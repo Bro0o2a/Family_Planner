@@ -706,6 +706,23 @@
   .sync-pill.off { color: var(--warn); }
   .sync-choice small { display: block; font-size: 14px; font-weight: 700; opacity: .85; }
 
+  /* 🔔 What's new: the bell (with a small red number) and its list */
+  .bell-btn { position: relative; padding: 8px 14px; font-size: 20px; line-height: 1; }
+  .bell-num { position: absolute; top: -7px; right: -7px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px;
+    background: #e5484d; color: #fff; border: 2px solid #fff; font-size: 13px; font-weight: 800; line-height: 20px; text-align: center; }
+  .start-top { display: flex; justify-content: flex-end; }
+  .news-card { max-width: 520px; }
+  .news-list { list-style: none; margin: 12px 0 0; padding: 0 20px; max-height: 50vh; overflow-y: auto; }
+  .news-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 8px; border-bottom: 2px dashed #f0e9dc;
+    font-size: 17px; line-height: 1.35; border-radius: 14px; }
+  .news-item.new { background: var(--accent-soft); }
+  .news-face { font-size: 28px; line-height: 1; flex: none; }
+  .news-item small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .news-empty { text-align: center; color: var(--muted); padding: 18px 0; font-size: 17px; }
+  .notify-box .hint { margin: 0 0 10px; }
+  .notify-box .primary { margin-bottom: 12px; }
+  #newsNotify { padding: 14px 24px 0; }
+
   @media print {
     @page { size: A4 landscape; margin: 8mm; }
     html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
@@ -993,6 +1010,7 @@
 
 <!-- ===== START (the home page): logo + today's date · Who are you? · View all plan · achievements ===== -->
 <section class="screen" id="scr-start" hidden>
+  <div class="start-top"><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div>
   <!-- Logo (a house in a soft rounded square + the app name) and today's date -->
   <div class="brand"><span class="brand-icon" aria-hidden="true">🏠</span><span class="brand-name">Hani's Family Plan</span></div>
   <div class="brand-date" id="todayDate"></div>
@@ -1018,7 +1036,8 @@
 
 <!-- ===== VIEW ALL PLAN: everyone's week, just for looking (no ticking, no changes) ===== -->
 <section class="screen" id="scr-view" hidden>
-  <header class="bar"><button class="pill" data-go="start">🏠 Home</button><button class="pill" data-printcal>🖨️ Print</button></header>
+  <header class="bar"><button class="pill" data-go="start">🏠 Home</button>
+    <div class="bar-right"><button class="pill" data-printcal>🖨️ Print</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
   <h1 class="page-title">👨‍👩‍👧‍👦 Everyone's plan</h1>
   <p class="lead">Just for looking 👀 Each color is one person. Tap a block to see more.</p>
   <div class="note" id="viewNote" hidden></div>
@@ -1029,7 +1048,7 @@
 <!-- ===== HOME: big buttons ===== -->
 <section class="screen" id="scr-home" hidden>
   <header class="bar"><button class="pill cal-btn" data-go="mine">📅 My calendar</button>
-    <div class="bar-right"><button class="pill" id="backupPill" data-backup hidden>💾 Backup</button><button class="pill" data-switch>🔄 Switch user</button></div></header>
+    <div class="bar-right"><button class="pill" id="backupPill" data-backup hidden>💾 Backup</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
   <div class="hello"><span class="hello-face" id="homeFace"></span>
     <div><h1 class="big-title" id="homeHello"></h1><p class="hello-points" id="homePoints"></p></div></div>
   <div class="note" id="homeNote" hidden></div>
@@ -1040,7 +1059,7 @@
 <!-- ===== ADD ACTIVITIES ===== -->
 <section class="screen" id="scr-add" hidden>
   <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button>
-    <div class="bar-right"><button class="pill" data-printlist>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button></div></header>
+    <div class="bar-right"><button class="pill" data-printlist>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
   <h1 class="page-title" id="addTitle"></h1>
   <p class="lead" id="addSub"></p>
 
@@ -1150,7 +1169,7 @@
 <!-- ===== MY PLAN ===== -->
 <section class="screen" id="scr-mine" hidden>
   <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn here" data-go="mine" aria-current="page">📅 My calendar</button>
-    <div class="bar-right"><button class="pill" data-printcal>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button></div></header>
+    <div class="bar-right"><button class="pill" data-printcal>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
   <!-- Whose calendar? One button per person -->
   <div class="chips" id="minePeople"></div>
   <h1 class="page-title" id="mineTitle"></h1>
@@ -1169,7 +1188,7 @@
 
 <!-- ===== POINTS ===== -->
 <section class="screen" id="scr-points" hidden>
-  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button><button class="pill" data-switch>🔄 Switch user</button></header>
+  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">🏆 Points this week</h1>
   <p class="lead" id="ptsWeek"></p>
   <div class="card" id="ptsList"></div>
@@ -1182,7 +1201,7 @@
 <!-- ===== EVERYONE'S PLAN (Dad only) ===== -->
 <section class="screen" id="scr-all" hidden>
   <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button>
-    <div class="bar-right"><button class="pill" data-printmenu>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button></div></header>
+    <div class="bar-right"><button class="pill" data-printmenu>🖨️ Print</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
   <h1 class="page-title">👨‍👩‍👧‍👦 Everyone's plan</h1>
   <div id="allTop"></div>
   <div class="view-row"><div class="chips" id="allFilter"></div><div class="seg" id="allView"></div></div>
@@ -1191,7 +1210,7 @@
 
 <!-- ===== SETTINGS (Dad only) ===== -->
 <section class="screen" id="scr-settings" hidden>
-  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button><button class="pill" data-switch>🔄 Switch user</button></header>
+  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">⚙️ Settings</h1>
   <div class="two-col">
     <div>
@@ -1263,6 +1282,11 @@
         <div class="btnrow">
           <button id="signOutBtn" class="danger-text">Sign out</button>
         </div>
+      </div>
+      <!-- 🔔 Notifications: each device decides for itself (kept on this device, not in the cloud) -->
+      <div class="card" style="margin-top:18px">
+        <h2>🔔 Notifications on this device</h2>
+        <div class="notify-box" id="setNotify"></div>
       </div>
     </div>
   </div>
@@ -1409,6 +1433,16 @@
     <button type="submit" class="primary login-btn" id="loginBtn">Sign in</button>
     <div class="err" id="loginErr" role="alert"></div>
   </form>
+</div>
+<!-- 🔔 What's new: the family's last 30 changes (the same list on every device) -->
+<div class="k-modal" id="newsModal" hidden>
+  <div class="k-card news-card" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+    <div class="print-title" id="newsTitle">🔔 What's new</div>
+    <p class="print-hint">The family's last 30 changes. Newest first.</p>
+    <ul class="news-list" id="newsList"></ul>
+    <div class="notify-box" id="newsNotify"></div>
+    <button class="k-ok" data-newsclose>OK</button>
+  </div>
 </div>
 <!-- ☁️ "Synced" / "Offline" -->
 <div class="sync-pill" id="syncPill" role="status" hidden></div>
@@ -1890,10 +1924,25 @@ const cloud = {
   sent: null,        // what the cloud has (as far as we know), so we only upload what changed
   stash: null        // a plan change from another phone that came while you had unsaved changes
 };
+// 🔔 This device's own id, so it can tell its own changes from the other devices' (see "WHAT'S NEW" below)
+const DEVICE = (() => {
+  const key = SAVE_KEY + ".device";
+  try { let id = localStorage.getItem(key); if (!id) { id = newId(); localStorage.setItem(key, id); } return id; }
+  catch (e) { return newId(); }
+})();
+// The family's news list (the cloud document "news"), and what this device already showed
+const feed = {
+  ref: null,         // the cloud document
+  items: {},         // id → { id, kind: "tick" | "plan", by, who, what, short, list, n, at, start, dev }
+  live: false,       // true once the cloud itself answered (news from before that doesn't pop up)
+  seen: new Set(),   // news this device already knows about ("id:n")
+  fresh: new Set(),  // news that was new when the list was opened (shown in color)
+  bundle: null       // ticks that arrived within the same minute: one notification for all of them
+};
 function writeData(how) {
   savedJson = JSON.stringify(data);
   storeLocal();
-  if (cloud.ready) { if (how === "replace") cloudUploadAll(); else cloudUpload(); }
+  if (cloud.ready) { if (how === "replace") cloudUploadAll(true); else cloudUpload(how); }
   // Not signed in / Firebase not loaded (no internet): remember there are changes to upload later
   else if (how !== "auto" && cloud.enabled && !cloud.user) setCloudMeta({ dirty: true });
 }
@@ -2059,6 +2108,7 @@ function render() {
   if (screen === "all") drawAll();
   if (screen === "settings") drawSettings();
   updateSaveBars();
+  drawNews();
 }
 // A change on "Add activities" or "Settings": it's only a draft until you tap 💾 Save.
 function changed() { render(); }
@@ -4267,6 +4317,7 @@ function drawSettings() {
   $("acctInfo").textContent = cloud.user ? `Signed in as ${cloud.user.email}. Everyone's phones share this family's data.`
     : cloud.enabled ? "Not signed in." : "Opened from a file: the cloud only works from a web address (http://…).";
   $("signOutBtn").hidden = !cloud.user;
+  $("setNotify").innerHTML = notifyHtml();
 }
 
 // ---------- My day ----------
@@ -4601,6 +4652,7 @@ document.addEventListener("click", e => {
   if (e.target === $("userModal")) return closeAddUser();
   if (e.target === $("moveModal")) return closeMoveBox();
   if (e.target === $("backupModal")) return closeBackupBox();
+  if (e.target === $("newsModal")) return closeNews();
   // The round "done" checkbox
   const chk = e.target.closest("[data-check]");
   if (chk) {
@@ -4618,6 +4670,10 @@ document.addEventListener("click", e => {
   }
   const ds = t.dataset;
   if (ds.sync) return answerSync(ds.sync);   // ☁️ "Which data should we use?"
+  // 🔔 What's new, and "Allow notifications"
+  if ("bell" in ds) return openNews();
+  if ("newsclose" in ds) return closeNews();
+  if ("notifyask" in ds) return askNotify();
   if (t.id === "kOk") return closeCard();
   if (ds.print) return printFor(ds.print);
   if ("printmenu" in ds) return openPrintMenu();
@@ -4717,6 +4773,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("userModal").hidden) closeAddUser();
   if (e.key === "Escape" && !$("moveModal").hidden) closeMoveBox();
   if (e.key === "Escape" && !$("backupModal").hidden) closeBackupBox();
+  if (e.key === "Escape" && !$("newsModal").hidden) closeNews();
   if (e.key === "Enter" && !$("userModal").hidden && e.target.matches && e.target.matches("#auName, #auEmoji")) addUserNow();
   // Keyboard: Enter or Space on a block opens its big card
   if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("[data-kblock]")) {
@@ -4734,6 +4791,8 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) rend
 //   plan   → people, activities, routines, My day, settings, the planned week, the habits list
 //   points → activity ticks, points history, stars   ({ week, since, marks, history, log })
 //   habits → good-habit ticks                        ({ marks })
+//   news   → the last 30 changes for 🔔 "What's new"  ({ items }, see "WHAT'S NEW" below)
+//   (the plan also says who saved it last: change = { by, at, what })
 // A tick changes ONLY its own field in the cloud, so two phones ticking at the same time don't overwrite each other.
 // Every phone listens for changes (onSnapshot) and redraws within seconds.
 // Firestore also keeps its own offline copy: changes made without internet upload when you're back online.
@@ -4845,6 +4904,11 @@ function cloudSignedIn(user) {
   cloud.base = savedJson;   // this device's data now: changes made before the cloud answers are kept (see keepEarlyChanges)
   cloud.unsub = Object.keys(cloud.refs).map(name => fb.onSnapshot(cloud.refs[name], { includeMetadataChanges: true },
     snap => cloudSnap(name, snap), cloudError));
+  // 🔔 The family's news list (a 4th document, kept apart from the data)
+  feed.ref = ref("news");
+  feed.items = {};
+  feed.live = false;
+  cloud.unsub.push(fb.onSnapshot(feed.ref, { includeMetadataChanges: true }, feedSnap, err => console.warn("News:", err)));
   showSync();
   if (screen === "settings") render();
 }
@@ -4854,6 +4918,7 @@ function cloudSignedOut() {
   cloud.user = null;
   cloud.ready = false;
   cloud.snaps = {};
+  feed.ref = null;
   showLogin();
 }
 
@@ -4948,22 +5013,40 @@ function cloudReady() {
 }
 
 // ---------- Uploading ----------
+// The plan document also says who changed it last: change = { by, at, what, dev } (so others know who changed what).
+// planOnly() is the plan without that note.
+function planOnly(p) { const { change, ...rest } = p || {}; return rest; }
+function changeNote(what) { return { by: me || "", at: new Date().toISOString(), what, dev: DEVICE }; }
 // Everything: replaces the 3 cloud documents (first upload, "Replace cloud", Import backup, Clear everything)
-function cloudUploadAll() {
+// told = someone did it on purpose (Import backup, Clear everything, Load example): tell the family
+function cloudUploadAll(told) {
   const parts = splitData(data);
-  cloud.sent = splitData(data);
+  if (told) {
+    const what = "replaced all the family data";
+    parts.plan.change = changeNote(what);
+    addNews([newsItem("plan", what)]);
+  }
+  cloud.sent = JSON.parse(JSON.stringify(parts));
   Object.keys(cloud.refs).forEach(name => cloud.fb.setDoc(cloud.refs[name], parts[name]).catch(cloudError));
 }
-// Only what changed since the last upload
-function cloudUpload() {
-  const now = splitData(data);
+// Only what changed since the last upload.
+// how = "auto": the app tidied up by itself (a new week, planned again after an update) — that isn't news.
+function cloudUpload(how) {
+  const now = splitData(data), told = how !== "auto", news = [];
   // The plan document is sent whole (it only changes with 💾 Save, "Plan my week", adding a person …)
-  if (sameText(now.plan) !== sameText(cloud.sent.plan)) {
-    cloud.sent.plan = now.plan;
-    cloud.fb.setDoc(cloud.refs.plan, now.plan).catch(cloudError);
+  const before = planOnly(cloud.sent.plan);
+  if (sameText(now.plan) !== sameText(before)) {
+    const what = planNews(before, now.plan);
+    const change = told ? changeNote(what) : (cloud.sent.plan || {}).change;
+    cloud.sent.plan = change ? { ...now.plan, change } : now.plan;
+    cloud.fb.setDoc(cloud.refs.plan, cloud.sent.plan).catch(cloudError);
+    if (told) news.push(newsItem("plan", what));
   }
+  // Ticks and unticks (worked out before cloud.sent is updated below)
+  if (told) news.push(...tickNews(cloud.sent.points, now.points), ...habitNews(cloud.sent.habits, now.habits));
   cloudUpdateFields("points", now.points);
   cloudUpdateFields("habits", now.habits);
+  addNews(news);
 }
 // Points and habits: update only the fields that changed (one tick = one field, e.g. marks."2|math|mody")
 function cloudUpdateFields(name, now) {
@@ -5001,7 +5084,7 @@ function cloudApply(name, remote) {
     Object.keys(fresh).forEach(k => { if (k !== "points" && k !== "habitMarks") data[k] = fresh[k]; });
     const replanned = finishPlanAfterLoad();
     savedJson = JSON.stringify(data);
-    if (replanned) cloudUpload();
+    if (replanned) cloudUpload("auto");
     if (me && !exists(me)) me = null;   // your person was removed on another phone
   } else {
     // Ticks: change them in the data AND in what counts as "saved", so a draft you're working on stays a draft
@@ -5055,6 +5138,246 @@ $("signOutBtn").onclick = async () => {
   try { await fb.terminate(cloud.db); await fb.clearIndexedDbPersistence(cloud.db); } catch (e) {}
   location.reload();
 };
+
+// =====================================================================
+//  🔔 WHAT'S NEW: news and notifications about the family's changes
+// =====================================================================
+// The device that makes a change writes one line about it into the cloud document "news"
+// (families/{family account id}/state/news → { items: { id: news } }), keeping the newest 30.
+// Every device listens to it: news from ANOTHER device pops up (a toast + a phone notification),
+// and the 🔔 button counts what this device hasn't looked at yet.
+// Many ticks by the same person within 1 minute become one line (and one notification).
+const NEWS_MAX = 30;
+const NEWS_MINUTE = 60 * 1000;
+// What this device remembers: { on: show pop-ups here, init: set up, opened: the news seen when the list was last opened }
+const NEWS_KEY = SAVE_KEY + ".news";
+function newsPrefs() { try { return { on: true, ...JSON.parse(localStorage.getItem(NEWS_KEY)) }; } catch (e) { return { on: true }; } }
+function setNewsPrefs(change) { try { localStorage.setItem(NEWS_KEY, JSON.stringify({ ...newsPrefs(), ...change })); } catch (e) {} }
+
+// ---------- Making news (on the device where the change happened) ----------
+// kind = "tick" (ticks and unticks) or "plan" (a saved plan change)
+// what = the words after the name ("finished Math ✓"), short = the short form for a group of ticks ("Math ✓")
+function newsItem(kind, what, short, by, at) {
+  const who = by || me || "", when = at || new Date().toISOString();
+  return { id: newId(), kind, by: who, who: exists(who) ? whoText(who) : "🙂 Someone", what, short: short || what,
+           list: [short || what], n: 1, at: when, start: new Date().toISOString(), dev: DEVICE };
+}
+// Activity ticks: what's ticked or unticked now that wasn't before (uses "by" and "at" from points.marks)
+function tickNews(before, now) {
+  if (!before || before.week !== now.week) return [];   // a new week cleared the ticks: that's not "unticked"
+  const was = before.marks || {}, is = now.marks || {}, out = [];
+  new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
+    if (!!was[key] === !!is[key]) return;
+    const [, actId, user] = key.split("|"), act = allActs().find(a => a.id === actId);
+    const name = act ? act.name : "an activity", by = is[key] ? is[key].by : me;
+    const forWho = by !== user ? ` for ${whoText(user)}` : "";
+    out.push(is[key]
+      ? newsItem("tick", by === user ? `finished ${name} ✓` : `ticked ${name}${forWho} ✓`, `${name} ✓`, by, is[key].at)
+      : newsItem("tick", `unticked ${name}${forWho}`, `${name} ✗`, by));
+  });
+  return out;
+}
+// Good habit ticks (the last 7 days only: ticks older than 5 weeks are tidied away, that's not news)
+function habitNews(before, now) {
+  const was = (before && before.marks) || {}, is = now.marks || {}, out = [];
+  const recent = new Date(); recent.setDate(recent.getDate() - 7);
+  const count = (h, v) => h.kind === "prayers" ? (Array.isArray(v) ? v.filter(Boolean).length : 0)
+                        : h.kind === "water" ? (v || 0) : (v === true ? 1 : 0);
+  new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
+    if (key.slice(0, 10) < ymd(recent) || sameText(was[key]) === sameText(is[key])) return;
+    const [, habitId, user] = key.split("|"), h = data.habits.find(x => x.id === habitId);
+    if (!h) return;
+    const old = was[key], v = is[key], name = `${h.emoji} ${h.name}`;
+    const forWho = me !== user ? ` for ${whoText(user)}` : "";
+    let what, short;
+    if (count(h, v) < count(h, old)) { what = `unticked ${name}${forWho}`; short = `${name} ✗`; }
+    else if (habitDone(h, v)) { what = me === user ? `finished ${name} ✓` : `ticked ${name}${forWho} ✓`; short = `${name} ✓`; }
+    else {
+      const i = h.kind === "prayers" ? PRAYERS.findIndex((p, k) => v[k] && !(Array.isArray(old) && old[k])) : -1;
+      const part = i >= 0 ? ` (${PRAYERS[i]})` : h.kind === "water" ? ` (${v}/${WATER_DROPS})` : "";
+      what = `ticked ${name}${part}${forWho}`; short = `${name}${part}`;
+    }
+    out.push(newsItem("tick", what, short, me));
+  });
+  return out;
+}
+// A saved plan change, in words: "added Math · changed School · changed the routines"
+function planNews(before, now) {
+  const acts = p => [...(p.fixed || []), ...(p.flexible || [])];
+  const was = acts(before), is = acts(now), find = (list, id) => list.find(a => a.id === id);
+  const few = list => list.slice(0, 3).map(a => a.name).join(", ") + (list.length > 3 ? ` +${list.length - 3} more` : "");
+  const added = is.filter(a => !find(was, a.id)), removed = was.filter(a => !find(is, a.id));
+  const edited = is.filter(a => find(was, a.id) && sameText(find(was, a.id)) !== sameText(a));
+  const parts = [];
+  if (added.length) parts.push("added " + few(added));
+  if (removed.length) parts.push("removed " + few(removed));
+  if (edited.length) parts.push("changed " + few(edited));
+  [["users", "the people"], ["routines", "the routines"], ["habits", "the good habits"]].forEach(([k, label]) => {
+    if (sameText(before[k]) !== sameText(now[k])) parts.push("changed " + label);
+  });
+  if (sameText(before.myDay) !== sameText(now.myDay) || before.maxTogether !== now.maxTogether) parts.push("changed the settings");
+  if (!parts.length && sameText(before.plan) !== sameText(now.plan)) parts.push("changed the calendar 📅");
+  return parts.length ? parts.join(" · ") : "changed the plan";
+}
+const newestFirst = (a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0);
+const newsSig = it => it.id + ":" + (it.n || 1);   // changes when more ticks join the same line
+// Adds news to the cloud list (only the lines that changed are sent, so two phones adding at once don't clash)
+function addNews(list) {
+  if (!list.length || !feed.ref || !cloud.fb) return;
+  const fb = cloud.fb, items = { ...feed.items }, changes = new Map();
+  list.forEach(it => {
+    // A tick by the same person on this device within 1 minute joins the line that's already there
+    const last = it.kind === "tick" && Object.values(items).find(x => x.kind === "tick" && x.dev === DEVICE && x.by === it.by
+      && Date.now() - Date.parse(x.start) < NEWS_MINUTE);
+    const line = last ? { ...last, n: (last.n || 1) + 1, list: [...(last.list || []), it.short].slice(-10), what: it.what, at: it.at } : it;
+    items[line.id] = line;
+    changes.set(line.id, line);
+  });
+  // Keep only the newest 30
+  Object.values(items).sort(newestFirst).slice(NEWS_MAX).forEach(x => { delete items[x.id]; changes.set(x.id, null); });
+  feed.items = items;
+  const args = [];
+  changes.forEach((v, id) => args.push(new fb.FieldPath("items", id), v === null ? fb.deleteField() : v));
+  fb.updateDoc(feed.ref, ...args).catch(err => {
+    // The list isn't in the cloud yet: create it
+    if (err && err.code === "not-found") fb.setDoc(feed.ref, { items: feed.items }, { merge: true }).catch(e => console.warn("News:", e));
+    else console.warn("News:", err);
+  });
+  drawNews();
+}
+
+// ---------- Getting news (from the other devices) ----------
+function feedSnap(snap) {
+  feed.items = (snap.exists() && snap.data().items) || {};
+  const quiet = !feed.live;                    // the first answer = old news: count it, but no pop-ups
+  if (!snap.metadata.fromCache) feed.live = true;
+  // The very first time on this device: start with nothing new
+  if (feed.live && !newsPrefs().init) setNewsPrefs({ init: true, opened: Object.values(feed.items).map(newsSig) });
+  const fresh = [];
+  Object.values(feed.items).forEach(it => {
+    const sig = newsSig(it);
+    if (feed.seen.has(sig)) return;
+    feed.seen.add(sig);
+    if (!quiet && it.dev !== DEVICE) fresh.push(it);
+  });
+  if (!$("newsModal").hidden) { fresh.forEach(it => feed.fresh.add(newsSig(it))); markNewsOpened(); }
+  if (fresh.length) announce(fresh.sort(newestFirst).reverse());
+  drawNews();
+}
+// "🦄 Bana" (or the name saved with the news, if that person was removed)
+function newsWho(it) { return exists(it.by) ? whoText(it.by) : it.who || "🙂 Someone"; }
+function newsWhat(it) {
+  const n = it.n || 1, list = it.list || [];
+  return n > 1 ? `made ${n} ticks: ${n > list.length ? "… " : ""}${list.slice(-4).join(", ")}${list.length > 4 ? " …" : ""}` : it.what;
+}
+const newsLine = it => `${newsWho(it)} ${newsWhat(it)}`;
+// Pop-ups: one for each plan change, and one for all the ticks of the same minute (it's updated, not repeated)
+function announce(list) {
+  if (!newsPrefs().on) return;
+  list.filter(it => it.kind !== "tick").forEach(it => showNews(newsLine(it), "", "plan-" + it.id));
+  const ticks = list.filter(it => it.kind === "tick");
+  if (!ticks.length) return;
+  if (!feed.bundle || Date.now() - feed.bundle.start > NEWS_MINUTE) feed.bundle = { start: Date.now(), items: new Map() };
+  ticks.forEach(it => feed.bundle.items.set(it.id, it));
+  const all = [...feed.bundle.items.values()], count = all.reduce((sum, it) => sum + (it.n || 1), 0);
+  if (all.length === 1) showNews(newsLine(all[0]), "", "ticks-" + feed.bundle.start);
+  else showNews(`✓ ${count} new ticks in the family`, all.map(newsLine).join("\n"), "ticks-" + feed.bundle.start);
+}
+function showNews(title, body, tag) {
+  toast(body ? `🔔 ${title}` : title, 4500);
+  systemNotify(title, body, tag);
+}
+// A phone/computer notification. Through the service worker, so it also shows when the app is in the background.
+// The same tag replaces the old notification quietly (that's how a minute of ticks stays ONE notification).
+async function systemNotify(title, body, tag) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const options = { body, tag, icon: "icons/icon-192.png", badge: "icons/icon-192.png" };
+  try {
+    const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : null;
+    if (reg) await reg.showNotification(title, options);
+    else new Notification(title, options);
+  } catch (e) { console.warn("Notification:", e); }
+}
+
+// ---------- The 🔔 button and the "What's new" list ----------
+function unreadNews() {
+  const p = newsPrefs();
+  if (!p.init) return 0;
+  const opened = new Set(p.opened || []);
+  return Object.values(feed.items).filter(it => it.dev !== DEVICE && !opened.has(newsSig(it))).length;
+}
+function drawNews() {
+  const n = unreadNews();
+  document.querySelectorAll("[data-bell]").forEach(b => {
+    const num = b.querySelector(".bell-num");
+    num.hidden = !n;
+    num.textContent = n;
+    b.setAttribute("aria-label", n ? `What's new: ${n} new` : "What's new");
+  });
+  if ($("newsModal").hidden) return;
+  const list = Object.values(feed.items).sort(newestFirst);
+  $("newsList").innerHTML = list.length ? list.map(it => {
+    const u = exists(it.by) ? userById(it.by) : null, saved = (it.who || "🙂 Someone").split(" ");
+    return `<li class="news-item ${feed.fresh.has(newsSig(it)) ? "new" : ""}">
+      <span class="news-face">${safe(u ? u.emoji : saved[0])}</span>
+      <div><b>${safe(u ? u.name : saved.slice(1).join(" ") || "Someone")}</b> ${safe(newsWhat(it))}
+        <small>${agoText(it.at)}${it.dev === DEVICE ? " · on this device" : ""}</small></div></li>`;
+  }).join("") : `<li class="news-empty">Nothing new yet. Ticks and plan changes will show up here.</li>`;
+  $("newsNotify").innerHTML = notifyHtml();
+}
+// "just now", "5 min ago", "today 4:30pm", "yesterday 9am", "Mon, Oct 5 4:30pm"
+function agoText(iso) {
+  const t = Date.parse(iso);
+  if (!t) return "";
+  const s = (Date.now() - t) / 1000;
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + " min ago";
+  const dt = new Date(t), time = showTime(dt.getHours() * 60 + dt.getMinutes()), y = new Date();
+  y.setDate(y.getDate() - 1);
+  if (ymd(dt) === ymd(new Date())) return "today " + time;
+  if (ymd(dt) === ymd(y)) return "yesterday " + time;
+  return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) + " " + time;
+}
+// Opening the list clears the red number (on this device only)
+function openNews() {
+  const opened = new Set(newsPrefs().opened || []);
+  feed.fresh = new Set(Object.values(feed.items).filter(it => it.dev !== DEVICE && !opened.has(newsSig(it))).map(newsSig));
+  markNewsOpened();
+  $("newsModal").hidden = false;
+  drawNews();
+  $("newsModal").querySelector("[data-newsclose]").focus();
+}
+function markNewsOpened() { setNewsPrefs({ init: true, opened: Object.values(feed.items).map(newsSig) }); }
+function closeNews() { $("newsModal").hidden = true; }
+
+// ---------- 🔔 Notifications on this device (in Settings and in the "What's new" list) ----------
+function notifyHtml() {
+  const can = "Notification" in window, perm = can ? Notification.permission : "";
+  const status = !can ? "This browser can't show notifications. On iPhone or iPad: add the app to the Home Screen, then open it from there."
+    : perm === "granted" ? "✅ Notifications are allowed on this device."
+    : perm === "denied" ? "🚫 Notifications are blocked. Allow them in this browser's settings for this app, then come back."
+    : "Get a message when someone in the family ticks something or changes the plan.";
+  return `<p class="hint">${status}</p>
+    ${perm === "default" ? `<button class="primary" data-notifyask>🔔 Allow notifications</button>` : ""}
+    <label class="checkline"><input type="checkbox" data-notifyon ${newsPrefs().on ? "checked" : ""}> Show family news on this device</label>`;
+}
+// Asks the browser only when the button is tapped
+async function askNotify() {
+  if (!("Notification" in window)) return;
+  let answer = Notification.permission;
+  try { answer = (await Notification.requestPermission()) || Notification.permission; } catch (e) {}
+  if (answer === "granted") {
+    setNewsPrefs({ on: true });
+    toast("🔔 Notifications are on for this device!");
+  } else toast("OK! You can still see the news with the 🔔 button.", 3500);
+  render();
+}
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("[data-notifyon]")) return;
+  setNewsPrefs({ on: e.target.checked });
+  toast(e.target.checked ? "🔔 Family news is on for this device." : "🔕 Family news is off for this device. The 🔔 list still works.", 3500);
+  render();
+});
 
 // =====================================================================
 //  START THE APP

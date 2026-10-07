@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v35";
+const CACHE = "family-planner-v36";
 
 // Firebase and Google's servers (login, the cloud data, the Firebase code): NEVER saved here.
 // They must always come fresh from the internet (Firebase keeps its own offline copy of the data).
@@ -60,4 +60,16 @@ self.addEventListener("fetch", event => {
     );
   }
   // Everything else from other websites (including the font, which comes from Google): not saved here.
+});
+
+// 4) 🔔 Tapping a family notification ("🦄 Bana finished Math ✓"): open the app (or bring it to the front).
+//    (The app itself shows the notifications, through this service worker's showNotification.)
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(windows => {
+      const open = windows.find(w => "focus" in w);
+      return open ? open.focus() : self.clients.openWindow("./");
+    })
+  );
 });
