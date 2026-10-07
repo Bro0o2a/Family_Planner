@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v36";
+const CACHE = "family-planner-v37";
 
 // Firebase and Google's servers (login, the cloud data, the Firebase code): NEVER saved here.
 // They must always come fresh from the internet (Firebase keeps its own offline copy of the data).
