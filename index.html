@@ -188,7 +188,7 @@
   .card h2 { font-size: 26px; margin: 0 0 2px; line-height: 1.2; }
   .hint { color: var(--muted); font-size: 16px; margin: 0 0 14px; }
   label.small { font-size: 16px; font-weight: 700; display: block; margin-bottom: 4px; }
-  input[type=text], input[type=number], input[type=time], input[type=email], input[type=password], select {
+  input[type=text], input[type=number], input[type=time], select {
     width: 100%; padding: 10px 14px; border: 2px solid var(--line); border-radius: 16px; min-height: 52px;
     font: inherit; font-size: 18px; background: #fffdf8; color: var(--text);
   }
@@ -677,23 +677,6 @@
   .p-legend { display: flex; gap: 5mm; flex-wrap: wrap; font-size: calc(var(--fs, 13pt) * .9); }
   .p-legend i { display: inline-block; width: 4mm; height: 4mm; border-radius: 1mm; background: var(--c); margin-right: 1.2mm; vertical-align: -.5mm; }
 
-  /* ☁️ Family login (shown until the family account is signed in on this device) */
-  .login-screen { position: fixed; inset: 0; z-index: 70; background: var(--bg); overflow-y: auto;
-    display: grid; place-items: center; padding: 16px; }
-  .login-card { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 4px; }
-  .login-card .brand { padding-top: 0; margin-bottom: 10px; }
-  .login-card .brand-name { font-size: 26px; }
-  .login-card h1 { font-size: 34px; text-align: center; margin: 0; }
-  .login-card .hint { text-align: center; }
-  .login-card input { margin-bottom: 10px; }
-  .login-btn { min-height: 56px; border-radius: 999px; font-size: 20px; margin-top: 6px; }
-  /* ☁️ The tiny "Synced / Offline" sign in the top corner */
-  .sync-pill { position: fixed; top: 2px; right: 6px; z-index: 40; pointer-events: none;
-    font-size: 11px; font-weight: 700; line-height: 1.4; padding: 1px 8px; border-radius: 999px;
-    background: rgba(255, 255, 255, .85); color: var(--muted); border: 1px solid var(--line); }
-  .sync-pill.off { color: var(--warn); }
-  .sync-choice small { display: block; font-size: 14px; font-weight: 700; opacity: .85; }
-
   @media print {
     @page { size: A4 landscape; margin: 8mm; }
     html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
@@ -1176,7 +1159,7 @@
       <!-- Backup -->
       <div class="card" style="margin-top:18px">
         <h2>💾 Backup</h2>
-        <p class="hint">Everything is saved in the family cloud and on this device. A backup file keeps an extra copy safe.</p>
+        <p class="hint">Everything is saved automatically on this device. A backup file keeps it safe.</p>
         <div class="btnrow">
           <button id="exportBtn">⬇ Export backup</button>
           <button id="importBtn">⬆ Import backup</button>
@@ -1185,14 +1168,6 @@
         </div>
         <!-- Hidden file picker: the "Import backup" button opens it -->
         <input type="file" id="importFile" accept=".json,application/json" hidden>
-      </div>
-      <!-- ☁️ Family account (the cloud login shared by the whole family) -->
-      <div class="card" style="margin-top:18px">
-        <h2>☁️ Family account</h2>
-        <p class="hint" id="acctInfo">Not signed in.</p>
-        <div class="btnrow">
-          <button id="signOutBtn" class="danger-text">Sign out</button>
-        </div>
       </div>
     </div>
   </div>
@@ -1270,7 +1245,7 @@
     <!-- Step 2 (Import only): "Are you sure?" -->
     <div id="backupAsk" hidden>
       <div class="leave-emoji">⚠️</div>
-      <div class="print-title">This will replace the family's data on all devices. Continue?</div>
+      <div class="print-title">This will replace all data on this device. Continue?</div>
       <div class="leave-btns">
         <button class="save-btn" data-backupyes>Yes, continue</button>
         <button data-backupclose>Cancel</button>
@@ -1314,34 +1289,6 @@
     </div>
   </div>
 </div>
-<!-- ☁️ First time on this device: the cloud and this device have different data. Which one? -->
-<div class="k-modal" id="syncModal" hidden>
-  <div class="k-card leave-card" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
-    <div class="leave-emoji">☁️</div>
-    <div class="print-title" id="syncTitle">Which data should we use?</div>
-    <p class="print-hint" id="syncInfo"></p>
-    <div class="leave-btns">
-      <button class="save-btn sync-choice" data-sync="cloud" style="font-size:20px">Use family data from the cloud<small>Recommended</small></button>
-      <button class="sync-choice" data-sync="local">Replace cloud with this device's data</button>
-    </div>
-  </div>
-</div>
-<!-- ☁️ Family login: shown when nobody is signed in on this device -->
-<div class="login-screen" id="loginScreen" hidden>
-  <form class="card login-card" id="loginForm" novalidate>
-    <div class="brand"><span class="brand-icon" aria-hidden="true">🏠</span><span class="brand-name">Hani's Family Plan</span></div>
-    <h1>Family login</h1>
-    <p class="hint" id="loginHint">Sign in with the family account. This device stays signed in.</p>
-    <label class="small" for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" autocomplete="username" inputmode="email" placeholder="family@example.com">
-    <label class="small" for="loginPass">Password</label>
-    <input type="password" id="loginPass" autocomplete="current-password" placeholder="Password">
-    <button type="submit" class="primary login-btn" id="loginBtn">Sign in</button>
-    <div class="err" id="loginErr" role="alert"></div>
-  </form>
-</div>
-<!-- ☁️ "Synced" / "Offline" -->
-<div class="sync-pill" id="syncPill" role="status" hidden></div>
 <!-- Short messages at the bottom of the screen -->
 <div class="toast" id="toast" role="status" hidden></div>
 <!-- The paper pages are built here just before printing (hidden on screen) -->
@@ -1796,35 +1743,13 @@ function load() {
 }
 
 // ---------- Where the data is stored ----------
-// writeData() is the ONLY place that stores the data:
-//   1) this device's localStorage (a fast local copy, so the app opens quickly and works offline)
-//   2) the family cloud (Firebase), so every phone shows the same thing — see "FAMILY CLOUD" below.
-// how: (nothing) = a normal change · "auto" = the app tidied up by itself (e.g. a new week)
-//      · "replace" = replace ALL the cloud data with this (Import backup, Clear everything, Load example)
+// writeData() is the ONLY place that stores the data (now: this device's localStorage).
+// ➜ To share between devices later (Firebase), change writeData() and load().
 // It also remembers what was stored, so we can tell when there are unsaved changes (a "draft").
 let saveWarned = false;
 let savedJson = null;     // the data as it was last stored
-// The family cloud's state (filled in by the "FAMILY CLOUD" part below)
-const cloud = {
-  enabled: location.protocol.startsWith("http"),  // opened from a web address (file:// can't sign in)
-  fb: null,          // the Firebase functions, once they're loaded from the internet
-  auth: null, db: null, user: null,
-  refs: null,        // the 3 cloud documents: plan, points, habits
-  unsub: [],         // to stop listening (when signing out)
-  snaps: {},         // the newest copy of each document
-  ready: false,      // true once this device's data and the cloud's data are matched up
-  asking: false,     // the "Which data should we use?" box is open
-  sent: null,        // what the cloud has (as far as we know), so we only upload what changed
-  stash: null        // a plan change from another phone that came while you had unsaved changes
-};
-function writeData(how) {
+function writeData() {
   savedJson = JSON.stringify(data);
-  storeLocal();
-  if (cloud.ready) { if (how === "replace") cloudUploadAll(); else cloudUpload(); }
-  // Not signed in / Firebase not loaded (no internet): remember there are changes to upload later
-  else if (how !== "auto" && cloud.enabled && !cloud.user) setCloudMeta({ dirty: true });
-}
-function storeLocal() {
   try {
     localStorage.setItem(SAVE_KEY, savedJson);
   } catch (e) {
@@ -1954,7 +1879,7 @@ function render() {
   // A new week started: points go back to zero. (If there's a draft, it's stored when you tap Save;
   // if you cancel the draft, this runs again on the stored data.)
   const draft = hasDraft();
-  if (newWeek() && !draft) writeData("auto");
+  if (newWeek() && !draft) writeData();
   if (screen === "start") drawStart();
   if (screen === "view") drawView();
   if (screen === "points") drawPoints();
@@ -1976,10 +1901,9 @@ function keepNow() { writeData(); render(); }
 // 1) plans the week again if the activities changed, 2) stores everything (writeData), 3) redraws, 4) says so.
 // (If only the calendar was edited by hand, nothing is re-planned, so the moves stay exactly where they are.)
 // Everyone's calendar and "View all plan" read the same data, so they're all updated.
-// (writeData() also sends it to the family cloud, so the other phones get it within seconds.)
+// ➜ Later, connect Firebase inside writeData(); this function stays the same.
 function saveChanges() {
   if (!data.plan || data.plan === "redo" || planIsOld()) makeAndKeepPlan();
-  cloud.stash = null;   // your saved changes win over a change another phone made meanwhile
   writeData();
   render();
   showSaved();
@@ -1998,7 +1922,6 @@ function cancelChanges(quiet) {
   if (savedJson === null) return;
   data = JSON.parse(savedJson);
   resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-  if (cloud.stash) { const s = cloud.stash; cloud.stash = null; cloudApply("plan", s); }  // now show the other phone's change
   render();
   if (!quiet) toast("↩ Changes thrown away.");
 }
@@ -4139,9 +4062,6 @@ function drawSettings() {
   $("maxTogether").value = data.maxTogether;
   drawUsers();
   drawHabitList();
-  $("acctInfo").textContent = cloud.user ? `Signed in as ${cloud.user.email}. Everyone's phones share this family's data.`
-    : cloud.enabled ? "Not signed in." : "Opened from a file: the cloud only works from a web address (http://…).";
-  $("signOutBtn").hidden = !cloud.user;
 }
 
 // ---------- My day ----------
@@ -4401,15 +4321,13 @@ $("importFile").onchange = () => {
       return toast("⚠ That file isn't a planner backup. Nothing was changed.", 4000);
     }
     const cleaned = cleanData(incoming);
-    const ok = importAlreadyAsked || confirm(`Load this backup?\n\n${cleaned.users.length} people\n${cleaned.fixed.length} fixed activities\n${cleaned.flexible.length} flexible activities\n${cleaned.routines.length} routines\n\nThis replaces the family's data on all devices (the cloud).`);
+    const ok = importAlreadyAsked || confirm(`Load this backup?\n\n${cleaned.users.length} people\n${cleaned.fixed.length} fixed activities\n${cleaned.flexible.length} flexible activities\n${cleaned.routines.length} routines\n\nThis replaces what you have now.`);
     if (!ok) return;
     data = cleaned;
     finishPlanAfterLoad();
     me = DAD;
-    cloud.stash = null;
     resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-    writeData("replace");   // you already said yes, so it's kept right away — and replaces the cloud data
-    render();
+    keepNow();   // you already said yes in the box, so it's kept right away
     toast("✓ Backup loaded and saved.");
   };
   reader.readAsText(chosen);
@@ -4426,19 +4344,16 @@ function openBackupBox() {
 function closeBackupBox() { $("backupModal").hidden = true; }
 
 $("clearBtn").onclick = () => {
-  if (!confirm("Delete all activities, people and settings — on ALL the family's devices?\n\nTip: click Cancel and use “Export backup” first if you might want them back.")) return;
+  if (!confirm("Delete all activities, people and settings?\n\nTip: click Cancel and use “Export backup” first if you might want them back.")) return;
   data = emptyData();
   allFilter = "all";
-  cloud.stash = null;
   resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-  writeData("replace");   // you already said yes in the box, so it's kept right away (cloud too)
-  render();
+  keepNow();   // you already said yes in the box, so it's kept right away
 };
 
 $("exampleBtn").onclick = () => {
-  if ((data.fixed.length || data.flexible.length || data.routines.length) && !confirm("Replace everything with the example week?\n\nThis changes it on all the family's devices.")) return;
+  if ((data.fixed.length || data.flexible.length || data.routines.length) && !confirm("Replace everything with the example week?")) return;
   data = emptyData();
-  cloud.stash = null;
   allFilter = "all";
   resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
   // (every activity gets its automatic get ready / break times from its name)
@@ -4461,7 +4376,7 @@ $("exampleBtn").onclick = () => {
   fl(newId(), "Science", "mody", 45, 2, true);
   fl(newId(), "Quran", "jawad", 30, 3, true);
   fl(newId(), "Gym", DAD, 60, 3, false);  makeAndKeepPlan();
-  writeData("replace");
+  writeData();
   go("all");
   toast("✨ Example week loaded and planned!");
 };
@@ -4492,7 +4407,6 @@ document.addEventListener("click", e => {
     return;
   }
   const ds = t.dataset;
-  if (ds.sync) return answerSync(ds.sync);   // ☁️ "Which data should we use?"
   if (t.id === "kOk") return closeCard();
   if (ds.print) return printFor(ds.print);
   if ("printmenu" in ds) return openPrintMenu();
@@ -4585,335 +4499,6 @@ document.addEventListener("keydown", e => {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
 
 // =====================================================================
-//  ☁️ FAMILY CLOUD (Firebase): the whole family shares the same data, live
-// =====================================================================
-// Where the data lives in the cloud (Cloud Firestore): families/{family account id}/state/…
-//   plan   → people, activities, routines, My day, settings, the planned week, the habits list
-//   points → activity ticks, points history, stars   ({ week, since, marks, history, log })
-//   habits → good-habit ticks                        ({ marks })
-// A tick changes ONLY its own field in the cloud, so two phones ticking at the same time don't overwrite each other.
-// Every phone listens for changes (onSnapshot) and redraws within seconds.
-// Firestore also keeps its own offline copy: changes made without internet upload when you're back online.
-// (This config is not a secret: it only says WHICH Firebase project to use. The Firestore rules protect the data.)
-const firebaseConfig = {
-  apiKey: "AIzaSyBArJ3-WFiUO_G9g32V6pKURCfzHH0LqX4",
-  authDomain: "ani-family-plan.firebaseapp.com",
-  projectId: "ani-family-plan",
-  storageBucket: "ani-family-plan.firebasestorage.app",
-  messagingSenderId: "662014356182",
-  appId: "1:662014356182:web:1a46b5b4ded3b34ac33777",
-  measurementId: "G-7J9Z81YL1D"
-};
-const FIREBASE_URL = "https://www.gstatic.com/firebasejs/10.14.1/";   // Firebase JS SDK v10 (modular)
-// What this device remembers about the cloud: { uid: the family account it synced with, dirty: changes made before connecting }
-const CLOUD_META = SAVE_KEY + ".cloud";
-function cloudMeta() { try { return JSON.parse(localStorage.getItem(CLOUD_META)) || {}; } catch (e) { return {}; } }
-function setCloudMeta(change) { try { localStorage.setItem(CLOUD_META, JSON.stringify({ ...cloudMeta(), ...change })); } catch (e) {} }
-
-// The data split into the 3 cloud documents (copies), and put back together
-function splitData(d) {
-  const { points, habitMarks, ...plan } = JSON.parse(JSON.stringify(d));
-  return { plan, points, habits: { marks: habitMarks || {} } };
-}
-function joinData(plan, points, habits) { return { ...plan, points: points || {}, habitMarks: (habits && habits.marks) || {} }; }
-// The same data always gives the same text (the cloud may return the keys in another order), so we can compare
-function sameText(v) {
-  return JSON.stringify(v, (k, x) => x && typeof x === "object" && !Array.isArray(x)
-    ? Object.fromEntries(Object.keys(x).sort().map(key => [key, x[key]])) : x);
-}
-
-// ---------- Starting: load Firebase, then wait for the family login ----------
-async function startCloud() {
-  if (!cloud.enabled) return showSync();          // opened as a file: this device only
-  if (cloud.fb || cloud.loading) return;
-  cloud.loading = true;
-  if (!cloudMeta().uid) showLogin("Connecting…", true);   // never signed in here: the login comes first
-  showSync();
-  try {
-    const [app, auth, store] = await Promise.all(["firebase-app.js", "firebase-auth.js", "firebase-firestore.js"]
-      .map(file => import(FIREBASE_URL + file)));
-    cloud.fb = { ...app, ...auth, ...store };
-  } catch (e) {
-    // No internet (or Firebase is blocked): keep working on this device, and try again when the internet is back.
-    console.warn("Firebase didn't load:", e);
-    cloud.loading = false;
-    window.addEventListener("online", startCloud, { once: true });
-    if (!cloudMeta().uid) showLogin("No internet. Connect to the internet to sign in the first time.", true);
-    return showSync();
-  }
-  cloud.loading = false;
-  const fb = cloud.fb, app = fb.initializeApp(firebaseConfig);
-  cloud.auth = fb.getAuth(app);   // remembers the login on this device (until "Sign out")
-  try {
-    // Offline persistence: Firestore keeps a copy on the device and queues changes until you're online again
-    cloud.db = fb.initializeFirestore(app, { ignoreUndefinedProperties: true,
-      localCache: fb.persistentLocalCache({ tabManager: fb.persistentMultipleTabManager() }) });
-  } catch (e) {
-    console.warn("Offline copy not available:", e);
-    cloud.db = fb.getFirestore(app);
-  }
-  fb.onAuthStateChanged(cloud.auth, user => user ? cloudSignedIn(user) : cloudSignedOut());
-}
-
-// ---------- Family login ----------
-function showLogin(message, busy) {
-  $("loginScreen").hidden = false;
-  $("loginHint").textContent = message || "Sign in with the family account. This device stays signed in.";
-  $("loginBtn").disabled = !!busy;
-  showSync();
-}
-function hideLogin() { $("loginScreen").hidden = true; $("loginErr").textContent = ""; $("loginPass").value = ""; }
-// Friendly words for Firebase's error codes
-function loginError(err) {
-  const code = (err && err.code) || "";
-  if (/invalid-credential|wrong-password|user-not-found|invalid-login-credentials/.test(code)) return "That email or password isn't right. Please try again.";
-  if (code.includes("invalid-email")) return "That doesn't look like an email address. Please check it.";
-  if (code.includes("missing-password")) return "Please type the password.";
-  if (code.includes("too-many-requests")) return "Too many tries. Please wait a few minutes, then try again.";
-  if (code.includes("network-request-failed")) return "No internet. Connect to the internet and try again.";
-  if (code.includes("user-disabled")) return "This account is turned off. Check it in the Firebase console.";
-  if (code.includes("operation-not-allowed")) return "Email/Password sign-in isn't turned on in Firebase yet.";
-  if (code.includes("unauthorized-domain")) return "This web address isn't allowed yet. Add it in Firebase → Authentication → Settings → Authorized domains.";
-  return "Couldn't sign in. Please try again." + (code ? ` (${code})` : "");
-}
-$("loginForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const email = $("loginEmail").value.trim(), pass = $("loginPass").value;
-  if (!email || !pass) return $("loginErr").textContent = "Please type the email and the password.";
-  if (!cloud.fb) return $("loginErr").textContent = "No internet yet. Connect to the internet and try again.";
-  $("loginBtn").disabled = true;
-  $("loginBtn").textContent = "Signing in…";
-  $("loginErr").textContent = "";
-  try { await cloud.fb.signInWithEmailAndPassword(cloud.auth, email, pass); }   // then cloudSignedIn() takes over
-  catch (err) { $("loginErr").textContent = loginError(err); }
-  $("loginBtn").disabled = false;
-  $("loginBtn").textContent = "Sign in";
-});
-
-// Signed in: listen to the family's 3 documents. Every change (from any phone) arrives here.
-function cloudSignedIn(user) {
-  hideLogin();
-  if (cloud.user && cloud.user.uid === user.uid) return showSync();
-  cloud.user = user;
-  const fb = cloud.fb, ref = name => fb.doc(cloud.db, "families", user.uid, "state", name);
-  cloud.refs = { plan: ref("plan"), points: ref("points"), habits: ref("habits") };
-  cloud.snaps = {};
-  cloud.ready = false;
-  cloud.base = savedJson;   // this device's data now: changes made before the cloud answers are kept (see keepEarlyChanges)
-  cloud.unsub = Object.keys(cloud.refs).map(name => fb.onSnapshot(cloud.refs[name], { includeMetadataChanges: true },
-    snap => cloudSnap(name, snap), cloudError));
-  showSync();
-  if (screen === "settings") render();
-}
-function cloudSignedOut() {
-  cloud.unsub.forEach(stop => stop());
-  cloud.unsub = [];
-  cloud.user = null;
-  cloud.ready = false;
-  cloud.snaps = {};
-  showLogin();
-}
-
-// A new copy of one document arrived (from the cloud, or our own change coming back)
-function cloudSnap(name, snap) {
-  cloud.snaps[name] = snap;
-  showSync();
-  if (!cloud.ready) return cloudFirstSync();
-  if (snap.exists()) cloudApply(name, snap.data());
-}
-
-// ---------- The first time (on this device, since opening the app): match up the cloud and this device ----------
-function cloudFirstSync() {
-  const s = cloud.snaps;
-  if (!s.plan || !s.points || !s.habits || cloud.asking) return;
-  const cloudHasData = s.plan.exists();
-  // Not in the offline copy yet: wait for the cloud's real answer before deciding it's empty
-  if (!cloudHasData && [s.plan, s.points, s.habits].some(x => x.metadata.fromCache)) return;
-  // 1) The cloud is empty: upload everything from this device
-  if (!cloudHasData) {
-    cloudUploadAll();
-    cloudReady();
-    return toast("☁️ Your data is now in the family cloud. Sign in on the other phones to see it.", 5000);
-  }
-  const remote = cloudData(), local = JSON.parse(savedJson), meta = cloudMeta();
-  const nothingHere = !local.fixed.length && !local.flexible.length && !local.routines.length
-    && !Object.keys(local.points.marks).length && !Object.keys(local.habitMarks).length;
-  // 2) Same data, nothing on this device yet, or this device was already in sync (the cloud is just newer): use the cloud
-  if (sameText(remote) === sameText(local) || nothingHere || (meta.uid === cloud.user.uid && !meta.dirty))
-    return cloudUseCloud(true);
-  // 3) Both have different data: ask
-  const count = d => `${d.users.length} people, ${d.fixed.length + d.flexible.length} activities, ` +
-    `${Object.keys(d.points.marks).length + Object.keys(d.habitMarks).length} ticks`;
-  $("syncInfo").innerHTML = `This device has different data from the family cloud.<br><br>
-    <b>Cloud:</b> ${count(remote)}<br><b>This device:</b> ${count(local)}`;
-  cloud.asking = true;
-  $("syncModal").hidden = false;
-  $("syncModal").querySelector("[data-sync=cloud]").focus();
-}
-// The cloud's data, cleaned up like any saved data
-function cloudData() {
-  const s = cloud.snaps, val = snap => snap && snap.exists() ? snap.data() : {};
-  return cleanData(joinData(val(s.plan), val(s.points), val(s.habits)));
-}
-function answerSync(choice) {
-  if (choice === "local" && !confirm("Replace the family's cloud data with this device's data?\n\nAll the family's phones will then show this device's data.")) return;
-  $("syncModal").hidden = true;
-  if (choice === "local") {
-    cloudUploadAll();
-    cloudReady();
-    toast("☁️ The family cloud now has this device's data.", 4000);
-  } else {
-    cloudUseCloud();
-    toast("☁️ Using the family data from the cloud.", 4000);
-  }
-}
-// keepEarly = also keep the ticks/changes made on this device while waiting for the cloud's first answer
-function cloudUseCloud(keepEarly) {
-  const s = cloud.snaps, raw = snap => snap.exists() ? snap.data() : {};
-  cloud.sent = { plan: raw(s.plan), points: raw(s.points), habits: raw(s.habits) };
-  data = keepEarly && cloud.base ? keepEarlyChanges(cloudData(), JSON.parse(cloud.base), JSON.parse(savedJson)) : cloudData();
-  cloud.stash = null;
-  finishPlanAfterLoad();
-  newWeek();
-  if (me && !exists(me)) me = null;
-  resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-  cloudReady();
-  if (!me && screen !== "start" && screen !== "view") go("start"); else render();
-}
-// The cloud's data + what changed on this device (from base to local) in the first seconds:
-// ticks added or removed are copied over one by one; a saved plan change wins as a whole.
-function keepEarlyChanges(remote, base, local) {
-  if (sameText(base) === sameText(local)) return remote;
-  const b = splitData(base), l = splitData(local), r = splitData(remote);
-  if (sameText(b.plan) !== sameText(l.plan)) r.plan = l.plan;
-  ["points", "habits"].forEach(part => {
-    const bm = b[part].marks || {}, lm = l[part].marks || {}, rm = r[part].marks = r[part].marks || {};
-    new Set([...Object.keys(bm), ...Object.keys(lm)]).forEach(key => {
-      if (sameText(bm[key]) === sameText(lm[key])) return;
-      if (hasOwn(lm, key)) rm[key] = lm[key]; else delete rm[key];
-    });
-  });
-  return cleanData(joinData(r.plan, r.points, r.habits));
-}
-// From now on every change goes to the cloud right away
-function cloudReady() {
-  cloud.ready = true;
-  cloud.asking = false;
-  setCloudMeta({ uid: cloud.user.uid, dirty: false });
-  writeData("auto");   // stores it here, and uploads anything the app tidied up (e.g. a new week)
-  showSync();
-}
-
-// ---------- Uploading ----------
-// Everything: replaces the 3 cloud documents (first upload, "Replace cloud", Import backup, Clear everything)
-function cloudUploadAll() {
-  const parts = splitData(data);
-  cloud.sent = splitData(data);
-  Object.keys(cloud.refs).forEach(name => cloud.fb.setDoc(cloud.refs[name], parts[name]).catch(cloudError));
-}
-// Only what changed since the last upload
-function cloudUpload() {
-  const now = splitData(data);
-  // The plan document is sent whole (it only changes with 💾 Save, "Plan my week", adding a person …)
-  if (sameText(now.plan) !== sameText(cloud.sent.plan)) {
-    cloud.sent.plan = now.plan;
-    cloud.fb.setDoc(cloud.refs.plan, now.plan).catch(cloudError);
-  }
-  cloudUpdateFields("points", now.points);
-  cloudUpdateFields("habits", now.habits);
-}
-// Points and habits: update only the fields that changed (one tick = one field, e.g. marks."2|math|mody")
-function cloudUpdateFields(name, now) {
-  const fb = cloud.fb, before = cloud.sent[name] || {}, changes = [];
-  const oldMarks = before.marks || {}, newMarks = now.marks || {};
-  new Set([...Object.keys(oldMarks), ...Object.keys(newMarks)]).forEach(key => {
-    if (!hasOwn(newMarks, key)) changes.push(new fb.FieldPath("marks", key), fb.deleteField());   // unticked
-    else if (sameText(oldMarks[key]) !== sameText(newMarks[key])) changes.push(new fb.FieldPath("marks", key), newMarks[key]);
-  });
-  // The other fields (week, history …) only change on a new week
-  Object.keys(now).forEach(k => { if (k !== "marks" && sameText(before[k]) !== sameText(now[k])) changes.push(k, now[k]); });
-  if (!changes.length) return;
-  cloud.sent[name] = now;
-  fb.updateDoc(cloud.refs[name], ...changes).catch(err => {
-    // The document isn't in the cloud yet: create it with everything
-    if (err && err.code === "not-found") fb.setDoc(cloud.refs[name], splitData(data)[name]).catch(cloudError);
-    else cloudError(err);
-  });
-}
-
-// ---------- A change from another phone ----------
-function cloudApply(name, remote) {
-  if (sameText(remote) === sameText(cloud.sent[name])) return;   // nothing new (e.g. our own change coming back)
-  // You're in the middle of changes (not saved yet): show the other phone's plan after you Save or Cancel
-  if (name === "plan" && hasDraft()) {
-    if (cloud.stash && sameText(cloud.stash) === sameText(remote)) return;
-    cloud.stash = remote;
-    return toast("☁️ The plan was changed on another phone. “Cancel changes” shows it · 💾 Save keeps yours.", 6000);
-  }
-  cloud.sent[name] = remote;
-  const parts = splitData(data);
-  parts[name] = remote;
-  const fresh = cleanData(joinData(parts.plan, parts.points, parts.habits));
-  if (name === "plan") {
-    Object.keys(fresh).forEach(k => { if (k !== "points" && k !== "habitMarks") data[k] = fresh[k]; });
-    const replanned = finishPlanAfterLoad();
-    savedJson = JSON.stringify(data);
-    if (replanned) cloudUpload();
-    if (me && !exists(me)) me = null;   // your person was removed on another phone
-  } else {
-    // Ticks: change them in the data AND in what counts as "saved", so a draft you're working on stays a draft
-    const key = name === "points" ? "points" : "habitMarks";
-    const saved = JSON.parse(savedJson);
-    data[key] = fresh[key];
-    saved[key] = JSON.parse(JSON.stringify(fresh[key]));
-    savedJson = JSON.stringify(saved);
-  }
-  storeLocal();
-  if (!me && screen !== "start" && screen !== "view") go("start"); else render();
-}
-
-function cloudError(err) {
-  console.warn("Cloud:", err);
-  const code = err && err.code;
-  if (code === "permission-denied") toast("⚠ The cloud said no. Check the Firestore rules in the Firebase console.", 6000);
-  else if (code === "resource-exhausted") toast("⚠ The cloud is busy (daily limit reached). Changes are kept on this device.", 6000);
-  showSync();
-}
-
-// ---------- The tiny "☁️ Synced / 📴 Offline" sign ----------
-function showSync() {
-  const pill = $("syncPill");
-  if (!cloud.enabled) { pill.hidden = false; pill.textContent = "💾 This device only"; return; }
-  if (cloud.fb && !cloud.user) { pill.hidden = true; return; }   // the login screen is showing
-  const snaps = Object.values(cloud.snaps);
-  const offline = !navigator.onLine || !cloud.fb || (cloud.ready && snaps.some(s => s.metadata.fromCache));
-  const busy = !cloud.ready || snaps.some(s => s.metadata.hasPendingWrites);
-  pill.hidden = false;
-  pill.textContent = offline ? "📴 Offline" : busy ? "🔄 Syncing…" : "☁️ Synced";
-  pill.classList.toggle("off", offline);
-}
-window.addEventListener("online", showSync);
-window.addEventListener("offline", showSync);
-
-// ---------- Sign out (Settings, Bro2a only) ----------
-$("signOutBtn").onclick = async () => {
-  if (me !== DAD || !cloud.user) return;
-  const waiting = Object.values(cloud.snaps).some(s => s.metadata.hasPendingWrites);
-  if (!confirm("Sign out of the family account on this device?\n\n" + (waiting
-      ? "⚠ Some changes haven't reached the cloud yet (no internet?). If you sign out now, they'll be lost."
-      : "The family's data stays safe in the cloud. You'll need the email and password to sign in again."))) return;
-  const fb = cloud.fb;
-  cloud.unsub.forEach(stop => stop());
-  cloud.unsub = [];
-  cloud.ready = false;
-  try { await fb.signOut(cloud.auth); } catch (e) {}
-  // Forget the family's data on this device (it stays in the cloud), then start fresh at the login
-  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(CLOUD_META); } catch (e) {}
-  try { await fb.terminate(cloud.db); await fb.clearIndexedDbPersistence(cloud.db); } catch (e) {}
-  location.reload();
-};
-
-// =====================================================================
 //  START THE APP
 // =====================================================================
 // After loading saved data (or a backup) from an older version:
@@ -4933,12 +4518,11 @@ if (finishPlanAfterLoad()) {
                            : "📅 The week was planned again. Everything fits! ✓", 6000), 400);
 }
 newWeek();                     // a new week since last time? Points start again from zero
-writeData("auto");              // stores the updated data (people, owners, "Needs Dad", plan, points)
+writeData();                    // stores the updated data (people, owners, "Needs Dad", plan, points)
 try { history.replaceState({ screen: "start" }, ""); } catch (e) {}   // the Back button's first stop
 resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-// Always open on the home page ("Who are you?") — after the family login, if nobody is signed in yet
+// Always open on the home page ("Who are you?")
 go("start");
-startCloud();
 
 // ---------- Offline support ----------
 // Starts the "service worker" (sw.js), which keeps a copy of the app so it works without internet.

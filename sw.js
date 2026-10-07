@@ -3,19 +3,13 @@
 //  The browser runs this file in the background. It keeps a copy
 //  of the app's files on your device, and hands out that copy
 //  whenever there's no internet.
-//  (Your activities are NOT stored here — they live in the family
-//   cloud (Firebase) and in the browser's localStorage.)
+//  (Your activities are NOT stored here — they stay in the
+//   browser's localStorage, exactly like before.)
 // ============================================================
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v32";
-
-// Firebase and Google's servers (login, the cloud data, the Firebase code): NEVER saved here.
-// They must always come fresh from the internet (Firebase keeps its own offline copy of the data).
-function isFirebase(url) {
-  return /(^|\.)(googleapis\.com|gstatic\.com|firebaseio\.com|firebaseapp\.com|firebasestorage\.app|web\.app)$/.test(url.hostname);
-}
+const CACHE = "family-planner-v31";
 
 // The files the app needs to open without internet.
 const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"];
@@ -47,7 +41,6 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (url.origin !== location.origin && isFirebase(url)) return;   // not touched at all: the browser fetches it normally
 
   if (url.origin === location.origin) {
     // Our own files: try the internet first (so you always get the newest version),
@@ -58,6 +51,10 @@ self.addEventListener("fetch", event => {
         .catch(() => caches.match(request, { ignoreSearch: true })
           .then(saved => saved || (request.mode === "navigate" ? caches.match("index.html") : undefined)))
     );
+  } else if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
+    // The font: use the saved copy if we have one (fonts never change).
+    event.respondWith(
+      caches.match(request).then(saved => saved || fetch(request).then(response => remember(request, response)))
+    );
   }
-  // Everything else from other websites (including the font, which comes from Google): not saved here.
 });
