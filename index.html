@@ -293,6 +293,17 @@
   .free-row small { color: var(--muted); font-size: 15px; }
   .free-row .total { font-weight: 800; color: var(--ok); }
   .free-row .total.none { color: var(--muted); font-weight: 500; }
+  /* What's planned inside the free time (from the saved plan), and the free time left */
+  .free-who { margin: 8px 0 4px; }
+  .free-who .chip { font-size: 16px; padding: 4px 12px 4px 6px; }
+  .free-who .chip .e { font-size: 20px; }
+  .free-plan { grid-column: 1 / -1; font-size: 15px; color: var(--muted); margin-left: 60px; }
+  .free-plan .sum b { color: var(--text); }
+  .free-plan .sum .left { color: var(--ok); font-weight: 800; }
+  .free-plan ul { list-style: none; margin: 4px 0 0; padding: 0; }
+  .free-plan li { padding: 2px 0; color: var(--text); }
+  .free-plan li .t { color: var(--muted); display: inline-block; min-width: 9.5em; }
+  @media (max-width: 600px) { .free-plan { margin-left: 0; } .free-plan li .t { min-width: 0; margin-right: 6px; } }
   .setting { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 18px; font-weight: 700; }
   .setting input { width: 90px; }
 
@@ -324,7 +335,28 @@
   /* =============================================================
      THE COLORFUL WEEK (my plan / everyone's plan)
      ============================================================= */
-  .k-nav { display: none; }   /* arrows + day buttons: phone only */
+  /* Day / Week switch + ‹ day buttons ›: on the computer too (the phone's look: see "Phone: one day, big and clear") */
+  .k-nav { display: none; }   /* (shown below on the computer, and in the PHONE part on the phone) */
+  @media (min-width: 700px) {
+    .k-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .k-navrow { order: 2; margin-left: auto; }
+    .k-mode { margin: 0; }
+    .k-days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .k-arrow { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--line);
+               background: #fff; font-size: 22px; font-weight: 800; line-height: 1; }
+    .k-dbtn { min-height: 42px; padding: 4px 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff;
+              font-size: 15px; font-weight: 800; white-space: nowrap; }
+    .k-days .k-dbtn small { display: inline; font-size: 15px; margin-left: 4px; }
+    .k-dbtn.istoday { border-color: #facc15; background: #fffbea; }
+    .k-dbtn.sel { background: var(--text); border-color: var(--text); color: #fff; }
+    /* One day on the computer: only that day's column (and its times), a bit bigger */
+    .k-week.rows.one-day { grid-template-columns: var(--cols-day); }
+    .k-week.rows.one-day .k-cell:not(.sel), .k-week.rows.one-day .k-time.not-sel { display: none; }
+    .k-week.rows.one-day .k-dayname { font-size: 17px; }
+    .k-week.rows.one-day .k-block .who, .k-week.rows.one-day .k-block.fixed .who { font-size: 17px; }
+    .k-week.rows.one-day .k-block .k-sub, .k-week.rows.one-day .k-block .when, .k-week.rows.one-day .k-block .what { font-size: 14px; }
+    .k-week.rows.one-day .k-time { font-size: 13px; }
+  }
   .k-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
   .k-day { background: #fff; border-radius: 26px; padding: 14px 10px 16px; border: 4px solid transparent;
            box-shadow: var(--shadow); min-height: 260px; }
@@ -355,6 +387,24 @@
   .k-routine .r-nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .k-routine .r-who { flex: none; font-size: 13px; opacity: .85; }
   .k-routine.faded { opacity: .25; }
+  /* 🕌 Prayer times: a thin soft green line with the time (on its own, or inside the activity happening then) */
+  .k-pray { display: block; margin: 0 0 4px; padding: 0 8px; border-top: 2px solid #34a56f; color: #1f6b47; background: #effaf4;
+            font-size: 12px; font-weight: 800; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .k-pray.in { margin: 5px -4px 0; border-radius: 0 0 6px 6px; background: rgba(239, 250, 244, .9); }
+  .k-block .k-pray.in { font-size: 11px; line-height: 15px; }
+  /* Time grid: a line across the day at the exact time */
+  .ev-pray { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid #34a56f; z-index: 6; pointer-events: none; }
+  .ev-pray span { position: absolute; right: 2px; top: -1px; background: #effaf4; color: #1f6b47; font-size: 10px; font-weight: 800;
+                  padding: 0 4px; border-radius: 0 0 4px 4px; white-space: nowrap; }
+  /* "Show prayer times on your calendar?" box */
+  .pray-card { max-width: 420px; text-align: center; padding: 0 22px 22px; }
+  .pray-card .leave-emoji { margin-top: 22px; }
+  /* Settings: On / Off */
+  .pray-seg { margin: 4px 0 12px; }
+  /* Settings for a kid: only the cards that are for everyone */
+  #scr-settings.kid-view .card:not(.for-all) { display: none; }
+  #scr-settings.kid-view .for-all { margin-top: 0 !important; }
+  #scr-settings.kid-view .two-col { grid-template-columns: minmax(0, 560px); }
   /* Get ready / break around an activity: an even thinner, light striped strip with small text */
   .k-routine.pad { background: repeating-linear-gradient(135deg, #f3f3f7 0 6px, #e6e6ee 6px 12px); color: #6f7486;
                    border: 1px dashed #d6d8e2; font-size: 12px; line-height: 1.5; padding: 0 10px; margin: -2px 0 6px; }
@@ -469,6 +519,208 @@
   .add-user-card .save-btn { background: #16a34a; border-color: #16a34a; color: #fff; }
   .add-user-card .save-btn:hover { background: #15803d; border-color: #15803d; }
   .add-user-form { padding: 16px 24px 0; }
+  /* =============================================================
+     🎒 SCHOOL page (info + timetable, grades, homework & exams, weekly review, Seesaw)
+     ============================================================= */
+  input[type=date], textarea { width: 100%; padding: 10px 14px; border: 2px solid var(--line); border-radius: 16px; min-height: 52px;
+                               font: inherit; font-size: 18px; background: #fffdf8; color: var(--text); }
+  textarea { resize: vertical; min-height: 90px; margin-bottom: 12px; }
+  input[type=date]:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+  .sc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+  .sc-grid > .card { margin: 0; }
+  .sc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .sc-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+  .sc-form { background: var(--accent-soft); border-radius: 22px; padding: 14px 16px; margin: 10px 0 6px; }
+  .sc-info { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 18px; margin: 6px 0 10px; }
+  .sc-info span { color: var(--muted); font-weight: 700; }
+  .sc-info b { overflow-wrap: anywhere; }
+  .sc-tt { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .sc-tt th { text-align: left; width: 56px; padding: 6px 8px 6px 0; vertical-align: top; }
+  .sc-tt td { padding: 4px 0; border-bottom: 2px solid var(--line); }
+  .sc-tt tr:last-child td { border-bottom: none; }
+  .sc-tt th.today { color: #6b4f05; }
+  .sc-sub { display: inline-block; background: #f3e9d6; border-radius: 999px; padding: 2px 10px; margin: 2px 4px 2px 0; font-weight: 700; font-size: 15px; }
+  .sc-ttrow { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .sc-ttrow input { min-height: 44px; font-size: 16px; }
+  /* Grades: averages per subject (▲ better than the last mark, ▼ worse) */
+  .sc-avgs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .sc-avg { background: #fff; border: 2px solid var(--line); border-radius: 18px; padding: 8px 14px; min-width: 120px; }
+  .sc-avg b { display: block; font-size: 16px; }
+  .sc-avg .pct { font-size: 26px; font-weight: 800; }
+  .sc-avg small { color: var(--muted); font-size: 13px; display: block; }
+  .sc-up { color: var(--ok); font-weight: 800; }
+  .sc-down { color: var(--danger); font-weight: 800; }
+  .sc-same { color: var(--muted); font-weight: 800; }
+  .sc-score { font-weight: 800; white-space: nowrap; }
+  .sc-tag { display: inline-block; border-radius: 999px; padding: 0 8px; font-size: 13px; font-weight: 800; background: #eef2ff; color: #4338ca; margin-right: 4px; }
+  .sc-tag.exam { background: #fee2e2; color: #b91c1c; }
+  .sc-tag.late { background: #fff7ed; color: #c2410c; }
+  .sc-tag.soon { background: #fef9c3; color: #854d0e; }
+  ul.list li.sc-done .what { text-decoration: line-through; opacity: .6; }
+  .sc-tick { width: 28px; height: 28px; flex: none; accent-color: var(--ok); cursor: pointer; }
+  .sc-tick:disabled { cursor: default; }
+  /* Weekly review: stars */
+  .sc-stars { letter-spacing: 1px; color: #f59e0b; white-space: nowrap; }
+  .sc-stars .off { color: #e5e7eb; }
+  .sc-review { padding: 10px 4px; border-bottom: 2px solid var(--line); }
+  .sc-review:last-child { border-bottom: none; }
+  .sc-review .sc-rates { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 15px; margin: 4px 0; }
+  .sc-review p { margin: 4px 0 0; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sc-starpick { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .sc-starpick > span { min-width: 120px; font-weight: 700; }
+  .sc-starpick button { min-height: 40px; min-width: 40px; padding: 0; border-radius: 12px; font-size: 22px; color: #e5e7eb; }
+  .sc-starpick button.on { color: #f59e0b; border-color: #fcd34d; background: #fffbeb; }
+  /* Seesaw */
+  .sc-ss { padding: 12px 4px; border-bottom: 2px solid var(--line); }
+  .sc-ss:last-child { border-bottom: none; }
+  .sc-ss p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 17px; }
+  .sc-photo { display: block; max-width: 100%; max-height: 520px; border-radius: 14px; margin-top: 8px; border: 2px solid var(--line); background: #f8f5ee; }
+  img.sc-photo:not([src]) { min-height: 80px; width: 100%; }
+  .sc-photo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sc-file { display: inline-flex; align-items: center; cursor: pointer; }
+  .sc-seesaw-card { max-width: 540px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 0 22px 22px; }
+  .sc-seesaw-card .print-title, .sc-seesaw-card .print-hint { margin-left: 0; margin-right: 0; }
+  .sc-seesaw-card .print-hint { margin-bottom: 14px; }
+  .sc-empty { color: var(--muted); font-size: 17px; margin: 8px 0; }
+  .sc-h3 { font-size: 19px; margin: 14px 0 4px; }
+  .sc-info b { white-space: pre-wrap; }
+  @media (max-width: 800px) { .sc-grid { grid-template-columns: 1fr; } }
+  /* =============================================================
+     🎒 SCHOOL — "Binder": tiles, colored subject folders with a tab, a crumb on top
+     ============================================================= */
+  .home-big { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 18px; }
+  .big-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 170px;
+             border-radius: 30px; border: 3px solid transparent; box-shadow: var(--shadow); text-align: center; transition: transform .15s; }
+  .big-btn:hover { transform: translateY(-3px); }
+  .big-btn:active { transform: scale(.97); }
+  .big-btn .e { font-size: 64px; line-height: 1.1; }
+  .big-btn b { font-size: 32px; font-weight: 800; }
+  .big-btn small { font-size: 17px; font-weight: 600; opacity: .85; }
+  .big-btn.cal { background: linear-gradient(135deg, #7c6cf0, #5b5bd6); color: #fff; }
+  .big-btn.cal:hover { background: linear-gradient(135deg, #7366ea, #5252cc); }
+  .big-btn.school { background: linear-gradient(135deg, #ffb347, #f0892b); color: #fff; }
+  .big-btn.school:hover { background: linear-gradient(135deg, #f7a93c, #e67f22); }
+  .bd-crumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 0 0 14px; font-size: 17px; }
+  .bd-crumb button { min-height: 38px; padding: 2px 12px; border-radius: 999px; font-size: 16px; background: #fff; }
+  .bd-crumb .sep { color: var(--muted); font-weight: 800; }
+  .bd-crumb b { padding: 2px 6px; }
+  .bd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+  .bd-head h2 { font-size: 28px; margin: 0; }
+  .bd-card h2 { font-size: 22px; }
+  /* School home: 6 tiles, 2 columns, each like a binder tab */
+  .bd-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .bd-tile { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; text-align: left;
+             min-height: 96px; padding: 14px 16px; border-radius: 24px; background: #fff; border: 3px solid var(--line);
+             border-left: 12px solid var(--tab, var(--accent)); box-shadow: var(--shadow); }
+  .bd-tile .e { grid-row: 1 / 3; font-size: 40px; }
+  .bd-tile b { font-size: 22px; font-weight: 800; }
+  .bd-tile small { color: var(--muted); font-size: 15px; font-weight: 600; }
+  .bd-subjects { --tab: #4a7fd4; } .bd-homework { --tab: #df8238; } .bd-marks { --tab: #3e9f68; }
+  .bd-reviews { --tab: #c79a22; } .bd-info { --tab: #8167d2; } .bd-reports { --tab: #2f9a92; }
+  /* Subject folders */
+  .bd-folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .bd-folder { position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; text-align: left;
+               padding: 22px 16px 14px; border-radius: 6px 22px 22px 22px; background: var(--soft); border: 3px solid var(--c); color: var(--ink);
+               min-height: 110px; box-shadow: var(--shadow); margin-top: 14px; }
+  .bd-folder::before { content: ""; position: absolute; left: -3px; top: -17px; width: 42%; height: 16px; background: var(--c);
+                       border-radius: 10px 10px 0 0; }
+  .bd-folder .e { font-size: 40px; grid-row: 1 / 3; }
+  .bd-folder .nm { font-size: 24px; font-weight: 800; }
+  .bd-stats { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; font-weight: 600; color: var(--ink); opacity: .9; }
+  .bd-stats b { font-size: 16px; }
+  .bd-stats .todo b { color: #c2410c; }
+  .bd-folder-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 12px; border-radius: 6px 22px 22px 22px;
+                    background: var(--soft); color: var(--ink); border: 3px solid var(--c); border-top-width: 10px; }
+  .bd-folder-head .e { font-size: 40px; }
+  .bd-folder-head h2 { flex: 1; margin: 0; font-size: 28px; }
+  .bd-head-btns { display: flex; gap: 4px; }
+  .bd-actions .pill { min-height: 46px; }
+  .bd-bar { height: 14px; border-radius: 999px; background: #f0ebe0; overflow: hidden; margin: 6px 0 10px; }
+  .bd-bar i { display: block; height: 100%; border-radius: 999px; }
+  .bd-avg { color: var(--ink, var(--text)); font-weight: 800; }
+  .bd-avgrow { padding: 8px 0 2px; border-bottom: 2px solid var(--line); }
+  .bd-avgrow:last-child { border-bottom: none; }
+  .bd-avgtop { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 18px; }
+  .bd-avgtop small { color: var(--muted); }
+  .bd-avgrow .bd-bar { margin: 6px 0 8px; }
+  /* Files */
+  .bd-file { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 0; padding: 4px 2px; border: none; background: none; text-align: left; }
+  .bd-file:hover { background: none; }
+  .bd-file .e { font-size: 28px; }
+  .bd-file .what { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .bd-file .what small { display: block; color: var(--muted); font-weight: 500; font-size: 14px; }
+  .bd-file-card { max-width: 760px; }
+  .bd-file-body { margin: 6px 0 14px; }
+  .bd-preview-img { display: block; max-width: 100%; max-height: 65vh; margin: 0 auto; border-radius: 12px; border: 2px solid var(--line); }
+  .bd-preview-pdf { display: block; width: 100%; height: 65vh; border: 2px solid var(--line); border-radius: 12px; background: #f8f5ee; }
+  .bd-linktext { font-size: 15px; overflow-wrap: anywhere; background: #f8f5ee; border-radius: 12px; padding: 10px 12px; }
+  /* Homework */
+  ul.list li.bd-task { align-items: flex-start; }
+  .bd-task .sc-tick { margin-top: 4px; }
+  .bd-task-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .bd-task-btns .linkbtn { min-height: 34px; font-size: 14px; }
+  .bd-status { font-weight: 800; }
+  .bd-status.answers { color: #1d4ed8; }
+  .bd-status.checked { color: var(--ok); }
+  .bd-task .sc-form { margin-top: 8px; }
+  /* Reviews: points this week */
+  .bd-points { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; text-align: center; }
+  .bd-points div { background: #f8f5ee; border-radius: 16px; padding: 10px 4px; }
+  .bd-points b { display: block; font-size: 28px; font-weight: 800; }
+  .bd-points small { color: var(--muted); font-size: 13px; font-weight: 700; }
+  .bd-points .total { background: #fff7e0; }
+  /* Timetable */
+  .bd-tt-scroll { overflow-x: auto; }
+  .bd-tt { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 460px; }
+  .bd-tt th { padding: 6px 4px; color: var(--muted); font-size: 14px; }
+  .bd-tt thead th.today { color: #6b4f05; background: #fdf3d3; border-radius: 10px 10px 0 0; }
+  .bd-tt td { padding: 3px; border-top: 2px solid var(--line); text-align: center; }
+  .bd-tt td.today { background: #fffbea; }
+  .bd-lesson { display: inline-block; border-radius: 10px; padding: 2px 8px; font-weight: 700; font-size: 14px; background: var(--soft, #f3e9d6); color: var(--ink, var(--text)); }
+  .bd-tt-edit { display: grid; grid-template-columns: 26px repeat(5, minmax(0, 1fr)); gap: 4px; align-items: center; overflow-x: auto; }
+  .bd-tt-edit b { text-align: center; font-size: 14px; }
+  .bd-tt-edit .n { color: var(--muted); font-weight: 800; text-align: center; }
+  .bd-tt-edit input { min-height: 40px; padding: 4px 6px; font-size: 14px; border-radius: 10px; min-width: 70px; }
+  /* 📄 The report (on screen and on paper) */
+  .bd-report-preview { margin-top: 18px; background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 22px; font-size: 16px; overflow-x: auto; }
+  .bd-report-page { font-size: var(--fs, 13pt); }
+  .bd-report { display: flex; flex-direction: column; gap: 1em; min-width: 0; }
+  .rp-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1em; border-bottom: .15em solid #333; padding-bottom: .5em; }
+  .rp-title { font-size: 1.8em; font-weight: 800; line-height: 1.1; }
+  .rp-sub, .rp-date { font-size: .85em; color: #555; margin-top: .2em; }
+  .rp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+  .rp-box { border: .1em solid #ccc; border-radius: .6em; padding: .6em .8em; break-inside: avoid; }
+  .rp-wide { grid-column: 1 / -1; }
+  .rp-box h3 { margin: 0 0 .4em; font-size: 1.05em; }
+  .rp-box p { margin: .2em 0 .6em; }
+  .rp-table { width: 100%; border-collapse: collapse; }
+  .rp-table td { padding: .2em .3em; border-bottom: .05em solid #eee; white-space: nowrap; }
+  .rp-bar { width: 40%; }
+  .rp-bar i { display: block; height: .7em; border-radius: 1em; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .rp-pct { font-weight: 800; text-align: right; }
+  .rp-n { color: #666; font-size: .85em; }
+  .rp-stars { display: flex; flex-wrap: wrap; gap: .3em 1.2em; }
+  .rp-note { font-style: italic; }
+  .rp-foot { margin-top: auto; text-align: right; }
+  .rp-foot .line { display: inline-block; width: 14em; border-bottom: .1em solid #333; margin-left: .5em; }
+  @media (max-width: 600px) {
+    .home-big { gap: 10px; }
+    .big-btn { min-height: 140px; border-radius: 24px; }
+    .big-btn .e { font-size: 50px; }
+    .big-btn b { font-size: 25px; }
+    .big-btn small { font-size: 14px; }
+    .bd-tiles { gap: 10px; }
+    .bd-tile { grid-template-columns: 1fr; grid-template-rows: auto; text-align: center; justify-items: center; padding: 12px 8px; border-left-width: 3px; border-top: 10px solid var(--tab); }
+    .bd-tile .e { grid-row: auto; font-size: 34px; }
+    .bd-tile b { font-size: 19px; }
+    .bd-tile small { font-size: 13px; }
+    .bd-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rp-grid { grid-template-columns: 1fr; }
+  }
+  /* An exam on the kid's calendar (under the day name) */
+  .k-exam { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 1px 6px; border-radius: 8px; border: 1px solid #fecaca;
+            background: #fee2e2; color: #b91c1c; font-size: 12px; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-exam:hover { background: #fecaca; }
   /* "Save your changes?" box */
   .leave-card { max-width: 460px; text-align: center; padding-bottom: 22px; }
   .leave-emoji { font-size: 60px; line-height: 1; margin-top: 22px; }
@@ -890,6 +1142,7 @@
      ============================================================= */
   .v-top { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; }
   .v-mode { align-self: flex-start; }
+  .v-who-pick { margin: 0; }   /* Full week: All / one person */
   .v-days { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding: 2px 0 4px; -webkit-overflow-scrolling: touch; }
   .v-arrow { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--line);
              background: #fff; font-size: 18px; font-weight: 800; }
@@ -942,7 +1195,8 @@
     .k-navrow { display: flex; justify-content: flex-end; margin-bottom: 8px; }
     .k-mode, .v-mode { margin: 0; padding: 3px; }
     .k-mode button, .v-mode button { min-height: 36px; padding: 4px 14px; font-size: 16px; font-weight: 800; }
-    .v-mode { align-self: flex-end; }
+    .v-mode { align-self: flex-end; max-width: 100%; flex-wrap: wrap; }
+    .v-mode button { padding: 4px 10px; }   /* Day / Week summary / Full week fit on a small phone */
     .k-days, .v-days { display: flex; align-items: stretch; gap: 3px; overflow: visible; padding: 0; }
     .k-arrow, .v-arrow { flex: none; width: 34px; height: auto; min-height: 58px; padding: 0 0 4px; border-radius: 14px;
                          border: 3px solid var(--line); background: #fff; font-size: 34px; font-weight: 800; line-height: 1; }
@@ -1052,6 +1306,8 @@
   <div class="hello"><span class="hello-face" id="homeFace"></span>
     <div><h1 class="big-title" id="homeHello"></h1><p class="hello-points" id="homePoints"></p></div></div>
   <div class="note" id="homeNote" hidden></div>
+  <!-- Kids: two big buttons, 📅 Calendar and 🎒 School -->
+  <div class="home-big" id="homeBig" hidden></div>
   <div class="menu" id="homeMenu"></div>
   <div id="homeHabits"></div>
 </section>
@@ -1230,6 +1486,7 @@
         </div>
         <div class="err" id="dayErr"></div>
         <div class="free-title" id="freeTitle"></div>
+        <div class="chips free-who" id="freeWho"></div>
         <div id="freeRows"></div>
       </div>
       <!-- Planning -->
@@ -1241,6 +1498,27 @@
         </div>
         <p class="hint" style="margin:8px 0 0">One person is only in two activities at once if you allowed them together.
           Different people can always do different things at the same time.</p>
+      </div>
+      <!-- 🕌 Prayer times: each person's own choice (every person can open Settings for this card) -->
+      <div class="card for-all" style="margin-top:18px">
+        <h2>🕌 Prayer times</h2>
+        <p class="hint">A thin 🕌 line with the time on your calendar. It doesn't block anything: activities stay where they are.
+          This is just for you, on all your devices.</p>
+        <div class="seg pray-seg" id="prMine"></div>
+        <label class="checkline"><input type="checkbox" id="prRemind"> 🔔 Remind me when it's prayer time (while the app is open)</label>
+        <!-- The family's place (Bro2a only) -->
+        <div id="prPlace">
+          <div class="row" style="margin-top:10px">
+            <div><label class="small" for="prCity">City</label><input type="text" id="prCity" maxlength="40" placeholder="Al Barsha, Dubai, UAE"></div>
+          </div>
+          <div class="row">
+            <div><label class="small" for="prLat">Latitude</label><input type="number" id="prLat" step="any" min="-90" max="90"></div>
+            <div><label class="small" for="prLng">Longitude</label><input type="number" id="prLng" step="any" min="-180" max="180"></div>
+          </div>
+          <p class="hint" style="margin:0"><button type="button" class="linkbtn" id="prDefault">↺ Al Barsha, Dubai</button></p>
+          <div class="err" id="prErr"></div>
+        </div>
+        <p class="hint" style="margin:6px 0 0" id="prToday"></p>
       </div>
     </div>
     <div>
@@ -1293,7 +1571,7 @@
   <!-- ⭐ Good habits: add, edit, remove, order, and on/off per kid -->
   <div class="card" style="margin-top:18px">
     <h2>⭐ Good habits</h2>
-    <p class="hint">A daily checklist for the kids (not on the calendar). 1 point each: each prayer = 1, water = 1 when all 6 drops are ticked.
+    <p class="hint">A daily checklist for the kids (not on the calendar). 1 point each: each prayer = 15 points, water = 1 when all 6 drops are ticked.
       Tap a kid's name to turn a habit on or off for them. ▲ ▼ change the order.</p>
     <ul class="list" id="hbList"></ul>
     <div class="row" style="margin-top:14px">
@@ -1313,6 +1591,88 @@
     <button class="save-btn" data-savechanges>💾 Save</button>
   </div>
 </section>
+
+<!-- ===== 🎒 SCHOOL (each kid; only Bro2a can add or change things, a kid sees only their own page) ===== -->
+<section class="screen" id="scr-school" hidden>
+  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button>
+    <div class="bar-right"><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
+  <!-- Bro2a: which kid? -->
+  <div class="chips" id="schoolKids"></div>
+  <h1 class="page-title" id="schoolTitle"></h1>
+  <p class="lead" id="schoolSub"></p>
+  <div id="schoolBody"></div>
+  <!-- ⬆ Upload: a photo or a PDF (a subject's file, or the answers to a homework) -->
+  <input type="file" id="scUpFile" accept="image/*,application/pdf,.pdf" hidden>
+</section>
+
+<!-- 🤖 The ready prompt for the Claude app (copied to the clipboard) -->
+<div class="k-modal" id="promptModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+    <div class="print-title" id="pmTitle">🤖 Copied!</div>
+    <p class="print-hint" id="pmHint"></p>
+    <textarea id="pmText" rows="5" readonly aria-label="The prompt"></textarea>
+    <div class="btnrow">
+      <button class="primary" id="pmOpen">🤖 Open Claude</button>
+      <button id="pmAnswers" hidden>📎 Open the answers</button>
+      <button id="pmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📁 A school file: preview, ⬇ Download, 🗑️ Delete -->
+<div class="k-modal" id="fileModal" hidden>
+  <div class="k-card sc-seesaw-card bd-file-card" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
+    <div class="print-title" id="fmTitle"></div>
+    <p class="print-hint" id="fmInfo"></p>
+    <div class="bd-file-body" id="fmBody"></div>
+    <div class="btnrow">
+      <button class="primary" id="fmDown">⬇ Download</button>
+      <button class="primary" id="fmLink" hidden>🔗 Open link</button>
+      <button class="danger-text" id="fmDel">🗑️ Delete</button>
+      <button id="fmClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📥 From Seesaw (Bro2a): paste text or add a photo, pick the kid and the type -->
+<div class="k-modal" id="seesawModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="seesawTitle">
+    <div class="print-title" id="seesawTitle">📥 From Seesaw</div>
+    <p class="print-hint">Paste the text, or add a photo or screenshot. It's saved on the kid's School page with the date.</p>
+    <label class="small">Which kid?</label>
+    <div class="chips" id="ssKids"></div>
+    <div class="row">
+      <div><label class="small" for="ssType">Type</label>
+        <select id="ssType"><option value="homework">📚 Homework</option><option value="comment">💬 Teacher comment</option><option value="grade">🏅 Grade</option></select></div>
+      <div><label class="small" for="ssDate">Date</label><input type="date" id="ssDate"></div>
+    </div>
+    <label class="small" for="ssText">Text (you can also paste a screenshot here)</label>
+    <textarea id="ssText" rows="5" maxlength="3000" placeholder="Paste from Seesaw…"></textarea>
+    <div class="sc-photo-row">
+      <label class="pill sc-file"><input type="file" id="ssFile" accept="image/*" hidden>📷 Add photo</label>
+      <button type="button" class="linkbtn" id="ssNoPhoto" hidden>✕ Remove photo</button>
+    </div>
+    <img id="ssPreview" class="sc-photo" alt="The photo to save" hidden>
+    <div class="err" id="ssErr"></div>
+    <div class="btnrow">
+      <button class="primary" id="ssSave">💾 Save</button>
+      <button id="ssCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🕌 Asked once per person: show prayer times on their calendar? -->
+<div class="k-modal" id="prayAsk" hidden>
+  <div class="k-card pray-card" role="dialog" aria-modal="true" aria-labelledby="prayAskTitle">
+    <div class="leave-emoji">🕌</div>
+    <div class="print-title" id="prayAskTitle" style="font-size:24px;margin:10px 0 0">Show prayer times on your calendar?</div>
+    <p class="print-hint" style="margin:6px 0 18px">A thin line with the time. It doesn't move any activities. You can change it later in ⚙️ Settings.</p>
+    <div class="btnrow">
+      <button class="primary" id="prayYes">🕌 Yes</button>
+      <button id="prayNo">No thanks</button>
+    </div>
+  </div>
+</div>
 
 <!-- The big card that pops up when you tap a block -->
 <div class="k-modal" id="kModal" hidden>
@@ -1455,11 +1815,20 @@
      PART 3: THE BRAIN (JavaScript)
      This is the code that saves your data and builds the plan.
      ============================================================ -->
+<!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
+<script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <script>
 // ---------- Basic settings ----------
 const DAYS  = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const LAST_DAY = DAYS.length - 1;                 // 6 = Sunday (days are numbered 0 = Monday … 6 = Sunday)
+// 🕌 Prayer times: the family's place (Al Barsha, Dubai unless Bro2a picks another one in Settings).
+// Whether a person SEES them is their own choice: showPrayer / prayerRemind on each person (see cleanData).
+// (show / remind here are from an earlier version and aren't used any more; they're kept so old data stays the same.)
+const PRAYER_DEFAULT = { show: true, remind: true, city: "Al Barsha, Dubai, UAE", lat: 25.1135, lng: 55.2000 };
+const PRAYER_AMMAN = { city: "Amman, Jordan", lat: 31.9539, lng: 35.9106 };   // the earlier version's default
+const PRAYERS_LIST = [["fajr", "Fajr"], ["dhuhr", "Dhuhr"], ["asr", "Asr"], ["maghrib", "Maghrib"], ["isha", "Isha"]];
+const PRAYER_MIN = 15;                            // the reminder shows during the first 15 minutes
 const SAVE_KEY = "weeklyPlanner.v1";             // the name we save our data under in the browser
 const APP_NAME = "Hani's Family Plan";
 const DAD = "dad";                               // Dad's id. Dad can't be removed. (Only the shown name can change.)
@@ -1608,10 +1977,16 @@ function emptyData() {
     //             (the home page uses it to show the last 7 days)
     //   since   = the first day ticks were kept, e.g. "2026-10-05" (days before it aren't counted)
     points: { week: mondayOf(new Date()), since: ymd(new Date()), marks: {}, history: [], log: [] },
-    // Good habits: a daily checklist for the kids (not on the calendar). 1 point each.
+    // Good habits: a daily checklist for the kids (not on the calendar). 1 point each (each prayer = 15 points, see habitValuePoints).
     habits: defaultHabits(),
     // Habit ticks: "date|habit id|person" → true (one tick), [0/1 × 5] (prayers) or 1–6 (water drops). Kept 5 weeks.
     habitMarks: {},
+    // 🎒 School, per kid (see cleanSchool): kid id → { info, grades, tasks, reviews, seesaw }
+    //   (Seesaw photos are NOT in here: each one is its own cloud document, see "SEESAW PHOTOS")
+    school: {},
+    // 🕌 Prayer times: the family's place (worked out on the device with the adhan library, see PRAYER TIMES).
+    //   Each person chooses to see them or not (showPrayer on the person). They never block anything.
+    prayer: { ...PRAYER_DEFAULT },
     dadRenamed: true,  // Dad is already shown as "Bro2a" (see cleanData)
     schoolFixed: true, // the School rule was already applied (see cleanData)
     autoPads: true,    // the automatic get ready / break times were already given to all activities (see cleanData)
@@ -1634,7 +2009,10 @@ function cleanData(d) {
       .filter(u => u && typeof u.id === "string" && u.id && typeof u.name === "string" && u.name.trim() && !seen.has(u.id) && seen.add(u.id))
       .map(u => ({ id: u.id, name: u.name.trim().slice(0, 30),
                    emoji: typeof u.emoji === "string" && u.emoji.trim() ? u.emoji.trim().slice(0, 8) : "🙂",
-                   color: hasOwn(PALETTE, u.color) ? u.color : "purple" }));
+                   color: hasOwn(PALETTE, u.color) ? u.color : "purple",
+                   // 🕌 their own choice (older saved data: not set yet → they're asked once)
+                   ...(typeof u.showPrayer === "boolean" ? { showPrayer: u.showPrayer } : {}),
+                   ...(typeof u.prayerRemind === "boolean" ? { prayerRemind: u.prayerRemind } : {}) }));
     if (!users.some(u => u.id === DAD)) users.unshift(defaultUsers()[0]); // Dad is always there
     clean.users = users;
   }
@@ -1873,7 +2251,117 @@ function cleanData(d) {
                      .map(w => ({ id: String(w.id || ""), name: renameDad && w.id === DAD && w.name === "Dad" ? DAD_NAME : w.name, emoji: typeof w.emoji === "string" ? w.emoji : "🙂" })) }))
       .slice(0, 104);
   }
+  // 🎒 School pages (older saved data has none)
+  clean.school = cleanSchool(d.school);
+  // 🕌 Prayer times' place (older saved data has none: Al Barsha, Dubai).
+  // The earlier version's untouched default (Amman) also becomes Al Barsha; a place Bro2a picked himself is kept.
+  const pr = d.prayer;
+  if (pr && typeof pr === "object") {
+    const lat = Number(pr.lat), lng = Number(pr.lng);
+    const wasAmman = lat === PRAYER_AMMAN.lat && lng === PRAYER_AMMAN.lng && (pr.city === PRAYER_AMMAN.city || !pr.city);
+    if (!wasAmman && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+      Object.assign(clean.prayer, { lat, lng });
+      clean.prayer.city = typeof pr.city === "string" ? pr.city.trim().slice(0, 40) : "";
+    }
+    clean.prayer.show = pr.show !== false;
+    clean.prayer.remind = pr.remind !== false;
+  }
   return clean;
+}
+
+// 🎒 School data for each kid. Lists are objects (id → item), so the cloud can change ONE item at a time.
+//   info    = { name: "Al Noor School", grade: "Grade 3B", teachers: "Ms. Sara (Math) …", timetable: { "0": ["Math", "English"], … } }
+//             (timetable: day 0 = Monday … 6 = Sunday → that day's subjects in order)
+//             (info.grade = the class, info.teachers = the teacher)
+//   grades  = id → { subject, date: "2026-10-12", type: "quiz" | "exam" | "homework", score: 8, max: 10, task? }
+//             (task = the homework it came from, when Bro2a ✅ checked its answers)
+//   tasks   = id → { kind: "homework" | "exam", subject, title, due: "2026-10-20", done: false,
+//                    by?, doneAt?: "2026-10-19" (+10 points that week), answer?: file id, checked?: { score, max, note, at } }
+//   reviews = Monday of the week ("2026-10-12") → { note, effort, behaviour, focus }   (1–5 stars)
+//   seesaw  = id → { date, type: "homework" | "comment" | "grade", text, photo: true/false }
+//   subjects = id → { name, emoji, color, order }   (📚 the folders; older data: Math, Science, English, Arabic)
+//   files   = id → { subject, name, kind: "image" | "pdf" | "link", url? (links), size, date, by, task? }
+//             (the file itself is NOT here: each one is its own cloud document families/{family}/files/{id}, see SCHOOL FILES)
+//   notes   = id → { subject, text, date, by }
+const GRADE_TYPES = ["quiz", "exam", "homework"];
+const TASK_KINDS = ["homework", "exam"];
+const SEESAW_TYPES = ["homework", "comment", "grade"];
+const FILE_KINDS = ["image", "pdf", "link"];
+const REVIEW_PARTS = [["effort", "💪 Effort"], ["behaviour", "😊 Behaviour"], ["focus", "🎯 Focus"]];
+const DEFAULT_SUBJECTS = {
+  "s-math":    { name: "Math",    emoji: "➗", color: "blue",   order: 0 },
+  "s-science": { name: "Science", emoji: "🔬", color: "green",  order: 1 },
+  "s-english": { name: "English", emoji: "📖", color: "purple", order: 2 },
+  "s-arabic":  { name: "Arabic",  emoji: "✍️", color: "orange", order: 3 }
+};
+function emptySchool() {
+  return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
+           subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {} };
+}
+function cleanSchool(s) {
+  const out = {};
+  if (!s || typeof s !== "object" || Array.isArray(s)) return out;
+  const isDate = x => typeof x === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x);
+  const txt = (x, n) => typeof x === "string" ? x.trim().slice(0, n) : "";
+  const okKey = k => /^[A-Za-z0-9_-]{1,40}$/.test(k);
+  // Keeps every good item of a list (id → item); fn cleans one item (null = drop it)
+  const list = (m, fn) => {
+    const r = {};
+    if (m && typeof m === "object" && !Array.isArray(m)) Object.entries(m).forEach(([k, v]) => {
+      const c = okKey(k) && v && typeof v === "object" ? fn(v, k) : null;
+      if (c) r[k] = c;
+    });
+    return r;
+  };
+  const stars = x => { const n = Math.round(Number(x)); return n >= 1 && n <= 5 ? n : 0; };
+  Object.entries(s).forEach(([kid, k]) => {
+    if (!okKey(kid) || kid === DAD || !k || typeof k !== "object") return;
+    const c = emptySchool(), info = k.info && typeof k.info === "object" ? k.info : {};
+    c.info.name = txt(info.name, 60);
+    c.info.grade = txt(info.grade, 30);
+    c.info.teachers = txt(info.teachers, 300);
+    if (info.timetable && typeof info.timetable === "object") for (let d = 0; d <= LAST_DAY; d++) {
+      const subs = Array.isArray(info.timetable[d]) ? info.timetable[d].map(x => txt(x, 30)).filter(Boolean).slice(0, 12) : [];
+      if (subs.length) c.info.timetable[d] = subs;
+    }
+    c.grades = list(k.grades, g => {
+      const score = Number(g.score), max = Number(g.max);
+      if (!txt(g.subject, 30) || !isDate(g.date) || !Number.isFinite(score) || score < 0 || !(max > 0)) return null;
+      return { subject: txt(g.subject, 30), date: g.date, type: GRADE_TYPES.includes(g.type) ? g.type : "quiz", score, max,
+               ...(okKey(String(g.task || "")) ? { task: g.task } : {}) };
+    });
+    // (by / doneAt / answer / checked are newer: older homework has none, and keeps no homework points)
+    c.tasks = list(k.tasks, t => {
+      if (!txt(t.subject, 30) || !isDate(t.due)) return null;
+      const ck = t.checked && typeof t.checked === "object" ? t.checked : null, score = ck && Number(ck.score), max = ck && Number(ck.max);
+      return { kind: TASK_KINDS.includes(t.kind) ? t.kind : "homework", subject: txt(t.subject, 30), title: txt(t.title, 80), due: t.due, done: t.done === true,
+               ...(okKey(String(t.by || "")) ? { by: t.by } : {}),
+               ...(t.done === true && isDate(t.doneAt) ? { doneAt: t.doneAt } : {}),
+               ...(okKey(String(t.answer || "")) ? { answer: t.answer } : {}),
+               ...(ck && Number.isFinite(score) && score >= 0 && max > 0 ? { checked: { score, max, note: txt(ck.note, 200), at: isDate(ck.at) ? ck.at : "" } } : {}) };
+    });
+    // 📚 Subject folders (older data has none: the 4 default folders)
+    c.subjects = k.subjects && typeof k.subjects === "object" && !Array.isArray(k.subjects)
+      ? list(k.subjects, x => txt(x.name, 30) ? { name: txt(x.name, 30), emoji: txt(x.emoji, 8) || "📘",
+                                                   color: hasOwn(PALETTE, x.color) ? x.color : "blue", order: Number(x.order) || 0 } : null)
+      : JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+    c.files = list(k.files, f => {
+      const kind = FILE_KINDS.includes(f.kind) ? f.kind : null, url = kind === "link" && /^https?:\/\/\S+$/i.test(String(f.url || "")) ? String(f.url).slice(0, 500) : null;
+      if (!kind || !isDate(f.date) || (kind === "link" && !url)) return null;
+      return { subject: txt(f.subject, 30), name: txt(f.name, 60) || "File", kind, ...(url ? { url } : {}), size: Math.max(0, Number(f.size) || 0), date: f.date,
+               ...(okKey(String(f.by || "")) ? { by: f.by } : {}), ...(okKey(String(f.task || "")) ? { task: f.task } : {}) };
+    });
+    c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
+      ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
+    c.reviews = list(k.reviews, (r, week) => !isDate(week) ? null
+      : { note: txt(r.note, 600), effort: stars(r.effort), behaviour: stars(r.behaviour), focus: stars(r.focus) });
+    c.seesaw = list(k.seesaw, x => {
+      const text = txt(x.text, 3000), photo = x.photo === true;
+      return isDate(x.date) && (text || photo) ? { date: x.date, type: SEESAW_TYPES.includes(x.type) ? x.type : "comment", text, photo } : null;
+    });
+    out[kid] = c;
+  });
+  return out;
 }
 
 // The plan's "fingerprint" the way the older version made it (one person per activity),
@@ -2066,15 +2554,17 @@ const canEdit = act => me === DAD || (act.users.length === 1 && act.users[0] ===
 // fromHistory = true when we got here with the phone's/browser's Back button
 function go(name, fromHistory) {
   if (name !== "start" && name !== "view" && !exists(me)) name = "start";  // "View all plan" doesn't need a person
-  if ((name === "all" || name === "settings") && me !== DAD) {   // Dad only (Dad is the admin)
-    if (name === "settings") toast(`Ask ${dadName()} 🙂`);
-    name = "home";
-  }
+  // Dad only (Dad is the admin). (Settings: everyone can open it, but the kids only see their own 🕌 Prayer times.)
+  if (name === "all" && me !== DAD) name = "home";
+  if (name === "school" && me !== DAD) schoolKid = me;   // 🎒 a kid only sees their own School page
+  if (name === "school" && name !== screen) { schoolEdit = schoolEditId = null; schoolFresh = true; }
   // Remember each screen in the browser history, so Back goes to the previous screen (not out of the app)
   if (!fromHistory && name !== screen) { try { history.pushState({ screen: name }, ""); } catch (e) {} }
-  if (name === "mine" && screen !== "mine") { viewDay = todayIndex(); wholeWeek = false; }  // phone: open on today
+  // "My calendar" opens on the last day / view / person chosen on this device (first time: today, my own week).
+  // Tapping "My calendar" while already on it goes back to my own week.
+  if (name === "mine" && screen !== "mine") restoreMine();
+  else if (name === "mine") viewing = null;
   if ((name === "home" || name === "mine") && screen !== name) habitDay = todayIndex();     // habits: start on today
-  if (name === "mine") viewing = null;   // "My calendar" always shows your own week
   if (name !== screen) { editMode = false; editUndo = []; }   // leaving the page ends "Edit calendar"
   screen = name;
   if (name === "mine" || name === "start") hideSaved();   // already there (or nobody's using the app)
@@ -2085,13 +2575,13 @@ function go(name, fromHistory) {
 }
 function chooseUser(id) {
   me = id;
-  viewDay = todayIndex(); wholeWeek = false; allFilter = "all";
+  viewDay = todayIndex(); wholeWeek = !isPhone(); allFilter = "all";
   resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
   go("home");
 }
 function switchUser() { me = null; go("start"); }
-// "View all plan" on the home page: everyone's week, starting on today
-function openViewAll() { viewDay = todayIndex(); wholeWeek = false; allFilter = "all"; viewMode = "day"; go("view"); }
+// "View all plan" on the home page: everyone's week, on the last view chosen on this device (first time: today)
+function openViewAll() { wholeWeek = !isPhone(); allFilter = "all"; restoreView(); go("view"); }
 
 // Draws the screen that's showing
 function render() {
@@ -2107,8 +2597,11 @@ function render() {
   if (screen === "mine") drawMine();
   if (screen === "all") drawAll();
   if (screen === "settings") drawSettings();
+  if (screen === "school") drawSchool();
+  if (screen === "mine" || screen === "view") saveCalPrefs();   // remember the day / view / person on this device
   updateSaveBars();
   drawNews();
+  maybeAskPrayer();   // 🕌 the first time after this update: "Show prayer times on your calendar?"
 }
 // A change on "Add activities" or "Settings": it's only a draft until you tap 💾 Save.
 function changed() { render(); }
@@ -2196,26 +2689,32 @@ function activityPointsByUser() {
   Object.values(data.points.marks).forEach(m => { if (hasOwn(totals, m.user)) totals[m.user] += POINTS_EACH; });
   return totals;
 }
-// Everyone's points this week: activities + good habits. (This is what the Shining Star uses.)
+// Everyone's points this week: activities + good habits + 🎒 homework done. (This is what the Shining Star uses.)
 function pointsByUser() {
   const totals = activityPointsByUser();
-  Object.keys(totals).forEach(id => totals[id] += habitPoints(id, data.points.week, weekEnd()));
+  Object.keys(totals).forEach(id => totals[id] += habitPoints(id, data.points.week, weekEnd()) + homeworkPoints(id, data.points.week, weekEnd()));
   return totals;
 }
 // The day after this week's Sunday (so "this week" = from data.points.week up to, not including, this day)
 function weekEnd() { const dt = fromYmd(data.points.week); dt.setDate(dt.getDate() + 7); return ymd(dt); }
 
 // ---------- Good habits: points ----------
-// One tick = 1 point · each prayer = 1 point · water = 1 point when all 6 drops are ticked
-function habitValuePoints(v) {
-  return v === true ? 1 : Array.isArray(v) ? v.filter(Boolean).length : typeof v === "number" ? (v >= WATER_DROPS ? 1 : 0) : 0;
+// One tick = 1 point · each prayer = 15 points · water = 1 point when all 6 drops are ticked
+// (🕌 Prayers ticked before 2026-10-18 stay 1 point each, so older weeks and past Shining Stars don't change.)
+const PRAYER_POINTS = 15;
+const PRAYER_POINTS_FROM = "2026-10-18";
+const prayerPointsOn = date => date >= PRAYER_POINTS_FROM ? PRAYER_POINTS : 1;
+// date = the day of the tick ("2026-10-18")
+function habitValuePoints(v, date) {
+  return v === true ? 1 : Array.isArray(v) ? v.filter(Boolean).length * prayerPointsOn(date)
+    : typeof v === "number" ? (v >= WATER_DROPS ? 1 : 0) : 0;
 }
 // A person's habit points between two dates (from ≤ day < to), e.g. this week
 function habitPoints(user, from, to) {
   let total = 0;
   for (const [key, v] of Object.entries(data.habitMarks)) {
     const [date, , who] = key.split("|");
-    if (who === user && date >= from && date < to) total += habitValuePoints(v);
+    if (who === user && date >= from && date < to) total += habitValuePoints(v, date);
   }
   return total;
 }
@@ -2356,7 +2855,7 @@ function toggleHabit(who, habitId, part, button) {
   if (!h || !habitsFor(who).includes(h)) return;
   if (!(me === DAD || who === me)) return toast("You can only tick your own habits.");
   if (habitDay > todayIndex()) return toast("Not yet!");
-  const key = habitKey(ymd(dayDate(habitDay)), habitId, who), old = data.habitMarks[key];
+  const date = ymd(dayDate(habitDay)), key = habitKey(date, habitId, who), old = data.habitMarks[key];
   let now;
   if (h.kind === "prayers") {
     now = Array.isArray(old) ? [...old] : PRAYERS.map(() => 0);
@@ -2368,10 +2867,10 @@ function toggleHabit(who, habitId, part, button) {
     if (!now) now = undefined;
   } else now = old === true ? undefined : true;
   if (now === undefined) delete data.habitMarks[key]; else data.habitMarks[key] = now;
-  const gained = habitValuePoints(now) > habitValuePoints(old);
+  const gained = habitValuePoints(now, date) - habitValuePoints(old, date);
   const wasStar = stars().includes(who);
   keepNow();   // habit ticks are kept right away, like activity ticks
-  if (!gained) return;
+  if (gained <= 0) return;
   const owner = userById(who), color = colorsOf(owner).color;
   const allDone = habitsFor(who).every(x => habitDone(x, data.habitMarks[habitKey(ymd(dayDate(habitDay)), x.id, who)]));
   const nowStar = !wasStar && stars().includes(who);
@@ -2379,13 +2878,14 @@ function toggleHabit(who, habitId, part, button) {
   celebrate(r.left + r.width / 2, r.top + r.height / 2, color, allDone || nowStar);
   if (allDone) toast(`All good habits done, ${owner.name}! 🌟`, 3200, color);
   else if (nowStar) toast(`You're the Shining Star, ${owner.name}! 🌟`, 3200, color);
-  else if (habitDone(h, now)) toast(`${h.emoji} Well done, ${owner.name}! +1 ⭐`, 2200, color);
+  else if (h.kind === "prayers") toast(`${h.emoji} Well done, ${owner.name}! +${gained} ⭐`, 2200, color);   // each prayer
+  else if (habitDone(h, now)) toast(`${h.emoji} Well done, ${owner.name}! +${gained} ⭐`, 2200, color);
 }
 
 // ---------- Points screen ----------
 function drawPoints() {
   const totals = pointsByUser(), acts = activityPointsByUser(), days = planDays(), star = stars();
-  $("ptsWeek").textContent = `${weekLabel(data.points.week)} · ${POINTS_EACH} points for each activity you finish · 1 point for each good habit · starts again every Monday`;
+  $("ptsWeek").textContent = `${weekLabel(data.points.week)} · ${POINTS_EACH} points for each activity you finish · 1 point for each good habit · 🕌 ${PRAYER_POINTS} points for each prayer · 📝 ${POINTS_EACH} points for each homework done · starts again every Monday`;
   // How many points each person could get this week: their planned activities × 10
   const possible = id => days ? days.reduce((sum, day) => sum + day.items.filter(it => it.users.includes(id)).length, 0) * POINTS_EACH : 0;
   const sorted = [...data.users].sort((a, b) => totals[b.id] - totals[a.id]);
@@ -2395,7 +2895,7 @@ function drawPoints() {
     if (totals[u.id] !== lastPoints) { rank = i; lastPoints = totals[u.id]; }  // a tie shares the same place
     // The bar shows the activities part (habits are added on top, in the number)
     const c = colorsOf(u), max = possible(u.id), pct = max ? Math.min(100, Math.round(acts[u.id] / max * 100)) : 0;
-    const habits = totals[u.id] - acts[u.id];
+    const hw = homeworkPoints(u.id, data.points.week, weekEnd()), habits = totals[u.id] - acts[u.id] - hw;
     return `<div class="pt-row" style="--soft:${c.soft};--ink:${c.ink};--c:${c.color}">
       <div class="pt-rank">${totals[u.id] > 0 && rank < 3 ? medals[rank] : rank + 1}</div>
       <div class="face">${safe(u.emoji)}${starBadge(u.id)}</div>
@@ -2403,7 +2903,7 @@ function drawPoints() {
         <div class="pt-top"><span class="pt-name">${safe(u.name)}${star.includes(u.id) ? `<span class="star-label">Shining Star of the Week!</span>` : ""}</span>
           <span class="pt-num">${totals[u.id]} <small>points</small></span></div>
         <div class="pt-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${totals[u.id]}"><i style="width:${pct}%"></i></div>
-        <div class="pt-sub">${max ? `${acts[u.id] / POINTS_EACH} of ${max / POINTS_EACH} activities done` : "No planned activities yet"}${habits ? ` · Habits: ${habits} ✓` : ""}</div>
+        <div class="pt-sub">${max ? `${acts[u.id] / POINTS_EACH} of ${max / POINTS_EACH} activities done` : "No planned activities yet"}${habits ? ` · Habits: ${habits} ⭐` : ""}${hw ? ` · 📝 Homework: ${hw} ⭐` : ""}</div>
       </div></div>`;
   }).join("");
   const h = data.points.history;
@@ -2432,7 +2932,8 @@ function lastWeekStats() {
   return data.users.map(u => {
     const done = ticks.filter(t => t.user === u.id).length;
     const planned = days ? dates.reduce((sum, dt) => sum + days[(dt.getDay() + 6) % 7].items.filter(it => it.users.includes(u.id)).length, 0) : 0;
-    return { user: u, done, points: done * POINTS_EACH + habitPoints(u.id, ymd(lastSevenDays()[0]), tomorrow()), planned: Math.max(planned, done) };
+    const from = ymd(lastSevenDays()[0]);
+    return { user: u, done, points: done * POINTS_EACH + habitPoints(u.id, from, tomorrow()) + homeworkPoints(u.id, from, tomorrow()), planned: Math.max(planned, done) };
   });
 }
 
@@ -2479,16 +2980,27 @@ function drawHome() {
   $("backupPill").hidden = !isDad;   // 💾 Backup button: only Bro2a sees it
   const tiles = [
     { go: "add", emoji: "✏️", label: "Add activities", sub: isDad ? "Yours and everyone's" : "Add or change yours" },
-    { go: "mine", emoji: "📅", label: "View my plan", sub: isDad ? "Yours + lessons that need you" : "Tick what you finish!" },
+    // (a kid has the big 📅 Calendar button above instead)
+    ...(isDad ? [{ go: "mine", emoji: "📅", label: "View my plan", sub: "Yours + lessons that need you" }] : []),
     { go: "points", emoji: "🏆", label: "Points", sub: "Who's the Shining Star?" }
   ];
+  // Kids: two big buttons first — 📅 Calendar (their week) and 🎒 School (their binder)
+  const todo = isDad ? 0 : todoOf(schoolOf(me)).length;
+  $("homeBig").hidden = isDad;
+  $("homeBig").innerHTML = isDad ? "" : `<button class="big-btn cal" data-go="mine"><span class="e">📅</span><b>Calendar</b><small>Tick what you finish!</small></button>
+    <button class="big-btn school" data-school="${safe(me)}"><span class="e">🎒</span><b>School</b><small>${todo ? `${todo} homework to do` : "Homework, marks, files"}</small></button>`;
+  // 🎒 School: a kid gets their own page; Bro2a gets every kid's (starting with the first kid)
+  const firstKid = kidsList()[0];
+  if (!isDad) tiles.push({ go: "settings", emoji: "⚙️", label: "Settings", sub: "🕌 Prayer times" });
   if (isDad) tiles.push(
     { go: "all", emoji: "👨‍👩‍👧‍👦", label: "Everyone's plan", sub: "All of us together" },
     { plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" },
+    ...(hasPinned() ? [{ unpinall: true, emoji: "📌", label: "Unpin all", sub: "Let the app plan them again" }] : []),
+    ...(firstKid ? [{ school: firstKid.id, emoji: "🎒", label: "School", sub: "Grades, homework, reviews" }] : []),
     { printmenu: true, emoji: "🖨️", label: "Print", sub: "Paper schedules to tick" },
     { adduser: true, emoji: "➕", label: "Add user", sub: "Name, emoji and color" },
     { go: "settings", emoji: "⚙️", label: "Settings", sub: "My day, people, backup" });
-  $("homeMenu").innerHTML = tiles.map(t => `<button class="tile ${t.cls || ""}" ${t.plan ? "data-plan" : t.printmenu ? "data-printmenu" : t.adduser ? "data-adduser" : `data-go="${t.go}"`}>
+  $("homeMenu").innerHTML = tiles.map(t => `<button class="tile ${t.cls || ""}" ${t.plan ? "data-plan" : t.unpinall ? "data-unpinall" : t.school ? `data-school="${safe(t.school)}"` : t.printmenu ? "data-printmenu" : t.adduser ? "data-adduser" : `data-go="${t.go}"`}>
       <span class="t-emoji">${t.emoji}</span><span class="t-label">${t.label}</span><span class="t-sub">${t.sub}</span></button>`).join("");
   // Dad sees a reminder when the plan is missing or old
   const note = isDad ? (!data.plan ? "🗓️ No plan yet. Add activities, then press ✨ Plan my week."
@@ -2965,6 +3477,56 @@ function routinesOn(i) {
   data.fixed.filter(f => f.days.includes(i)).forEach(f => list.push(...padsFor(f, toMin(f.start), toMin(f.end))));
   return list.sort((a, b) => a.start - b.start);
 }
+
+// =====================================================================
+//  🕌 PRAYER TIMES: worked out on this device (no internet needed) with the adhan library,
+//  Dubai method, Shafi madhab, at the family's place from Settings (Al Barsha, Dubai by default).
+//  Each prayer is a thin 🕌 line with its time, ON TOP of the calendar: it never blocks anything,
+//  and "Plan my week" ignores it. Inside an activity when one is happening then.
+//  Each person chooses for themselves (showPrayer on the person, the same on all their devices).
+//  Someone who said No never sees prayer times or reminders.
+// =====================================================================
+const prayerCache = {};   // "date|lat|lng" → [{ key, name, start }] (so it's worked out once per day)
+// The 5 times on a date, in minutes since midnight on this device's clock ([] if the library isn't loaded)
+function prayerTimes(dt) {
+  const p = data.prayer, key = `${ymd(dt)}|${p.lat}|${p.lng}`;
+  if (prayerCache[key]) return prayerCache[key];
+  if (typeof adhan === "undefined") return [];   // (not loaded: no internet the very first time) — try again next time
+  try {
+    const params = adhan.CalculationMethod.Dubai();
+    params.madhab = adhan.Madhab.Shafi;
+    const t = new adhan.PrayerTimes(new adhan.Coordinates(p.lat, p.lng), new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()), params);
+    return prayerCache[key] = PRAYERS_LIST.map(([k, name]) => ({ key: k, name, start: t[k].getHours() * 60 + t[k].getMinutes() }))
+      .filter(x => Number.isFinite(x.start));
+  } catch (e) { console.warn("Prayer times:", e); return []; }
+}
+// Does the person using the app want to see prayer times? (Only a clear Yes: not asked yet / No = no.)
+const seesPrayer = () => exists(me) && userById(me).showPrayer === true;
+// The prayer lines on day i (0 = Monday) of the calendar's week, for the person using the app
+function prayersOn(i) { return seesPrayer() ? prayerTimes(dayDate(i)) : []; }
+// The thin line: "🕌 Asr 3:42 PM"
+const prayLineHtml = (p, inside) => `<span class="k-pray ${inside ? "in" : ""}" title="🕌 ${p.name} ${clock(p.start, true)}${inside ? " (during this)" : ""}">🕌 ${p.name} ${clock(p.start, true)}</span>`;
+// "Fajr 4:58 AM · Dhuhr 11:32 AM …" for today (Settings)
+function prayerTodayText() {
+  const list = prayerTimes(new Date());
+  return list.length ? list.map(x => `${x.name} ${clock(x.start, true)}`).join(" · ") : "⚠ Prayer times aren't loaded yet. Connect to the internet once.";
+}
+// 🔔 "🕌 Time for Asr": while the app is open, once per prayer per day on this device (only for people who want it)
+const PRAYER_SEEN = SAVE_KEY + ".prayerSeen";
+function checkPrayerReminder() {
+  if (!seesPrayer() || userById(me).prayerRemind === false) return;
+  const now = new Date(), min = now.getHours() * 60 + now.getMinutes();
+  const due = prayerTimes(now).find(x => min >= x.start && min < x.start + PRAYER_MIN);
+  if (!due) return;
+  const key = `${ymd(now)}|${due.key}`;
+  let seen = "";
+  try { seen = localStorage.getItem(PRAYER_SEEN) || ""; } catch (e) {}
+  if (seen === key) return;
+  try { localStorage.setItem(PRAYER_SEEN, key); } catch (e) {}
+  toast(`🕌 Time for ${due.name}`, 8000);
+}
+setInterval(checkPrayerReminder, 30 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkPrayerReminder(); });
 // The thin strips around an activity: "🎒 Get ready" before it and "☕ Break" after it (no points).
 // They keep the activity's people busy (and Bro2a too if it needs him). Used for fixed AND flexible activities.
 function padsFor(act, start, end) {
@@ -3097,6 +3659,7 @@ function makePlan() {
   }
   // Routines (and "Get ready" before fixed activities) keep their people busy like fixed activities,
   // so lessons are never placed on top of them. (A routine during a fixed activity, like lunch at school, is fine.)
+  // (🕌 Prayer times are NOT here: they never block anything.)
   days.forEach((day, d) => routinesOn(d).forEach(r =>
     day.items.push({ ...r, fixed: true, actId: r.id, people: r.users })));
   // How full a person's free time is on day d (0 = empty, 1 = full) with flexible activities.
@@ -3238,11 +3801,41 @@ function planDays() {
 // =====================================================================
 //  THE COLORFUL WEEK (my plan, everyone's plan)
 // =====================================================================
-let viewDay = todayIndex();   // phone: which day is showing (starts on today)
-let wholeWeek = false;        // phone: true = show all 7 days
+// Phone: a calendar opens on one day. Computer: on the whole week.
+const isPhone = () => window.matchMedia("(max-width: 699px)").matches;
+let viewDay = todayIndex();   // which day is showing (starts on today)
+let wholeWeek = !isPhone();   // true = show all 7 days
 let blocks = [];              // the blocks on screen, so we know which one was tapped
 
-// Phone only: a small Day / Week switch, then ‹ Mon Tue … Sun › (the date under each day). Swiping also changes the day.
+// The last calendar view and person, remembered on THIS device only (not in the family's data), e.g.
+// { day: 2, mine: { week: true, who: { dad: "mody" } }, view: { mode: "full", who: "all" } }
+const CAL_KEY = SAVE_KEY + ".calendar";
+function calPrefs() { try { return JSON.parse(localStorage.getItem(CAL_KEY)) || {}; } catch (e) { return {}; } }
+function saveCalPrefs() {
+  const p = calPrefs();
+  p.day = viewDay;
+  if (screen === "mine" && exists(me)) p.mine = { week: wholeWeek, who: { ...((p.mine && p.mine.who) || {}), [me]: viewing } };
+  if (screen === "view") p.view = { mode: viewMode, who: viewWho };
+  try { localStorage.setItem(CAL_KEY, JSON.stringify(p)); } catch (e) {}
+}
+const savedDay = p => Number.isInteger(p.day) && p.day >= 0 && p.day <= 6 ? p.day : todayIndex();
+// Opening "My calendar": the last day, Day / Week and person (or today, and my own week)
+function restoreMine() {
+  const p = calPrefs(), m = p.mine || {};
+  viewDay = savedDay(p);
+  wholeWeek = typeof m.week === "boolean" ? m.week : !isPhone();
+  const who = m.who && m.who[me];
+  viewing = who && who !== me && exists(who) ? who : null;
+}
+// Opening "View all plan": the last view (Day / Week summary / Full week), day and person
+function restoreView() {
+  const p = calPrefs(), v = p.view || {};
+  viewDay = savedDay(p);
+  viewMode = ["day", "week", "full"].includes(v.mode) ? v.mode : "day";
+  viewWho = v.who === "all" || exists(v.who) ? v.who : "all";
+}
+
+// A small Day / Week switch, then ‹ Mon Tue … Sun › (the date under each day). Phone: swiping also changes the day.
 function navHtml() {
   const today = todayIndex();
   return `<div class="k-nav"><div class="k-navrow">
@@ -3315,6 +3908,11 @@ function weekHtml(days, opts) {
           !opts.only && !isEveryone(s.users) ? `<span class="r-who">${safe(emojisOf(s.users))}</span>` : ""}</div>` });
     });
     if (!merged.length) parts.push({ free: true, start: -1, html: `<div class="k-free">Free day! 🎉</div>` });
+    // 🕌 Prayer times (only for people who want them): inside the activity happening then, otherwise a thin line of its own
+    const prays = prayersOn(d), inPrayer = new Set();
+    const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
+    merged.forEach(b => praysIn(b).forEach(p => inPrayer.add(p)));
+    prays.filter(p => !inPrayer.has(p)).forEach(p => parts.push({ start: p.start, end: p.start + 1, strip: true, html: prayLineHtml(p, false) }));
     merged.forEach(b => {
       const info = blockInfo(b);
       const faded = opts.fade && opts.fade !== "all" && !b.people.includes(opts.fade);
@@ -3352,12 +3950,13 @@ function weekHtml(days, opts) {
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>
         <span class="who">${sameBtn}<span class="t-full">${safe(info.title)}</span><span class="t-short">${safe(shortTitle)}</span></span>
         <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatText
-          ? ` <span class="what">${safe(whatText)}</span>` : ""}</span></div>` });
+          ? ` <span class="what">${safe(whatText)}</span>` : ""}</span>${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
     });
     dayParts.push(parts.sort((a, b) => a.start - b.start));
   });
-  return navHtml() + weekRowsHtml(dayParts, d =>
-    `<div class="k-dayname" ${d === today ? `title="Today"` : ""}>${dayHead(d)}</div>`);
+  // opts.whole = always the whole week, without the Day / Week switch (View all plan → "🗓️ Full week")
+  return (opts.whole ? "" : navHtml()) + weekRowsHtml(dayParts, d =>
+    `<div class="k-dayname" ${d === today ? `title="Today"` : ""}>${dayHead(d)}</div>${examTagsHtml(d, opts.only || null)}`, opts.whole || wholeWeek);
 }
 
 // Rows by time of day: every different start time in the week (to the nearest 15 minutes) is one row,
@@ -3442,7 +4041,7 @@ function rowLayout(dayParts) {
   });
   return { rows, days };
 }
-function weekRowsHtml(dayParts, headHtml) {
+function weekRowsHtml(dayParts, headHtml, whole = wholeWeek) {
   const today = todayIndex();
   const { rows, days } = rowLayout(dayParts);
   const last = rows.length + 2;                 // the day names row + the rows + a little space at the bottom
@@ -3463,7 +4062,7 @@ function weekRowsHtml(dayParts, headHtml) {
       fluid.push(`minmax(0,${fr})`); wide.push(lane); one.push(d === viewDay ? `minmax(0,${fr})` : "0px");
     }
   });
-  let html = `<div class="k-scroll ${wholeWeek ? "wide" : ""}"><div class="k-week rows ${wholeWeek ? "" : "one-day"}"
+  let html = `<div class="k-scroll ${whole ? "wide" : ""}"><div class="k-week rows ${whole ? "" : "one-day"}"
     style="--cols:${fluid.join(" ")};--cols-wide:${wide.join(" ")};--cols-day:${one.join(" ")};grid-template-rows:auto repeat(${rows.length}, auto) 6px">
     <div class="k-corner"></div>`;
   days.forEach((x, d) => {
@@ -3674,6 +4273,20 @@ function unpin(day, actId) {
   changed();
   toast("📌 Unpinned. ✨ Plan my week can move it again.");
 }
+// Is any flexible activity in the saved plan pinned 📌?
+function hasPinned() {
+  return !!data.plan && data.plan !== "redo" && data.plan.days.some(day => day.items.some(it => !it.fixed && it.pinned));
+}
+// "📌 Unpin all" (home, Bro2a only): unpin every moved activity, then plan the week again.
+// Fixed activities are not touched.
+function unpinAll() {
+  if (me !== DAD || !hasPinned()) return;
+  if (!confirm("Unpin all moved activities and let the app plan the week again?")) return;
+  editUndo.push(JSON.stringify(data.plan));
+  data.plan.days.forEach(day => day.items.forEach(it => { if (!it.fixed) delete it.pinned; }));
+  writeData();
+  planNow();
+}
 
 // ---------- The small "Move" box (edit mode): tap a flexible activity, pick the day and start time ----------
 let moving = null;   // { actId, fromDay, day }
@@ -3773,7 +4386,7 @@ function briefHtml(who, days) {
     ? `📅 This week: <b>${items.length}</b> ${items.length === 1 ? "activity" : "activities"} · <b>${done}</b> done ✓ · <b>${items.length - done}</b> left`
     : `📅 No activities planned this week.`;
   const habits = habitPoints(who, data.points.week, weekEnd());
-  const line2 = `${minutes ? `⏱️ <b>${showDuration(minutes)}</b> of activities · ` : ""}${habitsFor(who).length || habits ? `Habits: <b>${habits}</b> ✓ · ` : ""}⭐ <b>${points}</b> points${stars().includes(who) ? " · 🌟 Shining Star!" : ""}`;
+  const line2 = `${minutes ? `⏱️ <b>${showDuration(minutes)}</b> of activities · ` : ""}${habitsFor(who).length || habits ? `Habits: <b>${habits}</b> ⭐ · ` : ""}⭐ <b>${points}</b> points${stars().includes(who) ? " · 🌟 Shining Star!" : ""}`;
   return `<div>${line1}</div><div>${line2}</div>${pastHtml(who)}`;
 }
 // Past weeks' points: last week's points (from the ticks we keep) and how often they were the Shining Star
@@ -3784,7 +4397,7 @@ function pastHtml(who) {
   const parts = [];
   if (data.points.since < to) {   // we were already keeping ticks last week
     const pts = data.points.log.filter(t => t.user === who && t.date >= from && t.date < to).length * POINTS_EACH
-              + habitPoints(who, from, to);
+              + habitPoints(who, from, to) + homeworkPoints(who, from, to);
     const wasStar = data.points.history.some(h => h.week === from && h.winners.some(w => w.id === who));
     parts.push(`Last week: <b>${pts}</b> ⭐${wasStar ? " 🌟" : ""}`);
   }
@@ -3832,8 +4445,19 @@ function filterChipsHtml() {
 
 // ---------- View all plan (from the home page, anyone, view only) ----------
 // "📆 Day": one day with a column per person. "📅 Week summary": a table of people × days.
+// "🗓️ Full week": the whole 7-day calendar (like a person's own week), for everyone or one person.
 let viewMode = "day";
+let viewWho = "all";   // Full week: "all" or one person's id
+// The "All, Bro2a, Mody …" buttons above the Full week (each in that person's color)
+function viewWhoHtml() {
+  return `<div class="chips v-who-pick">${[{ id: "all", emoji: "👨‍👩‍👧‍👦", name: "All" }, ...data.users].map(u => {
+    const c = u.id === "all" ? { soft: "#fef3c7", ink: "var(--text)" } : colorsOf(u);
+    return `<button class="chip ${viewWho === u.id ? "on" : ""}" data-vwho="${safe(u.id)}" style="--soft:${c.soft};--ink:${c.ink}"
+      ${viewWho === u.id ? `aria-current="true"` : ""}><span class="e">${safe(u.emoji)}</span>${safe(u.name)}</button>`;
+  }).join("")}</div>`;
+}
 function drawView() {
+  if (viewWho !== "all" && !exists(viewWho)) viewWho = "all";
   const days = planDays();
   const note = days && planIsOld() ? `🕐 Some changes aren't in the plan yet. ${dadName()} will update it soon.` : "";
   $("viewNote").hidden = !note;
@@ -3843,12 +4467,17 @@ function drawView() {
   const today = todayIndex();
   const top = `<div class="v-top">
       <div class="seg v-mode"><button class="${viewMode === "day" ? "on" : ""}" data-vmode="day">📆 Day</button>
-        <button class="${viewMode === "week" ? "on" : ""}" data-vmode="week">📅 Week summary</button></div>
+        <button class="${viewMode === "week" ? "on" : ""}" data-vmode="week">📅 Week summary</button>
+        <button class="${viewMode === "full" ? "on" : ""}" data-vmode="full">🗓️ Full week</button></div>
+      ${viewMode === "full" ? viewWhoHtml() : ""}
       ${viewMode === "day" ? `<div class="v-days"><button class="v-arrow" data-vprev aria-label="Previous day"><span class="pc">◀</span><span class="ph">‹</span></button>${SHORT.map((d, i) =>
         `<button class="v-dbtn ${i === viewDay ? "sel" : ""} ${i === today ? "istoday" : ""}" data-vday="${i}"><span class="pc">${dayHead(i)}</span><span class="ph">${d}<small>${dayDate(i).getDate()}</small></span></button>`).join("")}
         <button class="v-arrow" data-vnext aria-label="Next day"><span class="pc">▶</span><span class="ph">›</span></button></div>` : ""}
     </div>`;
-  $("viewWeek").innerHTML = top + (viewMode === "day" ? viewDayHtml(days, viewDay) : weekSummaryHtml(days));
+  // Full week: look only (no tick circles, no moving), everyone in their own color, or only one person's
+  $("viewWeek").innerHTML = top + (viewMode === "day" ? viewDayHtml(days, viewDay)
+    : viewMode === "full" ? weekHtml(days, { only: viewWho === "all" ? null : viewWho, readOnly: true, whole: true })
+    : weekSummaryHtml(days));
 }
 // The activity's name for View all plan: "🏫 School", "🔢 Math", "Gym_kids" (no names list, no "with …")
 function viewTitle(b) {
@@ -3871,7 +4500,8 @@ function viewCardHtml(b, d, person, shared) {
       style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}" title="${safe(b.name)} · ${clock(b.start, true)}–${clock(b.end, true)}">
     <span class="k-checks">${ticks}</span>
     <span class="who">${shared ? `<span class="v-shared" title="Shared with others">👥</span> ` : ""}${safe(viewTitle(b))}</span>
-    <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span></span></div>`;
+    <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span></span>${
+      prayersOn(d).filter(p => b.start <= p.start && p.start < b.end).map(p => prayLineHtml(p, true)).join("")}</div>`;
 }
 // 📆 Day: a column per person, rows by time (like the other calendars), so things at the same time are on the same row.
 // A shared activity is ONE card stretching over its people's columns when they're next to each other
@@ -3907,6 +4537,13 @@ function viewDayHtml(days, d) {
     cols[i].push({ start: s.start, end: s.end, strip: true, padId: s.pad ? s.id : null,
       html: `<div class="k-routine ${s.pad ? "pad" : ""}" data-kblock="${n}" role="button" tabindex="0"
         title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${safe(s.emoji)} ${safe(s.name)}</span></div>` });
+  }));
+  // 🕌 Prayer times (only for people who want them): a thin line in each column where that person has no activity then
+  // (when they do, the line is inside that activity's card, see viewCardHtml)
+  const prays = prayersOn(d);
+  people.forEach((p, i) => prays.forEach(x => {
+    if (!acts.some(b => b.people.includes(p) && b.start <= x.start && x.start < b.end))
+      cols[i].push({ start: x.start, end: x.start + 1, strip: true, html: prayLineHtml(x, false) });
   }));
   const { rows, days: lay } = rowLayout(cols);
   const last = rows.length + 2;
@@ -4064,6 +4701,9 @@ function gridHtml(days, person) {
                  title="${safe(namesOf(it.users))}: ${safe(it.name)} · ${showTime(it.start)}–${showTime(it.end)}${it.needsDad ? " · with " + safe(dadName()) : ""}">
                  <b>${safe(label)}</b>${h > 30 ? `<span>${showTime(it.start)}–${showTime(it.end)}</span>` : ""}</div>`;
     });
+    // 🕌 Prayer times (only for people who want them): a thin line across the day, on top of everything
+    prayersOn(day).filter(p => p.start >= startHour * 60 && p.start < endHour * 60).forEach(p =>
+      html += `<div class="ev-pray" style="top:${top(p.start)}px"><span>🕌 ${p.name} ${clock(p.start, true)}</span></div>`);
     html += `</div>`;
   });
   html += `</div></div>
@@ -4306,12 +4946,1027 @@ window.addEventListener("beforeprint", () => {
 });
 
 // =====================================================================
+//  🎒 SCHOOL ("Binder"): one binder per kid
+//   School home: 6 tiles (📚 Subjects, 📝 Homework, 📊 Marks, ⭐ Reviews, 🏫 School info, 📄 Reports) + 📁 Recent files
+//   📚 Subjects: a colored folder per subject, with its Files, Homework & exams, Marks and Notes
+//  Bro2a sees and changes everything for every kid. A kid sees only their OWN binder: they can add homework,
+//  upload files and answers, add notes and tick done. Only Bro2a adds marks and reviews, checks answers,
+//  and changes School info and the subject folders.
+//  Changes are kept right away (no 💾 Save), like ticks. (The data: see cleanSchool. The files: see SCHOOL FILES.)
+// =====================================================================
+let schoolKid = null;      // whose binder is showing
+let schoolView = "home";   // "home" | "subjects" | "subject" | "homework" | "marks" | "reviews" | "info" | "reports"
+let schoolSubject = null;  // the open subject folder (its id)
+let schoolEdit = null;     // the open form: "task" | "grade" | "note" | "link" | "subject" | "info" | "review" | "check"
+let schoolEditId = null;   // the item being changed (null = adding a new one)
+let schoolFresh = false;   // true = a form was just opened or closed: don't put back what was typed before
+let schoolReport = false;  // 📄 the report was made (it's showing)
+let schoolUpload = null;   // what the next chosen file is for: { subject, task }
+
+const kidsList = () => data.users.filter(u => u.id !== DAD);
+const schoolOf = kid => data.school[kid] || emptySchool();
+// The kid's school data (made the first time something is added)
+function schoolFor(kid) { if (!data.school[kid]) data.school[kid] = emptySchool(); return data.school[kid]; }
+const todayYmd = () => ymd(new Date());
+const isYmd = s => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+// "2026-10-20" → "Tue 20 Oct"
+function shortDate(s) { const dt = fromYmd(s); return `${SHORT[(dt.getDay() + 6) % 7]} ${dt.getDate()} ${MONTHS[dt.getMonth()]}`; }
+// Days from today to that date (0 = today, 1 = tomorrow, -1 = yesterday)
+function daysUntil(s) { return Math.round((fromYmd(s) - fromYmd(todayYmd())) / 86400000); }
+const pctOf = g => Math.round(g.score / g.max * 100);
+const num = n => String(Math.round(n * 100) / 100);   // 7.5 → "7.5", 8 → "8"
+const sameSubject = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+const avgOf = list => list.length ? Math.round(list.reduce((sum, g) => sum + pctOf(g), 0) / list.length) : null;
+// ▲ better than the mark before, ▼ lower, ▬ the same (nothing for the first mark)
+function arrowHtml(now, before) {
+  if (before == null) return "";
+  return now > before ? `<span class="sc-up" title="Better than the last mark">▲</span>`
+    : now < before ? `<span class="sc-down" title="Lower than the last mark">▼</span>` : `<span class="sc-same" title="Same as the last mark">▬</span>`;
+}
+function starsHtml(n) { return `<span class="sc-stars" aria-label="${n} of 5 stars">${"★".repeat(n)}<span class="off">${"★".repeat(5 - n)}</span></span>`; }
+const GRADE_LABEL = { quiz: "✏️ Quiz", exam: "📝 Exam", homework: "📚 Homework" };
+const SEESAW_LABEL = { homework: "📚 Homework", comment: "💬 Teacher comment", grade: "🏅 Grade" };
+const isDadNow = () => me === DAD;
+// Can the person using the app change / delete this? (Bro2a always; a kid only what they added themselves)
+const canChange = x => me === DAD || (!!x && x.by === me);
+// A label + input in its own row
+const scField = (id, label, input) => `<div class="row"><div><label class="small" for="${id}">${label}</label>${input}</div></div>`;
+const scButtons = (what, editing) => `<div class="btnrow"><button class="primary" data-scsave="${what}">${editing ? "💾 Save" : "➕ Add"}</button>
+  <button data-sccancel>Cancel</button></div><div class="err" id="scErr"></div>`;
+const itemBtns = (what, id, edit = true) => `${edit ? `<button class="edit" data-scedit="${what}|${safe(id)}" aria-label="Change">✏️</button>` : ""}
+  <button class="x" data-scdel="${what}|${safe(id)}" aria-label="Delete">🗑️</button>`;
+
+// ---------- The subject folders ----------
+function subjectList(s) {
+  return Object.entries(s.subjects).map(([id, x]) => ({ id, ...x })).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+}
+const subjectColors = x => PALETTE[x && x.color] || PALETTE.blue;
+// The folder of a subject name (null when there's no folder with that name)
+const folderOf = (s, name) => subjectList(s).find(x => sameSubject(x.name, name)) || null;
+const subjectEmoji = (s, name) => { const f = folderOf(s, name); return f ? f.emoji : "📘"; };
+// Every subject name this kid has (folders first, then the ones only used in homework / marks / timetable)
+function subjectsOf(s) {
+  const all = [...subjectList(s).map(x => x.name), ...Object.values(s.info.timetable).flat(),
+               ...Object.values(s.grades).map(g => g.subject), ...Object.values(s.tasks).map(t => t.subject)];
+  const seen = new Set();
+  return all.filter(x => { const k = x.toLowerCase(); return x && !seen.has(k) && seen.add(k); });
+}
+const subjectPicker = (id, s, value) => `<input type="text" id="${id}" list="scSubjects" maxlength="30" value="${safe(value || "")}" placeholder="Math">`;
+// Homework that still has to be done; a subject's files / marks / notes
+const todoOf = (s, subject) => Object.values(s.tasks).filter(t => !t.done && (!subject || sameSubject(t.subject, subject)));
+const marksOf = (s, subject) => Object.entries(s.grades).map(([id, g]) => ({ id, ...g }))
+  .filter(g => !subject || sameSubject(g.subject, subject)).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+const filesOf = (s, subject) => Object.entries(s.files).map(([id, f]) => ({ id, ...f }))
+  .filter(f => !subject || sameSubject(f.subject, subject)).sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+// ---------- ⭐ Homework points (+10 for each homework ticked done, in the week it was ticked) ----------
+function homeworkPoints(user, from, to) {
+  const s = data.school[user];
+  return s ? Object.values(s.tasks).filter(t => t.done && t.doneAt && t.doneAt >= from && t.doneAt < to).length * POINTS_EACH : 0;
+}
+
+// Open a kid's binder (a kid always gets their own)
+function openSchool(kid) {
+  schoolKid = me === DAD ? kid : me;
+  schoolView = "home"; schoolSubject = null; schoolReport = false;
+  schoolEdit = schoolEditId = null;
+  schoolFresh = true;
+  go("school");
+}
+function goSchool(view, subject) {
+  schoolView = view || "home";
+  schoolSubject = subject || null;
+  schoolEdit = schoolEditId = null; schoolFresh = true; schoolReport = false;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function drawSchool() {
+  const kids = kidsList(), isDad = isDadNow();
+  if (!isDad) schoolKid = me;
+  else if (!kids.some(k => k.id === schoolKid)) schoolKid = kids.length ? kids[0].id : null;
+  $("schoolKids").hidden = !isDad;
+  $("schoolKids").innerHTML = isDad ? kids.map(x => {
+    const c = colorsOf(x);
+    return `<button class="chip ${x.id === schoolKid ? "on" : ""}" data-sckid="${safe(x.id)}" style="--soft:${c.soft};--ink:${c.ink}"
+      ${x.id === schoolKid ? `aria-current="true"` : ""}><span class="e">${safe(x.emoji)}</span>${safe(x.name)}</button>`;
+  }).join("") : "";
+  if (!schoolKid) {
+    $("schoolTitle").textContent = "🎒 School";
+    $("schoolSub").textContent = "";
+    $("schoolBody").innerHTML = `<div class="card"><p class="sc-empty">There are no kids yet. Add one with ➕ Add user.</p></div>`;
+    return;
+  }
+  const u = userById(schoolKid), s = schoolOf(schoolKid);
+  if (schoolView === "subject" && !s.subjects[schoolSubject]) schoolView = "subjects";
+  $("schoolTitle").textContent = isDad ? `🎒 ${u.emoji} ${u.name}'s school` : "🎒 My school";
+  $("schoolSub").textContent = "";
+  // Drawn again while a form is open (e.g. a change from another phone): keep what was typed
+  const typed = {}, focus = document.activeElement && document.activeElement.id;
+  if (!schoolFresh) $("schoolBody").querySelectorAll(".sc-form [id]").forEach(el => { if ("value" in el && el.type !== "radio") typed[el.id] = el.value; });
+  schoolFresh = false;
+  const views = { home: schoolHomeHtml, subjects: schoolSubjectsHtml, subject: schoolFolderHtml, homework: schoolHomeworkHtml,
+                  marks: schoolMarksHtml, reviews: schoolReviewsHtml, info: schoolInfoHtml, reports: schoolReportsHtml };
+  $("schoolBody").innerHTML = `<datalist id="scSubjects">${subjectsOf(s).map(x => `<option value="${safe(x)}">`).join("")}</datalist>`
+    + crumbHtml(s) + (views[schoolView] || schoolHomeHtml)(s, isDad, u);
+  Object.entries(typed).forEach(([id, v]) => { const el = $(id); if (el) el.value = v; });
+  $("schoolBody").querySelectorAll(".sc-starpick").forEach(showStars);
+  if (focus && $(focus) && $("schoolBody").contains($(focus))) $(focus).focus();
+  fillPhotos($("schoolBody"));
+}
+
+// "🎒 School › Subjects › Math" (tap a part to go back there)
+const VIEW_NAMES = { subjects: "📚 Subjects", homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports" };
+function crumbHtml(s) {
+  if (schoolView === "home") return "";
+  const parts = [["🎒 School", "home"]];
+  if (schoolView === "subject") {
+    const f = s.subjects[schoolSubject];
+    parts.push([VIEW_NAMES.subjects, "subjects"], [`${f.emoji} ${f.name}`, null]);
+  } else parts.push([VIEW_NAMES[schoolView], null]);
+  return `<nav class="bd-crumb" aria-label="Where you are">${parts.map(([label, view], i) => i < parts.length - 1
+    ? `<button data-scgo="${view}">${safe(label)}</button><span class="sep">›</span>` : `<b>${safe(label)}</b>`).join("")}</nav>`;
+}
+
+// ---------- 🏠 School home: 6 tiles + 📁 Recent files ----------
+function schoolHomeHtml(s, isDad) {
+  const todo = todoOf(s).length, avg = avgOf(marksOf(s)), week = s.reviews[mondayOf(new Date())];
+  const tiles = [
+    ["subjects", "📚", "Subjects", `${subjectList(s).length} folders`],
+    ["homework", "📝", "Homework", todo ? `${todo} to do` : "All done 🎉"],
+    ["marks", "📊", "Marks", avg == null ? "No marks yet" : `Average ${avg}%`],
+    ["reviews", "⭐", "Reviews", week ? "This week ✓" : "This week: not yet"],
+    ["info", "🏫", "School info", s.info.name || "Timetable"],
+    ["reports", "📄", "Reports", "Make a report"]
+  ];
+  const recent = filesOf(s).slice(0, 3);
+  return `<div class="bd-tiles">${tiles.map(([view, emoji, label, sub]) => `<button class="bd-tile bd-${view}" data-scgo="${view}">
+      <span class="e">${emoji}</span><b>${label}</b><small>${safe(sub)}</small></button>`).join("")}</div>
+    <div class="card bd-card"><h2>📁 Recent files</h2>${recent.length ? `<ul class="list">${recent.map(f => fileRowHtml(f, s)).join("")}</ul>`
+      : `<p class="sc-empty">No files yet. Open a subject and tap ⬆ Upload.</p>`}</div>
+    ${schoolSeesawHtml(s, isDad)}`;
+}
+
+// 📥 From Seesaw: text and photos, newest first (the photos load by themselves, see fillPhotos)
+function schoolSeesawHtml(s, isDad) {
+  const list = Object.entries(s.seesaw).sort((a, b) => b[1].date.localeCompare(a[1].date) || b[0].localeCompare(a[0]));
+  if (!list.length && !isDad) return "";
+  return `<div class="card bd-card" style="margin-top:18px"><div class="sc-head"><h2>📥 From Seesaw</h2>${isDad ? `<button class="edit" data-seesaw>➕ Add</button>` : ""}</div>
+    ${list.length ? list.slice(0, 10).map(([id, x]) => `<div class="sc-ss"><div class="sc-head" style="margin:0"><span><span class="sc-tag">${SEESAW_LABEL[x.type]}</span>
+        <b>${shortDate(x.date)}</b></span>${isDad ? `<button class="x" data-scdel="seesaw|${safe(id)}" aria-label="Delete">🗑️</button>` : ""}</div>
+      ${x.text ? `<p>${safe(x.text)}</p>` : ""}${x.photo ? `<div data-photo="${safe(id)}"><p class="sc-empty">📷 Loading the photo…</p></div>` : ""}</div>`).join("")
+      : `<p class="sc-empty">Nothing from Seesaw yet. Tap ➕ Add to paste text or add a photo.</p>`}</div>`;
+}
+
+// ---------- 📚 Subjects: the folders ----------
+function schoolSubjectsHtml(s, isDad) {
+  const list = subjectList(s), open = isDad && schoolEdit === "subject" && !schoolEditId;
+  let html = `<div class="bd-head"><h2>📚 Subjects</h2>${isDad && !open ? `<button class="edit" data-scedit="subject">➕ Add subject</button>` : ""}</div>`;
+  if (open) html += subjectFormHtml({});
+  if (!list.length) return html + `<div class="card"><p class="sc-empty">No subject folders yet.${isDad ? " Tap ➕ Add subject." : ""}</p></div>`;
+  return html + `<div class="bd-folders">${list.map(x => {
+    const c = subjectColors(x), avg = avgOf(marksOf(s, x.name)), files = filesOf(s, x.name).length, todo = todoOf(s, x.name).length;
+    return `<button class="bd-folder" data-scgo="subject|${safe(x.id)}" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
+      <span class="e">${safe(x.emoji)}</span><span class="nm">${safe(x.name)}</span>
+      <span class="bd-stats"><span><b>${avg == null ? "–" : avg + "%"}</b> average</span><span><b>${files}</b> ${files === 1 ? "file" : "files"}</span>
+        <span class="${todo ? "todo" : ""}"><b>${todo}</b> to do</span></span></button>`;
+  }).join("")}</div>`;
+}
+function subjectFormHtml(x) {
+  return `<div class="sc-form">
+    <div class="row"><div style="flex:0 0 84px"><label class="small" for="scsEmoji">Emoji</label><input type="text" id="scsEmoji" maxlength="8" value="${safe(x.emoji || "")}" placeholder="📘"></div>
+      <div><label class="small" for="scsName">Subject</label><input type="text" id="scsName" maxlength="30" value="${safe(x.name || "")}" placeholder="History"></div></div>
+    <label class="small">Color</label>
+    <div class="swatches">${Object.entries(PALETTE).map(([key, c]) => `<label title="${key}"><input type="radio" name="scsColor" value="${key}" ${(x.color || "blue") === key ? "checked" : ""}>
+      <span style="background:${c.color}"></span></label>`).join("")}</div>
+    ${scButtons("subject", !!schoolEditId)}</div>`;
+}
+
+// ---------- 📂 One subject folder ----------
+function schoolFolderHtml(s, isDad) {
+  const f = s.subjects[schoolSubject], c = subjectColors(f);
+  const editing = isDad && schoolEdit === "subject" && schoolEditId === schoolSubject;
+  const files = filesOf(s, f.name), tasks = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t })).filter(t => sameSubject(t.subject, f.name));
+  const marks = marksOf(s, f.name), notes = Object.entries(s.notes).map(([id, n]) => ({ id, ...n }))
+    .filter(n => sameSubject(n.subject, f.name)).sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  const avg = avgOf(marks);
+  let html = `<div class="bd-folder-head" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(f.emoji)}</span>
+      <h2>${safe(f.name)}</h2>${isDad && !editing ? `<span class="bd-head-btns">${itemBtns("subject", schoolSubject)}</span>` : ""}</div>`;
+  if (editing) html += subjectFormHtml(f);
+  html += `<div class="sc-actions bd-actions">
+      <button class="pill" data-scupload="${safe(f.name)}">⬆ Upload</button>
+      <button class="pill" data-scedit="link">🔗 Add link</button>
+      <button class="pill" data-scedit="note">➕ Note</button>
+      ${isDad ? `<button class="pill" data-scedit="grade">➕ Mark</button>` : ""}
+      <button class="pill" data-scedit="task">➕ Homework</button></div>`;
+  if (schoolEdit === "link") html += linkFormHtml();
+  if (schoolEdit === "note") html += noteFormHtml(s);
+  if (schoolEdit === "grade" && isDad) html += gradeFormHtml(s, f.name);
+  if (schoolEdit === "task") html += taskFormHtml(s, f.name);
+  html += `<div class="sc-grid">
+    <div class="card bd-card"><h2>📁 Files</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s)).join("")}</ul>` : `<p class="sc-empty">No files yet. Tap ⬆ Upload.</p>`}</div>
+    <div class="card bd-card"><h2>📝 Homework & exams</h2>${tasksListHtml(s, tasks)}</div>
+    <div class="card bd-card"><h2>📊 Marks${avg == null ? "" : ` · <span class="bd-avg">${avg}%</span>`}</h2>${avg == null ? "" : barHtml(avg, c)}
+      ${marks.length ? marksListHtml(marks) : `<p class="sc-empty">No marks yet.</p>`}</div>
+    <div class="card bd-card"><h2>🗒️ Notes</h2>${notes.length ? notes.map(n => `<div class="sc-ss"><div class="sc-head" style="margin:0"><b>${shortDate(n.date)}</b>
+        ${canChange(n) ? `<span>${itemBtns("note", n.id)}</span>` : ""}</div><p>${safe(n.text)}</p></div>`).join("") : `<p class="sc-empty">No notes yet.</p>`}</div>
+  </div>`;
+  return html;
+}
+const barHtml = (pct, c) => `<div class="bd-bar" role="img" aria-label="${pct}%"><i style="width:${Math.min(100, pct)}%;background:${c.color}"></i></div>`;
+
+// ---------- Forms ----------
+function linkFormHtml() {
+  return `<div class="sc-form">
+    ${scField("sclName", "Name", `<input type="text" id="sclName" maxlength="60" placeholder="Fractions worksheet">`)}
+    ${scField("sclUrl", "Link (Google Drive …)", `<input type="text" id="sclUrl" maxlength="500" placeholder="https://drive.google.com/…" inputmode="url">`)}
+    ${scButtons("link", false)}</div>`;
+}
+function noteFormHtml(s) {
+  const n = schoolEditId ? s.notes[schoolEditId] || {} : {};
+  return `<div class="sc-form"><label class="small" for="scnText">Note</label>
+    <textarea id="scnText" rows="3" maxlength="1000" placeholder="Test on Thursday: chapters 3 and 4">${safe(n.text || "")}</textarea>
+    ${scButtons("note", !!schoolEditId)}</div>`;
+}
+function gradeFormHtml(s, subject) {
+  const g = schoolEditId ? s.grades[schoolEditId] || {} : {};
+  return `<div class="sc-form">
+    ${scField("scgSubject", "Subject", subjectPicker("scgSubject", s, g.subject || subject))}
+    <div class="row"><div><label class="small" for="scgDate">Date</label><input type="date" id="scgDate" value="${g.date || todayYmd()}"></div>
+      <div><label class="small" for="scgType">Type</label><select id="scgType">${GRADE_TYPES.map(t =>
+        `<option value="${t}" ${(g.type || "quiz") === t ? "selected" : ""}>${GRADE_LABEL[t]}</option>`).join("")}</select></div></div>
+    <div class="row"><div><label class="small" for="scgScore">Score</label><input type="number" id="scgScore" min="0" step="any" value="${g.score ?? ""}" placeholder="8"></div>
+      <div><label class="small" for="scgMax">Out of</label><input type="number" id="scgMax" min="1" step="any" value="${g.max ?? 10}"></div></div>
+    ${scButtons("grade", !!schoolEditId)}</div>`;
+}
+function taskFormHtml(s, subject) {
+  const t = schoolEditId ? s.tasks[schoolEditId] || {} : {};
+  return `<div class="sc-form">
+    <div class="row"><div><label class="small" for="sctKind">Type</label><select id="sctKind">${TASK_KINDS.map(k =>
+        `<option value="${k}" ${(t.kind || "homework") === k ? "selected" : ""}>${k === "exam" ? "📝 Exam" : "📚 Homework"}</option>`).join("")}</select></div>
+      <div><label class="small" for="sctDue">Due day</label><input type="date" id="sctDue" value="${t.due || ""}"></div></div>
+    ${scField("sctSubject", "Subject", subjectPicker("sctSubject", s, t.subject || subject))}
+    ${scField("sctTitle", "What", `<input type="text" id="sctTitle" maxlength="80" value="${safe(t.title || "")}" placeholder="Fractions sheet p. 24">`)}
+    ${scButtons("task", !!schoolEditId)}</div>`;
+}
+
+// ---------- 📝 Homework & exams ----------
+function schoolHomeworkHtml(s) {
+  const open = schoolEdit === "task" && !schoolEditId;
+  const all = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t }));
+  return `<div class="bd-head"><h2>📝 Homework & exams</h2>${open ? "" : `<button class="edit" data-scedit="task">➕ Add</button>`}</div>
+    ${open ? taskFormHtml(s, "") : ""}<div class="card bd-card">${tasksListHtml(s, all)}</div>`;
+}
+// To do (soonest first), then the last ones done
+function tasksListHtml(s, all) {
+  const todo = all.filter(t => !t.done).sort((a, b) => a.due.localeCompare(b.due));
+  const done = all.filter(t => t.done).sort((a, b) => b.due.localeCompare(a.due)).slice(0, 8);
+  if (!all.length) return `<p class="sc-empty">Nothing yet. 🎉</p>`;
+  return (todo.length ? `<ul class="list">${todo.map(t => taskRowHtml(s, t)).join("")}</ul>` : `<p class="sc-empty">All done! 🎉</p>`)
+    + (done.length ? `<h3 class="sc-h3">✓ Done</h3><ul class="list">${done.map(t => taskRowHtml(s, t)).join("")}</ul>` : "");
+}
+// Where the homework is: To do → Answers uploaded → Checked ✓
+const taskStatus = t => t.checked ? "checked" : t.answer ? "answers" : "todo";
+const STATUS_LABEL = { todo: "To do", answers: "📎 Answers uploaded", checked: "Checked ✓" };
+function taskRowHtml(s, t) {
+  const isDad = isDadNow(), canTick = isDad || me === schoolKid, st = taskStatus(t), n = daysUntil(t.due);
+  const when = t.done ? "" : n < 0 ? `<span class="sc-tag late">Late</span>` : n === 0 ? `<span class="sc-tag soon">Today!</span>`
+    : n === 1 ? `<span class="sc-tag soon">Tomorrow</span>` : `in ${n} days`;
+  const answerFile = t.answer && s.files[t.answer];
+  const btns = [
+    `<button class="linkbtn" data-scprompt="worksheet|${safe(t.id)}">🤖 Make worksheet</button>`,
+    answerFile ? `<button class="linkbtn" data-scfile="${safe(t.answer)}">📎 My answers</button>`
+      : canTick ? `<button class="linkbtn" data-scupload="${safe(t.subject)}|${safe(t.id)}">⬆ Upload my answers</button>` : "",
+    isDad && answerFile && !t.checked ? `<button class="linkbtn" data-scprompt="check|${safe(t.id)}">🤖 Check answers</button>` : "",
+    isDad && !t.checked ? `<button class="linkbtn" data-scedit="check|${safe(t.id)}">✅ Mark as checked</button>` : ""
+  ].join("");
+  const checking = isDad && schoolEdit === "check" && schoolEditId === t.id;
+  return `<li class="bd-task ${t.done ? "sc-done" : ""}"><input type="checkbox" class="sc-tick" data-sctick="${safe(t.id)}" ${t.done ? "checked" : ""}
+      ${canTick ? "" : "disabled"} aria-label="Done: ${safe(t.subject)} ${safe(t.title)}">
+    <div class="what"><span class="sc-tag ${t.kind === "exam" ? "exam" : ""}">${t.kind === "exam" ? "📝 Exam" : "📚 Homework"}</span>${safe(subjectEmoji(s, t.subject))} ${safe(t.subject)}${t.title ? " – " + safe(t.title) : ""}
+      <small>${t.kind === "exam" ? "On" : "Due"} ${shortDate(t.due)} ${when} · <span class="bd-status ${st}">${STATUS_LABEL[st]}</span>${t.checked
+        ? ` <b>${num(t.checked.score)}/${num(t.checked.max)}</b>${t.checked.note ? ` · “${safe(t.checked.note)}”` : ""}` : ""}</small>
+      <span class="bd-task-btns">${btns}</span>
+      ${checking ? `<div class="sc-form">
+        <div class="row"><div><label class="small" for="sckScore">Score</label><input type="number" id="sckScore" min="0" step="any" placeholder="8"></div>
+          <div><label class="small" for="sckMax">Out of</label><input type="number" id="sckMax" min="1" step="any" value="10"></div></div>
+        ${scField("sckNote", "Note", `<input type="text" id="sckNote" maxlength="200" placeholder="Great work! Check question 7 again.">`)}
+        ${scButtons("check", true)}</div>` : ""}</div>
+    ${canChange(t) ? itemBtns("task", t.id) : ""}</li>`;
+}
+
+// ---------- 📊 Marks ----------
+function schoolMarksHtml(s, isDad) {
+  const all = marksOf(s), open = isDad && schoolEdit === "grade";
+  const subjects = subjectsOf(s).map(name => ({ name, list: marksOf(s, name) })).filter(x => x.list.length);
+  let html = `<div class="bd-head"><h2>📊 Marks</h2>${isDad && !open ? `<button class="edit" data-scedit="grade">➕ Add mark</button>` : ""}</div>`;
+  if (open) html += gradeFormHtml(s, "");
+  if (!all.length) return html + `<div class="card"><p class="sc-empty">No marks yet.</p></div>`;
+  html += `<div class="card bd-card"><h2>Average per subject</h2>${subjects.map(x => {
+    const avg = avgOf(x.list), last = x.list[x.list.length - 1], prev = x.list.length > 1 ? pctOf(x.list[x.list.length - 2]) : null;
+    const c = subjectColors(folderOf(s, x.name));
+    return `<div class="bd-avgrow"><div class="bd-avgtop"><b>${safe(subjectEmoji(s, x.name))} ${safe(x.name)}</b>
+      <span><b class="bd-avg">${avg}%</b> ${arrowHtml(pctOf(last), prev)} <small>${x.list.length} ${x.list.length === 1 ? "mark" : "marks"}</small></span></div>${barHtml(avg, c)}</div>`;
+  }).join("")}</div>`;
+  return html + `<div class="card bd-card" style="margin-top:18px"><h2>Latest marks</h2>${marksListHtml(all.slice(-12))}</div>`;
+}
+// Newest first, each with ▲▼ compared with the same subject's mark before
+function marksListHtml(marks) {
+  const before = {}, last = {};
+  marks.forEach(g => { const k = g.subject.toLowerCase(); before[g.id] = last[k] ? pctOf(last[k]) : null; last[k] = g; });
+  return `<ul class="list">${[...marks].reverse().map(m => `<li><div class="what">${safe(m.subject)} <span class="sc-score">${num(m.score)}/${num(m.max)}</span>
+      ${arrowHtml(pctOf(m), before[m.id])}<small>${GRADE_LABEL[m.type]} · ${shortDate(m.date)} · ${pctOf(m)}%</small></div>
+      ${isDadNow() ? itemBtns("grade", m.id) : ""}</li>`).join("")}</ul>`;
+}
+
+// ---------- ⭐ Reviews ----------
+function schoolReviewsHtml(s, isDad, u) {
+  const week = mondayOf(new Date()), r = s.reviews[week];
+  const past = Object.entries(s.reviews).filter(([w]) => w !== week).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 20);
+  const open = isDad && schoolEdit === "review";
+  const acts = activityPointsByUser()[u.id] || 0, habits = habitPoints(u.id, data.points.week, weekEnd()), hw = homeworkPoints(u.id, data.points.week, weekEnd());
+  const review = (w, x) => `<div class="sc-review"><div class="sc-head" style="margin:0"><b>Week of ${shortDate(w)}</b>
+      ${isDad ? `<span>${itemBtns("review", w)}</span>` : ""}</div>
+      <div class="sc-rates">${REVIEW_PARTS.map(([k, label]) => `<span>${label} ${starsHtml(x[k])}</span>`).join("")}</div>
+      ${x.note ? `<p>${safe(x.note)}</p>` : ""}</div>`;
+  let html = `<div class="sc-grid"><div class="card bd-card"><div class="sc-head"><h2>⭐ This week</h2>${isDad && !open ? `<button class="edit" data-scedit="review">${r ? "✏️ Change" : "➕ Add"}</button>` : ""}</div>`;
+  if (open) {
+    const x = schoolEditId ? s.reviews[schoolEditId] || {} : r || {};
+    html += `<div class="sc-form">
+      ${scField("scrWeek", "Week (any day of it)", `<input type="date" id="scrWeek" value="${schoolEditId || week}">`)}
+      ${REVIEW_PARTS.map(([k, label]) => `<div class="sc-starpick"><span>${label}</span>${[1, 2, 3, 4, 5].map(n =>
+        `<button type="button" data-scstar="${n}" aria-label="${n} ${n === 1 ? "star" : "stars"}">★</button>`).join("")}
+        <input type="hidden" id="scr-${k}" value="${x[k] || 0}"></div>`).join("")}
+      <label class="small" for="scrNote">Note</label>
+      <textarea id="scrNote" rows="3" maxlength="600" placeholder="Great week! Keep reading every day.">${safe(x.note || "")}</textarea>
+      ${scButtons("review", true)}</div>`;
+  }
+  html += r ? review(week, r) : `<p class="sc-empty">No review for this week yet.</p>`;
+  html += `</div><div class="card bd-card"><h2>🏆 Points this week</h2>
+    <div class="bd-points"><div><b>${acts}</b><small>📅 Activities</small></div><div><b>${habits}</b><small>⭐ Habits</small></div>
+      <div><b>${hw}</b><small>📝 Homework</small></div><div class="total"><b>${acts + habits + hw}</b><small>Total</small></div></div></div></div>`;
+  return html + `<div class="card bd-card" style="margin-top:18px"><h2>Past weeks</h2>${past.length ? past.map(([w, x]) => review(w, x)).join("") : `<p class="sc-empty">No past reviews yet.</p>`}</div>`;
+}
+
+// ---------- 🏫 School info + timetable (Mon–Fri, up to 7 lessons) ----------
+const LESSONS = 7;
+function schoolInfoHtml(s, isDad) {
+  const i = s.info, today = todayIndex(), open = isDad && schoolEdit === "info";
+  const rows = [["🏫 School", i.name], ["🎓 Class", i.grade], ["👩‍🏫 Teacher", i.teachers]].filter(r => r[1]);
+  const most = Math.max(0, ...[0, 1, 2, 3, 4].map(d => (i.timetable[d] || []).length));
+  let html = `<div class="bd-head"><h2>🏫 School info</h2>${isDad && !open ? `<button class="edit" data-scedit="info">✏️ Edit</button>` : ""}</div>`;
+  if (open) html += `<div class="sc-form">
+      ${scField("scName", "School name", `<input type="text" id="scName" maxlength="60" value="${safe(i.name)}" placeholder="Al Noor School">`)}
+      <div class="row"><div><label class="small" for="scGrade">Class</label><input type="text" id="scGrade" maxlength="30" value="${safe(i.grade)}" placeholder="Grade 6B"></div>
+        <div><label class="small" for="scTeachers">Teacher</label><input type="text" id="scTeachers" maxlength="300" value="${safe(i.teachers)}" placeholder="Ms. Sara"></div></div>
+      <label class="small">Timetable (Mon–Fri, up to ${LESSONS} lessons)</label>
+      <div class="bd-tt-edit"><span></span>${SHORT.slice(0, 5).map(d => `<b>${d}</b>`).join("")}
+        ${Array.from({ length: LESSONS }, (_, n) => `<span class="n">${n + 1}</span>${[0, 1, 2, 3, 4].map(d =>
+          `<input type="text" id="scTT${d}_${n}" list="scSubjects" maxlength="30" aria-label="${DAYS[d]}, lesson ${n + 1}" value="${safe((i.timetable[d] || [])[n] || "")}">`).join("")}`).join("")}</div>
+      <div style="height:10px"></div>${scButtons("info", true)}</div>`;
+  html += `<div class="card bd-card">${rows.length ? `<div class="sc-info">${rows.map(([l, v]) => `<span>${l}</span><b>${safe(v)}</b>`).join("")}</div>`
+    : `<p class="sc-empty">No school info yet.${isDad ? " Tap ✏️ Edit." : ""}</p>`}
+    <h3 class="sc-h3">📅 Timetable</h3>${most ? `<div class="bd-tt-scroll"><table class="bd-tt"><thead><tr><th></th>${SHORT.slice(0, 5).map((d, n) =>
+      `<th class="${n === today ? "today" : ""}">${d}</th>`).join("")}</tr></thead><tbody>${Array.from({ length: most }, (_, n) => `<tr><th>${n + 1}</th>${[0, 1, 2, 3, 4].map(d => {
+        const x = (i.timetable[d] || [])[n] || "", c = x && folderOf(s, x) ? subjectColors(folderOf(s, x)) : null;
+        return `<td class="${d === today ? "today" : ""}">${x ? `<span class="bd-lesson" ${c ? `style="--soft:${c.soft};--ink:${c.ink}"` : ""}>${safe(subjectEmoji(s, x))} ${safe(x)}</span>` : ""}</td>`;
+      }).join("")}</tr>`).join("")}</tbody></table></div>` : `<p class="sc-empty">No timetable yet.</p>`}</div>`;
+  return html;
+}
+
+// ---------- 📄 Reports ----------
+function schoolReportsHtml(s, isDad, u) {
+  return `<div class="bd-head"><h2>📄 Reports</h2></div>
+    <div class="card bd-card"><p class="hint">A neat one-page school report for ${safe(u.name)}: the average per subject, homework done,
+      this week's stars and note, and the points.</p>
+      <div class="btnrow"><button class="primary" data-screport="make">📄 Make report</button>
+        ${schoolReport ? `<button data-screport="pdf">⬇ Download as PDF</button><button data-screport="share">📤 Share</button>` : ""}</div></div>
+    ${schoolReport ? `<div class="bd-report-preview">${reportInner(u.id)}</div>` : ""}`;
+}
+// The report itself (the same on screen and on paper)
+function reportInner(kid) {
+  const s = schoolOf(kid), u = userById(kid), week = mondayOf(new Date());
+  const r = s.reviews[week] || Object.entries(s.reviews).sort((a, b) => b[0].localeCompare(a[0])).map(x => x[1])[0];
+  const rWeek = s.reviews[week] ? week : Object.keys(s.reviews).sort().reverse()[0];
+  const subjects = subjectsOf(s).map(name => ({ name, list: marksOf(s, name) })).filter(x => x.list.length);
+  const tasks = Object.values(s.tasks), doneWeek = tasks.filter(t => t.done && t.doneAt && t.doneAt >= data.points.week && t.doneAt < weekEnd()).length;
+  const acts = activityPointsByUser()[kid] || 0, habits = habitPoints(kid, data.points.week, weekEnd()), hw = homeworkPoints(kid, data.points.week, weekEnd());
+  const info = [s.info.name, s.info.grade, s.info.teachers && "Teacher: " + s.info.teachers].filter(Boolean).join(" · ");
+  return `<div class="bd-report">
+    <div class="rp-top"><div><div class="rp-title">🎒 School report: ${safe(u.emoji)} ${safe(u.name)}</div>
+      <div class="rp-sub">${safe(weekLabel(data.points.week))}${info ? " · " + safe(info) : ""}</div></div><div class="rp-date">Made ${shortDate(todayYmd())}</div></div>
+    <div class="rp-grid">
+      <div class="rp-box"><h3>📊 Average per subject</h3>${subjects.length ? `<table class="rp-table">${subjects.map(x => {
+        const avg = avgOf(x.list), c = subjectColors(folderOf(s, x.name));
+        return `<tr><td>${safe(subjectEmoji(s, x.name))} ${safe(x.name)}</td><td class="rp-bar"><i style="width:${avg}%;background:${c.color}"></i></td><td class="rp-pct">${avg}%</td>
+          <td class="rp-n">${x.list.length} ${x.list.length === 1 ? "mark" : "marks"}</td></tr>`;
+      }).join("")}</table>` : `<p>No marks yet.</p>`}</div>
+      <div class="rp-box"><h3>📝 Homework</h3><p><b>${doneWeek}</b> done this week · <b>${tasks.filter(t => t.done).length}</b> done in all · <b>${tasks.filter(t => !t.done).length}</b> to do</p>
+        <h3>🏆 Points this week</h3><p>📅 Activities <b>${acts}</b> · ⭐ Habits <b>${habits}</b> · 📝 Homework <b>${hw}</b> · <b>Total ${acts + habits + hw}</b></p></div>
+      <div class="rp-box rp-wide"><h3>⭐ ${rWeek ? `Week of ${shortDate(rWeek)}` : "This week"}</h3>${r ? `<p class="rp-stars">${REVIEW_PARTS.map(([k, label]) =>
+        `<span>${label} ${starsHtml(r[k])}</span>`).join("")}</p>${r.note ? `<p class="rp-note">“${safe(r.note)}”</p>` : ""}` : `<p>No review yet.</p>`}</div>
+    </div>
+    <div class="rp-foot">Parent signature:<span class="line"></span></div></div>`;
+}
+function reportText(kid) {
+  const s = schoolOf(kid), u = userById(kid), r = s.reviews[mondayOf(new Date())];
+  const lines = [`🎒 School report: ${u.name} (${weekLabel(data.points.week)})`];
+  subjectsOf(s).forEach(name => { const list = marksOf(s, name); if (list.length) lines.push(`${subjectEmoji(s, name)} ${name}: ${avgOf(list)}% (${list.length} marks)`); });
+  lines.push(`📝 Homework to do: ${todoOf(s).length}`);
+  if (r) lines.push(REVIEW_PARTS.map(([k, label]) => `${label} ${"★".repeat(r[k])}`).join(" · ") + (r.note ? `\n“${r.note}”` : ""));
+  lines.push(`🏆 Points this week: ${pointsByUser()[kid] || 0}`);
+  return lines.join("\n");
+}
+function reportAction(what) {
+  const kid = schoolKid;
+  if (what === "make") { schoolReport = true; return render(); }
+  if (what === "pdf") {   // the app's usual way: the print screen (choose "Save as PDF" there)
+    buildPages([`<section class="p-page bd-report-page">${reportInner(kid)}</section>`]);
+    return window.print();
+  }
+  if (what === "share") {
+    const text = reportText(kid);
+    if (navigator.share) return navigator.share({ title: `School report: ${userById(kid).name}`, text }).catch(() => {});
+    copyText(text).then(ok => toast(ok ? "📋 The report is copied. Paste it in a message." : "Couldn't share on this device.", 3500));
+  }
+}
+
+// ---------- 🤖 Ready prompts for the Claude app ----------
+function gradeText(s) { const g = s.info.grade.trim(); return g ? (/^\d/.test(g) ? "Grade " + g : g) : ""; }
+function promptFor(kind, t, s) {
+  const g = gradeText(s), what = `${t.subject}${t.title ? " – " + t.title : ""}`;
+  return kind === "check"
+    ? `Check this ${g ? g + " " : ""}${t.subject} worksheet answer photo. Give a score out of 10 and one short kind note.`
+    : `Make a printable worksheet for a ${g ? g + " " : ""}student about: ${what}. 10 questions, easy to hard, with space to answer, and an answer key on a separate last page.`;
+}
+// Copies text; true when it worked
+async function copyText(text) {
+  // (some browsers never answer: then give up after 1.5 seconds and try the older way)
+  try {
+    await Promise.race([navigator.clipboard.writeText(text), new Promise((_, no) => setTimeout(() => no(new Error("slow")), 1500))]);
+    return true;
+  } catch (e) {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
+let promptTask = null;   // the homework of the open prompt box (for "📎 Open the answers")
+async function showPrompt(kind, taskId) {
+  const s = schoolOf(schoolKid), t = s.tasks[taskId];
+  if (!t) return;
+  const text = promptFor(kind, t, s), ok = await copyText(text);
+  promptTask = kind === "check" ? taskId : null;
+  $("pmTitle").textContent = ok ? "🤖 Copied!" : "🤖 Your prompt";
+  $("pmHint").textContent = ok
+    ? (kind === "check" ? "Copied! Paste it in the Claude app with the answer photo." : "Copied! Paste it in the Claude app, then print the sheet.")
+    : "Copy the text below, paste it in the Claude app" + (kind === "check" ? " with the answer photo." : ", then print the sheet.");
+  $("pmText").value = text;
+  $("pmAnswers").hidden = kind !== "check" || !t.answer;
+  $("promptModal").hidden = false;
+  $("pmOpen").focus();
+}
+function closePrompt() { $("promptModal").hidden = true; }
+$("promptModal").addEventListener("click", e => {
+  if (e.target === $("promptModal")) return closePrompt();
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.id === "pmOpen") { window.open("https://claude.ai/new", "_blank", "noopener"); return; }
+  if (b.id === "pmOk") return closePrompt();
+  if (b.id === "pmAnswers") { closePrompt(); const t = schoolOf(schoolKid).tasks[promptTask]; if (t && t.answer) openFile(t.answer); }
+});
+
+// ---------- The stars in the review form ----------
+function showStars(pick) {
+  const v = Number(pick.querySelector("input").value) || 0;
+  pick.querySelectorAll("[data-scstar]").forEach(b => { const on = Number(b.dataset.scstar) <= v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+}
+
+// ---------- Opening, saving and deleting ----------
+function openSchoolForm(what, id) {
+  const s = schoolOf(schoolKid);
+  const dadOnly = ["grade", "subject", "info", "review", "check"];
+  if (dadOnly.includes(what) && !isDadNow()) return;
+  if ((what === "task" || what === "note") && id && !canChange((what === "task" ? s.tasks : s.notes)[id])) return;
+  if (what === "review" && !id && s.reviews[mondayOf(new Date())]) id = mondayOf(new Date());   // this week already has one: change it
+  schoolEdit = what; schoolEditId = id || null; schoolFresh = true;
+  render();
+  const first = $("schoolBody").querySelector(".sc-form input:not([type=hidden]):not([type=radio]), .sc-form select, .sc-form textarea");
+  if (first) { first.focus(); first.closest(".sc-form").scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+}
+function closeSchoolForm() { schoolEdit = schoolEditId = null; schoolFresh = true; render(); }
+const scErr = msg => { $("scErr").textContent = msg; };
+// Renames a subject everywhere (homework, marks, files, notes, timetable)
+function renameSubject(s, from, to) {
+  [s.grades, s.tasks, s.files, s.notes].forEach(list => Object.values(list).forEach(x => { if (sameSubject(x.subject, from)) x.subject = to; }));
+  Object.values(s.info.timetable).forEach(day => day.forEach((x, n) => { if (sameSubject(x, from)) day[n] = to; }));
+}
+
+function saveSchoolForm(what) {
+  if (!schoolKid || !exists(me)) return;
+  const isDad = isDadNow(), s = schoolFor(schoolKid), v = id => $(id).value.trim();
+  const folder = schoolView === "subject" ? s.subjects[schoolSubject] : null;
+  if (what === "info" && isDad) {
+    const timetable = { ...s.info.timetable };   // (Saturday / Sunday from older data stay as they are)
+    for (let d = 0; d < 5; d++) {
+      const lessons = Array.from({ length: LESSONS }, (_, n) => v(`scTT${d}_${n}`).slice(0, 30));
+      while (lessons.length && !lessons[lessons.length - 1]) lessons.pop();
+      if (lessons.some(Boolean)) timetable[d] = lessons.map(x => x || "—"); else delete timetable[d];
+    }
+    s.info = { name: v("scName").slice(0, 60), grade: v("scGrade").slice(0, 30), teachers: v("scTeachers").slice(0, 300), timetable };
+  } else if (what === "subject" && isDad) {
+    const name = v("scsName").slice(0, 30), emoji = v("scsEmoji").slice(0, 8) || "📘";
+    const color = (document.querySelector('input[name="scsColor"]:checked') || {}).value || "blue";
+    if (!name) return scErr("Please type the subject.");
+    if (subjectList(s).some(x => x.id !== schoolEditId && sameSubject(x.name, name))) return scErr("There's already a folder with that name.");
+    if (schoolEditId && s.subjects[schoolEditId]) {
+      const old = s.subjects[schoolEditId];
+      if (!sameSubject(old.name, name) || old.name !== name) renameSubject(s, old.name, name);
+      Object.assign(old, { name, emoji, color });
+    } else s.subjects["s" + newId()] = { name, emoji, color, order: subjectList(s).length };
+  } else if (what === "grade" && isDad) {
+    const subject = v("scgSubject"), date = v("scgDate"), score = Number(v("scgScore")), max = Number(v("scgMax"));
+    if (!subject) return scErr("Please type the subject.");
+    if (!isYmd(date)) return scErr("Please pick the date.");
+    if (v("scgScore") === "" || !Number.isFinite(score) || score < 0) return scErr("Please type the score.");
+    if (!(max > 0)) return scErr("“Out of” must be more than 0.");
+    if (score > max) return scErr("The score can't be more than “Out of”.");
+    const old = schoolEditId && s.grades[schoolEditId];
+    s.grades[schoolEditId || newId()] = { subject: subject.slice(0, 30), date, type: $("scgType").value, score, max, ...(old && old.task ? { task: old.task } : {}) };
+  } else if (what === "task") {
+    const subject = v("sctSubject"), due = v("sctDue"), old = schoolEditId && s.tasks[schoolEditId];
+    if (old && !canChange(old)) return;
+    if (!subject) return scErr("Please type the subject.");
+    if (!v("sctTitle")) return scErr("What is the homework? (e.g. Fractions sheet p. 24)");
+    if (!isYmd(due)) return scErr("Please pick the due day.");
+    s.tasks[schoolEditId || newId()] = { ...(old || { done: false, by: me }), kind: $("sctKind").value, subject: subject.slice(0, 30), title: v("sctTitle").slice(0, 80), due };
+  } else if (what === "note") {
+    const text = v("scnText"), old = schoolEditId && s.notes[schoolEditId];
+    if (old && !canChange(old)) return;
+    if (!text) return scErr("Please type the note.");
+    s.notes[schoolEditId || newId()] = { ...(old || { date: todayYmd(), by: me }), subject: old ? old.subject : folder ? folder.name : "", text: text.slice(0, 1000) };
+  } else if (what === "link") {
+    const name = v("sclName"), url = v("sclUrl");
+    if (!/^https?:\/\/\S+$/i.test(url)) return scErr("Please paste the whole link, starting with https://");
+    s.files[newId()] = { subject: folder ? folder.name : "", name: (name || url.replace(/^https?:\/\//i, "")).slice(0, 60), kind: "link", url: url.slice(0, 500), size: 0, date: todayYmd(), by: me };
+  } else if (what === "check" && isDad) {
+    const t = s.tasks[schoolEditId], score = Number(v("sckScore")), max = Number(v("sckMax"));
+    if (!t) return;
+    if (v("sckScore") === "" || !Number.isFinite(score) || score < 0) return scErr("Please type the score.");
+    if (!(max > 0)) return scErr("“Out of” must be more than 0.");
+    if (score > max) return scErr("The score can't be more than “Out of”.");
+    t.checked = { score, max, note: v("sckNote").slice(0, 200), at: todayYmd() };
+    s.grades["c" + schoolEditId] = { subject: t.subject, date: todayYmd(), type: "homework", score, max, task: schoolEditId };   // also a mark
+  } else if (what === "review" && isDad) {
+    const day = v("scrWeek");
+    if (!isYmd(day)) return scErr("Please pick the week.");
+    const rates = Object.fromEntries(REVIEW_PARTS.map(([k]) => [k, Number($("scr-" + k).value) || 0]));
+    if (REVIEW_PARTS.some(([k]) => !rates[k])) return scErr("Please give stars for Effort, Behaviour and Focus.");
+    const week = mondayOf(fromYmd(day));
+    if (schoolEditId && schoolEditId !== week) delete s.reviews[schoolEditId];   // moved to another week
+    s.reviews[week] = { note: v("scrNote").slice(0, 600), ...rates };
+  } else return;
+  schoolEdit = schoolEditId = null; schoolFresh = true;
+  writeData();
+  render();
+  toast(what === "check" ? "✅ Checked, and saved as a mark" : "✓ Saved");
+}
+
+function deleteSchoolItem(what, id) {
+  if (!schoolKid) return;
+  const s = schoolFor(schoolKid);
+  const part = { grade: "grades", task: "tasks", review: "reviews", seesaw: "seesaw", note: "notes", subject: "subjects", file: "files" }[what];
+  const item = part && s[part][id];
+  if (!item) return;
+  const dadOnly = ["grade", "review", "seesaw", "subject"];
+  if (dadOnly.includes(what) ? !isDadNow() : !canChange(item)) return toast(`Ask ${dadName()} 🙂`);
+  const label = what === "task" ? (item.kind === "exam" ? "exam" : "homework") : what === "seesaw" ? "Seesaw note"
+    : what === "subject" ? `subject folder “${item.name}”` : what === "file" ? `file “${item.name}”` : what === "grade" ? "mark" : what;
+  const extra = what === "subject" ? "\n\nIts homework, marks, files and notes are kept." : "";
+  if (!confirm(`Delete this ${label}?${extra}`)) return;
+  if (what === "seesaw" && item.photo) deletePhoto(id);
+  if (what === "file") {
+    if (item.kind !== "link") deleteFileData(id);
+    Object.values(s.tasks).forEach(t => { if (t.answer === id) delete t.answer; });   // answers deleted: back to "To do"
+  }
+  if (what === "task") Object.entries(s.files).forEach(([fid, f]) => { if (f.task === id) delete f.task; });   // its answers stay as a file
+  delete s[part][id];
+  if (schoolEditId === id) schoolEdit = schoolEditId = null;
+  if (what === "subject") { schoolView = "subjects"; schoolSubject = null; }
+  schoolFresh = true;
+  writeData();
+  render();
+}
+
+// Homework done ✓ (the kid on their own binder, or Bro2a): +10 points this week
+function tickSchoolTask(id, box) {
+  const s = data.school[schoolKid];
+  if (!s || !s.tasks[id] || (me !== DAD && me !== schoolKid)) { box.checked = !box.checked; return; }
+  if (newWeek()) keepNow();
+  const t = s.tasks[id];
+  t.done = box.checked;
+  if (t.done) t.doneAt = todayYmd(); else delete t.doneAt;
+  writeData();
+  render();
+  if (box.checked) {
+    const r = box.getBoundingClientRect(), color = colorsOf(userById(schoolKid)).color;
+    celebrate(r.left + r.width / 2, r.top + r.height / 2, color, false);
+    toast(`${me === schoolKid ? "🎉 Well done!" : "✓ Done"} +${POINTS_EACH} ⭐`, 2200, color);
+  }
+}
+
+// ---------- ⬆ Uploading files (a subject's file, or the answers to a homework) ----------
+function startUpload(target) {
+  const [subject, task] = target.split("|");
+  if (task) { const t = schoolOf(schoolKid).tasks[task]; if (!t || !(isDadNow() || me === schoolKid)) return; }
+  schoolUpload = { subject, task: task || null };
+  $("scUpFile").value = "";
+  $("scUpFile").click();
+}
+$("scUpFile").addEventListener("change", async e => {
+  const file = e.target.files[0], target = schoolUpload, kid = schoolKid;
+  schoolUpload = null;
+  if (!file || !target || !kid) return;
+  toast("⬆ Getting the file ready…", 2500);
+  let ready;
+  try { ready = await readSchoolFile(file); }
+  catch (err) {
+    return toast(err.message === "big" ? "Too big. Add a 🔗 link instead (Google Drive)."
+      : err.message === "type" ? "Only photos and PDF files, please." : "Couldn't read that file. Please try another one.", 5000);
+  }
+  const s = schoolFor(kid), id = newId();
+  s.files[id] = { subject: target.subject, name: ready.name, kind: ready.kind, size: ready.size, date: todayYmd(), by: me, ...(target.task ? { task: target.task } : {}) };
+  if (target.task && s.tasks[target.task]) s.tasks[target.task].answer = id;   // Answers uploaded
+  storeFileData(id, kid, ready.url);
+  writeData();
+  render();
+  toast(target.task ? "📎 Your answers are uploaded!" : "✓ File saved", 3000);
+});
+
+$("scr-school").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  const ds = b.dataset;
+  if (ds.sckid) { schoolKid = ds.sckid; schoolView = "home"; schoolSubject = null; schoolReport = false; schoolEdit = schoolEditId = null; schoolFresh = true; return render(); }
+  if (ds.scgo) { const [view, id] = ds.scgo.split("|"); return goSchool(view, id); }
+  if ("seesaw" in ds) return openSeesaw();
+  if (ds.scedit) { const [what, id] = ds.scedit.split("|"); return openSchoolForm(what, id); }
+  if (ds.scsave) return saveSchoolForm(ds.scsave);
+  if ("sccancel" in ds) return closeSchoolForm();
+  if (ds.scdel) { const [what, id] = ds.scdel.split("|"); return deleteSchoolItem(what, id); }
+  if (ds.scfile) return openFile(ds.scfile);
+  if (ds.scupload !== undefined) return startUpload(ds.scupload);
+  if (ds.scprompt) { const [kind, id] = ds.scprompt.split("|"); return showPrompt(kind, id); }
+  if (ds.screport) return reportAction(ds.screport);
+  if (ds.scstar) {
+    const pick = b.closest(".sc-starpick");
+    pick.querySelector("input").value = ds.scstar;
+    return showStars(pick);
+  }
+});
+$("scr-school").addEventListener("change", e => { if (e.target.dataset.sctick) tickSchoolTask(e.target.dataset.sctick, e.target); });
+
+// A file in a list: 🖼️ photo, 📄 PDF, 🔗 link
+const FILE_EMOJI = { image: "🖼️", pdf: "📄", link: "🔗" };
+const sizeText = n => n >= 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+function fileRowHtml(f, s) {
+  const t = f.task && s.tasks[f.task];
+  return `<li><button class="bd-file" data-scfile="${safe(f.id)}"><span class="e">${FILE_EMOJI[f.kind]}</span>
+    <span class="what">${safe(f.name)}<small>${f.subject ? safe(subjectEmoji(s, f.subject)) + " " + safe(f.subject) + " · " : ""}${shortDate(f.date)}${
+      f.kind === "link" ? " · link" : " · " + sizeText(f.size)}${t ? " · 📎 answers" : ""}${f.by && f.by !== DAD && isDadNow() ? " · by " + safe(userById(f.by).name) : ""}</small></span></button></li>`;
+}
+
+// 📝 Upcoming exams (not done yet) on day d of the calendar's week: one kid's, or every kid's (who = null)
+function examsOn(d, who) {
+  const date = ymd(dayDate(d));
+  if (date < todayYmd()) return [];
+  return Object.entries(data.school).filter(([kid]) => (!who || who === kid) && exists(kid))
+    .flatMap(([kid, s]) => Object.values(s.tasks).filter(t => t.kind === "exam" && !t.done && t.due === date).map(t => ({ ...t, kid })));
+}
+// Small red "📝 Math" tags under the day name (tap one to see what it is)
+function examTagsHtml(d, who) {
+  return examsOn(d, who).map(t => {
+    const u = userById(t.kid), text = `📝 Exam: ${t.subject}${t.title ? " – " + t.title : ""} (${u.name})`;
+    return `<button class="k-exam" data-same="${safe(text)}" title="${safe(text)}">${who ? "" : safe(u.emoji) + " "}📝 ${safe(t.subject)}</button>`;
+  }).join("");
+}
+
+// ---------- 📥 From Seesaw (Bro2a): paste text or add a photo, pick the kid and the type ----------
+let ssKid = null;     // which kid it's for
+let ssPhoto = null;   // the photo, already made smaller (a JPEG data URL), or null
+function openSeesaw() {
+  if (me !== DAD) return;
+  const kids = kidsList();
+  if (!kids.length) return toast("Add a kid first (➕ Add user).");
+  ssKid = kids.some(k => k.id === schoolKid) ? schoolKid : kids[0].id;
+  ssPhoto = null;
+  $("ssType").value = "homework";
+  $("ssDate").value = todayYmd();
+  $("ssText").value = "";
+  $("ssFile").value = "";
+  $("ssErr").textContent = "";
+  drawSeesawKids();
+  showSeesawPhoto();
+  $("seesawModal").hidden = false;
+  $("ssText").focus();
+}
+function closeSeesaw() { $("seesawModal").hidden = true; ssPhoto = null; }
+function drawSeesawKids() {
+  $("ssKids").innerHTML = kidsList().map(x => {
+    const c = colorsOf(x);
+    return `<button type="button" class="chip ${x.id === ssKid ? "on" : ""}" data-sskid="${safe(x.id)}" style="--soft:${c.soft};--ink:${c.ink}"
+      aria-pressed="${x.id === ssKid}"><span class="e">${safe(x.emoji)}</span>${safe(x.name)}</button>`;
+  }).join("");
+}
+function showSeesawPhoto() {
+  $("ssPreview").hidden = !ssPhoto;
+  if (ssPhoto) $("ssPreview").src = ssPhoto; else $("ssPreview").removeAttribute("src");
+  $("ssNoPhoto").hidden = !ssPhoto;
+}
+async function addSeesawPhoto(file) {
+  if (!file || !/^image\//.test(file.type)) return $("ssErr").textContent = "That isn't a photo. Please pick a picture.";
+  $("ssErr").textContent = "📷 Making the photo smaller…";
+  try { ssPhoto = await shrinkPhoto(file); $("ssErr").textContent = ""; }
+  catch (e) { $("ssErr").textContent = "Couldn't read that photo. Please try another one."; }
+  showSeesawPhoto();
+}
+function saveSeesaw() {
+  if (me !== DAD || !exists(ssKid)) return;
+  const text = $("ssText").value.trim(), date = $("ssDate").value;
+  if (!text && !ssPhoto) return $("ssErr").textContent = "Paste some text or add a photo first.";
+  if (!isYmd(date)) return $("ssErr").textContent = "Please pick the date.";
+  const id = newId(), kid = ssKid;
+  schoolFor(kid).seesaw[id] = { date, type: $("ssType").value, text: text.slice(0, 3000), photo: !!ssPhoto };
+  if (ssPhoto) savePhoto(id, kid, ssPhoto);
+  writeData();
+  closeSeesaw();
+  toast(`📥 Saved on ${userById(kid).name}'s School page`);
+  if (screen === "school") { schoolKid = kid; schoolFresh = true; render(); } else openSchool(kid);
+}
+$("seesawModal").addEventListener("click", e => {
+  if (e.target === $("seesawModal")) return closeSeesaw();   // tapped outside the box
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.sskid) { ssKid = b.dataset.sskid; return drawSeesawKids(); }
+  if (b.id === "ssSave") return saveSeesaw();
+  if (b.id === "ssCancel") return closeSeesaw();
+  if (b.id === "ssNoPhoto") { ssPhoto = null; $("ssFile").value = ""; return showSeesawPhoto(); }
+});
+$("ssFile").addEventListener("change", e => addSeesawPhoto(e.target.files[0]));
+// A screenshot can be pasted straight into the box (Ctrl+V / long press → Paste)
+$("seesawModal").addEventListener("paste", e => {
+  const item = [...((e.clipboardData && e.clipboardData.items) || [])].find(x => x.kind === "file" && /^image\//.test(x.type));
+  if (!item) return;   // just text: it goes in the text box as usual
+  e.preventDefault();
+  addSeesawPhoto(item.getAsFile());
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("seesawModal").hidden) closeSeesaw(); });
+
+// Makes a photo about 800px wide, as a JPEG under 150 KB (smaller and smaller until it fits).
+// (School files: 1000px wide, under 700 KB.)
+function shrinkPhoto(file, width = 800, LIMIT = 150 * 1024) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), src = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(src);
+      let w = Math.min(width, img.naturalWidth), url = "";
+      for (let round = 0; round < 8 && w >= 50; round++) {
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = Math.max(1, Math.round(img.naturalHeight * w / img.naturalWidth));
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff";   // (a see-through screenshot gets a white background)
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        for (const q of [0.82, 0.72, 0.62, 0.52, 0.42]) {
+          url = c.toDataURL("image/jpeg", q);
+          if ((url.length - url.indexOf(",") - 1) * 0.75 < LIMIT) return resolve(url);
+        }
+        w = Math.round(w * 0.8);   // still too big (e.g. a very long screenshot): narrower
+      }
+      url ? resolve(url) : reject(new Error("too big"));
+    };
+    img.onerror = () => { URL.revokeObjectURL(src); reject(new Error("not a picture")); };
+    img.src = src;
+  });
+}
+
+// =====================================================================
+//  📥 SEESAW PHOTOS: each photo is its own small cloud document, families/{family}/state/photo-{id}
+//  = { kid, data: "data:image/jpeg;base64,…", at } — NOT inside the family data (Firebase Storage needs the paid plan).
+//  Until the cloud has it, the photo waits on this device (localStorage), and uploads when the cloud is ready.
+// =====================================================================
+const PHOTO_KEY = SAVE_KEY + ".photo.";
+const photoCache = {};   // id → the photo (data URL), once loaded on this device
+const isPhotoUrl = u => typeof u === "string" && u.startsWith("data:image/jpeg;base64,");
+function photoRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "state", "photo-" + id); }
+function sendPhoto(id, kid, url) {
+  return cloud.fb.setDoc(photoRef(id), { kid, data: url, at: new Date().toISOString() })
+    .then(() => { try { localStorage.removeItem(PHOTO_KEY + id); } catch (e) {} });
+}
+function savePhoto(id, kid, url) {
+  photoCache[id] = url;
+  try { localStorage.setItem(PHOTO_KEY + id, JSON.stringify({ kid, url })); }
+  catch (e) { if (!cloud.ready) toast("⚠ This device is full: the photo can't wait here for the cloud.", 5000); }
+  if (cloud.ready) sendPhoto(id, kid, url).catch(cloudError);
+}
+// Photos that are still waiting on this device: send them now
+function uploadPhotos() {
+  if (!cloud.ready) return;
+  let keys = [];
+  try { keys = Object.keys(localStorage).filter(k => k.startsWith(PHOTO_KEY)); } catch (e) {}
+  keys.forEach(key => {
+    let p = null;
+    try { p = JSON.parse(localStorage.getItem(key)); } catch (e) {}
+    if (p && isPhotoUrl(p.url)) sendPhoto(key.slice(PHOTO_KEY.length), String(p.kid || ""), p.url).catch(cloudError);
+  });
+}
+function deletePhoto(id) {
+  delete photoCache[id];
+  try { localStorage.removeItem(PHOTO_KEY + id); } catch (e) {}
+  if (cloud.ready) cloud.fb.deleteDoc(photoRef(id)).catch(cloudError);
+}
+// The photo: from this device, or from the cloud (Firestore also keeps an offline copy of the ones it loaded)
+async function photoUrl(id) {
+  if (photoCache[id]) return photoCache[id];
+  try { const p = JSON.parse(localStorage.getItem(PHOTO_KEY + id)); if (p && isPhotoUrl(p.url)) return photoCache[id] = p.url; } catch (e) {}
+  if (!cloud.ready) return null;
+  const snap = await cloud.fb.getDoc(photoRef(id));
+  const url = snap.exists() ? snap.data().data : null;
+  return isPhotoUrl(url) ? photoCache[id] = url : null;
+}
+// Puts each photo in its place on the page (they load one by one)
+function fillPhotos(root) {
+  root.querySelectorAll("[data-photo]").forEach(box => {
+    const id = box.dataset.photo;
+    const put = url => {
+      if (!url) return box.innerHTML = `<p class="sc-empty">📷 The photo isn't here yet. It shows when this device is online.</p>`;
+      const img = document.createElement("img");
+      img.className = "sc-photo";
+      img.alt = "Photo from Seesaw";
+      img.src = url;
+      box.replaceChildren(img);
+    };
+    if (photoCache[id]) return put(photoCache[id]);
+    photoUrl(id).then(put).catch(() => { box.innerHTML = `<p class="sc-empty">📷 Couldn't load the photo.</p>`; });
+  });
+}
+
+// =====================================================================
+//  🎒 SCHOOL FILES: each file is its own cloud document, families/{family}/files/{id}
+//  = { kid, name, type: "image/jpeg" | "application/pdf", data: "data:…;base64,…", at }
+//  NOT inside the family data (Firebase Storage needs the paid plan). Photos ~1000px JPEG; at most about 700 KB a file.
+//  Until the cloud has it, the file waits on this device (localStorage if there's room, or in memory), then uploads.
+// =====================================================================
+const FILE_MAX = 700 * 1024;
+const FILE_KEY = SAVE_KEY + ".file.";
+const fileCache = {};     // id → the file (data URL), once loaded on this device
+const fileWaiting = {};   // id → { kid, url } not in the cloud yet
+const isFileUrl = u => typeof u === "string" && /^data:(image\/jpeg|application\/pdf);base64,/.test(u);
+const bytesOf = url => Math.round((url.length - url.indexOf(",") - 1) * 0.75);
+function fileRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "files", id); }
+// A chosen file → { kind, name, size, url }; throws "big" (too big) or "type" (not a photo / PDF)
+async function readSchoolFile(file) {
+  const name = String(file.name || "File").replace(/\.[^.]+$/, "").slice(0, 60) || "File";
+  if (/^image\//.test(file.type)) {
+    const url = await shrinkPhoto(file, 1000, FILE_MAX);
+    if (bytesOf(url) > FILE_MAX) throw new Error("big");
+    return { kind: "image", name, size: bytesOf(url), url };
+  }
+  if (file.type === "application/pdf" || /\.pdf$/i.test(file.name || "")) {
+    if (file.size > FILE_MAX) throw new Error("big");
+    const url = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).replace(/^data:[^;,]*/, "data:application/pdf"));
+      r.onerror = () => reject(new Error("read"));
+      r.readAsDataURL(file);
+    });
+    return { kind: "pdf", name, size: file.size, url };
+  }
+  throw new Error("type");
+}
+function sendFile(id, kid, url) {
+  const meta = Object.values(data.school).map(s => s.files[id]).find(Boolean) || {};
+  return cloud.fb.setDoc(fileRef(id), { kid, name: meta.name || "", type: url.slice(5, url.indexOf(";")), data: url, at: new Date().toISOString() })
+    .then(() => { delete fileWaiting[id]; try { localStorage.removeItem(FILE_KEY + id); } catch (e) {} });
+}
+function storeFileData(id, kid, url) {
+  fileCache[id] = url;
+  fileWaiting[id] = { kid, url };
+  try { localStorage.setItem(FILE_KEY + id, JSON.stringify({ kid, url })); } catch (e) {}   // (no room: it waits in memory)
+  if (cloud.ready) sendFile(id, kid, url).catch(cloudError);
+}
+// Files still waiting on this device: send them now (when the cloud is ready)
+function uploadFiles() {
+  if (!cloud.ready) return;
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith(FILE_KEY)).forEach(key => {
+      const id = key.slice(FILE_KEY.length);
+      let p = null;
+      try { p = JSON.parse(localStorage.getItem(key)); } catch (e) {}
+      if (p && isFileUrl(p.url) && !fileWaiting[id]) fileWaiting[id] = { kid: String(p.kid || ""), url: p.url };
+    });
+  } catch (e) {}
+  Object.entries(fileWaiting).forEach(([id, p]) => sendFile(id, p.kid, p.url).catch(cloudError));
+}
+function deleteFileData(id) {
+  delete fileCache[id]; delete fileWaiting[id];
+  try { localStorage.removeItem(FILE_KEY + id); } catch (e) {}
+  if (cloud.ready) cloud.fb.deleteDoc(fileRef(id)).catch(cloudError);
+}
+// The file: from this device, or from the cloud
+async function fileUrl(id) {
+  if (fileCache[id]) return fileCache[id];
+  if (fileWaiting[id]) return fileCache[id] = fileWaiting[id].url;
+  try { const p = JSON.parse(localStorage.getItem(FILE_KEY + id)); if (p && isFileUrl(p.url)) return fileCache[id] = p.url; } catch (e) {}
+  if (!cloud.ready) return null;
+  const snap = await cloud.fb.getDoc(fileRef(id));
+  const url = snap.exists() ? snap.data().data : null;
+  return isFileUrl(url) ? fileCache[id] = url : null;
+}
+
+// "data:application/pdf;base64,…" → a Blob (for the preview and the download)
+function blobOf(url) {
+  const comma = url.indexOf(","), bin = atob(url.slice(comma + 1)), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: url.slice(5, url.indexOf(";")) });
+}
+// ---------- Tap a file: preview (photo or PDF), ⬇ Download, 🗑️ Delete ----------
+let fileOpen = null, fileBlobUrl = null;   // the open file's id, and its blob address (for the PDF preview and the download)
+function closeFile() {
+  $("fileModal").hidden = true;
+  $("fmBody").innerHTML = "";
+  if (fileBlobUrl) URL.revokeObjectURL(fileBlobUrl);
+  fileOpen = fileBlobUrl = null;
+}
+async function openFile(id) {
+  const s = schoolOf(schoolKid), f = s.files[id];
+  if (!f) return;
+  closeFile();
+  fileOpen = id;
+  $("fmTitle").textContent = `${FILE_EMOJI[f.kind]} ${f.name}`;
+  $("fmInfo").textContent = [f.subject, shortDate(f.date), f.kind === "link" ? "link" : sizeText(f.size), f.by ? "by " + userById(f.by).name : ""].filter(Boolean).join(" · ");
+  $("fmDel").hidden = !canChange(f);
+  $("fmDown").hidden = f.kind === "link";
+  $("fmLink").hidden = f.kind !== "link";
+  $("fileModal").hidden = false;
+  if (f.kind === "link") {
+    $("fmBody").innerHTML = `<p class="bd-linktext">${safe(f.url)}</p>`;
+    return $("fmLink").focus();
+  }
+  $("fmBody").innerHTML = `<p class="sc-empty">Loading…</p>`;
+  $("fmDown").disabled = true;
+  let url = null;
+  try { url = await fileUrl(id); } catch (e) {}
+  if (fileOpen !== id) return;   // closed meanwhile
+  if (!url) return $("fmBody").innerHTML = `<p class="sc-empty">The file isn't here yet. It shows when this device is online.</p>`;
+  fileBlobUrl = URL.createObjectURL(blobOf(url));
+  $("fmBody").innerHTML = "";
+  const el = document.createElement(f.kind === "image" ? "img" : "iframe");
+  el.className = f.kind === "image" ? "bd-preview-img" : "bd-preview-pdf";
+  if (f.kind === "image") el.alt = f.name; else el.title = f.name;
+  el.src = fileBlobUrl;
+  $("fmBody").appendChild(el);
+  $("fmDown").disabled = false;
+  $("fmDown").focus();
+}
+$("fileModal").addEventListener("click", e => {
+  if (e.target === $("fileModal")) return closeFile();
+  const b = e.target.closest("button");
+  if (!b) return;
+  const f = fileOpen && schoolOf(schoolKid).files[fileOpen];
+  if (b.id === "fmClose") return closeFile();
+  if (!f) return;
+  if (b.id === "fmLink") return window.open(f.url, "_blank", "noopener");
+  if (b.id === "fmDown" && fileBlobUrl) {
+    const a = document.createElement("a");
+    a.href = fileBlobUrl;
+    a.download = f.name + (f.kind === "pdf" ? ".pdf" : ".jpg");
+    document.body.appendChild(a); a.click(); a.remove();
+    return;
+  }
+  if (b.id === "fmDel") { const id = fileOpen; closeFile(); deleteSchoolItem("file", id); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("fileModal").hidden) closeFile();
+  if (!$("promptModal").hidden) closePrompt();
+});
+
+// =====================================================================
 //  SETTINGS (Dad only): my day, planning, people, backup
 // =====================================================================
 function drawSettings() {
+  // A kid: only the cards that are for everyone (🕌 Prayer times)
+  $("scr-settings").classList.toggle("kid-view", me !== DAD);
   fillMyDay();
   drawFreeTime();
   $("maxTogether").value = data.maxTogether;
+  fillPrayer();
   drawUsers();
   drawHabitList();
   $("acctInfo").textContent = cloud.user ? `Signed in as ${cloud.user.email}. Everyone's phones share this family's data.`
@@ -4346,23 +6001,125 @@ function fillMyDay() {
                  weekendStart: wkStart || data.myDay.weekendStart, weekendEnd: wkEnd || data.myDay.weekendEnd };
   changed();
 }));
-// Dad's calculated free time for each day, listed under the "My day" boxes.
+// The calculated free time of one person for each day, listed under the "My day" boxes,
+// with the flexible activities the SAVED plan put inside it (nothing is re-planned here)
+// and the free time left after them (and their get ready / break).
+let freeWho = DAD;   // whose free time is showing (only on this screen, not saved)
 function drawFreeTime() {
-  $("freeTitle").textContent = `${dadName()}'s free time (calculated)`;
-  $("freeRows").innerHTML = DAYS.map((d, i) => {
-    const free = freeFor(i, DAD), total = totalLength(free);
-    const parts = free.map(([s, e]) => `${showTime(s)}–${showTime(e)}`).join(", ");
-    return `<div class="free-row"><b>${SHORT[i]}</b>
-      <small>${parts || "No free time"}</small>
-      <span class="total ${total ? "" : "none"}">${total ? showDuration(total) : "—"}</span></div>`;
+  if (!data.users.some(u => u.id === freeWho)) freeWho = DAD;
+  const who = userById(freeWho);
+  $("freeTitle").textContent = `${who.name}'s free time (calculated)`;
+  $("freeWho").innerHTML = data.users.map(x => {
+    const c = colorsOf(x);
+    return `<button type="button" class="chip ${x.id === freeWho ? "on" : ""}" data-freewho="${safe(x.id)}" style="--soft:${c.soft};--ink:${c.ink}"
+      ${x.id === freeWho ? `aria-current="true"` : ""}><span class="e">${safe(x.emoji)}</span>${safe(x.name)}</button>`;
   }).join("");
+  const days = planDays();   // the saved plan (null = no plan yet)
+  $("freeRows").innerHTML = DAYS.map((d, i) => {
+    const free = freeFor(i, freeWho), total = totalLength(free);
+    const parts = free.map(([s, e]) => `${showTime(s)}–${showTime(e)}`).join(", ");
+    let plan = "";
+    if (days && total) {
+      // This person's flexible activities that day that are (at least partly) in their free time
+      const inFree = (s, e) => free.some(([a, b]) => s < b && a < e);
+      const acts = days[i].items.filter(it => !it.fixed && it.people.includes(freeWho) && inFree(it.start, it.end));
+      // The time they take, with their get ready / break, counted only where it's inside the free time
+      const pieces = acts.flatMap(it => {
+        const act = data.flexible.find(a => a.id === it.actId) || {};
+        const s = it.start - (act.getReady || 0), e = it.end + (act.breakAfter || 0);
+        return free.map(([a, b]) => ({ start: Math.max(a, s), end: Math.min(b, e) })).filter(p => p.end > p.start);
+      });
+      const used = busyMinutes(pieces), left = Math.max(0, total - used);
+      plan = `<div class="free-plan"><div class="sum">${acts.length
+        ? `planned <b>${acts.length} ${acts.length === 1 ? "activity" : "activities"} (${showDuration(used)})</b>`
+        : "nothing planned"} · <span class="left">left ${showDuration(left)}</span></div>
+        ${acts.length ? `<ul>${acts.map(it => `<li><span class="t">${showTime(it.start)}–${showTime(it.end)}</span>
+          ${safe(it.name)} ${it.users.map(id => safe(userById(id).emoji)).join("")}</li>`).join("")}</ul>` : ""}</div>`;
+    }
+    return `<div class="free-row"><b>${SHORT[i]}</b>
+      <small>${parts ? "free " + parts : "No free time"}</small>
+      <span class="total ${total ? "" : "none"}">${total ? showDuration(total) : "—"}</span>${plan}</div>`;
+  }).join("") + (days ? "" : `<p class="hint">No plan yet, so nothing is planned in this free time.</p>`);
 }
+// Tap a person to see their free time and what's planned in it
+$("freeWho").addEventListener("click", e => {
+  const b = e.target.closest("[data-freewho]");
+  if (!b) return;
+  freeWho = b.dataset.freewho;
+  drawFreeTime();
+});
 // The "Max activities at the same time" setting
 $("maxTogether").addEventListener("change", () => {
   const n = Math.round(Number($("maxTogether").value));
   if (n >= 1 && n <= 5) data.maxTogether = n;   // only accept 1 to 5
   changed();                                    // (if the number was wrong, this puts the old one back)
 });
+
+// ---------- 🕌 Prayer times ----------
+// On / Off and the reminder are each person's own choice: kept right away (on all their devices).
+// The place is Bro2a's (a draft until 💾 Save, like the rest of Settings).
+function fillPrayer() {
+  const p = data.prayer, u = userById(me), on = u.showPrayer === true;
+  $("prMine").innerHTML = `<button type="button" class="${on ? "on" : ""}" data-prmine="on" aria-pressed="${on}">🕌 On</button>
+    <button type="button" class="${on ? "" : "on"}" data-prmine="off" aria-pressed="${!on}">Off</button>`;
+  $("prRemind").checked = on && u.prayerRemind !== false;
+  $("prRemind").disabled = !on;
+  $("prPlace").hidden = me !== DAD;
+  if (document.activeElement !== $("prCity")) $("prCity").value = p.city;
+  if (document.activeElement !== $("prLat")) $("prLat").value = p.lat;
+  if (document.activeElement !== $("prLng")) $("prLng").value = p.lng;
+  $("prToday").textContent = on ? `Today in ${p.city || "our city"}: ${prayerTodayText()}` : "";
+}
+// A person's own prayer choice: kept right away. (If other Settings changes aren't saved yet, it's saved with them.)
+function setMyPrayer(change) {
+  if (!exists(me)) return;
+  const draft = hasDraft();
+  Object.assign(data.users.find(u => u.id === me), change);
+  if (!draft) writeData();
+  render();
+}
+$("prMine").addEventListener("click", e => {
+  const b = e.target.closest("[data-prmine]");
+  if (!b) return;
+  const on = b.dataset.prmine === "on";
+  setMyPrayer(on ? { showPrayer: true, prayerRemind: userById(me).prayerRemind !== false } : { showPrayer: false });
+  toast(on ? "🕌 Prayer times are on your calendar." : "Prayer times are off.");
+});
+$("prRemind").addEventListener("change", () => setMyPrayer({ prayerRemind: $("prRemind").checked }));
+["prCity", "prLat", "prLng"].forEach(id => $(id).addEventListener("change", () => {
+  if (me !== DAD) return;
+  const lat = Number($("prLat").value), lng = Number($("prLng").value);
+  $("prErr").textContent = "";
+  if ($("prLat").value === "" || $("prLng").value === "" || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180)
+    return $("prErr").textContent = "Latitude is −90 to 90 and longitude is −180 to 180 (Al Barsha: 25.1135, 55.2000).";
+  data.prayer = { ...data.prayer, city: $("prCity").value.trim().slice(0, 40), lat, lng };
+  changed();
+}));
+$("prDefault").addEventListener("click", () => {
+  if (me !== DAD) return;
+  data.prayer = { ...data.prayer, city: PRAYER_DEFAULT.city, lat: PRAYER_DEFAULT.lat, lng: PRAYER_DEFAULT.lng };
+  $("prErr").textContent = "";
+  ["prCity", "prLat", "prLng"].forEach(id => $(id).blur());
+  changed();
+});
+
+// ---------- 🕌 "Show prayer times on your calendar?" (once per person, the first time after this update) ----------
+// Only once the family data is matched up with the cloud, so the answer is never asked twice or lost.
+function maybeAskPrayer() {
+  const u = exists(me) && userById(me);
+  const ready = !cloud.enabled || cloud.ready;
+  if (!u || typeof u.showPrayer === "boolean" || !ready || screen === "start" || !$("prayAsk").hidden) return;
+  if (!$("syncModal").hidden || !$("loginScreen").hidden) return;
+  $("prayAsk").hidden = false;
+  $("prayYes").focus();
+}
+function answerPrayer(yes) {
+  $("prayAsk").hidden = true;
+  setMyPrayer(yes ? { showPrayer: true, prayerRemind: true } : { showPrayer: false });
+  toast(yes ? "🕌 Prayer times are on your calendar. You can change it in ⚙️ Settings." : "OK! You can turn them on later in ⚙️ Settings.", 4000);
+}
+$("prayYes").addEventListener("click", () => answerPrayer(true));
+$("prayNo").addEventListener("click", () => answerPrayer(false));
 
 // ---------- People ----------
 let editingUser = null; // which person is being edited (null = adding a new one)
@@ -4723,6 +6480,8 @@ document.addEventListener("click", e => {
   if ("viewall" in ds) return openViewAll();
   if (ds.go) return leaveDraft(() => go(ds.go));
   if ("plan" in ds) return planNow();
+  if ("unpinall" in ds) return unpinAll();
+  if (ds.school) return leaveDraft(() => openSchool(ds.school));   // 🎒 School page
   if (ds.editFixed) return startEditFixed(ds.editFixed);
   if (ds.editFlex) return startEditFlex(ds.editFlex);
   if (ds.delFixed) return deleteActivity(ds.delFixed, true);
@@ -4744,6 +6503,7 @@ document.addEventListener("click", e => {
   if (ds.same) return toast(`⇄ ${ds.same}`, 3500);   // "At the same time as: Gym (Bro2a)"
   // View all plan: "📆 Day" / "📅 Week summary", the day buttons and ◀ ▶
   if (ds.vmode) { viewMode = ds.vmode; return render(); }
+  if (ds.vwho) { viewWho = ds.vwho; return render(); }   // Full week: All or one person
   if (ds.vday) { viewDay = Number(ds.vday); return render(); }
   if ("vprev" in ds) { viewDay = (viewDay + 6) % 7; return render(); }
   if ("vnext" in ds) { viewDay = (viewDay + 1) % 7; return render(); }
@@ -4812,12 +6572,16 @@ const CLOUD_META = SAVE_KEY + ".cloud";
 function cloudMeta() { try { return JSON.parse(localStorage.getItem(CLOUD_META)) || {}; } catch (e) { return {}; } }
 function setCloudMeta(change) { try { localStorage.setItem(CLOUD_META, JSON.stringify({ ...cloudMeta(), ...change })); } catch (e) {} }
 
-// The data split into the 3 cloud documents (copies), and put back together
+// The data split into the 3 cloud documents (copies), and put back together.
+// 🎒 School pages live in the habits document too (a "school" field next to "marks"), so a kid ticking homework
+// changes only that one item, like a habit tick. (Older cloud data has no "school" field: then it's empty.)
 function splitData(d) {
-  const { points, habitMarks, ...plan } = JSON.parse(JSON.stringify(d));
-  return { plan, points, habits: { marks: habitMarks || {} } };
+  const { points, habitMarks, school, ...plan } = JSON.parse(JSON.stringify(d));
+  return { plan, points, habits: { marks: habitMarks || {}, school: school || {} } };
 }
-function joinData(plan, points, habits) { return { ...plan, points: points || {}, habitMarks: (habits && habits.marks) || {} }; }
+function joinData(plan, points, habits) {
+  return { ...plan, points: points || {}, habitMarks: (habits && habits.marks) || {}, school: (habits && habits.school) || {} };
+}
 // The same data always gives the same text (the cloud may return the keys in another order), so we can compare
 function sameText(v) {
   return JSON.stringify(v, (k, x) => x && typeof x === "object" && !Array.isArray(x)
@@ -4945,7 +6709,7 @@ function cloudFirstSync() {
   }
   const remote = cloudData(), local = JSON.parse(savedJson), meta = cloudMeta();
   const nothingHere = !local.fixed.length && !local.flexible.length && !local.routines.length
-    && !Object.keys(local.points.marks).length && !Object.keys(local.habitMarks).length;
+    && !Object.keys(local.points.marks).length && !Object.keys(local.habitMarks).length && !Object.keys(local.school || {}).length;
   // 2) Same data, nothing on this device yet, or this device was already in sync (the cloud is just newer): use the cloud
   if (sameText(remote) === sameText(local) || nothingHere || (meta.uid === cloud.user.uid && !meta.dirty))
     return cloudUseCloud(true);
@@ -5001,6 +6765,8 @@ function keepEarlyChanges(remote, base, local) {
       if (hasOwn(lm, key)) rm[key] = lm[key]; else delete rm[key];
     });
   });
+  // 🎒 School changes made here in those first seconds win as a whole
+  if (sameText(b.habits.school) !== sameText(l.habits.school)) r.habits.school = l.habits.school;
   return cleanData(joinData(r.plan, r.points, r.habits));
 }
 // From now on every change goes to the cloud right away
@@ -5009,6 +6775,8 @@ function cloudReady() {
   cloud.asking = false;
   setCloudMeta({ uid: cloud.user.uid, dirty: false });
   writeData("auto");   // stores it here, and uploads anything the app tidied up (e.g. a new week)
+  uploadPhotos();      // 📥 Seesaw photos added before the cloud was ready
+  uploadFiles();       // 🎒 school files too
   showSync();
 }
 
@@ -5036,11 +6804,11 @@ function cloudUpload(how) {
   // The plan document is sent whole (it only changes with 💾 Save, "Plan my week", adding a person …)
   const before = planOnly(cloud.sent.plan);
   if (sameText(now.plan) !== sameText(before)) {
-    const what = planNews(before, now.plan);
-    const change = told ? changeNote(what) : (cloud.sent.plan || {}).change;
+    const what = planNews(before, now.plan);   // ("" = only someone's own prayer choice: not news)
+    const change = told && what ? changeNote(what) : (cloud.sent.plan || {}).change;
     cloud.sent.plan = change ? { ...now.plan, change } : now.plan;
     cloud.fb.setDoc(cloud.refs.plan, cloud.sent.plan).catch(cloudError);
-    if (told) news.push(newsItem("plan", what));
+    if (told && what) news.push(newsItem("plan", what));
   }
   // Ticks and unticks (worked out before cloud.sent is updated below)
   if (told) news.push(...tickNews(cloud.sent.points, now.points), ...habitNews(cloud.sent.habits, now.habits));
@@ -5056,8 +6824,13 @@ function cloudUpdateFields(name, now) {
     if (!hasOwn(newMarks, key)) changes.push(new fb.FieldPath("marks", key), fb.deleteField());   // unticked
     else if (sameText(oldMarks[key]) !== sameText(newMarks[key])) changes.push(new fb.FieldPath("marks", key), newMarks[key]);
   });
-  // The other fields (week, history …) only change on a new week
-  Object.keys(now).forEach(k => { if (k !== "marks" && sameText(before[k]) !== sameText(now[k])) changes.push(k, now[k]); });
+  // The other fields (week, history …) only change on a new week.
+  // 🎒 "school" (habits document): only the items that changed (e.g. school.mody.tasks.abc12), when the cloud has it already.
+  Object.keys(now).forEach(k => {
+    if (k === "marks" || sameText(before[k]) === sameText(now[k])) return;
+    if (k === "school" && before.school && typeof before.school === "object") changes.push(...schoolChanges(before.school, now.school));
+    else changes.push(k, now[k]);
+  });
   if (!changes.length) return;
   cloud.sent[name] = now;
   fb.updateDoc(cloud.refs[name], ...changes).catch(err => {
@@ -5065,6 +6838,27 @@ function cloudUpdateFields(name, now) {
     if (err && err.code === "not-found") fb.setDoc(cloud.refs[name], splitData(data)[name]).catch(cloudError);
     else cloudError(err);
   });
+}
+
+// 🎒 The changed parts of the school data, as Firestore field changes: a kid, a kid's info, or one item of a list
+function schoolChanges(was, is) {
+  const fb = cloud.fb, out = [], path = (...p) => new fb.FieldPath("school", ...p);
+  const obj = x => x && typeof x === "object" && !Array.isArray(x);
+  new Set([...Object.keys(was), ...Object.keys(is)]).forEach(kid => {
+    const a = was[kid], b = is[kid];
+    if (sameText(a) === sameText(b)) return;
+    if (!hasOwn(is, kid)) return out.push(path(kid), fb.deleteField());
+    if (!obj(a)) return out.push(path(kid), b);
+    Object.keys(b).forEach(part => {
+      const x = a[part], y = b[part];
+      if (sameText(x) === sameText(y)) return;
+      if (part === "info" || !obj(x)) return out.push(path(kid, part), y);
+      new Set([...Object.keys(x), ...Object.keys(y)]).forEach(id => {
+        if (sameText(x[id]) !== sameText(y[id])) out.push(path(kid, part, id), hasOwn(y, id) ? y[id] : fb.deleteField());
+      });
+    });
+  });
+  return out;
 }
 
 // ---------- A change from another phone ----------
@@ -5088,10 +6882,13 @@ function cloudApply(name, remote) {
     if (me && !exists(me)) me = null;   // your person was removed on another phone
   } else {
     // Ticks: change them in the data AND in what counts as "saved", so a draft you're working on stays a draft
-    const key = name === "points" ? "points" : "habitMarks";
+    // (the habits document also has the 🎒 school pages)
+    const keys = name === "points" ? ["points"] : ["habitMarks", "school"];
     const saved = JSON.parse(savedJson);
-    data[key] = fresh[key];
-    saved[key] = JSON.parse(JSON.stringify(fresh[key]));
+    keys.forEach(key => {
+      data[key] = fresh[key];
+      saved[key] = JSON.parse(JSON.stringify(fresh[key]));
+    });
     savedJson = JSON.stringify(saved);
   }
   storeLocal();
@@ -5212,11 +7009,16 @@ function planNews(before, now) {
   if (added.length) parts.push("added " + few(added));
   if (removed.length) parts.push("removed " + few(removed));
   if (edited.length) parts.push("changed " + few(edited));
+  // (a person's own 🕌 prayer choice isn't news for the family)
+  const plain = (k, p) => k !== "users" ? p[k] : (p.users || []).map(({ showPrayer, prayerRemind, ...u }) => u);
   [["users", "the people"], ["routines", "the routines"], ["habits", "the good habits"]].forEach(([k, label]) => {
-    if (sameText(before[k]) !== sameText(now[k])) parts.push("changed " + label);
+    if (sameText(plain(k, before)) !== sameText(plain(k, now))) parts.push("changed " + label);
   });
-  if (sameText(before.myDay) !== sameText(now.myDay) || before.maxTogether !== now.maxTogether) parts.push("changed the settings");
+  if (sameText(before.myDay) !== sameText(now.myDay) || before.maxTogether !== now.maxTogether
+      || sameText(before.prayer) !== sameText(now.prayer)) parts.push("changed the settings");
   if (!parts.length && sameText(before.plan) !== sameText(now.plan)) parts.push("changed the calendar 📅");
+  // Only someone's own 🕌 choice changed: no news ("")
+  if (!parts.length && sameText({ ...before, users: plain("users", before) }) === sameText({ ...now, users: plain("users", now) })) return "";
   return parts.length ? parts.join(" · ") : "changed the plan";
 }
 const newestFirst = (a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0);

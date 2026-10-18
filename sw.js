@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v37";
+const CACHE = "family-planner-v44";
 
 // Firebase and Google's servers (login, the cloud data, the Firebase code): NEVER saved here.
 // They must always come fresh from the internet (Firebase keeps its own offline copy of the data).
@@ -19,10 +19,17 @@ function isFirebase(url) {
 
 // The files the app needs to open without internet.
 const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"];
+// 🕌 The prayer-times library (from another website). The version is in the address, so it never changes:
+// once it's saved here, it's always used from here (the prayer times then work without internet).
+const ADHAN_URL = "https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js";
 
-// 1) Install: save a copy of the app files.
+// 1) Install: save a copy of the app files (and the prayer-times library).
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(APP_FILES)));
+  event.waitUntil(caches.open(CACHE).then(cache => Promise.all([
+    cache.addAll(APP_FILES),
+    // (if it can't be fetched right now, the app still installs: it's saved the first time the page loads it)
+    cache.add(new Request(ADHAN_URL, { mode: "cors" })).catch(() => {})
+  ])));
   self.skipWaiting(); // start working right away
 });
 
@@ -48,6 +55,18 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== location.origin && isFirebase(url)) return;   // not touched at all: the browser fetches it normally
+
+  // 🕌 The prayer-times library: the saved copy first, the internet only if it isn't saved yet
+  if (request.url === ADHAN_URL) {
+    event.respondWith(
+      caches.match(ADHAN_URL).then(saved => saved || fetch(request).then(response => {
+        // (a script from another website can come back "opaque": that's fine to keep)
+        if (response.ok || response.type === "opaque") { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(ADHAN_URL, copy)); }
+        return response;
+      }))
+    );
+    return;
+  }
 
   if (url.origin === location.origin) {
     // Our own files: try the internet first (so you always get the newest version),
