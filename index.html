@@ -6253,8 +6253,17 @@ const aiFile = (name, url) => ({ name, mediaType: url.slice(5, url.indexOf(";"))
 // PowerPoint / Word can't go to the AI as they are: their text is sent instead ({ name, mediaType: "text/plain", data: the text, NOT base64 }).
 // Throws "notext" (only pictures inside) or "zip" (JSZip couldn't load: no internet).
 const NO_TEXT = "This file has no text I can read. Save it as PDF in PowerPoint (File > Save As > PDF) and upload the PDF.";
+// Text already taken out of a big PowerPoint / Word, kept as "data:text/plain;base64,…" (UTF-8)
+function textUrl(text) {
+  const bytes = new TextEncoder().encode(text);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return "data:text/plain;base64," + btoa(bin);
+}
+const textOfUrl = url => new TextDecoder().decode(Uint8Array.from(atob(url.slice(url.indexOf(",") + 1)), c => c.charCodeAt(0)));
 async function aiFileFor(name, url) {
   const type = url.slice(5, url.indexOf(";"));
+  if (type === "text/plain") return { name, mediaType: "text/plain", data: textOfUrl(url) };
   if (type !== PPTX_TYPE && type !== DOCX_TYPE) return aiFile(name, url);
   const text = await officeText(url.slice(url.indexOf(",") + 1), type === PPTX_TYPE ? "pptx" : "docx");
   if (!text) throw new Error("notext");
@@ -6451,6 +6460,16 @@ async function addWorkFiles(files) {
       // A PDF too big to keep can still be read by the AI now (up to 4 MB)
       if (err.message === "big" && isPdfFile(file) && file.size <= AI_MAX) {
         try { r = { kind: "pdf", name: fileNameOf(file), size: file.size, url: await readPdf(file) }; keep = false; } catch (e) {}
+      }
+      // A PowerPoint / Word too big to keep (any size): only its text goes to the AI, so take the text out now
+      const office = err.message === "big" && officeKindOf(file);
+      if (office) {
+        try {
+          const url = await readAsUrl(file, OFFICE_TYPES[office]);
+          const text = await officeText(url.slice(url.indexOf(",") + 1), office);
+          if (!text) { problems.push(`“${file.name}”: ${NO_TEXT}`); continue; }
+          r = { kind: office, name: fileNameOf(file), size: file.size, url: textUrl(text) }; keep = false;
+        } catch (e) { problems.push(aiFileError(e)); continue; }
       }
       if (!r) problems.push(err.message === "type" ? `“${file.name}”: ${TYPE_TEXT.charAt(0).toLowerCase() + TYPE_TEXT.slice(1)}`
         : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.`);
