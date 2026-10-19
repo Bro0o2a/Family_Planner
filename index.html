@@ -179,6 +179,8 @@
           color: var(--text); box-shadow: var(--shadow); transition: transform .15s; }
   .tile:hover { transform: translateY(-3px); }
   .tile:active { transform: scale(.97); }
+  .tile { min-width: 0; overflow: hidden; overflow-wrap: anywhere; }   /* never wider than its column (no overlapping) */
+  .tile > * { max-width: 100%; }
   .tile .t-emoji { font-size: 56px; line-height: 1.1; }
   .tile .t-label { font-size: 28px; font-weight: 800; }
   .tile .t-sub { font-size: 17px; color: var(--muted); }
@@ -590,14 +592,17 @@
      ============================================================= */
   .home-big { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 18px; }
   .big-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 170px;
-             border-radius: 30px; border: 3px solid transparent; box-shadow: var(--shadow); text-align: center; transition: transform .15s; }
+             border-radius: 30px; border: 3px solid transparent; box-shadow: var(--shadow); text-align: center; transition: transform .15s;
+             min-width: 0; overflow: hidden; overflow-wrap: anywhere; padding: 14px 10px; }   /* never wider than its column: the text wraps */
+  .big-btn > * { max-width: 100%; line-height: 1.15; }
   .big-btn:hover { transform: translateY(-3px); }
   .big-btn:active { transform: scale(.97); }
   .big-btn .e { font-size: 64px; line-height: 1.1; }
   .big-btn b { font-size: 32px; font-weight: 800; }
   .big-btn small { font-size: 17px; font-weight: 600; opacity: .85; }
-  .big-btn.cal { background: linear-gradient(135deg, #7c6cf0, #5b5bd6); color: #fff; }
-  .big-btn.cal:hover { background: linear-gradient(135deg, #7366ea, #5252cc); }
+  /* (not "cal": that's the calendar grid, 840px wide, which pushed this button over the School one) */
+  .big-btn.big-cal { background: linear-gradient(135deg, #7c6cf0, #5b5bd6); color: #fff; }
+  .big-btn.big-cal:hover { background: linear-gradient(135deg, #7366ea, #5252cc); }
   .big-btn.school { background: linear-gradient(135deg, #ffb347, #f0892b); color: #fff; }
   .big-btn.school:hover { background: linear-gradient(135deg, #f7a93c, #e67f22); }
   .bd-crumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 0 0 14px; font-size: 17px; }
@@ -705,9 +710,9 @@
   .rp-foot .line { display: inline-block; width: 14em; border-bottom: .1em solid #333; margin-left: .5em; }
   @media (max-width: 600px) {
     .home-big { gap: 10px; }
-    .big-btn { min-height: 140px; border-radius: 24px; }
-    .big-btn .e { font-size: 50px; }
-    .big-btn b { font-size: 25px; }
+    .big-btn { min-height: 130px; border-radius: 24px; padding: 12px 8px; }
+    .big-btn .e { font-size: 44px; }
+    .big-btn b { font-size: 24px; }
     .big-btn small { font-size: 14px; }
     .bd-tiles { gap: 10px; }
     .bd-tile { grid-template-columns: 1fr; grid-template-rows: auto; text-align: center; justify-items: center; padding: 12px 8px; border-left-width: 3px; border-top: 10px solid var(--tab); }
@@ -1116,7 +1121,7 @@
     .brand-name { font-size: 28px; }
     .brand-date { font-size: 18px; }
     .hello-face { width: 72px; height: 72px; font-size: 40px; }
-    .menu { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .menu { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .tile { min-height: 140px; padding: 12px; border-radius: 24px; }
     .tile .t-emoji { font-size: 44px; }
     .tile .t-label { font-size: 21px; line-height: 1.15; }
@@ -1697,9 +1702,9 @@
   <p class="lead" id="schoolSub"></p>
   <div id="schoolBody"></div>
   <!-- ⬆ Upload: a photo or a PDF (a subject's file, or the answers to a homework) -->
-  <input type="file" id="scUpFile" accept="image/*,application/pdf,.pdf" hidden>
+  <input type="file" id="scUpFile" accept="image/*,application/pdf,.pdf,.pptx,.docx,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
   <!-- 🤖 Photos / PDF for the AI help (📥 school work, or the answers to a worksheet): several at once -->
-  <input type="file" id="aiFile" accept="image/*,application/pdf,.pdf" multiple hidden>
+  <input type="file" id="aiFile" accept="image/*,application/pdf,.pdf,.pptx,.docx,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
 </section>
 
 <!-- 📥 Add school work: pick the PDF or photos, they're kept in the School files, then 🤖 reads them -->
@@ -2424,7 +2429,7 @@ function cleanData(d) {
 const GRADE_TYPES = ["quiz", "exam", "homework", "worksheet"];
 const TASK_KINDS = ["homework", "exam"];
 const SEESAW_TYPES = ["homework", "comment", "grade"];
-const FILE_KINDS = ["image", "pdf", "link"];
+const FILE_KINDS = ["image", "pdf", "pptx", "docx", "link"];
 const REVIEW_PARTS = [["effort", "💪 Effort"], ["behaviour", "😊 Behaviour"], ["focus", "🎯 Focus"]];
 const DEFAULT_SUBJECTS = {
   "s-math":    { name: "Math",    emoji: "➗", color: "blue",   order: 0 },
@@ -3132,7 +3137,7 @@ function drawHome() {
   // Kids: two big buttons first — 📅 Calendar (their week) and 🎒 School (their binder)
   const todo = isDad ? 0 : todoOf(schoolOf(me)).length;
   $("homeBig").hidden = isDad;
-  $("homeBig").innerHTML = isDad ? "" : `<button class="big-btn cal" data-go="mine"><span class="e">📅</span><b>Calendar</b><small>Tick what you finish!</small></button>
+  $("homeBig").innerHTML = isDad ? "" : `<button class="big-btn big-cal" data-go="mine"><span class="e">📅</span><b>Calendar</b><small>Tick what you finish!</small></button>
     <button class="big-btn school" data-school="${safe(me)}"><span class="e">🎒</span><b>School</b><small>${todo ? `${todo} homework to do` : "Homework, marks, files"}</small></button>`;
   // 🎒 School: a kid gets their own page; Bro2a gets every kid's (starting with the first kid)
   const firstKid = kidsList()[0];
@@ -5769,7 +5774,7 @@ $("scUpFile").addEventListener("change", async e => {
   try { ready = await readSchoolFile(file); }
   catch (err) {
     return toast(err.message === "big" ? "Too big. Add a 🔗 link instead (Google Drive)."
-      : err.message === "type" ? "Only photos and PDF files, please." : "Couldn't read that file. Please try another one.", 5000);
+      : err.message === "type" ? TYPE_TEXT : "Couldn't read that file. Please try another one.", 5000);
   }
   const s = schoolFor(kid), id = newId();
   s.files[id] = { subject: target.subject, name: ready.name, kind: ready.kind, size: ready.size, date: todayYmd(), by: me, ...(target.task ? { task: target.task } : {}) };
@@ -5812,7 +5817,7 @@ $("scr-school").addEventListener("click", e => {
 $("scr-school").addEventListener("change", e => { if (e.target.dataset.sctick) tickSchoolTask(e.target.dataset.sctick, e.target); });
 
 // A file in a list: 🖼️ photo, 📄 PDF, 🔗 link
-const FILE_EMOJI = { image: "🖼️", pdf: "📄", link: "🔗" };
+const FILE_EMOJI = { image: "🖼️", pdf: "📄", pptx: "📊", docx: "📃", link: "🔗" };
 const sizeText = n => n >= 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
 function fileRowHtml(f, s) {
   const t = f.task && s.tasks[f.task];
@@ -5999,7 +6004,7 @@ function fillPhotos(root) {
 
 // =====================================================================
 //  🎒 SCHOOL FILES: each file is its own cloud document, families/{family}/files/{id}
-//  = { kid, name, type: "image/jpeg" | "application/pdf", data: "data:…;base64,…", at }
+//  = { kid, name, type: "image/jpeg" | "application/pdf" | PowerPoint (.pptx) | Word (.docx), data: "data:…;base64,…", at }
 //  NOT inside the family data (Firebase Storage needs the paid plan). Photos ~1000px JPEG; at most about 700 KB a file.
 //  Until the cloud has it, the file waits on this device (localStorage if there's room, or in memory), then uploads.
 // =====================================================================
@@ -6007,21 +6012,30 @@ const FILE_MAX = 700 * 1024;
 const FILE_KEY = SAVE_KEY + ".file.";
 const fileCache = {};     // id → the file (data URL), once loaded on this device
 const fileWaiting = {};   // id → { kid, url } not in the cloud yet
-const isFileUrl = u => typeof u === "string" && /^data:(image\/jpeg|application\/pdf);base64,/.test(u);
+const PPTX_TYPE = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const OFFICE_TYPES = { pptx: PPTX_TYPE, docx: DOCX_TYPE };
+const TYPE_TEXT = "Only photos, PDF, PowerPoint (.pptx) and Word (.docx) files, please.";
+const isFileUrl = u => typeof u === "string" && /^data:(image\/jpeg|application\/pdf|application\/vnd\.openxmlformats-officedocument\.(presentationml\.presentation|wordprocessingml\.document));base64,/.test(u);
 const bytesOf = url => Math.round((url.length - url.indexOf(",") - 1) * 0.75);
 function fileRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "files", id); }
 // A chosen file → { kind, name, size, url }; throws "big" (too big) or "type" (not a photo / PDF)
 // (width: photos are made this wide at most. 🤖 AI help uses 1600px, so the AI can read the small writing.)
 const fileNameOf = file => String(file.name || "File").replace(/\.[^.]+$/, "").slice(0, 60) || "File";
 const isPdfFile = file => file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
-function readPdf(file) {
+// "pptx" / "docx" for a PowerPoint / Word file, otherwise null
+const officeKindOf = file => file.type === PPTX_TYPE || /\.pptx$/i.test(file.name || "") ? "pptx"
+  : file.type === DOCX_TYPE || /\.docx$/i.test(file.name || "") ? "docx" : null;
+// The file as "data:<type>;base64,…" (with the right type, whatever the phone said)
+function readAsUrl(file, type) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = () => resolve(String(r.result).replace(/^data:[^;,]*/, "data:application/pdf"));
+    r.onload = () => resolve(String(r.result).replace(/^data:[^;,]*/, "data:" + type));
     r.onerror = () => reject(new Error("read"));
     r.readAsDataURL(file);
   });
 }
+const readPdf = file => readAsUrl(file, "application/pdf");
 async function readSchoolFile(file, width = 1000) {
   const name = fileNameOf(file);
   if (/^image\//.test(file.type)) {
@@ -6032,6 +6046,11 @@ async function readSchoolFile(file, width = 1000) {
   if (isPdfFile(file)) {
     if (file.size > FILE_MAX) throw new Error("big");
     return { kind: "pdf", name, size: file.size, url: await readPdf(file) };
+  }
+  const office = officeKindOf(file);
+  if (office) {
+    if (file.size > FILE_MAX) throw new Error("big");
+    return { kind: office, name, size: file.size, url: await readAsUrl(file, OFFICE_TYPES[office]) };
   }
   throw new Error("type");
 }
@@ -6111,6 +6130,11 @@ async function openFile(id) {
   if (fileOpen !== id) return;   // closed meanwhile
   if (!url) return $("fmBody").innerHTML = `<p class="sc-empty">The file isn't here yet. It shows when this device is online.</p>`;
   fileBlobUrl = URL.createObjectURL(blobOf(url));
+  $("fmDown").disabled = false;
+  if (OFFICE_TYPES[f.kind]) {   // PowerPoint / Word: no preview here, ⬇ Download opens it
+    $("fmBody").innerHTML = `<p class="sc-empty">${FILE_EMOJI[f.kind]} ${f.kind === "pptx" ? "PowerPoint" : "Word"} files can't be shown here. Tap ⬇ Download to open it.</p>`;
+    return $("fmDown").focus();
+  }
   $("fmBody").innerHTML = "";
   const el = document.createElement(f.kind === "image" ? "img" : "iframe");
   el.className = f.kind === "image" ? "bd-preview-img" : "bd-preview-pdf";
@@ -6131,7 +6155,7 @@ $("fileModal").addEventListener("click", e => {
   if (b.id === "fmDown" && fileBlobUrl) {
     const a = document.createElement("a");
     a.href = fileBlobUrl;
-    a.download = f.name + (f.kind === "pdf" ? ".pdf" : ".jpg");
+    a.download = f.name + (f.kind === "pdf" ? ".pdf" : OFFICE_TYPES[f.kind] ? "." + f.kind : ".jpg");
     document.body.appendChild(a); a.click(); a.remove();
     return;
   }
@@ -6226,6 +6250,69 @@ async function callAi(action, body, key) {
 }
 // A file for the AI: { name, mediaType, data } (data = the base64 part, without "data:…;base64,")
 const aiFile = (name, url) => ({ name, mediaType: url.slice(5, url.indexOf(";")), data: url.slice(url.indexOf(",") + 1) });
+// PowerPoint / Word can't go to the AI as they are: their text is sent instead ({ name, mediaType: "text/plain", data: the text, NOT base64 }).
+// Throws "notext" (only pictures inside) or "zip" (JSZip couldn't load: no internet).
+const NO_TEXT = "This file has no text I can read. Save it as PDF in PowerPoint (File > Save As > PDF) and upload the PDF.";
+async function aiFileFor(name, url) {
+  const type = url.slice(5, url.indexOf(";"));
+  if (type !== PPTX_TYPE && type !== DOCX_TYPE) return aiFile(name, url);
+  const text = await officeText(url.slice(url.indexOf(",") + 1), type === PPTX_TYPE ? "pptx" : "docx");
+  if (!text) throw new Error("notext");
+  return { name, mediaType: "text/plain", data: text };
+}
+// The files for an AI call (each PowerPoint / Word turned into its text)
+const aiFilesFor = list => Promise.all(list.map(x => aiFileFor(x.name, x.url)));
+const aiFileError = err => err.message === "notext" ? NO_TEXT
+  : err.message === "zip" ? "🔌 Couldn't load the PowerPoint / Word reader. Check the internet and try again." : "Couldn't read that file. Please try another one.";
+// 📦 JSZip (opens .pptx / .docx, which are zip files): loaded only the first time it's needed (sw.js keeps a copy)
+const JSZIP_URL = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+let jszipLoading = null;
+function loadJsZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return jszipLoading = jszipLoading || new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = JSZIP_URL;
+    el.onload = () => window.JSZip ? resolve(window.JSZip) : reject(new Error("zip"));
+    el.onerror = () => { el.remove(); jszipLoading = null; reject(new Error("zip")); };
+    document.head.appendChild(el);
+  });
+}
+// The text of one slide / notes page / Word document: one line per paragraph (<a:p> / <w:p>), from its <a:t> / <w:t> pieces
+const NS_A = "http://schemas.openxmlformats.org/drawingml/2006/main", NS_W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+function xmlLines(xml, ns) {
+  const doc = new DOMParser().parseFromString(xml, "application/xml"), lines = [];
+  let para;
+  for (const t of doc.getElementsByTagNameNS(ns, "t")) {
+    let p = t.parentNode;
+    while (p && !(p.namespaceURI === ns && p.localName === "p")) p = p.parentNode;
+    if (p !== para || !lines.length) { lines.push(""); para = p; }
+    lines[lines.length - 1] += t.textContent;
+  }
+  return lines.map(l => l.trim()).filter(Boolean);
+}
+// The base64 .pptx / .docx → its text ("" when there is none)
+async function officeText(base64, kind) {
+  const JSZip = await loadJsZip();
+  let zip;
+  try { zip = await JSZip.loadAsync(base64, { base64: true }); } catch (e) { throw new Error("read"); }
+  const read = path => zip.file(path) ? zip.file(path).async("string") : Promise.resolve("");
+  if (kind === "docx") return xmlLines(await read("word/document.xml"), NS_W).join("\n");
+  // PowerPoint: the slides in slide-number order ("--- Slide N ---" before each), then the speaker notes
+  const numbered = re => Object.keys(zip.files).map(p => { const m = p.match(re); return m ? { p, n: Number(m[1]) } : null; })
+    .filter(Boolean).sort((a, b) => a.n - b.n);
+  const out = [];
+  let found = false;
+  for (const { p, n } of numbered(/^ppt\/slides\/slide(\d+)\.xml$/)) {
+    const lines = xmlLines(await read(p), NS_A);
+    if (lines.length) found = true;
+    out.push(`--- Slide ${n} ---`, ...lines);
+  }
+  for (const { p, n } of numbered(/^ppt\/notesSlides\/notesSlide(\d+)\.xml$/)) {
+    const lines = xmlLines(await read(p), NS_A).filter(l => !/^\d+$/.test(l));   // (not the slide number itself)
+    if (lines.length) { found = true; out.push(`--- Notes ${n} ---`, ...lines); }
+  }
+  return found ? out.join("\n") : "";
+}
 const tooBigText = total => `📦 That's ${sizeText(total)}: too big for the AI (4 MB at most). Please remove some pages or photos.`;
 const kidNameOf = kid => userById(kid).name;
 const gradeOf = kid => schoolOf(kid).info.grade;   // the class from 🏫 School info, e.g. "Year 5"
@@ -6365,7 +6452,7 @@ async function addWorkFiles(files) {
       if (err.message === "big" && isPdfFile(file) && file.size <= AI_MAX) {
         try { r = { kind: "pdf", name: fileNameOf(file), size: file.size, url: await readPdf(file) }; keep = false; } catch (e) {}
       }
-      if (!r) problems.push(err.message === "type" ? `“${file.name}”: only photos and PDF files, please.`
+      if (!r) problems.push(err.message === "type" ? `“${file.name}”: ${TYPE_TEXT.charAt(0).toLowerCase() + TYPE_TEXT.slice(1)}`
         : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.`);
     }
     if (!r) continue;
@@ -6413,7 +6500,10 @@ async function readWork() {
   if (total > AI_MAX) return $("awErr").textContent = tooBigText(total);
   const chosen = $("awSubject").value, items = [...box.items];
   $("awErr").textContent = "";
-  const r = await callAi("analyze", { files: items.map(x => aiFile(x.name, x.url)), kidName: kidNameOf(box.kid), grade: gradeOf(box.kid) }, "analyze");
+  let files;
+  try { files = await aiFilesFor(items); }
+  catch (err) { if (aw === box) $("awErr").textContent = aiFileError(err); return; }
+  const r = await callAi("analyze", { files, kidName: kidNameOf(box.kid), grade: gradeOf(box.kid) }, "analyze");
   if (!r) return;
   const s = schoolFor(box.kid), subject = aiTxt(r.subject, 30);
   let folderId = s.subjects[chosen] ? chosen : folderIdFor(s, subject);
@@ -6701,7 +6791,7 @@ async function addAnswerFiles(wsId, files) {
     try { r = await readSchoolFile(file, 1600); }
     catch (err) {
       toast(err.message === "big" ? "That file is too big (a PDF can be 700 KB at most). Try photos instead."
-        : err.message === "type" ? "Only photos and PDF files, please." : "Couldn't read that file. Please try another one.", 5000);
+        : err.message === "type" ? TYPE_TEXT : "Couldn't read that file. Please try another one.", 5000);
       continue;
     }
     const id = newId(), n = (w.answers.length + ids.length + 1);
@@ -6741,9 +6831,11 @@ async function checkWorksheet(wsId) {
   if (urls.length !== ids.length || urls.some(u => !u)) return toast("📎 The answer files aren't on this device yet. Please try again in a moment.", 4500);
   const total = urls.reduce((n, u) => n + bytesOf(u), 0);
   if (total > AI_MAX) return toast(tooBigText(total), 6000);
+  let files;
+  try { files = await aiFilesFor(ids.map((f, i) => ({ name: s.files[f].name, url: urls[i] }))); }
+  catch (err) { return toast(aiFileError(err), 6000); }
   const r = await callAi("check", { kidName: kidNameOf(w.kid), grade: gradeOf(w.kid), title: w.title,
-    answerKey: w.questions.map(q => ({ number: q.number, answer: q.answer, points: q.points })),
-    files: ids.map((f, i) => aiFile(s.files[f].name, urls[i])) }, "check|" + wsId);
+    answerKey: w.questions.map(q => ({ number: q.number, answer: q.answer, points: q.points })), files }, "check|" + wsId);
   if (!r) return;
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
   if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);

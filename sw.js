@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v46";
+const CACHE = "family-planner-v47";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
@@ -26,13 +26,16 @@ const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "i
 // 🕌 The prayer-times library (from another website). The version is in the address, so it never changes:
 // once it's saved here, it's always used from here (the prayer times then work without internet).
 const ADHAN_URL = "https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js";
+// 📦 JSZip (opens PowerPoint / Word files for 🤖 AI help). Same idea: the version is in the address, so it never changes.
+const JSZIP_URL = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+const LIBRARIES = [ADHAN_URL, JSZIP_URL];
 
-// 1) Install: save a copy of the app files (and the prayer-times library).
+// 1) Install: save a copy of the app files (and the libraries).
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => Promise.all([
     cache.addAll(APP_FILES),
-    // (if it can't be fetched right now, the app still installs: it's saved the first time the page loads it)
-    cache.add(new Request(ADHAN_URL, { mode: "cors" })).catch(() => {})
+    // (if one can't be fetched right now, the app still installs: it's saved the first time the page loads it)
+    ...LIBRARIES.map(url => cache.add(new Request(url, { mode: "cors" })).catch(() => {}))
   ])));
   self.skipWaiting(); // start working right away
 });
@@ -61,12 +64,13 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
   if (url.origin !== location.origin && isFirebase(url)) return;   // not touched at all: the browser fetches it normally
 
-  // 🕌 The prayer-times library: the saved copy first, the internet only if it isn't saved yet
-  if (request.url === ADHAN_URL) {
+  // 🕌 The prayer-times library and 📦 JSZip: the saved copy first, the internet only if it isn't saved yet
+  if (LIBRARIES.includes(request.url)) {
+    const lib = request.url;
     event.respondWith(
-      caches.match(ADHAN_URL).then(saved => saved || fetch(request).then(response => {
+      caches.match(lib).then(saved => saved || fetch(request).then(response => {
         // (a script from another website can come back "opaque": that's fine to keep)
-        if (response.ok || response.type === "opaque") { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(ADHAN_URL, copy)); }
+        if (response.ok || response.type === "opaque") { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(lib, copy)); }
         return response;
       }))
     );
