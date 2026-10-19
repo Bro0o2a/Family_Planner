@@ -9,7 +9,11 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v44";
+const CACHE = "family-planner-v46";
+
+// 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
+// Every call must go straight to the internet (the app says so when there's no internet).
+const AI_ORIGIN = "https://family-plan-ai.hanifamily.workers.dev";
 
 // Firebase and Google's servers (login, the cloud data, the Firebase code): NEVER saved here.
 // They must always come fresh from the internet (Firebase keeps its own offline copy of the data).
@@ -52,8 +56,9 @@ function remember(request, response) {
 // 3) Fetch: every time the app asks for a file, decide where it comes from.
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET") return;
   const url = new URL(request.url);
+  if (url.origin === AI_ORIGIN) return;   // 🤖 the AI helper: not touched at all (the browser fetches it normally)
+  if (request.method !== "GET") return;
   if (url.origin !== location.origin && isFirebase(url)) return;   // not touched at all: the browser fetches it normally
 
   // 🕌 The prayer-times library: the saved copy first, the internet only if it isn't saved yet

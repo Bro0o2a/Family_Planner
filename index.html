@@ -717,6 +717,101 @@
     .bd-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .rp-grid { grid-template-columns: 1fr; }
   }
+  /* =============================================================
+     🤖 AI HELP (School): 📥 School work cards, 📝 worksheets, 📖 explanations, ✅ checking
+     ============================================================= */
+  .ai-add, .ai-add:hover { background: linear-gradient(135deg, #ffb347, #f0892b); border-color: #f0892b; color: #fff; }
+  .ai-home-actions .ai-add { min-height: 58px; padding: 8px 26px; font-size: 20px; }
+  .ai-work { padding: 12px 4px; border-bottom: 2px solid var(--line); }
+  .ai-work:last-child { border-bottom: none; }
+  .ai-work-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ai-work-title { font-size: 21px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .ai-work-date { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .ai-todo { margin: 6px 0; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .ai-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px 2px 12px; border-radius: 999px; font-size: 15px; font-weight: 700;
+             background: var(--soft, #f3e9d6); color: var(--ink, var(--text)); border: 2px solid var(--c, var(--line)); overflow-wrap: anywhere; }
+  .ai-chip button { min-height: 32px; min-width: 34px; padding: 0 6px; border: none; border-radius: 999px; background: #fff; font-size: 15px; }
+  .ai-chip button:hover { background: #fffaf0; }
+  .ai-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+  .ai-files .linkbtn { min-height: 34px; font-size: 14px; overflow-wrap: anywhere; text-align: left; }
+  .ai-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ai-btns button { min-height: 46px; }
+  .ai-status { font-weight: 800; }
+  .ai-status.up { color: #1d4ed8; }
+  .ai-status.done { color: var(--ok); }
+  .ai-toolbar { display: flex; flex-wrap: wrap; gap: 8px; max-width: 820px; margin: 0 auto 14px; }
+  .ai-narrow { max-width: 820px; margin: 0 auto 18px; }
+  .ai-topicpick { max-height: 230px; overflow-y: auto; border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px 2px; margin-bottom: 12px; background: #fffdf8; }
+  .ai-topicpick .checkline span { overflow-wrap: anywhere; }
+  .ai-size { color: var(--muted); font-size: 15px; font-weight: 700; }
+  #awList:empty { display: none; }
+  /* The worksheet (on screen, and the same on paper) */
+  .ws-sheet { background: #fff; color: #1f1f1f; border-radius: 22px; box-shadow: var(--shadow); padding: 26px 28px; max-width: 820px;
+              margin: 0 auto 18px; font-size: 19px; line-height: 1.4; }
+  .ws-namerow { display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; font-size: 17px; border-bottom: 2px solid #333;
+                padding-bottom: 8px; margin-bottom: 12px; }
+  .ws-namerow b { display: inline-block; min-width: 120px; border-bottom: 1.5px dotted #888; padding: 0 6px; }
+  .ws-title { font-size: 30px; font-weight: 800; line-height: 1.15; margin: 4px 0; overflow-wrap: anywhere; }
+  .ws-sub { color: #555; font-size: 15px; margin-bottom: 6px; overflow-wrap: anywhere; }
+  .ws-intro { font-size: 18px; margin: 6px 0 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-qs { list-style: none; padding: 0; margin: 0; }
+  .ws-q { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1.5px dashed #cfcfcf; break-inside: avoid; page-break-inside: avoid; }
+  .ws-num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--accent-soft); color: var(--accent); }
+  .ws-prompt { font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-opts { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 6px 18px; }
+  .ws-opt { display: flex; gap: 8px; align-items: flex-start; overflow-wrap: anywhere; }
+  .ws-circle { flex: none; width: 22px; height: 22px; margin-top: 3px; border: 2px solid #333; border-radius: 50%; }
+  .ws-circle.ws-box { width: 30px; border-radius: 5px; }
+  .ws-line { height: 36px; border-bottom: 1.5px solid #9a9a9a; }
+  .ws-pts { align-self: start; white-space: nowrap; font-size: 14px; font-weight: 800; color: #555; border: 1.5px solid #bbb; border-radius: 10px; padding: 2px 8px; }
+  .ws-ans { margin-top: 8px; padding: 6px 10px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-total { width: max-content; max-width: 100%; margin: 16px 0 0 auto; border: 2.5px solid #333; border-radius: 14px; padding: 10px 16px; font-size: 20px; font-weight: 800; }
+  .ws-total i { display: inline-block; width: 64px; border-bottom: 2px solid #333; margin: 0 6px; }
+  /* ✅ The check result */
+  .ai-score { text-align: center; font-size: 64px; font-weight: 800; line-height: 1; color: var(--ok); margin: 6px 0 12px; }
+  .ai-score small { display: block; margin-top: 6px; font-size: 22px; color: var(--muted); }
+  .ai-note { font-size: 18px; background: var(--accent-soft); border-radius: 16px; padding: 10px 14px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai-note.dad { background: #fff7e0; }
+  .ai-mk { flex: none; width: 34px; text-align: center; font-size: 26px; font-weight: 800; }
+  .ai-mk.ok { color: var(--ok); }
+  .ai-mk.no { color: var(--danger); }
+  /* ▶️ YouTube / 🖨️ printable links */
+  .ai-links h2 { font-size: 20px; margin: 4px 0 8px; }
+  .ai-linkrow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .ai-link { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--line);
+             background: #fff; color: var(--text); font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+  .ai-link:hover { background: #fffaf0; }
+  .ai-link.yt { border-color: #fecaca; background: #fff5f5; }
+  /* 📖 The explanation: a friendly reading page with big text */
+  .ex-sheet { background: #fff; color: #1f1f1f; border-radius: 22px; box-shadow: var(--shadow); padding: 26px 28px; max-width: 820px;
+              margin: 0 auto 18px; font-size: 21px; line-height: 1.55; }
+  .ex-title { font-size: 34px; font-weight: 800; line-height: 1.15; margin: 2px 0 6px; overflow-wrap: anywhere; }
+  .ex-sec { break-inside: avoid-page; }
+  .ex-sec h3 { font-size: 25px; margin: 20px 0 4px; color: var(--accent); overflow-wrap: anywhere; }
+  .ex-sec p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ex-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 8px; }
+  .ex-word { background: #fff7e0; border: 2px solid #fcd34d; border-radius: 18px; padding: 10px 14px; break-inside: avoid; overflow-wrap: anywhere; }
+  .ex-word b { display: block; font-size: 23px; }
+  .ex-word span { display: block; font-size: 17px; line-height: 1.4; }
+  .ex-try { margin: 6px 0 0; padding-left: 1.3em; }
+  .ex-try li { margin-bottom: 6px; overflow-wrap: anywhere; }
+  @media (max-width: 600px) {
+    .ws-sheet, .ex-sheet { padding: 18px 16px; border-radius: 18px; font-size: 18px; }
+    .ws-q { grid-template-columns: 32px minmax(0, 1fr); }
+    .ws-pts { grid-column: 2; justify-self: start; }
+    .ws-title { font-size: 25px; }
+    .ex-title { font-size: 28px; }
+    .ai-score { font-size: 52px; }
+  }
+  /* On paper (A4, portrait): only the sheet, no app around it */
+  @media print {
+    .ai-print .ws-sheet, .ai-print .ex-sheet { box-shadow: none; border-radius: 0; padding: 0; margin: 0; max-width: none; }
+    .ai-print .ws-sheet { font-size: 13pt; }
+    .ai-print .ex-sheet { font-size: 14pt; }
+    .ai-print .ws-num { background: #fff; color: #000; border: .4mm solid #333; }
+    .ai-print .ws-line { height: 9mm; }
+  }
   /* An exam on the kid's calendar (under the day name) */
   .k-exam { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 1px 6px; border-radius: 8px; border: 1px solid #fecaca;
             background: #fee2e2; color: #b91c1c; font-size: 12px; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1603,7 +1698,46 @@
   <div id="schoolBody"></div>
   <!-- ⬆ Upload: a photo or a PDF (a subject's file, or the answers to a homework) -->
   <input type="file" id="scUpFile" accept="image/*,application/pdf,.pdf" hidden>
+  <!-- 🤖 Photos / PDF for the AI help (📥 school work, or the answers to a worksheet): several at once -->
+  <input type="file" id="aiFile" accept="image/*,application/pdf,.pdf" multiple hidden>
 </section>
+
+<!-- 📥 Add school work: pick the PDF or photos, they're kept in the School files, then 🤖 reads them -->
+<div class="k-modal" id="aiWorkModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="awTitle">
+    <div class="print-title" id="awTitle">📥 Add school work</div>
+    <p class="print-hint">Add the PDF or photos (from Seesaw, a worksheet, a test …). They're kept in the School files, then 🤖 reads them.</p>
+    <label class="small" for="awSubject">Subject</label>
+    <select id="awSubject"></select>
+    <div class="sc-photo-row" style="margin:12px 0 4px">
+      <button type="button" class="pill" id="awPick">📷 Add photos or PDF</button>
+      <span class="ai-size" id="awSize"></span>
+    </div>
+    <ul class="list" id="awList"></ul>
+    <div class="err" id="awErr"></div>
+    <div class="btnrow">
+      <button class="primary" id="awRead" data-aiwait="analyze">🤖 Read it</button>
+      <button id="awClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📝 Make a worksheet: which topics, how many questions -->
+<div class="k-modal" id="aiWsModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="wsoTitle">
+    <div class="print-title" id="wsoTitle">📝 Make a worksheet</div>
+    <p class="print-hint" id="wsoHint"></p>
+    <label class="small">Topics</label>
+    <div class="ai-topicpick" id="wsoTopics"></div>
+    <label class="small">How many questions?</label>
+    <div class="daypick" id="wsoCount"></div>
+    <div class="err" id="wsoErr"></div>
+    <div class="btnrow">
+      <button class="primary" id="wsoMake" data-aiwait="worksheet">🤖 Make worksheet</button>
+      <button id="wsoCancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- 🤖 The ready prompt for the Claude app (copied to the clipboard) -->
 <div class="k-modal" id="promptModal" hidden>
@@ -2273,17 +2407,21 @@ function cleanData(d) {
 //   info    = { name: "Al Noor School", grade: "Grade 3B", teachers: "Ms. Sara (Math) …", timetable: { "0": ["Math", "English"], … } }
 //             (timetable: day 0 = Monday … 6 = Sunday → that day's subjects in order)
 //             (info.grade = the class, info.teachers = the teacher)
-//   grades  = id → { subject, date: "2026-10-12", type: "quiz" | "exam" | "homework", score: 8, max: 10, task? }
+//   grades  = id → { subject, date: "2026-10-12", type: "quiz" | "exam" | "homework" | "worksheet", score: 8, max: 10, task?, worksheet? }
 //             (task = the homework it came from, when Bro2a ✅ checked its answers)
+//             (worksheet = the 🤖 worksheet it came from, once it was checked: id "w" + its id, +10 points that week)
 //   tasks   = id → { kind: "homework" | "exam", subject, title, due: "2026-10-20", done: false,
 //                    by?, doneAt?: "2026-10-19" (+10 points that week), answer?: file id, checked?: { score, max, note, at } }
 //   reviews = Monday of the week ("2026-10-12") → { note, effort, behaviour, focus }   (1–5 stars)
 //   seesaw  = id → { date, type: "homework" | "comment" | "grade", text, photo: true/false }
 //   subjects = id → { name, emoji, color, order }   (📚 the folders; older data: Math, Science, English, Arabic)
-//   files   = id → { subject, name, kind: "image" | "pdf" | "link", url? (links), size, date, by, task? }
+//   files   = id → { subject, name, kind: "image" | "pdf" | "link", url? (links), size, date, by, task?, work?, worksheet? }
 //             (the file itself is NOT here: each one is its own cloud document families/{family}/files/{id}, see SCHOOL FILES)
+//             (work = the 📥 school work card it belongs to, worksheet = the 🤖 worksheet it's the answers of)
 //   notes   = id → { subject, text, date, by }
-const GRADE_TYPES = ["quiz", "exam", "homework"];
+//   work    = id → { subject, title, date, what_to_do, topics: ["Fractions", …], files: [file ids], by }
+//             (📥 school work that 🤖 read; older data has none. Worksheets / explanations: see AI HELP)
+const GRADE_TYPES = ["quiz", "exam", "homework", "worksheet"];
 const TASK_KINDS = ["homework", "exam"];
 const SEESAW_TYPES = ["homework", "comment", "grade"];
 const FILE_KINDS = ["image", "pdf", "link"];
@@ -2296,7 +2434,7 @@ const DEFAULT_SUBJECTS = {
 };
 function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
-           subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {} };
+           subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {} };
 }
 function cleanSchool(s) {
   const out = {};
@@ -2328,7 +2466,7 @@ function cleanSchool(s) {
       const score = Number(g.score), max = Number(g.max);
       if (!txt(g.subject, 30) || !isDate(g.date) || !Number.isFinite(score) || score < 0 || !(max > 0)) return null;
       return { subject: txt(g.subject, 30), date: g.date, type: GRADE_TYPES.includes(g.type) ? g.type : "quiz", score, max,
-               ...(okKey(String(g.task || "")) ? { task: g.task } : {}) };
+               ...(okKey(String(g.task || "")) ? { task: g.task } : {}), ...(okKey(String(g.worksheet || "")) ? { worksheet: g.worksheet } : {}) };
     });
     // (by / doneAt / answer / checked are newer: older homework has none, and keeps no homework points)
     c.tasks = list(k.tasks, t => {
@@ -2349,8 +2487,15 @@ function cleanSchool(s) {
       const kind = FILE_KINDS.includes(f.kind) ? f.kind : null, url = kind === "link" && /^https?:\/\/\S+$/i.test(String(f.url || "")) ? String(f.url).slice(0, 500) : null;
       if (!kind || !isDate(f.date) || (kind === "link" && !url)) return null;
       return { subject: txt(f.subject, 30), name: txt(f.name, 60) || "File", kind, ...(url ? { url } : {}), size: Math.max(0, Number(f.size) || 0), date: f.date,
-               ...(okKey(String(f.by || "")) ? { by: f.by } : {}), ...(okKey(String(f.task || "")) ? { task: f.task } : {}) };
+               ...(okKey(String(f.by || "")) ? { by: f.by } : {}), ...(okKey(String(f.task || "")) ? { task: f.task } : {}),
+               ...(okKey(String(f.work || "")) ? { work: f.work } : {}), ...(okKey(String(f.worksheet || "")) ? { worksheet: f.worksheet } : {}) };
     });
+    // 📥 School work cards (newer: older data has none)
+    c.work = list(k.work, w => !txt(w.title, 80) || !isDate(w.date) ? null
+      : { subject: txt(w.subject, 30), title: txt(w.title, 80), date: w.date, what_to_do: txt(w.what_to_do, 600),
+          topics: Array.isArray(w.topics) ? w.topics.map(x => txt(x, 40)).filter(Boolean).slice(0, 8) : [],
+          files: Array.isArray(w.files) ? w.files.filter(x => okKey(String(x || ""))).slice(0, 20) : [],
+          ...(okKey(String(w.by || "")) ? { by: w.by } : {}) });
     c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
       ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
     c.reviews = list(k.reviews, (r, week) => !isDate(week) ? null
@@ -4962,6 +5107,9 @@ let schoolEditId = null;   // the item being changed (null = adding a new one)
 let schoolFresh = false;   // true = a form was just opened or closed: don't put back what was typed before
 let schoolReport = false;  // 📄 the report was made (it's showing)
 let schoolUpload = null;   // what the next chosen file is for: { subject, task }
+let schoolDoc = null;      // 🤖 the open worksheet / explanation (view "worksheet" | "explain")
+let wsAnswers = false;     // 🔑 the open worksheet shows its answers
+let wsFix = false;         // ✏️ Bro2a's "Change score" form is open
 
 const kidsList = () => data.users.filter(u => u.id !== DAD);
 const schoolOf = kid => data.school[kid] || emptySchool();
@@ -4984,7 +5132,7 @@ function arrowHtml(now, before) {
     : now < before ? `<span class="sc-down" title="Lower than the last mark">▼</span>` : `<span class="sc-same" title="Same as the last mark">▬</span>`;
 }
 function starsHtml(n) { return `<span class="sc-stars" aria-label="${n} of 5 stars">${"★".repeat(n)}<span class="off">${"★".repeat(5 - n)}</span></span>`; }
-const GRADE_LABEL = { quiz: "✏️ Quiz", exam: "📝 Exam", homework: "📚 Homework" };
+const GRADE_LABEL = { quiz: "✏️ Quiz", exam: "📝 Exam", homework: "📚 Homework", worksheet: "🤖 Worksheet" };
 const SEESAW_LABEL = { homework: "📚 Homework", comment: "💬 Teacher comment", grade: "🏅 Grade" };
 const isDadNow = () => me === DAD;
 // Can the person using the app change / delete this? (Bro2a always; a kid only what they added themselves)
@@ -5020,9 +5168,13 @@ const filesOf = (s, subject) => Object.entries(s.files).map(([id, f]) => ({ id, 
   .filter(f => !subject || sameSubject(f.subject, subject)).sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 
 // ---------- ⭐ Homework points (+10 for each homework ticked done, in the week it was ticked) ----------
+// (+10 too for each 🤖 worksheet that was checked: its "Worksheet" mark, in the week it was first checked)
 function homeworkPoints(user, from, to) {
   const s = data.school[user];
-  return s ? Object.values(s.tasks).filter(t => t.done && t.doneAt && t.doneAt >= from && t.doneAt < to).length * POINTS_EACH : 0;
+  if (!s) return 0;
+  const homework = Object.values(s.tasks).filter(t => t.done && t.doneAt && t.doneAt >= from && t.doneAt < to).length;
+  const worksheets = Object.values(s.grades).filter(g => g.type === "worksheet" && g.worksheet && g.date >= from && g.date < to).length;
+  return (homework + worksheets) * POINTS_EACH;
 }
 
 // Open a kid's binder (a kid always gets their own)
@@ -5066,13 +5218,17 @@ function drawSchool() {
   if (!schoolFresh) $("schoolBody").querySelectorAll(".sc-form [id]").forEach(el => { if ("value" in el && el.type !== "radio") typed[el.id] = el.value; });
   schoolFresh = false;
   const views = { home: schoolHomeHtml, subjects: schoolSubjectsHtml, subject: schoolFolderHtml, homework: schoolHomeworkHtml,
-                  marks: schoolMarksHtml, reviews: schoolReviewsHtml, info: schoolInfoHtml, reports: schoolReportsHtml };
+                  marks: schoolMarksHtml, reviews: schoolReviewsHtml, info: schoolInfoHtml, reports: schoolReportsHtml,
+                  worksheet: schoolWorksheetHtml, explain: schoolExplainHtml };
+  aiMounts = [];
   $("schoolBody").innerHTML = `<datalist id="scSubjects">${subjectsOf(s).map(x => `<option value="${safe(x)}">`).join("")}</datalist>`
     + crumbHtml(s) + (views[schoolView] || schoolHomeHtml)(s, isDad, u);
+  fillAiMounts($("schoolBody"));   // 🤖 the parts with text from the AI (built as plain text)
   Object.entries(typed).forEach(([id, v]) => { const el = $(id); if (el) el.value = v; });
   $("schoolBody").querySelectorAll(".sc-starpick").forEach(showStars);
   if (focus && $(focus) && $("schoolBody").contains($(focus))) $(focus).focus();
   fillPhotos($("schoolBody"));
+  showAiWait();
 }
 
 // "🎒 School › Subjects › Math" (tap a part to go back there)
@@ -5083,6 +5239,12 @@ function crumbHtml(s) {
   if (schoolView === "subject") {
     const f = s.subjects[schoolSubject];
     parts.push([VIEW_NAMES.subjects, "subjects"], [`${f.emoji} ${f.name}`, null]);
+  } else if (schoolView === "worksheet" || schoolView === "explain") {
+    // 🤖 a worksheet / explanation: back to its subject folder (or to Homework when the folder is gone)
+    const f = schoolSubject && s.subjects[schoolSubject];
+    if (f) parts.push([VIEW_NAMES.subjects, "subjects"], [`${f.emoji} ${f.name}`, "subject|" + schoolSubject]);
+    else parts.push([VIEW_NAMES.homework, "homework"]);
+    parts.push([schoolView === "worksheet" ? "📝 Worksheet" : "📖 Explanation", null]);
   } else parts.push([VIEW_NAMES[schoolView], null]);
   return `<nav class="bd-crumb" aria-label="Where you are">${parts.map(([label, view], i) => i < parts.length - 1
     ? `<button data-scgo="${view}">${safe(label)}</button><span class="sep">›</span>` : `<b>${safe(label)}</b>`).join("")}</nav>`;
@@ -5100,7 +5262,8 @@ function schoolHomeHtml(s, isDad) {
     ["reports", "📄", "Reports", "Make a report"]
   ];
   const recent = filesOf(s).slice(0, 3);
-  return `<div class="bd-tiles">${tiles.map(([view, emoji, label, sub]) => `<button class="bd-tile bd-${view}" data-scgo="${view}">
+  return `<div class="sc-actions ai-home-actions"><button class="pill ai-add" data-aiadd="">📥 Add school work</button></div>
+    <div class="bd-tiles">${tiles.map(([view, emoji, label, sub]) => `<button class="bd-tile bd-${view}" data-scgo="${view}">
       <span class="e">${emoji}</span><b>${label}</b><small>${safe(sub)}</small></button>`).join("")}</div>
     <div class="card bd-card"><h2>📁 Recent files</h2>${recent.length ? `<ul class="list">${recent.map(f => fileRowHtml(f, s)).join("")}</ul>`
       : `<p class="sc-empty">No files yet. Open a subject and tap ⬆ Upload.</p>`}</div>
@@ -5154,6 +5317,7 @@ function schoolFolderHtml(s, isDad) {
       <h2>${safe(f.name)}</h2>${isDad && !editing ? `<span class="bd-head-btns">${itemBtns("subject", schoolSubject)}</span>` : ""}</div>`;
   if (editing) html += subjectFormHtml(f);
   html += `<div class="sc-actions bd-actions">
+      <button class="pill ai-add" data-aiadd="${safe(schoolSubject)}">📥 Add school work</button>
       <button class="pill" data-scupload="${safe(f.name)}">⬆ Upload</button>
       <button class="pill" data-scedit="link">🔗 Add link</button>
       <button class="pill" data-scedit="note">➕ Note</button>
@@ -5163,6 +5327,7 @@ function schoolFolderHtml(s, isDad) {
   if (schoolEdit === "note") html += noteFormHtml(s);
   if (schoolEdit === "grade" && isDad) html += gradeFormHtml(s, f.name);
   if (schoolEdit === "task") html += taskFormHtml(s, f.name);
+  html += aiMount(() => workListNode(s, f.name, c));   // 📥 School work (🤖 read)
   html += `<div class="sc-grid">
     <div class="card bd-card"><h2>📁 Files</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s)).join("")}</ul>` : `<p class="sc-empty">No files yet. Tap ⬆ Upload.</p>`}</div>
     <div class="card bd-card"><h2>📝 Homework & exams</h2>${tasksListHtml(s, tasks)}</div>
@@ -5170,6 +5335,8 @@ function schoolFolderHtml(s, isDad) {
       ${marks.length ? marksListHtml(marks) : `<p class="sc-empty">No marks yet.</p>`}</div>
     <div class="card bd-card"><h2>🗒️ Notes</h2>${notes.length ? notes.map(n => `<div class="sc-ss"><div class="sc-head" style="margin:0"><b>${shortDate(n.date)}</b>
         ${canChange(n) ? `<span>${itemBtns("note", n.id)}</span>` : ""}</div><p>${safe(n.text)}</p></div>`).join("") : `<p class="sc-empty">No notes yet.</p>`}</div>
+    ${aiMount(() => aiListCard("📝 Worksheets", wsListNode(wsOf(schoolKid, f.name), false), "No worksheets yet. Tap 📝 Worksheet on a 📥 School work card."))}
+    ${aiMount(() => aiListCard("📖 Explanations", exListNode(exOf(schoolKid, f.name)), "No explanations yet. Tap 📖 Explain on a 📥 School work card."))}
   </div>`;
   return html;
 }
@@ -5215,7 +5382,9 @@ function schoolHomeworkHtml(s) {
   const open = schoolEdit === "task" && !schoolEditId;
   const all = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t }));
   return `<div class="bd-head"><h2>📝 Homework & exams</h2>${open ? "" : `<button class="edit" data-scedit="task">➕ Add</button>`}</div>
-    ${open ? taskFormHtml(s, "") : ""}<div class="card bd-card">${tasksListHtml(s, all)}</div>`;
+    ${open ? taskFormHtml(s, "") : ""}<div class="card bd-card">${tasksListHtml(s, all)}</div>
+    <div style="height:18px"></div>${aiMount(() => aiListCard("📝 Worksheets", wsListNode(wsOf(schoolKid), true),
+      "No worksheets yet. Open a subject, add 📥 School work, then tap 📝 Worksheet."))}`;
 }
 // To do (soonest first), then the last ones done
 function tasksListHtml(s, all) {
@@ -5462,7 +5631,7 @@ function closeSchoolForm() { schoolEdit = schoolEditId = null; schoolFresh = tru
 const scErr = msg => { $("scErr").textContent = msg; };
 // Renames a subject everywhere (homework, marks, files, notes, timetable)
 function renameSubject(s, from, to) {
-  [s.grades, s.tasks, s.files, s.notes].forEach(list => Object.values(list).forEach(x => { if (sameSubject(x.subject, from)) x.subject = to; }));
+  [s.grades, s.tasks, s.files, s.notes, s.work].forEach(list => Object.values(list).forEach(x => { if (sameSubject(x.subject, from)) x.subject = to; }));
   Object.values(s.info.timetable).forEach(day => day.forEach((x, n) => { if (sameSubject(x, from)) day[n] = to; }));
 }
 
@@ -5485,7 +5654,7 @@ function saveSchoolForm(what) {
     if (subjectList(s).some(x => x.id !== schoolEditId && sameSubject(x.name, name))) return scErr("There's already a folder with that name.");
     if (schoolEditId && s.subjects[schoolEditId]) {
       const old = s.subjects[schoolEditId];
-      if (!sameSubject(old.name, name) || old.name !== name) renameSubject(s, old.name, name);
+      if (!sameSubject(old.name, name) || old.name !== name) { renameSubject(s, old.name, name); aiRenameSubject(schoolKid, old.name, name); }
       Object.assign(old, { name, emoji, color });
     } else s.subjects["s" + newId()] = { name, emoji, color, order: subjectList(s).length };
   } else if (what === "grade" && isDad) {
@@ -5496,7 +5665,8 @@ function saveSchoolForm(what) {
     if (!(max > 0)) return scErr("“Out of” must be more than 0.");
     if (score > max) return scErr("The score can't be more than “Out of”.");
     const old = schoolEditId && s.grades[schoolEditId];
-    s.grades[schoolEditId || newId()] = { subject: subject.slice(0, 30), date, type: $("scgType").value, score, max, ...(old && old.task ? { task: old.task } : {}) };
+    s.grades[schoolEditId || newId()] = { subject: subject.slice(0, 30), date, type: $("scgType").value, score, max, ...(old && old.task ? { task: old.task } : {}),
+                                          ...(old && old.worksheet ? { worksheet: old.worksheet } : {}) };
   } else if (what === "task") {
     const subject = v("sctSubject"), due = v("sctDue"), old = schoolEditId && s.tasks[schoolEditId];
     if (old && !canChange(old)) return;
@@ -5539,20 +5709,23 @@ function saveSchoolForm(what) {
 function deleteSchoolItem(what, id) {
   if (!schoolKid) return;
   const s = schoolFor(schoolKid);
-  const part = { grade: "grades", task: "tasks", review: "reviews", seesaw: "seesaw", note: "notes", subject: "subjects", file: "files" }[what];
+  const part = { grade: "grades", task: "tasks", review: "reviews", seesaw: "seesaw", note: "notes", subject: "subjects", file: "files", work: "work" }[what];
   const item = part && s[part][id];
   if (!item) return;
   const dadOnly = ["grade", "review", "seesaw", "subject"];
   if (dadOnly.includes(what) ? !isDadNow() : !canChange(item)) return toast(`Ask ${dadName()} 🙂`);
   const label = what === "task" ? (item.kind === "exam" ? "exam" : "homework") : what === "seesaw" ? "Seesaw note"
-    : what === "subject" ? `subject folder “${item.name}”` : what === "file" ? `file “${item.name}”` : what === "grade" ? "mark" : what;
-  const extra = what === "subject" ? "\n\nIts homework, marks, files and notes are kept." : "";
+    : what === "subject" ? `subject folder “${item.name}”` : what === "file" ? `file “${item.name}”` : what === "grade" ? "mark"
+    : what === "work" ? `school work “${item.title}”` : what;
+  const extra = what === "subject" ? "\n\nIts homework, marks, files and notes are kept." : what === "work" ? "\n\nIts files, worksheets and explanations are kept." : "";
   if (!confirm(`Delete this ${label}?${extra}`)) return;
   if (what === "seesaw" && item.photo) deletePhoto(id);
   if (what === "file") {
     if (item.kind !== "link") deleteFileData(id);
     Object.values(s.tasks).forEach(t => { if (t.answer === id) delete t.answer; });   // answers deleted: back to "To do"
+    Object.values(s.work).forEach(w => { w.files = w.files.filter(f => f !== id); });   // 📥 no longer on its school work card
   }
+  if (what === "work") Object.values(s.files).forEach(f => { if (f.work === id) delete f.work; });   // its files stay in the folder
   if (what === "task") Object.entries(s.files).forEach(([fid, f]) => { if (f.task === id) delete f.task; });   // its answers stay as a file
   delete s[part][id];
   if (schoolEditId === id) schoolEdit = schoolEditId = null;
@@ -5621,6 +5794,14 @@ $("scr-school").addEventListener("click", e => {
   if (ds.scfile) return openFile(ds.scfile);
   if (ds.scupload !== undefined) return startUpload(ds.scupload);
   if (ds.scprompt) { const [kind, id] = ds.scprompt.split("|"); return showPrompt(kind, id); }
+  // 🤖 AI help
+  if (ds.aiadd !== undefined) return openWork(ds.aiadd);
+  if (ds.aiws) return wsFromWork(ds.aiws);
+  if (ds.aiex) return exFromWork(ds.aiex);
+  if (ds.aiopen) { const [view, id] = ds.aiopen.split("|"); return openAiDoc(view, id); }
+  if (ds.wsact) return wsAction(ds.wsact);
+  if (ds.exact) return exAction(ds.exact);
+  if (ds.wsfdel) return removeAnswerFile(ds.wsfdel);
   if (ds.screport) return reportAction(ds.screport);
   if (ds.scstar) {
     const pick = b.closest(".sc-starpick");
@@ -5830,22 +6011,27 @@ const isFileUrl = u => typeof u === "string" && /^data:(image\/jpeg|application\
 const bytesOf = url => Math.round((url.length - url.indexOf(",") - 1) * 0.75);
 function fileRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "files", id); }
 // A chosen file → { kind, name, size, url }; throws "big" (too big) or "type" (not a photo / PDF)
-async function readSchoolFile(file) {
-  const name = String(file.name || "File").replace(/\.[^.]+$/, "").slice(0, 60) || "File";
+// (width: photos are made this wide at most. 🤖 AI help uses 1600px, so the AI can read the small writing.)
+const fileNameOf = file => String(file.name || "File").replace(/\.[^.]+$/, "").slice(0, 60) || "File";
+const isPdfFile = file => file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+function readPdf(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).replace(/^data:[^;,]*/, "data:application/pdf"));
+    r.onerror = () => reject(new Error("read"));
+    r.readAsDataURL(file);
+  });
+}
+async function readSchoolFile(file, width = 1000) {
+  const name = fileNameOf(file);
   if (/^image\//.test(file.type)) {
-    const url = await shrinkPhoto(file, 1000, FILE_MAX);
+    const url = await shrinkPhoto(file, width, FILE_MAX);
     if (bytesOf(url) > FILE_MAX) throw new Error("big");
     return { kind: "image", name, size: bytesOf(url), url };
   }
-  if (file.type === "application/pdf" || /\.pdf$/i.test(file.name || "")) {
+  if (isPdfFile(file)) {
     if (file.size > FILE_MAX) throw new Error("big");
-    const url = await new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result).replace(/^data:[^;,]*/, "data:application/pdf"));
-      r.onerror = () => reject(new Error("read"));
-      r.readAsDataURL(file);
-    });
-    return { kind: "pdf", name, size: file.size, url };
+    return { kind: "pdf", name, size: file.size, url: await readPdf(file) };
   }
   throw new Error("type");
 }
@@ -5956,6 +6142,704 @@ document.addEventListener("keydown", e => {
   if (!$("fileModal").hidden) closeFile();
   if (!$("promptModal").hidden) closePrompt();
 });
+
+// =====================================================================
+//  🤖 AI HELP (School): 📥 Add school work · 📝 Worksheet · 📖 Explain · ✅ Check
+//  Every call goes to the family's own AI server (a Cloudflare Worker). The Claude key lives ONLY there,
+//  never in this app. The server only answers the signed-in family account (its Firebase login token goes with each call).
+//  Each call: POST AI_URL/<action> with JSON → { result } or { error }.
+//  Saved:  📥 school work cards → data.school[kid].work (like the other School lists, see cleanSchool)
+//          📝 worksheets        → their own cloud documents families/{family}/worksheets/{id}
+//          📖 explanations      → their own cloud documents families/{family}/explanations/{id}
+//  Text from the AI is ALWAYS put on the page as plain text (textContent, see h()), never as HTML.
+//  Kids and Bro2a can use everything. Only Bro2a deletes worksheets / explanations and changes scores.
+// =====================================================================
+const AI_URL = "https://family-plan-ai.hanifamily.workers.dev";
+const AI_OFF = "AI needs internet and the family sign-in";
+const AI_MAX = 4 * 1024 * 1024;   // all the files of one AI call together (the server takes about 4.5 MB)
+const WS_COUNTS = [5, 10, 15];
+const WS_KINDS = ["multiple_choice", "true_false", "fill_blank", "short_answer", "matching", "ordering"];
+const aiDocs = { worksheets: {}, explanations: {} };   // id → document, kept up to date from the cloud
+let aiWait = null;    // the AI button that's waiting for an answer ("🤖 Thinking…")
+let aiPick = null;    // what the next chosen files are for: "work" (📥 Add school work) or { ws: id } (the answers)
+let aiMounts = [];    // the AI parts of the School page, built after its HTML (see fillAiMounts)
+
+// Builds a page element. Text (strings) always goes in as plain text, never as HTML.
+// props: class, text, data: { key: value } (data-key), any other attribute; false / null = left out.
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  Object.entries(props || {}).forEach(([k, v]) => {
+    if (v == null || v === false) return;
+    if (k === "class") el.className = v;
+    else if (k === "data") Object.entries(v).forEach(([dk, dv]) => { el.dataset[dk] = dv; });
+    else el.setAttribute(k, v === true ? "" : String(v));
+  });
+  kids.flat(Infinity).forEach(c => { if (c != null && c !== false) el.append(c instanceof Node ? c : String(c)); });
+  return el;
+}
+// A place in the School page's HTML that gets an element built with h() (fn returns it)
+const aiMount = fn => `<div data-aimount="${aiMounts.push(fn) - 1}"></div>`;
+function fillAiMounts(root) {
+  root.querySelectorAll("[data-aimount]").forEach(box => {
+    const fn = aiMounts[Number(box.dataset.aimount)], node = fn && fn();
+    if (node) box.replaceWith(node); else box.remove();
+  });
+  aiMounts = [];
+}
+
+// ---------- Is the AI there? (signed in to the family account, and online) ----------
+const aiReady = () => cloud.enabled && !!cloud.user && !!cloud.db && navigator.onLine;
+// "🤖 Thinking…" on the waiting button (and it can't be tapped again); the others get their own words back
+function showAiWait() {
+  document.querySelectorAll("[data-aiwait]").forEach(b => {
+    if (!b.dataset.label) b.dataset.label = b.textContent;
+    const on = !!aiWait && b.dataset.aiwait === aiWait;
+    b.disabled = on;
+    b.textContent = on ? "🤖 Thinking…" : b.dataset.label;
+  });
+}
+// Asks the AI server. → the result, or null (then a friendly message was shown)
+async function callAi(action, body, key) {
+  if (!aiReady()) { toast("🔌 " + AI_OFF, 4500); return null; }
+  if (aiWait) { toast("🤖 Still thinking… one moment, please.", 2500); return null; }
+  aiWait = key || action;
+  showAiWait();
+  try {
+    const token = await cloud.user.getIdToken();
+    const res = await fetch(AI_URL + "/" + action, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify(body)
+    });
+    let out = null;
+    try { out = await res.json(); } catch (e) {}
+    if (res.ok && out && out.result && typeof out.result === "object" && !out.error) return out.result;
+    const why = out && typeof out.error === "string" && out.error.trim() ? out.error.trim().slice(0, 200) : "The AI helper couldn't answer. Please try again.";
+    toast("🤖 " + why, 5500);
+  } catch (e) {
+    toast(navigator.onLine ? "🤖 Couldn't reach the AI helper. Please try again." : "🔌 " + AI_OFF, 5000);
+  } finally {
+    aiWait = null;
+    showAiWait();
+  }
+  return null;
+}
+// A file for the AI: { name, mediaType, data } (data = the base64 part, without "data:…;base64,")
+const aiFile = (name, url) => ({ name, mediaType: url.slice(5, url.indexOf(";")), data: url.slice(url.indexOf(",") + 1) });
+const tooBigText = total => `📦 That's ${sizeText(total)}: too big for the AI (4 MB at most). Please remove some pages or photos.`;
+const kidNameOf = kid => userById(kid).name;
+const gradeOf = kid => schoolOf(kid).info.grade;   // the class from 🏫 School info, e.g. "Year 5"
+// "2026-10-19" → "19 October 2026"
+const longDate = s => fromYmd(s).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+// ---------- Cleaning what the AI (or the cloud) gives back ----------
+const okId = x => typeof x === "string" && /^[A-Za-z0-9_-]{1,40}$/.test(x);
+const aiTxt = (x, n) => typeof x === "string" ? x.trim().slice(0, n) : typeof x === "number" && Number.isFinite(x) ? String(x) : "";
+const aiInt = (x, lo, hi, d) => { const n = Math.round(Number(x)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
+const aiNum = (x, lo, hi, d) => { const n = Number(x); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, Math.round(n * 100) / 100)) : d; };
+const aiArr = (x, n) => Array.isArray(x) ? x.slice(0, n) : [];
+const aiObjs = (x, n) => aiArr(x, n).filter(o => o && typeof o === "object" && !Array.isArray(o));
+const aiSearches = x => aiObjs(x, 6).map(o => ({ label: aiTxt(o.label, 80), query: aiTxt(o.query, 120) }))
+  .filter(o => o.query).map(o => ({ label: o.label || o.query, query: o.query }));
+// Who / what / when, the same for worksheets and explanations
+function aiMeta(d) {
+  return { kid: okId(d.kid) ? d.kid : "", subject: aiTxt(d.subject, 30), date: isYmd(d.date) ? d.date : todayYmd(),
+           by: okId(d.by) ? d.by : "", at: aiTxt(d.at, 40), ...(okId(d.work) ? { work: d.work } : {}) };
+}
+// A worksheet: { kid, subject, topics, count, title, intro, questions, youtube_searches, printable_searches,
+//                date, status: "To do" | "Answers uploaded" | "Checked ✓", by, at, work?, answers: [file ids], check? }
+function cleanWorksheet(d) {
+  if (!d || typeof d !== "object") return null;
+  const questions = aiObjs(d.questions, 40).map((q, i) => {
+    const kind = WS_KINDS.includes(q.kind) ? q.kind : "short_answer";
+    let options = aiArr(q.options, 12).map(o => aiTxt(o, 200)).filter(Boolean), lines = aiInt(q.answer_lines, 0, 12, 0);
+    if (kind === "true_false" && !options.length) options = ["True", "False"];
+    if (!options.length && !lines) lines = 1;   // always somewhere to write
+    return { number: aiInt(q.number, 1, 99, i + 1), kind, prompt: aiTxt(q.prompt, 1000), options, answer_lines: lines,
+             points: aiInt(q.points, 0, 100, 1), answer: aiTxt(q.answer, 1000) };
+  }).filter(q => q.prompt);
+  if (!questions.length) return null;
+  const check = cleanCheck(d.check, questions.reduce((n, q) => n + q.points, 0));
+  const answers = aiArr(d.answers, 20).filter(okId);
+  return { ...aiMeta(d), title: aiTxt(d.title, 120) || "Worksheet", intro: aiTxt(d.intro, 1500),
+           topics: aiArr(d.topics, 12).map(t => aiTxt(t, 60)).filter(Boolean), count: aiInt(d.count, 1, 40, questions.length),
+           questions, youtube_searches: aiSearches(d.youtube_searches), printable_searches: aiSearches(d.printable_searches),
+           answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}) };
+}
+// The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote? }
+function cleanCheck(c, fallbackMax) {
+  if (!c || typeof c !== "object") return null;
+  let max = aiNum(c.max_score, 0, 1000, 0);
+  if (!(max > 0)) max = fallbackMax;
+  if (!(max > 0)) return null;
+  const out = { score: aiNum(c.score, 0, max, 0), max_score: max, overall_note: aiTxt(c.overall_note, 800),
+                questions: aiObjs(c.questions, 40).map(q => ({ number: aiInt(q.number, 0, 99, 0), correct: q.correct === true,
+                                                               points: aiNum(q.points, 0, 100, 0), note: aiTxt(q.note, 400) })),
+                at: isYmd(c.at) ? c.at : todayYmd() };
+  if (c.aiScore != null && Number.isFinite(Number(c.aiScore))) out.aiScore = aiNum(c.aiScore, 0, 1000, 0);
+  if (aiTxt(c.dadNote, 400)) out.dadNote = aiTxt(c.dadNote, 400);
+  return out;
+}
+// An explanation: { kid, subject, topic, title, sections, key_words, try_this, youtube_searches, printable_searches, date, by, at, work? }
+function cleanExplain(d) {
+  if (!d || typeof d !== "object") return null;
+  const sections = aiObjs(d.sections, 12).map(x => ({ heading: aiTxt(x.heading, 120), text: aiTxt(x.text, 3000) })).filter(x => x.heading || x.text);
+  if (!sections.length) return null;
+  return { ...aiMeta(d), topic: aiTxt(d.topic, 200), title: aiTxt(d.title, 120) || aiTxt(d.topic, 120) || "Explanation", sections,
+           key_words: aiObjs(d.key_words, 20).map(k => ({ word: aiTxt(k.word, 60), meaning: aiTxt(k.meaning, 400) })).filter(k => k.word),
+           try_this: aiArr(d.try_this, 10).map(t => aiTxt(t, 500)).filter(Boolean),
+           youtube_searches: aiSearches(d.youtube_searches), printable_searches: aiSearches(d.printable_searches) };
+}
+
+// ---------- The cloud: worksheets and explanations (each its own document) ----------
+const aiRef = (name, id) => cloud.fb.doc(cloud.db, "families", cloud.user.uid, name, id);
+function aiSave(name, id, doc) {
+  aiDocs[name][id] = doc;
+  if (cloud.user && cloud.db) cloud.fb.setDoc(aiRef(name, id), doc).catch(cloudError);
+}
+function aiDelete(name, id) {
+  delete aiDocs[name][id];
+  if (cloud.user && cloud.db) cloud.fb.deleteDoc(aiRef(name, id)).catch(cloudError);
+}
+// Signed in: listen to both lists (changes from any phone arrive here; Firestore also keeps an offline copy)
+function aiListen() {
+  const fb = cloud.fb, uid = cloud.user.uid;
+  ["worksheets", "explanations"].forEach(name => {
+    aiDocs[name] = {};
+    cloud.unsub.push(fb.onSnapshot(fb.collection(cloud.db, "families", uid, name), snap => {
+      const all = {};
+      snap.forEach(d => { const x = (name === "worksheets" ? cleanWorksheet : cleanExplain)(d.data()); if (x && okId(d.id)) all[d.id] = x; });
+      aiDocs[name] = all;
+      if (screen === "school") render();
+    }, err => console.warn("AI " + name + ":", err)));
+  });
+}
+// A subject folder was renamed: its worksheets and explanations follow
+function aiRenameSubject(kid, from, to) {
+  ["worksheets", "explanations"].forEach(name => Object.entries(aiDocs[name]).forEach(([id, d]) => {
+    if (d.kid === kid && sameSubject(d.subject, from)) aiSave(name, id, { ...d, subject: to });
+  }));
+}
+const byNewest = (a, b) => b.date.localeCompare(a.date) || String(b.at).localeCompare(String(a.at)) || b.id.localeCompare(a.id);
+const wsOf = (kid, subject) => Object.entries(aiDocs.worksheets).map(([id, w]) => ({ id, ...w }))
+  .filter(w => w.kid === kid && (!subject || sameSubject(w.subject, subject))).sort(byNewest);
+const exOf = (kid, subject) => Object.entries(aiDocs.explanations).map(([id, x]) => ({ id, ...x }))
+  .filter(x => x.kid === kid && (!subject || sameSubject(x.subject, subject))).sort(byNewest);
+
+// ---------- 📥 Add school work ----------
+let aw = null;   // the open box: { kid, items: [{ id (the saved file, or null), name, kind, url, size }] }
+function openWork(folderId) {
+  if (!schoolKid || !exists(me)) return;
+  const s = schoolOf(schoolKid);
+  aw = { kid: schoolKid, items: [] };
+  $("awSubject").replaceChildren(h("option", { value: "" }, "🤖 Let the AI find the subject"),
+    ...subjectList(s).map(x => h("option", { value: x.id }, `${x.emoji} ${x.name}`)));
+  $("awSubject").value = folderId && s.subjects[folderId] ? folderId : "";
+  $("awErr").textContent = aiReady() ? "" : `🔌 ${AI_OFF}. You can still add the files now.`;
+  drawWorkList();
+  $("aiWorkModal").hidden = false;
+  $("awPick").focus();
+}
+function closeWork() { $("aiWorkModal").hidden = true; aw = null; }
+function drawWorkList() {
+  if (!aw) return;
+  const total = aw.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  $("awSize").textContent = aw.items.length ? `${aw.items.length} ${aw.items.length === 1 ? "file" : "files"} · ${sizeText(total)}` : "";
+  $("awList").replaceChildren(...aw.items.map((x, i) => h("li", null,
+    h("span", { class: "uemoji" }, FILE_EMOJI[x.kind]),
+    h("div", { class: "what" }, x.name, h("small", null, sizeText(x.size) + (x.id ? " · kept in the School files" : " · too big to keep (700 KB at most): 🤖 only reads it now"))),
+    h("button", { type: "button", class: "x", "aria-label": "Remove " + x.name, data: { awdel: i } }, "✕"))));
+}
+// The chosen files: kept in the School files (like ⬆ Upload), and ready for the AI (photos: 1600px JPEG)
+async function addWorkFiles(files) {
+  const box = aw;
+  if (!box) return;
+  const s = schoolFor(box.kid), problems = [];
+  $("awErr").textContent = "⏳ Getting the files ready…";
+  let kept = 0;
+  for (const file of files) {
+    let r = null, keep = true;
+    try { r = await readSchoolFile(file, 1600); }
+    catch (err) {
+      // A PDF too big to keep can still be read by the AI now (up to 4 MB)
+      if (err.message === "big" && isPdfFile(file) && file.size <= AI_MAX) {
+        try { r = { kind: "pdf", name: fileNameOf(file), size: file.size, url: await readPdf(file) }; keep = false; } catch (e) {}
+      }
+      if (!r) problems.push(err.message === "type" ? `“${file.name}”: only photos and PDF files, please.`
+        : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.`);
+    }
+    if (!r) continue;
+    let id = null;
+    if (keep) {
+      const folder = s.subjects[$("awSubject").value];
+      id = newId();
+      s.files[id] = { subject: folder ? folder.name : "", name: r.name, kind: r.kind, size: r.size, date: todayYmd(), by: me };
+      storeFileData(id, box.kid, r.url);
+      kept++;
+    }
+    box.items.push({ id, name: r.name, kind: r.kind, url: r.url, size: r.size });
+  }
+  if (kept) { writeData(); render(); }
+  if (aw !== box) return;   // the box was closed meanwhile
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  $("awErr").textContent = problems.length ? problems.join(" ") : total > AI_MAX ? tooBigText(total) : "";
+  drawWorkList();
+}
+// ✕ in the box: the file is taken out again (it was only just added)
+function removeWorkFile(i) {
+  const x = aw && aw.items[i];
+  if (!x) return;
+  const s = schoolFor(aw.kid), f = x.id && s.files[x.id];
+  if (f && canChange(f)) { deleteFileData(x.id); delete s.files[x.id]; writeData(); render(); }
+  aw.items.splice(i, 1);
+  $("awErr").textContent = "";
+  drawWorkList();
+}
+// The folder for the subject the AI found (same name, one name inside the other, or the same known subject)
+function folderIdFor(s, name) {
+  if (!name) return null;
+  const list = subjectList(s), n = name.toLowerCase();
+  const hit = list.find(x => sameSubject(x.name, name)) || list.find(x => n.includes(x.name.toLowerCase()) || x.name.toLowerCase().includes(n));
+  if (hit) return hit.id;
+  const known = findSubject(name), same = known && list.find(x => known.find.test(x.name));
+  return same ? same.id : null;
+}
+// 🤖 Read it → { subject, title, topics[], what_to_do } → a "School work" card in that subject
+async function readWork() {
+  const box = aw;
+  if (!box) return;
+  if (!box.items.length) return $("awErr").textContent = "Add the PDF or photos first (📷 Add photos or PDF).";
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  if (total > AI_MAX) return $("awErr").textContent = tooBigText(total);
+  const chosen = $("awSubject").value, items = [...box.items];
+  $("awErr").textContent = "";
+  const r = await callAi("analyze", { files: items.map(x => aiFile(x.name, x.url)), kidName: kidNameOf(box.kid), grade: gradeOf(box.kid) }, "analyze");
+  if (!r) return;
+  const s = schoolFor(box.kid), subject = aiTxt(r.subject, 30);
+  let folderId = s.subjects[chosen] ? chosen : folderIdFor(s, subject);
+  if (!folderId) {   // a subject without a folder yet: make one
+    const name = subject || "Other", known = findSubject(name), colors = Object.keys(PALETTE);
+    folderId = folderIdFor(s, name) || "s" + newId();
+    if (!s.subjects[folderId]) s.subjects[folderId] = { name, emoji: known ? known.emoji : "📘", color: colors[subjectList(s).length % colors.length] || "blue", order: subjectList(s).length };
+  }
+  const folder = s.subjects[folderId], id = newId(), fileIds = items.map(x => x.id).filter(f => f && s.files[f]);
+  s.work[id] = { subject: folder.name, title: aiTxt(r.title, 80) || "School work", date: todayYmd(), what_to_do: aiTxt(r.what_to_do, 600),
+                 topics: aiArr(r.topics, 8).map(t => aiTxt(t, 40)).filter(Boolean), files: fileIds, by: me };
+  fileIds.forEach(f => { s.files[f].subject = folder.name; s.files[f].work = id; });
+  writeData();
+  if (aw === box) closeWork();
+  if (schoolKid === box.kid && screen === "school") goSchool("subject", folderId);
+  toast(`📥 Saved in ${folder.emoji} ${folder.name}!`, 3000);
+}
+$("aiWorkModal").addEventListener("click", e => {
+  if (e.target === $("aiWorkModal")) return closeWork();
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.id === "awClose") return closeWork();
+  if (b.id === "awPick") { aiPick = "work"; $("aiFile").value = ""; return $("aiFile").click(); }
+  if (b.id === "awRead") return readWork();
+  if (b.dataset.awdel !== undefined) return removeWorkFile(Number(b.dataset.awdel));
+});
+$("aiFile").addEventListener("change", e => {
+  const files = [...e.target.files], target = aiPick;
+  aiPick = null;
+  e.target.value = "";
+  if (!files.length || !target) return;
+  if (target === "work") return addWorkFiles(files);
+  if (target.ws) return addAnswerFiles(target.ws, files);
+});
+
+// ---------- 📥 The School work cards (in the subject folder) ----------
+function workListNode(s, subject, c) {
+  const list = Object.entries(s.work).map(([id, w]) => ({ id, ...w })).filter(w => sameSubject(w.subject, subject))
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  return h("div", { class: "card bd-card", style: "margin-bottom:18px" }, h("h2", null, "📥 School work"),
+    list.length ? list.map(w => workNode(s, w, c))
+      : h("p", { class: "sc-empty" }, "Nothing yet. Tap 📥 Add school work: add the PDF or photos, and 🤖 reads them for you."));
+}
+function workNode(s, w, c) {
+  const files = w.files.filter(id => s.files[id]);
+  return h("div", { class: "ai-work" },
+    h("div", { class: "ai-work-top" },
+      h("div", null, h("div", { class: "ai-work-title" }, "📥 " + w.title),
+        h("span", { class: "ai-work-date" }, shortDate(w.date) + (w.by && w.by !== DAD && isDadNow() ? " · by " + userById(w.by).name : ""))),
+      canChange(w) ? h("button", { class: "x", "aria-label": "Delete", data: { scdel: "work|" + w.id } }, "🗑️") : null),
+    w.what_to_do ? h("p", { class: "ai-todo" }, "✏️ " + w.what_to_do) : null,
+    w.topics.length ? h("div", { class: "ai-chips", style: `--soft:${c.soft};--ink:${c.ink};--c:${c.color}` }, w.topics.map((t, i) => h("span", { class: "ai-chip" }, t,
+      h("button", { type: "button", title: "📝 Worksheet: " + t, "aria-label": "Worksheet on " + t, data: { aiws: w.id + "|" + i } }, "📝"),
+      h("button", { type: "button", title: "📖 Explain: " + t, "aria-label": "Explain " + t, data: { aiex: w.id + "|" + i, aiwait: "ex|" + w.id + "|" + i } }, "📖")))) : null,
+    files.length ? h("div", { class: "ai-files" }, files.map(id => h("button", { class: "linkbtn", data: { scfile: id } }, `${FILE_EMOJI[s.files[id].kind]} ${s.files[id].name}`))) : null,
+    h("div", { class: "ai-btns" },
+      h("button", { class: "primary", data: { aiws: w.id } }, "📝 Worksheet"),
+      h("button", { data: { aiex: w.id, aiwait: "ex|" + w.id } }, "📖 Explain")));
+}
+// "📝 Worksheets" / "📖 Explanations" lists
+function aiListCard(title, list, empty) {
+  return h("div", { class: "card bd-card" }, h("h2", null, title),
+    list || h("p", { class: "sc-empty" }, cloud.user ? empty : "🔌 These show when this device is online and signed in to the family account."));
+}
+function wsListNode(list, showSubject) {
+  if (!list.length) return null;
+  return h("ul", { class: "list" }, list.map(w => h("li", null, h("button", { class: "bd-file", data: { aiopen: "worksheet|" + w.id } },
+    h("span", { class: "e" }, "📝"),
+    h("span", { class: "what" }, w.title, h("small", null,
+      [showSubject ? w.subject : "", shortDate(w.date), `${w.questions.length} questions`].filter(Boolean).join(" · ") + " · ",
+      h("span", { class: "ai-status " + (w.check ? "done" : w.answers.length ? "up" : "") }, w.status + (w.check ? ` ${num(w.check.score)}/${num(w.check.max_score)}` : "")))))))) ;
+}
+function exListNode(list) {
+  if (!list.length) return null;
+  return h("ul", { class: "list" }, list.map(x => h("li", null, h("button", { class: "bd-file", data: { aiopen: "explain|" + x.id } },
+    h("span", { class: "e" }, "📖"), h("span", { class: "what" }, x.title, h("small", null, shortDate(x.date) + (x.topic && x.topic !== x.title ? " · " + x.topic : "")))))));
+}
+// Open a saved worksheet / explanation (from the lists, or right after it was made)
+function openAiDoc(view, id) {
+  const d = (view === "worksheet" ? aiDocs.worksheets : aiDocs.explanations)[id];
+  if (!d || (view !== "worksheet" && view !== "explain")) return;
+  if (me !== DAD && d.kid !== me) return;   // a kid only opens their own
+  if (me === DAD && exists(d.kid)) schoolKid = d.kid;
+  const f = folderOf(schoolOf(d.kid), d.subject);
+  schoolView = view; schoolSubject = f ? f.id : null; schoolDoc = id;
+  schoolEdit = schoolEditId = null; schoolFresh = true; schoolReport = false; wsAnswers = false; wsFix = false;
+  if (screen !== "school") go("school"); else render();
+  window.scrollTo(0, 0);
+}
+// Back from a worksheet / explanation: its subject folder (or Homework)
+function leaveAiDoc() { if (schoolSubject && schoolOf(schoolKid).subjects[schoolSubject]) goSchool("subject", schoolSubject); else goSchool("homework"); }
+const notHere = () => `<div class="card"><p class="sc-empty">${cloud.user ? "It isn't here (maybe it was deleted). It shows when this device is online." : "🔌 " + AI_OFF + "."}</p></div>`;
+
+// ---------- ▶️ YouTube / 🖨️ printable links (they open in a new tab) ----------
+function aiLinksNode(d) {
+  const yt = d.youtube_searches || [], pr = d.printable_searches || [];
+  if (!yt.length && !pr.length) return null;
+  const link = (href, text, cls) => h("a", { class: "ai-link " + cls, href, target: "_blank", rel: "noopener noreferrer" }, text);
+  return h("div", { class: "card bd-card ai-links ai-narrow" },
+    yt.length ? [h("h2", null, "▶️ Watch on YouTube"), h("div", { class: "ai-linkrow" },
+      yt.map(x => link("https://www.youtube.com/results?search_query=" + encodeURIComponent(x.query), "▶️ " + x.label, "yt")))] : null,
+    pr.length ? [h("h2", null, "🖨️ Printable resources"), h("div", { class: "ai-linkrow" },
+      pr.map(x => link("https://www.google.com/search?q=" + encodeURIComponent(x.query + " printable worksheet pdf"), "🖨️ " + x.label, "")))] : null);
+}
+
+// ---------- 🖨️ Printing a worksheet / answer key / explanation: A4 portrait, only that sheet ----------
+// (The app's print style already hides everything but #printArea. A4 portrait is added just for this print.)
+function printAi(node) {
+  $("printArea").replaceChildren(h("div", { class: "ai-print" }, node));
+  if (!$("aiPageSize")) document.head.appendChild(h("style", { id: "aiPageSize" }, "@page { size: A4 portrait; margin: 12mm; }"));
+  window.print();
+}
+window.addEventListener("beforeprint", () => { if (!$("printArea").querySelector(".ai-print") && $("aiPageSize")) $("aiPageSize").remove(); });
+window.addEventListener("afterprint", () => {
+  if (!$("printArea").querySelector(".ai-print")) return;
+  $("printArea").replaceChildren();
+  if ($("aiPageSize")) $("aiPageSize").remove();
+});
+
+// ---------- 📝 Make a worksheet (the small box: topics + how many questions) ----------
+let wso = null;   // { kid, subject, topics, count, work }
+function openWsOpts(kid, subject, topics, count, work) {
+  if (!kid || !exists(me)) return;
+  wso = { kid, subject, topics: topics.length ? topics : [subject], count: WS_COUNTS.includes(count) ? count : 10, work: work || null };
+  $("wsoHint").textContent = `${subject} for ${kidNameOf(kid)}. The answers stay hidden until you tap 🔑.`;
+  $("wsoTopics").replaceChildren(...wso.topics.map((t, i) => h("label", { class: "checkline" },
+    h("input", { type: "checkbox", value: i, checked: true }), h("span", null, t))));
+  $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
+    h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
+  $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
+  $("aiWsModal").hidden = false;
+  $("wsoMake").focus();
+}
+function closeWsOpts() { $("aiWsModal").hidden = true; wso = null; }
+// From a School work card (all its topics) or one topic chip
+function wsFromWork(v) {
+  const [wid, i] = v.split("|"), w = schoolOf(schoolKid).work[wid];
+  if (!w) return;
+  const topics = i !== undefined ? [w.topics[Number(i)]].filter(Boolean) : w.topics.length ? w.topics : [w.title];
+  openWsOpts(schoolKid, w.subject, topics, 10, wid);
+}
+async function makeWorksheet() {
+  const o = wso;
+  if (!o) return;
+  const topics = [...$("wsoTopics").querySelectorAll("input:checked")].map(x => o.topics[Number(x.value)]).filter(Boolean);
+  if (!topics.length) return $("wsoErr").textContent = "Please tick at least one topic.";
+  const count = Number((document.querySelector('input[name="wsoN"]:checked') || {}).value) || 10;
+  $("wsoErr").textContent = "";
+  const r = await callAi("worksheet", { kidName: kidNameOf(o.kid), grade: gradeOf(o.kid), subject: o.subject, topics, count }, "worksheet");
+  if (!r) return;
+  const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(),
+                              answers: [], ...(o.work ? { work: o.work } : {}) });
+  if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
+  delete ws.check;
+  const id = newId();
+  aiSave("worksheets", id, ws);
+  if (wso === o) closeWsOpts();
+  openAiDoc("worksheet", id);
+  toast("📝 Your worksheet is ready!", 2500);
+}
+$("aiWsModal").addEventListener("click", e => {
+  if (e.target === $("aiWsModal")) return closeWsOpts();
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.id === "wsoCancel") return closeWsOpts();
+  if (b.id === "wsoMake") return makeWorksheet();
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("aiWorkModal").hidden) closeWork();
+  if (!$("aiWsModal").hidden) closeWsOpts();
+});
+
+// ---------- 📝 The worksheet page ----------
+const ptsText = n => `${num(n)} ${n === 1 ? "pt" : "pts"}`;
+const wsTotal = w => w.questions.reduce((n, q) => n + q.points, 0);
+// The sheet itself (on screen, and the same on paper). Answers only when showAns (never on the printed worksheet).
+function wsSheetNode(w, showAns) {
+  return h("div", { class: "ws-sheet" },
+    h("div", { class: "ws-namerow" }, h("span", null, "Name: ", h("b", null, kidNameOf(w.kid))), h("span", null, "Date: ", h("b", null, longDate(w.date)))),
+    h("div", { class: "ws-title" }, w.title),
+    h("div", { class: "ws-sub" }, [w.subject, w.topics.join(", ")].filter(Boolean).join(" · ")),
+    w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
+    h("ol", { class: "ws-qs" }, w.questions.map(q => h("li", { class: "ws-q" },
+      h("span", { class: "ws-num" }, String(q.number)),
+      h("div", null,
+        h("div", { class: "ws-prompt" }, q.prompt),
+        q.options.length ? h("ul", { class: "ws-opts" }, q.options.map(o => h("li", { class: "ws-opt" },
+          h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null,
+        Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
+        showAns ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
+      h("span", { class: "ws-pts" }, ptsText(q.points))))),
+    h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
+}
+// 🔑 The answer key: only the answers, on its own page
+function wsKeyNode(w) {
+  return h("div", { class: "ws-sheet" },
+    h("div", { class: "ws-namerow" }, h("span", null, "🔑 Answer key"), h("span", null, `${kidNameOf(w.kid)} · ${longDate(w.date)}`)),
+    h("div", { class: "ws-title" }, w.title),
+    h("ol", { class: "ws-qs" }, w.questions.map(q => h("li", { class: "ws-q" },
+      h("span", { class: "ws-num" }, String(q.number)), h("div", { class: "ws-ans" }, q.answer || "—"), h("span", { class: "ws-pts" }, ptsText(q.points))))),
+    h("div", { class: "ws-total" }, `Total: ${num(wsTotal(w))} points`));
+}
+function schoolWorksheetHtml(s, isDad) {
+  const w = aiDocs.worksheets[schoolDoc];
+  return w && w.kid === schoolKid ? aiMount(() => wsViewNode(w, schoolDoc, s, isDad)) : notHere();
+}
+function wsViewNode(w, id, s, isDad) {
+  const done = !!w.check, canAct = isDad || !done, files = w.answers.filter(f => s.files[f]);
+  return h("div", null,
+    h("div", { class: "ai-toolbar" },
+      h("button", { class: wsAnswers ? "primary" : null, "aria-pressed": String(wsAnswers), data: { wsact: "answers" } }, wsAnswers ? "🔑 Hide answers" : "🔑 Show answers"),
+      h("button", { data: { wsact: "print" } }, "🖨️ Print worksheet"),
+      h("button", { data: { wsact: "key" } }, "🖨️ Print answer key"),
+      h("button", { data: { wsact: "again" } }, "🔁 Make another"),
+      isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
+    wsSheetNode(w, wsAnswers),
+    // ✅ Upload the answers → 🤖 Check
+    h("div", { class: "card bd-card ai-narrow" },
+      h("div", { class: "sc-head" }, h("h2", null, done ? "✅ Checked" : "✅ Finished? Check it!"), h("span", { class: "ai-status " + (done ? "done" : files.length ? "up" : "") }, w.status)),
+      done ? resultNode(w) : h("p", { class: "hint" }, files.length ? "Your answers are uploaded. Tap 🤖 Check!"
+        : "Do the worksheet on paper, then upload a photo (or PDF) of your answers."),
+      files.length ? h("ul", { class: "list" }, files.map(fid => h("li", null,
+        h("button", { class: "bd-file", data: { scfile: fid } }, h("span", { class: "e" }, FILE_EMOJI[s.files[fid].kind]),
+          h("span", { class: "what" }, s.files[fid].name, h("small", null, `${shortDate(s.files[fid].date)} · ${sizeText(s.files[fid].size)}`))),
+        canAct && canChange(s.files[fid]) ? h("button", { class: "x", "aria-label": "Remove " + s.files[fid].name, data: { wsfdel: fid } }, "✕") : null))) : null,
+      h("div", { class: "ai-btns", style: "margin-top:12px" },
+        canAct ? h("button", { data: { wsact: "upload" } }, "⬆ Upload my answers") : null,
+        canAct && files.length ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "🤖 Check") : null,
+        isDad ? h("button", { data: { wsact: "fix" } }, done ? "✏️ Change score" : "✏️ Add score") : null),
+      isDad && wsFix ? fixFormNode(w) : null),
+    aiLinksNode(w));
+}
+// The score big, ✓ / ✗ for each question with its note, and the overall note
+function resultNode(w) {
+  const c = w.check, most = Object.fromEntries(w.questions.map(q => [q.number, q.points])), pct = Math.round(c.score / c.max_score * 100);
+  return h("div", null,
+    h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}% ${pct >= 80 ? "🌟" : pct >= 50 ? "👍" : "💪"}`)),
+    c.overall_note ? h("p", { class: "ai-note" }, "🤖 " + c.overall_note) : null,
+    c.dadNote ? h("p", { class: "ai-note dad" }, `${userById(DAD).emoji} ${dadName()}: ${c.dadNote}`) : null,
+    c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,
+      h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
+      h("div", { class: "what" }, `Question ${q.number}`,
+        h("small", null, `${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.note ? " · " + q.note : ""}`))))) : null);
+}
+// ✏️ Bro2a changes the score / adds his own note
+function fixFormNode(w) {
+  const c = w.check;
+  return h("div", { class: "sc-form" },
+    h("div", { class: "row" },
+      h("div", null, h("label", { class: "small", for: "wsfScore" }, "Score"), h("input", { type: "number", id: "wsfScore", min: 0, step: "any", value: c ? c.score : "" })),
+      h("div", null, h("label", { class: "small", for: "wsfMax" }, "Out of"), h("input", { type: "number", id: "wsfMax", min: 1, step: "any", value: c ? c.max_score : wsTotal(w) || 10 }))),
+    h("div", { class: "row" }, h("div", null, h("label", { class: "small", for: "wsfNote" }, `${dadName()}'s note`),
+      h("input", { type: "text", id: "wsfNote", maxlength: 400, value: (c && c.dadNote) || "", placeholder: "Great work! Practise question 4 again." }))),
+    h("div", { class: "btnrow" }, h("button", { class: "primary", data: { wsact: "fixsave" } }, "💾 Save"), h("button", { data: { wsact: "fixcancel" } }, "Cancel")),
+    h("div", { class: "err", id: "wsfErr" }));
+}
+function wsAction(act) {
+  const id = schoolDoc, w = aiDocs.worksheets[id];
+  if (!w) return;
+  if (act === "answers") { wsAnswers = !wsAnswers; return render(); }
+  if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
+  if (act === "key") return printAi(wsKeyNode(w));
+  if (act === "again") return openWsOpts(w.kid, w.subject, w.topics, w.count, w.work);
+  if (act === "upload") {
+    if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
+    aiPick = { ws: id };
+    $("aiFile").value = "";
+    return $("aiFile").click();
+  }
+  if (act === "check") return checkWorksheet(id);
+  if (act === "fix" && isDadNow()) { wsFix = !wsFix; schoolFresh = true; render(); if ($("wsfScore")) $("wsfScore").focus(); return; }
+  if (act === "fixcancel") { wsFix = false; schoolFresh = true; return render(); }
+  if (act === "fixsave") return saveWsFix(id);
+  if (act === "delete") return deleteWorksheet(id);
+}
+// ⬆ Upload my answers: photos (1600px JPEG) or a PDF, kept in the School files, linked to the worksheet
+async function addAnswerFiles(wsId, files) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w || (w.check && !isDadNow())) return;
+  const s = schoolFor(w.kid), ids = [];
+  toast("⬆ Getting your answers ready…", 2500);
+  for (const file of files) {
+    let r;
+    try { r = await readSchoolFile(file, 1600); }
+    catch (err) {
+      toast(err.message === "big" ? "That file is too big (a PDF can be 700 KB at most). Try photos instead."
+        : err.message === "type" ? "Only photos and PDF files, please." : "Couldn't read that file. Please try another one.", 5000);
+      continue;
+    }
+    const id = newId(), n = (w.answers.length + ids.length + 1);
+    s.files[id] = { subject: w.subject, name: (`Answers – ${w.title}` + (n > 1 ? ` (${n})` : "")).slice(0, 60), kind: r.kind, size: r.size,
+                    date: todayYmd(), by: me, worksheet: wsId };
+    storeFileData(id, w.kid, r.url);
+    ids.push(id);
+  }
+  if (!ids.length) return;
+  writeData();
+  const now = aiDocs.worksheets[wsId] || w;
+  aiSave("worksheets", wsId, { ...now, answers: [...now.answers, ...ids].slice(0, 20), status: now.check ? "Checked ✓" : "Answers uploaded" });
+  render();
+  toast("📎 Your answers are uploaded! Now tap 🤖 Check.", 3500);
+}
+function removeAnswerFile(fid) {
+  const w = aiDocs.worksheets[schoolDoc], s = schoolFor(schoolKid), f = s.files[fid];
+  if (!w || !f || !canChange(f) || (w.check && !isDadNow())) return;
+  if (!confirm(`Remove “${f.name}”?`)) return;
+  deleteFileData(fid);
+  delete s.files[fid];
+  writeData();
+  const answers = w.answers.filter(x => x !== fid);
+  aiSave("worksheets", schoolDoc, { ...w, answers, status: w.check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do" });
+  render();
+}
+// 🤖 Check: the answer photos + the answer key → the score. Saved on the worksheet AND as a "Worksheet" mark (+10 ⭐ the first time).
+async function checkWorksheet(wsId) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w) return;
+  if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
+  const s = schoolOf(w.kid), ids = w.answers.filter(f => s.files[f]);
+  if (!ids.length) return toast("⬆ Upload your answers first.", 3000);
+  if (!aiReady()) return toast("🔌 " + AI_OFF, 4500);
+  let urls = [];
+  try { urls = await Promise.all(ids.map(fileUrl)); } catch (e) {}
+  if (urls.length !== ids.length || urls.some(u => !u)) return toast("📎 The answer files aren't on this device yet. Please try again in a moment.", 4500);
+  const total = urls.reduce((n, u) => n + bytesOf(u), 0);
+  if (total > AI_MAX) return toast(tooBigText(total), 6000);
+  const r = await callAi("check", { kidName: kidNameOf(w.kid), grade: gradeOf(w.kid), title: w.title,
+    answerKey: w.questions.map(q => ({ number: q.number, answer: q.answer, points: q.points })),
+    files: ids.map((f, i) => aiFile(s.files[f].name, urls[i])) }, "check|" + wsId);
+  if (!r) return;
+  const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
+  if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);
+  c.aiScore = c.score;
+  const now = aiDocs.worksheets[wsId] || w;
+  aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });
+  const first = saveWsMark(now.kid, wsId, now, c);
+  render();
+  const color = colorsOf(userById(now.kid)).color;
+  if (first) {
+    celebrate(innerWidth / 2, innerHeight / 3, color, true);
+    toast(`🎉 ${num(c.score)}/${num(c.max_score)}! Worksheet done +${POINTS_EACH} ⭐`, 3500, color);
+  } else toast(`✅ Checked again: ${num(c.score)}/${num(c.max_score)}`, 3000);
+}
+// The worksheet's mark in its subject (type "Worksheet"). true = the first time (that's when the +10 ⭐ come)
+function saveWsMark(kid, wsId, w, c) {
+  if (newWeek()) keepNow();
+  const s = schoolFor(kid), key = "w" + wsId, old = s.grades[key];
+  s.grades[key] = { subject: w.subject, date: old ? old.date : todayYmd(), type: "worksheet", score: c.score, max: c.max_score, worksheet: wsId };
+  writeData();
+  return !old;
+}
+function saveWsFix(wsId) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w || !isDadNow()) return;
+  const score = Number($("wsfScore").value), max = Number($("wsfMax").value), note = $("wsfNote").value.trim().slice(0, 400);
+  if ($("wsfScore").value.trim() === "" || !Number.isFinite(score) || score < 0) return $("wsfErr").textContent = "Please type the score.";
+  if (!(max > 0)) return $("wsfErr").textContent = "“Out of” must be more than 0.";
+  if (score > max) return $("wsfErr").textContent = "The score can't be more than “Out of”.";
+  const c = { ...(w.check || { overall_note: "", questions: [], at: todayYmd() }), score, max_score: max };
+  if (note) c.dadNote = note; else delete c.dadNote;
+  aiSave("worksheets", wsId, { ...w, check: c, status: "Checked ✓" });
+  saveWsMark(w.kid, wsId, w, c);
+  wsFix = false; schoolFresh = true;
+  render();
+  toast("✓ Saved, and the mark too");
+}
+function deleteWorksheet(id) {
+  const w = aiDocs.worksheets[id];
+  if (!w) return;
+  if (!isDadNow()) return toast(`Ask ${dadName()} 🙂`);
+  if (!confirm(`Delete this worksheet?\n\n“${w.title}”\n\nIts answer files and its mark are kept.`)) return;
+  const s = schoolFor(w.kid);
+  Object.values(s.files).forEach(f => { if (f.worksheet === id) delete f.worksheet; });
+  writeData();
+  aiDelete("worksheets", id);
+  leaveAiDoc();
+}
+
+// ---------- 📖 Explain ----------
+function exFromWork(v) {
+  const [wid, i] = v.split("|"), w = schoolOf(schoolKid).work[wid];
+  if (!w) return;
+  const topic = i !== undefined ? w.topics[Number(i)] : (w.title + (w.topics.length ? ` (${w.topics.join(", ")})` : "")).slice(0, 200);
+  if (topic) explainTopic(schoolKid, w.subject, topic, "ex|" + v, wid);
+}
+async function explainTopic(kid, subject, topic, key, work) {
+  const r = await callAi("explain", { kidName: kidNameOf(kid), grade: gradeOf(kid), subject, topic }, key);
+  if (!r) return;
+  const x = cleanExplain({ ...r, kid, subject, topic, date: todayYmd(), by: me, at: new Date().toISOString(), ...(work ? { work } : {}) });
+  if (!x) return toast("🤖 The explanation came back empty. Please try again.", 4000);
+  const id = newId();
+  aiSave("explanations", id, x);
+  openAiDoc("explain", id);
+}
+function schoolExplainHtml(s, isDad) {
+  const x = aiDocs.explanations[schoolDoc];
+  return x && x.kid === schoolKid ? aiMount(() => h("div", null,
+    h("div", { class: "ai-toolbar" },
+      h("button", { class: "primary", data: { exact: "print" } }, "🖨️ Print"),
+      h("button", { data: { exact: "ws" } }, "📝 Worksheet on this"),
+      isDad ? h("button", { class: "danger-text", data: { exact: "delete" } }, "🗑️ Delete") : null),
+    exSheetNode(x), aiLinksNode(x))) : notHere();
+}
+// The reading page (on screen, and the same on paper)
+function exSheetNode(x) {
+  return h("div", { class: "ex-sheet" },
+    h("div", { class: "ws-sub" }, `${x.subject} · ${kidNameOf(x.kid)} · ${longDate(x.date)}`),
+    h("h1", { class: "ex-title" }, "📖 " + x.title),
+    x.sections.map(sec => h("section", { class: "ex-sec" }, sec.heading ? h("h3", null, sec.heading) : null, sec.text ? h("p", null, sec.text) : null)),
+    x.key_words.length ? h("section", { class: "ex-sec" }, h("h3", null, "🔑 Key words"),
+      h("div", { class: "ex-words" }, x.key_words.map(k => h("div", { class: "ex-word" }, h("b", null, k.word), k.meaning ? h("span", null, k.meaning) : null)))) : null,
+    x.try_this.length ? h("section", { class: "ex-sec" }, h("h3", null, "🧪 Try this"), h("ul", { class: "ex-try" }, x.try_this.map(t => h("li", null, t)))) : null);
+}
+function exAction(act) {
+  const id = schoolDoc, x = aiDocs.explanations[id];
+  if (!x) return;
+  if (act === "print") return printAi(exSheetNode(x));
+  if (act === "ws") return openWsOpts(x.kid, x.subject, [x.topic || x.title], 10, x.work);
+  if (act === "delete") {
+    if (!isDadNow()) return toast(`Ask ${dadName()} 🙂`);
+    if (!confirm(`Delete this explanation?\n\n“${x.title}”`)) return;
+    aiDelete("explanations", id);
+    leaveAiDoc();
+  }
+}
 
 // =====================================================================
 //  SETTINGS (Dad only): my day, planning, people, backup
@@ -6673,6 +7557,8 @@ function cloudSignedIn(user) {
   feed.items = {};
   feed.live = false;
   cloud.unsub.push(fb.onSnapshot(feed.ref, { includeMetadataChanges: true }, feedSnap, err => console.warn("News:", err)));
+  // 🤖 The worksheets and explanations (each its own document, see AI HELP)
+  aiListen();
   showSync();
   if (screen === "settings") render();
 }
@@ -6683,6 +7569,7 @@ function cloudSignedOut() {
   cloud.ready = false;
   cloud.snaps = {};
   feed.ref = null;
+  aiDocs.worksheets = {}; aiDocs.explanations = {};
   showLogin();
 }
 
