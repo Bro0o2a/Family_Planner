@@ -908,6 +908,17 @@
 
   /* Confetti and the happy message */
   .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }
+  /* 🎒 The small "+5 ⭐" pop when school points are earned */
+  .pt-pop { position: fixed; z-index: 75; pointer-events: none; transform: translate(-50%, -50%); padding: 6px 12px; border-radius: 999px;
+            background: var(--c, #c79a22); color: #fff; font-weight: 800; font-size: 17px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+            animation: ptpop 1.4s ease-out forwards; }
+  @keyframes ptpop {
+    0%   { transform: translate(-50%, -50%) scale(.6); opacity: 0; }
+    15%  { transform: translate(-50%, -70%) scale(1.1); opacity: 1; }
+    70%  { transform: translate(-50%, -130%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -170%) scale(1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pt-pop { animation: ptfade 1.4s linear forwards; } @keyframes ptfade { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
   .confetti span { position: absolute; left: var(--x); top: var(--y); font-size: var(--s); line-height: 1;
                    animation: burst 1.3s cubic-bezier(.15, .7, .4, 1) forwards; }
   .confetti i { position: absolute; left: var(--x); top: var(--y); width: 10px; height: 14px; border-radius: 3px;
@@ -3162,7 +3173,8 @@ function emptyData() {
     points: { week: mondayOf(new Date()), since: ymd(new Date()), marks: {}, history: [], log: [], auto: {}, prizes: {}, riddles: {}, riddleAns: {},
               diary: {}, lifetime: {}, levels: {}, duties: {}, wishes: {},   // (✅ duties, 💌 wishes: see DUTIES ON TIME and WISHES)
               meeting: {}, screen: {}, quran: {}, quranHeard: {}, chores: {},   // (☰ MORE PAGES)
-              want: {}, notes: {} },   // (🎁 the prize I want, 💬 notes: see LEADERBOARD ROWS)
+              want: {}, notes: {},   // (🎁 the prize I want, 💬 notes: see LEADERBOARD ROWS)
+              study: {} },   // (🎒 school points: 🤖 explanation read, 📤 answers uploaded: see SCHOOL POINTS)
     // ☰ More pages' settings (see MORE PAGES): 📱 rate, 🧹 duties
     screenRate: { points: 10, minutes: 5, max: 60 }, chores: [],
     // Good habits: a daily checklist for the kids (not on the calendar). 1 point each (each prayer = 15 points, see habitValuePoints).
@@ -3558,6 +3570,7 @@ function cleanData(d) {
       words: (Array.isArray(v.words) ? v.words : []).filter(w => w && typeof w.text === "string").map(w => ({ id: s(w.id, 40) || newId(), text: s(w.text, 40), date: isDate(w.date) ? w.date : "" })).slice(-200) }; });
     each(pts.quranHeard, (k, v) => { if (dayKey(k, 2)) clean.points.quranHeard[k] = { by: s(v.by, 40), at: s(v.at, 40) }; });
     each(pts.chores, (k, v) => { if (dayKey(k, 2)) clean.points.chores[k] = { at: s(v.at, 40) }; });
+    each(pts.study, (k, v) => { if (dayKey(k, 3) && hasOwn(STUDY_POINTS, k.split("|")[2])) clean.points.study[k] = { at: s(v.at, 40) }; });   // 🎒
     // 🎁 The prize I want and 💬 notes (older saved data has none)
     each(pts.want, (k, v) => { if (dayKey(k, 1) && typeof v.text === "string" && v.text.trim()) clean.points.want[k] = { text: s(v.text, 40), ok: v.ok === true, by: s(v.by, 40) }; });
     each(pts.notes, (k, v) => { if (dayKey(k, 1) && typeof v.text === "string" && v.text.trim()) clean.points.notes[k] = { text: s(v.text, 80), by: s(v.by, 40), at: s(v.at, 40) }; });
@@ -3635,10 +3648,14 @@ const DEFAULT_SUBJECTS = {
   "s-english": { name: "English", emoji: "📖", color: "purple", order: 2 },
   "s-arabic":  { name: "Arabic",  emoji: "✍️", color: "orange", order: 3 }
 };
+// 🏫 📚 🎓 The school basics saved on the kid (in 👤 the profile), in the order a missing one is asked
+const BASIC_KEYS = ["school", "curriculum", "year"];
+// 🎒 School points (✅ Tasks, see SCHOOL POINTS): 🤖 an explanation read · 📤 answers uploaded
+const STUDY_POINTS = { ex: 5, up: 5 };
 function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
            subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
-           profile: { asked: false, subjects: {}, other: "" }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {} };
+           profile: { asked: false, subjects: {}, other: "", skip: [] }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {} };
 }
 const isHm = x => typeof x === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);   // "08:30"
 function cleanSchool(s) {
@@ -3704,7 +3721,8 @@ function cleanSchool(s) {
           ...(okKey(String(w.by || "")) ? { by: w.by } : {}) });
     // 👤 Kid profile, 📌 school dates, 📰 this week
     const p = k.profile && typeof k.profile === "object" ? k.profile : {};
-    c.profile = { asked: p.asked === true, other: txt(p.other, 400), subjects: list(p.subjects, x => {
+    // (skip: the 🏫 📚 🎓 basics a parent answered "Not now" to: never asked again)
+    c.profile = { asked: p.asked === true, other: txt(p.other, 400), skip: Array.isArray(p.skip) ? BASIC_KEYS.filter(b => p.skip.includes(b)) : [], subjects: list(p.subjects, x => {
       const level = [1, 2, 3].includes(Number(x.level)) ? Number(x.level) : 0, good = txt(x.good, 150), hard = txt(x.hard, 150);
       const unsure = x.unsure === true, test = unsure && okKey(String(x.test || "")) ? { test: x.test } : {};
       return level || good || hard || unsure ? { level, good, hard, ...(unsure ? { unsure } : {}), ...test } : null;
@@ -4122,7 +4140,7 @@ function bonusPoints(id, from, to) { const k = pointKinds(id, from, to, 0); retu
 // (⚙️ a feature that's off gives no points: 🧩 riddles, 📔 My day, 💌 wishes, 👨‍👩‍👧 a parent's habits / helping / prize)
 function pointKinds(id, from, to, acts) {
   const on = k => feat(k) ? 1 : 0, pp = isParentId(id) ? on("parentPoints") : 1;
-  return { tasks: acts + homeworkPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
+  return { tasks: acts + homeworkPoints(id, from, to) + studyPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
            habits: habitPoints(id, from, to) * pp + diaryPoints(id, from, to) * on("diary"),
            fun: riddlePoints(id, from, to) * on("riddles") + (autoPoints(id, from, to) + prizePoints(id, from, to)) * pp
               + wishPoints(id, from, to) * on("wishes") + extraFunPoints(id, from, to) };
@@ -4159,6 +4177,53 @@ function giveAuto(kind, ref) {
   const got = autoPoints(me, today, tomorrow()) - before;
   const what = { check: "checking a worksheet", practice: "making a practice sheet", brief: "reading the brief" }[kind];
   if (got > 0) setTimeout(() => toast(`👨‍👩‍👧 +${got} ⭐ for ${what}!`, 2600, colorsOf(userById(me)).color), 3600);   // (after the other message)
+}
+
+// ---------- 🎒 SCHOOL POINTS (✅ Tasks): one full round on a topic = 20 ----------
+//   ✏️ a worksheet finished: +10 when it's first checked (its "Worksheet" mark, see homeworkPoints)
+//   🤖 an explanation read ("I got it 👍" at its end): +5, once a topic a day · 📤 answers uploaded: +5, once a worksheet
+// Only a kid earns them, on their own device (👨‍👩‍👧 parents' devices only watch).
+// data.points.study = "date|kid|kind|ref" → { at }   (kind: "ex" | "up"; ref: the topic, or the worksheet's id. Kept 180 days.)
+function studyPoints(user, from, to) {
+  return Object.keys(data.points.study).reduce((n, k) => { const [date, who, kind] = k.split("|"); return n + (who === user && date >= from && date < to ? STUDY_POINTS[kind] || 0 : 0); }, 0);
+}
+const studyRef = x => String(x).trim().replace(/[^A-Za-z0-9_-]+/g, "-").slice(0, 40) || "x";
+// A topic → a short ref that's the same for "Fractions" and "fractions " (any language)
+function topicRef(t) {
+  let n = 5381;
+  for (const ch of String(t).trim().toLowerCase()) n = ((n * 33) ^ ch.codePointAt(0)) >>> 0;
+  return "t" + n.toString(36);
+}
+const canEarnStudy = kid => !!kid && kid === me && !isParentId(kid) && !isParentPhone();
+// → true when the points were given now (false: already given, or a parent's device)
+function giveStudy(kid, kind, ref) {
+  if (!hasOwn(STUDY_POINTS, kind) || !canEarnStudy(kid)) return false;
+  if (studyEarned(kid, kind, ref)) return false;
+  if (newWeek()) keepNow();
+  data.points.study[`${todayYmd()}|${kid}|${kind}|${studyRef(ref)}`] = { at: new Date().toISOString() };
+  writeData();
+  pointPop(STUDY_POINTS[kind], colorsOf(userById(kid)).color);
+  return true;
+}
+// 📤 once a worksheet (any day) · 🤖 once a topic a day
+function studyEarned(kid, kind, ref) {
+  const r = studyRef(ref);
+  return kind === "up" ? Object.keys(data.points.study).some(k => { const [, who, kd, x] = k.split("|"); return who === kid && kd === "up" && x === r; })
+    : hasOwn(data.points.study, `${todayYmd()}|${kid}|${kind}|${r}`);
+}
+// The small "+10 ⭐" pop (where the last tap was, else the middle of the screen)
+let lastTap = null;
+document.addEventListener("pointerdown", e => { lastTap = { x: e.clientX, y: e.clientY, t: Date.now() }; }, true);
+function pointPop(n, color) {
+  const el = document.createElement("div"), tap = lastTap && Date.now() - lastTap.t < 60000 ? lastTap : null;
+  el.className = "pt-pop";
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = `+${n} ⭐`;
+  el.style.left = (tap ? tap.x : innerWidth / 2) + "px";
+  el.style.top = (tap ? tap.y : innerHeight / 2) + "px";
+  if (color) el.style.setProperty("--c", color);
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
 }
 
 // ---------- 🎁 A parent's weekly prize (Sunday evening): +20 once a week, when they did 70% or more ----------
@@ -4236,6 +4301,7 @@ function newWeek() {
   const half = new Date(); half.setDate(half.getDate() - 180);   // 📔 My day: about 6 months
   Object.keys(data.points.diary).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.diary[key]; });
   Object.keys(data.points.wishes).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.wishes[key]; });   // 💌 too
+  Object.keys(data.points.study).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.study[key]; });   // 🎒 too
   Object.keys(data.points.duties).forEach(key => { if (key.slice(0, 10) < ymd(cut)) delete data.points.duties[key]; });   // ✅ 5 weeks
   ["quranHeard", "chores"].forEach(k => Object.keys(data.points[k]).forEach(key => { if (key.slice(0, 10) < ymd(cut)) delete data.points[k][key]; }));   // ☰ 5 weeks
   const eight = new Date(); eight.setDate(eight.getDate() - 56);   // 🗣️ meetings: 8 weeks
@@ -5237,7 +5303,7 @@ function reportRange() {
   const now = new Date(), from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)), to = ymd(new Date(now.getFullYear(), now.getMonth() + 1, 1));
   return { from, to, days: now.getDate(), label: now.toLocaleDateString("en-GB", { month: "long", year: "numeric" }) };
 }
-const stars5 = lv => lv ? "★".repeat(lv) + "☆".repeat(Math.max(0, 5 - lv)) : "";
+const stars5 = lv => lv ? "★".repeat(lv) + "☆".repeat(Math.max(0, 3 - lv)) : "";   // (the 👤 profile levels: 1–3)
 // Everything the report shows for one kid (plain numbers and short lists)
 function reportData(kid, r) {
   const s = schoolOf(kid), inR = d => d && d >= r.from && d < r.to;
@@ -5275,7 +5341,7 @@ function reportCardsHtml(kid, forPdf) {
   const big = (n, label) => `<div class="rp-num"><b>${n}</b><small>${label}</small></div>`;
   return `<div class="card rp-card"><h2>🎒 School</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>
       ${x.subjects.length ? `<ul class="rp-subs">${x.subjects.map(f => `<li>${forPdf ? `<div class="rp-sub">` : `<button class="rp-sub" data-rpsub="${safe(f.id)}">`}
-        <span class="rp-subname">${safe(f.emoji)} ${safe(f.name)}</span><span class="rp-stars" aria-label="${f.level ? `Level ${f.level} of 5` : "No level yet"}">${stars5(f.level) || "–"}</span>
+        <span class="rp-subname">${safe(f.emoji)} ${safe(f.name)}</span><span class="rp-stars" aria-label="${f.level ? `Level ${f.level} of 3` : "No level yet"}">${stars5(f.level) || "–"}</span>
         ${f.strong.length ? `<small>💪 Good at: ${safe(f.strong.join(", "))}</small>` : ""}${f.weak.length ? `<small>🎯 Work on: ${safe(f.weak.join(", "))}</small>` : ""}${forPdf ? "</div>" : "</button>"}</li>`).join("")}</ul>` : ""}</div>
     <div class="card rp-card"><h2>✅ Tasks</h2><div class="rp-nums">${x.tasksPct != null ? big(x.tasksPct + "%", `of planned activities done this week (${x.done} of ${x.planned})`) : big("–", "no planned activities this week")}
       ${rpRange === "month" ? big(x.points, "points this month") : ""}</div></div>
@@ -5352,8 +5418,6 @@ function drawMe() {
   const p = lifetimePoints(u.id), L = levelOf(p), pct = levelPct(p), k = weekKinds(u.id), st = weekStats(u.id), bd = birthdayInfo(u.birthday);
   const chips = parent ? `<div class="chips me-chips">${data.users.map(x => { const xc = colorsOf(x); return `<button class="chip ${x.id === u.id ? "on" : ""}" data-mewho="${safe(x.id)}"
     style="--soft:${xc.soft};--ink:${xc.ink}"><span class="e">${safe(x.emoji)}</span>${x.id === me ? "Me" : safe(x.name)}</button>`; }).join("")}</div>` : "";
-  const s = kid ? schoolOf(u.id) : null;
-  const subjects = s ? subjectList(s).map(f => { const lv = (s.profile.subjects[f.id] || {}).level; return `<li><span>${safe(f.emoji)} ${safe(f.name)}</span><b>${lv ? "★".repeat(lv) + "☆".repeat(Math.max(0, 5 - lv)) : "–"}</b></li>`; }).join("") : "";
   const loves = LOVES.map(([key, e, label]) => { const v = (u.loves || {})[key]; return v ? `<li><span>${e} ${label}</span><b>${safe(v)}</b></li>` : ""; }).join("");
   const canBirthday = mine || parent;
   const form = meEdit ? `<div class="card sc-form me-form"><h2>✏️ ${mine ? "Change my profile" : `Change ${safe(u.name)}'s profile`}</h2>
@@ -5376,9 +5440,7 @@ function drawMe() {
     ${form}
     <div class="card me-card"><h2>🎂 Birthday</h2>${bd ? `<p class="me-big">${bd.days === 0 ? "🎉 Happy birthday!" : `🎂 ${bd.days} ${bd.days === 1 ? "day" : "days"} to go!`}</p>
       <p class="hint">${bd.label}${bd.age != null ? ` · ${bd.age} years old` : ""}</p>` : `<p class="sc-empty">${canBirthday ? "Add it with ✏️ Change." : "Not added yet."}</p>`}</div>
-    ${kid ? `<div class="card me-card"><h2>🎒 School</h2><ul class="me-list">
-      ${s.info.name ? `<li><span>🏫 School</span><b>${safe(s.info.name)}</b></li>` : ""}${curriculumOf(u.id) ? `<li><span>📚 Curriculum</span><b>${safe(curriculumOf(u.id))}</b></li>` : ""}
-      ${gradeOf(u.id) ? `<li><span>🎓 Year</span><b>${safe(gradeOf(u.id))}</b></li>` : ""}${subjects}</ul></div>` : ""}
+    ${kid ? schoolBasicsHtml(u.id, parent) : ""}
     <div class="card me-card"><h2>❤️ Things I love</h2>${loves ? `<ul class="me-list">${loves}</ul>` : `<p class="sc-empty">${mine ? "Fill them in with ✏️ Change." : "Nothing yet."}</p>`}</div>
     <div class="card me-card"><h2>📅 This week</h2><ul class="me-list">
       ${st.pct != null ? `<li><span>✅ Tasks done</span><b>${st.pct}% <small>(${st.done} of ${st.planned})</small></b></li>` : ""}
@@ -5416,6 +5478,14 @@ document.addEventListener("click", e => {
   if ("mecancel" in ds) { meEdit = false; return render(); }
   if ("mesave" in ds) return saveMe();
   if (ds.meemoji) { $("meBody").querySelectorAll("[data-meemoji]").forEach(x => x.classList.toggle("on", x === b)); return; }
+  // 🏫 A parent: ✏️ Edit the kid's school basics (👤 Profile in School) or ✏️ Edit subjects; 💾 Save comes back here
+  if (ds.meschool) {
+    const kid = meWho;
+    openSchool(kid);
+    profBack = kid;
+    if (ds.meschool === "subjects") { scSubEdit = true; scParents = false; schoolFresh = true; return render(); }
+    return goSchool("profile");
+  }
   if ("mespark" in ds) return openBuddyBox(meWho);   // ✨ the Spark page: level history, pick / 👨‍👩‍👧 change
 });
 
@@ -8315,8 +8385,8 @@ function drawSchool() {
                   worksheet: schoolWorksheetHtml, explain: schoolExplainHtml, profile: schoolProfileHtml, brief: schoolBriefHtml, make: schoolMakeHtml };
   if (schoolView === "brief" && (!isDad || isKidDevice())) schoolView = "home";   // 📋 parents only
   aiMounts = [];
-  // 👤 The first time School opens for this kid: their profile first (asked once)
-  const view = schoolView === "home" && !s.profile.asked && !isKidDevice() ? "profile" : schoolView;   // (🧒 not on a kid's device)
+  // (The 👤 profile isn't forced any more: only a missing 🏫 📚 🎓 basic is asked, one at a time, see askBasicHtml)
+  const view = schoolView;
   $("schoolBody").innerHTML = `<datalist id="scSubjects">${subjectsOf(s).map(x => `<option value="${safe(x)}">`).join("")}</datalist>`
     + (view === schoolView ? crumbHtml(s) : "") + (views[view] || schoolHomeHtml)(s, isDad, u);
   fillAiMounts($("schoolBody"));   // 🤖 the parts with text from the AI (built as plain text)
@@ -8423,6 +8493,7 @@ function schoolHomeHtml(s, isDad) {
       <button class="sc-addbig sc-make" data-mkopen="">✏️ Make a worksheet<small>Pick a topic</small></button>
       <button class="sc-addbig sc-news" data-nlopen>📰 Newsletter<small>School dates</small></button></div>`;
   return `${top}
+    ${askBasicHtml(schoolKid)}
     ${isDad ? aiUsageHtml() : ""}
     ${aiMount(() => waitingNode(s))}
     ${week && week.reminders.length ? `<div class="card bd-card sc-remind"><h2>🔔 Reminders${week.label ? ` · ${safe(week.label)}` : ""}</h2>
@@ -8495,7 +8566,71 @@ function testStatusText(x) {
   if (!t.w.check) return "🧪 Test pending: print it from 📝 Worksheets, then ⬆ upload the answers.";
   return `✅ Checked: ${num(t.w.check.score)}/${num(t.w.check.max_score)} → Level ${"⭐".repeat(x.level || 1)}`;
 }
+// 🏫 The kid's school basics in one card (👤 My profile, and look-only in School): school, curriculum, year, syllabus, subjects + levels.
+// canEdit (a parent's device): ✏️ Edit · ✏️ Edit subjects. Kids only look.
+function schoolBasicsHtml(kid, canEdit) {
+  const u = userById(kid), s = schoolOf(kid), syl = s.syllabus, none = `<i class="sc-empty">${canEdit ? "Not added yet" : "–"}</i>`;
+  const row = (label, v) => `<li><span>${label}</span><b>${v ? safe(v) : none}</b></li>`;
+  const subjects = subjectList(s).map(f => {
+    const x = s.profile.subjects[f.id] || {}, lv = x.level, t = testOf(x);
+    return `<li><span>${safe(f.emoji)} ${safe(f.name)}</span><b>${lv ? `<span aria-label="Level ${lv} of 3: ${LEVEL_WORDS[lv]}">${"★".repeat(lv)}${"☆".repeat(3 - lv)}</span>`
+      : x.unsure ? `<small>🧪 ${t ? "test pending" : "test to make"}</small>` : `<small>🧭 from the first level check</small>`}</b></li>`;
+  }).join("");
+  return `<div class="card me-card sc-basics"><h2>🏫 School</h2><ul class="me-list">
+      ${row("🏫 School", schoolNameOf(kid))}${row("📚 Curriculum", u.curriculum)}${row("🎓 Year / Grade", gradeOf(kid))}
+      ${row("📄 Syllabus", syl ? syl.name : "")}</ul>
+    ${subjects ? `<h3 class="ph-group">📚 Subjects and levels</h3><ul class="me-list">${subjects}</ul>` : ""}
+    ${canEdit ? `<div class="btnrow"><button class="pill" data-meschool="profile">✏️ Edit</button><button class="pill" data-meschool="subjects">✏️ Edit subjects</button></div>`
+      : `<p class="hint">👀 A parent can change these.</p>`}</div>`;
+}
+// ❓ Only a basic that's missing is asked (on a parent's device), one at a time, once: answered → saved on the kid; "Not now" → never again
+function missingBasic(kid) {
+  const u = userById(kid), skip = schoolOf(kid).profile.skip || [];
+  const has = { school: !!schoolNameOf(kid), curriculum: !!u.curriculum, year: !!gradeOf(kid) };
+  return BASIC_KEYS.find(k => !has[k] && !skip.includes(k)) || null;
+}
+function askBasicHtml(kid) {
+  if (!isDadNow() || isKidDevice()) return "";
+  const k = missingBasic(kid), u = userById(kid);
+  if (!k) return "";
+  const known = CURRICULA.some(x => x[0] === u.curriculum);
+  const input = k === "school"
+    ? `<input type="text" id="abSchool" maxlength="60" list="abSchools" placeholder="Type the school's name" autocomplete="off">
+       <datalist id="abSchools">${DUBAI_SCHOOLS.map(([n]) => `<option value="${safe(n)}">`).join("")}</datalist>`
+    : k === "curriculum"
+    ? `<select id="abCurr"><option value="">—</option>${CURRICULA.map(([c]) => `<option>${c}</option>`).join("")}</select>`
+    : `<select id="abYear">${yearOptionsHtml(known ? u.curriculum : "", "")}</select>`;
+  const q = { school: `🏫 Which school does ${safe(u.name)} go to?`, curriculum: `📚 Which curriculum does ${safe(u.name)} follow?`,
+              year: `🎓 Which year / grade is ${safe(u.name)} in?` }[k];
+  return `<div class="card bd-card sc-form sc-askbasic"><label class="small" for="${{ school: "abSchool", curriculum: "abCurr", year: "abYear" }[k]}"><b>${q}</b></label>${input}
+    <p class="hint">Asked once. It's saved in ${safe(u.name)}'s 👤 profile, and every worksheet uses it.</p>
+    <div class="btnrow"><button class="primary" data-askbasic="${k}">💾 Save</button><button data-askbasicskip="${k}">Not now</button></div></div>`;
+}
+function saveBasic(k, skip) {
+  const kid = schoolKid, u = data.users.find(x => x.id === kid);
+  if (!u || !isDadNow() || !BASIC_KEYS.includes(k)) return;
+  if (skip) {
+    const p = schoolFor(kid).profile;
+    p.skip = [...new Set([...(p.skip || []), k])];
+  } else if (k === "school") {
+    const v = $("abSchool").value.trim().slice(0, 60);
+    if (!v) return;
+    u.school = v;
+    const hit = DUBAI_SCHOOLS.find(([n]) => n.toLowerCase() === v.toLowerCase());   // (a known school: its curriculum too, when there's none yet)
+    if (hit && !u.curriculum) u.curriculum = hit[1];
+  } else {
+    const v = $(k === "curriculum" ? "abCurr" : "abYear").value;
+    if (!v) return;
+    u[k] = v;
+  }
+  writeData();
+  schoolFresh = true;
+  render();
+  if (!skip) toast("👤 Saved in the profile!", 2200);
+}
+let profBack = null;   // 👤 My profile → ✏️ Edit: 💾 Save / Cancel go back to that kid's profile
 function schoolProfileHtml(s, isDad, u) {
+  if (!isDad || isKidDevice()) return schoolBasicsHtml(u.id, false);   // 🧒 look only
   const p = s.profile, first = !p.asked, syl = s.syllabus;
   return `${isDad ? `<div class="sc-actions"><button class="pill" data-scgo="brief">📋 Brief for parents</button></div>` : ""}
     <div class="card bd-card sc-form sc-profile"><h2>👤 About ${safe(u.name)}</h2>
@@ -8523,9 +8658,11 @@ function schoolProfileHtml(s, isDad, u) {
     <div class="btnrow"><button class="primary" data-profsave>💾 Save</button><button data-profskip>${first ? "Skip for now" : "Cancel"}</button></div></div>`;
 }
 function saveProfile(skip) {
-  if (!schoolKid || !exists(me)) return;
-  const kid = schoolKid, s = schoolOf(kid);
-  if (skip && s.profile.asked) return goSchool("home");   // (Cancel)
+  if (!schoolKid || !exists(me) || !isDadNow() || isKidDevice()) return;   // (kids only look)
+  const kid = schoolKid, s = schoolOf(kid), back = profBack === kid;
+  profBack = null;
+  const done = () => back ? openProfile(kid) : goSchool("home");   // (back to 👤 My profile when ✏️ Edit came from there)
+  if (skip && s.profile.asked) return done();   // (Cancel)
   const p = schoolFor(kid).profile;
   let tests = [];
   if (!skip) {
@@ -8551,7 +8688,7 @@ function saveProfile(skip) {
   }
   p.asked = true;   // asked once: it doesn't come by itself again
   writeData();
-  goSchool("home");
+  done();
   if (skip) return;
   if (!tests.length) return toast("👤 Saved! Thank you.");
   makePlacementTests(kid, tests);
@@ -9134,12 +9271,12 @@ function schoolReviewsHtml(s, isDad, u) {
 const LESSONS = 7;
 function schoolInfoHtml(s, isDad) {
   const i = s.info, today = todayIndex(), open = isDad && schoolEdit === "info";
-  const rows = [["🏫 School", i.name], ["🎓 Class", i.grade], ["👩‍🏫 Teacher", i.teachers]].filter(r => r[1]);
+  // (🏫 the school and 🎓 the year are in 👤 the profile: only the class / section, teacher and timetable are typed here)
+  const rows = [["🏫 School", schoolNameOf(schoolKid)], ["🎓 Class", i.grade], ["👩‍🏫 Teacher", i.teachers]].filter(r => r[1]);
   const most = Math.max(0, ...[0, 1, 2, 3, 4].map(d => (i.timetable[d] || []).length));
   let html = `<div class="bd-head"><h2>🏫 School info</h2>${isDad && !open ? `<button class="edit" data-scedit="info">✏️ Edit</button>` : ""}</div>`;
   if (open) html += `<div class="sc-form">
-      ${scField("scName", "School name", `<input type="text" id="scName" maxlength="60" value="${safe(i.name)}" placeholder="Al Noor School">`)}
-      <div class="row"><div><label class="small" for="scGrade">Class</label><input type="text" id="scGrade" maxlength="30" value="${safe(i.grade)}" placeholder="Grade 6B"></div>
+      <div class="row"><div><label class="small" for="scGrade">Class / section</label><input type="text" id="scGrade" maxlength="30" value="${safe(i.grade)}" placeholder="6B"></div>
         <div><label class="small" for="scTeachers">Teacher</label><input type="text" id="scTeachers" maxlength="300" value="${safe(i.teachers)}" placeholder="Ms. Sara"></div></div>
       <label class="small">Timetable (Mon–Fri, up to ${LESSONS} lessons)</label>
       <div class="bd-tt-edit"><span></span>${SHORT.slice(0, 5).map(d => `<b>${d}</b>`).join("")}
@@ -9299,7 +9436,7 @@ function saveSchoolForm(what) {
       while (lessons.length && !lessons[lessons.length - 1]) lessons.pop();
       if (lessons.some(Boolean)) timetable[d] = lessons.map(x => x || "—"); else delete timetable[d];
     }
-    s.info = { name: v("scName").slice(0, 60), grade: v("scGrade").slice(0, 30), teachers: v("scTeachers").slice(0, 300), timetable };
+    s.info = { name: s.info.name, grade: v("scGrade").slice(0, 30), teachers: v("scTeachers").slice(0, 300), timetable };
   } else if (what === "subject" && isDad) {
     const name = v("scsName").slice(0, 30), emoji = v("scsEmoji").slice(0, 8) || "📘";
     const color = (document.querySelector('input[name="scsColor"]:checked') || {}).value || "blue";
@@ -9471,6 +9608,8 @@ $("scr-school").addEventListener("click", e => {
   if (ds.aiopen) { const [view, id] = ds.aiopen.split("|"); return openAiDoc(view, id); }
   if (ds.wsact) return wsAction(ds.wsact);
   if (ds.wsrow) return wsRowAction(ds.wsrow);
+  if (ds.askbasic) return saveBasic(ds.askbasic, false);   // ❓ one missing 🏫 📚 🎓 basic
+  if (ds.askbasicskip) return saveBasic(ds.askbasicskip, true);
   if ("profsave" in ds) return saveProfile(false);
   if ("profskip" in ds) return saveProfile(true);
   if ("sylpick" in ds) { aiPick = "syllabus"; $("aiFile").value = ""; return $("aiFile").click(); }
@@ -10265,8 +10404,11 @@ const kidNameOf = kid => userById(kid).name;
 const gradeOf = kid => userById(kid).year || schoolOf(kid).info.grade;
 // (the AI gets the short name for IGCSE: "British IGCSE", so worksheets follow the IGCSE syllabus for Years 10–11)
 const curriculumOf = kid => { const c = userById(kid).curriculum; return !c || c === "Other" ? "" : c === IGCSE ? "British IGCSE" : c; };
-// Sent with EVERY 🤖 call: the kid's name, 🎓 year / grade and 📚 curriculum
-const kidInfo = kid => ({ kidName: kidNameOf(kid), grade: gradeOf(kid), ...(curriculumOf(kid) ? { curriculum: curriculumOf(kid) } : {}) });
+// 🏫 The kid's school: from 👤 the profile, else (older data) from 🏫 School info
+const schoolNameOf = kid => userById(kid).school || schoolOf(kid).info.name;
+// Sent with EVERY 🤖 call: the kid's name, 🏫 school, 🎓 year / grade and 📚 curriculum (all read from 👤 the profile, never asked again)
+const kidInfo = kid => ({ kidName: kidNameOf(kid), grade: gradeOf(kid), ...(curriculumOf(kid) ? { curriculum: curriculumOf(kid) } : {}),
+                          ...(schoolNameOf(kid) ? { school: schoolNameOf(kid) } : {}) });
 // "2026-10-19" → "19 October 2026"
 const longDate = s => fromYmd(s).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
@@ -11286,7 +11428,7 @@ function exFromWork(v) {
   if (topic) explainTopic(schoolKid, w.subject, topic, "ex|" + v, wid);
 }
 async function explainTopic(kid, subject, topic, key, work) {
-  const r = await callAi("explain", { ...kidInfo(kid), subject, topic }, key);
+  const r = await callAi("explain", { ...kidInfo(kid), subject, topic, profile: profileText(kid, subject), ...schoolSystemOf(kid) }, key);
   if (!r) return;
   const x = cleanExplain({ ...r, kid, subject, topic, date: todayYmd(), by: me, at: new Date().toISOString(), ...(work ? { work } : {}) });
   if (!x) return toast("🤖 The explanation came back empty. Please try again.", 4000);
@@ -11696,7 +11838,8 @@ function familyFormHtml(u) {
     <label class="small">Colour</label>
     <div class="swatches">${Object.entries(PALETTE).map(([key, c]) => `<label title="${key}"><input type="radio" name="famColor" value="${key}" ${color === key ? "checked" : ""}>
       <span style="background:${c.color}"></span></label>`).join("")}</div>
-    ${schoolFieldsHtml("fam", u)}
+    ${u.id ? `<p class="hint">🏫 School, 📚 curriculum and 🎓 year: in ${safe(u.name)}'s 👤 profile (☰ More → 👤 My profile → ${safe(u.name)}).</p>`
+      : schoolFieldsHtml("fam", u)}
     <div class="btnrow"><button class="primary" data-famsave>${u.id ? "💾 Save" : "➕ Add"}</button><button data-famcancel>Cancel</button></div>
     <div class="err" id="famErr"></div></div>`;
 }
@@ -11706,7 +11849,7 @@ async function saveFamilyKid() {
   const color = (document.querySelector('input[name="famColor"]:checked') || {}).value || freeColor();
   if (!name) return $("famErr").textContent = "Please type a name.";
   if (data.users.some(u => u.id !== famEdit && u.name.toLowerCase() === name.toLowerCase())) return $("famErr").textContent = "Someone already has that name.";
-  const about = schoolFieldsValue("fam");
+  const about = $("famSchool") ? schoolFieldsValue("fam") : {};   // (a new kid only: then they're kept in 👤 the profile)
   let u = famEdit !== "new" && data.users.find(x => x.id === famEdit);
   if (u) Object.assign(u, { name, emoji, color }, about);
   else { u = { id: newId(), name, emoji, color, ...about }; data.users.push(u); }
@@ -12578,7 +12721,7 @@ function cloudUpdateFields(name, now) {
   const fb = cloud.fb, before = cloud.sent[name] || {}, changes = [];
   // Ticks, 👨‍👩‍👧 auto points, 🎁 prizes, 🧩 riddles and answers: one field per item (so two phones don't overwrite each other)
   const BY_ITEM = ["marks", "auto", "prizes", "riddles", "riddleAns", "diary", "lifetime", "levels", "duties", "wishes",
-                   "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes"];
+                   "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes", "study"];
   BY_ITEM.filter(k => now[k] && typeof now[k] === "object").forEach(k => {
     const was = before[k] && typeof before[k] === "object" ? before[k] : {}, is = now[k];
     new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
