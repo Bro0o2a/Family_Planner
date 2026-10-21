@@ -708,6 +708,111 @@
   .rp-note { font-style: italic; }
   .rp-foot { margin-top: auto; text-align: right; }
   .rp-foot .line { display: inline-block; width: 14em; border-bottom: .1em solid #333; margin-left: .5em; }
+  /* 🎒 School home (like a tutor): one big 📥 button, then a tile per subject with its success % */
+  .sc-addbig { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 84px;
+               margin: 0 0 20px; padding: 12px 16px; border-radius: 26px; border: none; font-size: 22px; font-weight: 800; color: #fff;
+               background: linear-gradient(135deg, #ffb347, #f0892b); box-shadow: var(--shadow); overflow-wrap: anywhere; line-height: 1.2; }
+  .sc-addbig:hover { background: linear-gradient(135deg, #f7a93c, #e67f22); }
+  .sc-addbig small { font-size: 15px; font-weight: 600; opacity: .9; }
+  .sc-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .sc-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 130px;
+             padding: 12px 8px; border-radius: 22px; background: #fff; border: 3px solid var(--line); border-top: 10px solid var(--c);
+             box-shadow: var(--shadow); text-align: center; }
+  .sc-tile .e { font-size: 38px; line-height: 1.1; }
+  .sc-tile b { max-width: 100%; font-size: 19px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  /* Success %: green ≥ 80, amber 60–79, red < 60 */
+  .lv-good { color: #15803d; } .lv-mid { color: #b45309; } .lv-low { color: #b91c1c; }
+  .sc-pct { border-radius: 999px; padding: 2px 12px; font-size: 16px; font-weight: 800; }
+  .sc-pct.lv-good { background: #dcfce7; } .sc-pct.lv-mid { background: #fef3c7; } .sc-pct.lv-low { background: #fee2e2; }
+  .sc-pct.none { color: var(--muted); }
+  .sc-more { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 0; color: var(--muted); font-size: 15px; font-weight: 700; }
+  .sc-more .linkbtn { min-height: 36px; font-size: 14px; }
+  /* Inside a subject: 3 tabs */
+  .sc-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 14px; padding: 5px; border-radius: 20px; background: #f3ecdf; }
+  .sc-tabs button { min-width: 0; min-height: 48px; padding: 4px 6px; border: none; border-radius: 16px; background: transparent;
+                    font-size: 16px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  .sc-tabs button.on { background: #fff; box-shadow: var(--shadow); }
+  .sc-newtopic { margin: 0 0 14px; background: #eef6ff; border: 3px solid #93c5fd; }
+  .sc-newtopic b { font-size: 19px; overflow-wrap: anywhere; }
+  .sc-newtopic p { margin: 6px 0 0; }
+  .sc-newtopic .btnrow { margin-top: 10px; }
+  /* 📊 Overview */
+  .sc-ov { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .sc-ov > .card { margin: 0; }
+  .sc-ov .sc-wide { grid-column: 1 / -1; }
+  .sc-bignum { font-size: 56px; font-weight: 800; line-height: 1; margin: 8px 0 2px; }
+  .sc-ov small { color: var(--muted); font-weight: 600; }
+  .sc-points { margin: 6px 0 0; padding-left: 22px; font-size: 18px; }
+  .sc-points li { margin: 4px 0; overflow-wrap: anywhere; }
+  .sc-tip { background: #fff8e6; }
+  .sc-tip p { margin: 6px 0; font-size: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sc-ov .bd-avgtop b { min-width: 0; overflow-wrap: anywhere; }
+  .sc-ov .bd-avgtop span { flex: none; }
+  /* 📝 Worksheets list */
+  ul.list li.sc-wsrow { display: block; }
+  .sc-wsstatus { margin: 0 0 8px 40px; font-size: 16px; }
+  .sc-wsbtns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
+  .sc-older-btn { width: 100%; margin: 18px 0 12px; text-align: left; }
+  /* ⬆️ Upload + 📰 Newsletter side by side; 🔔 reminders; 📌 past school dates */
+  .sc-topbtns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; margin: 0 0 18px; }
+  .sc-topbtns .sc-addbig { margin: 0; }
+  .sc-news, .sc-news:hover { background: linear-gradient(135deg, #8b7cf6, #6457d9); }
+  .sc-remind { margin: 0 0 18px; background: #fff9db; }
+  .sc-past { margin: 0 0 14px; }
+  .sc-past h2 { font-size: 19px; }
+  /* 🎯 each weak point with its own 🔁 button; 📰 this week; 👤 level */
+  .sc-weak { list-style: none; margin: 6px 0 0; padding: 0; }
+  .sc-weak li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 8px 0; border-bottom: 2px solid var(--line); font-size: 18px; }
+  .sc-weak li:last-child { border-bottom: none; }
+  .sc-weak li span { min-width: 0; overflow-wrap: anywhere; }
+  .sc-weak button { min-height: 40px; padding: 4px 12px; font-size: 15px; }
+  .sc-thisweek { background: #eef6ff; }
+  .sc-level { margin: 0; font-size: 20px; font-weight: 800; }
+  .sc-level small { color: var(--muted); font-size: 15px; }
+  /* 👤 Kid profile */
+  .sc-profile { max-width: 760px; }
+  .sc-prof-sub { border: 2px solid var(--line); border-radius: 18px; padding: 8px 12px 12px; margin: 0 0 12px; min-width: 0; }
+  .sc-prof-sub legend { font-weight: 800; font-size: 18px; padding: 0 6px; }
+  .sc-stars3 { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 6px; }
+  .sc-stars3 label { position: relative; }
+  .sc-stars3 input { position: absolute; opacity: 0; }
+  .sc-stars3 span { display: inline-block; padding: 4px 12px; border-radius: 999px; border: 2px solid var(--line); background: #fff; font-size: 16px; cursor: pointer; }
+  .sc-stars3 input:checked + span { border-color: #e8a020; background: #fff3cd; }
+  .sc-stars3 input:focus-visible + span { outline: 3px solid #93c5fd; }
+  .nl-events small { display: block; color: var(--muted); font-size: 14px; }
+  /* 👨‍👩‍👧 Family page */
+  .fam-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+  .fam-kid { margin: 0; border-top: 8px solid var(--c); }
+  .fam-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .fam-face { flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; font-size: 30px; }
+  .fam-top .what { min-width: 0; font-size: 20px; overflow-wrap: anywhere; }
+  .fam-top small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .fam-code { margin: 6px 0 10px; font-size: 18px; overflow-wrap: anywhere; }
+  .fam-form { margin: 8px 0 12px; }
+  .fam-kid .ai-btns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
+  /* ⏳ Waiting for a parent (kids' uploads and requests: a parent's device does the 🤖 part) */
+  .sc-wait { margin: 0 0 18px; background: #eef6ff; border: 3px solid #93c5fd; }
+  .sc-wait li { flex-wrap: wrap; }
+  .sc-wait .what { min-width: 0; overflow-wrap: anywhere; }
+  /* 🧒 A kid's device: no Switch user, Settings, backups, Family, newsletter, 👤 Kid profile edit or deleting */
+  body.kid-device [data-switch], body.kid-device [data-go="settings"], body.kid-device [data-backup], body.kid-device [data-go="family"],
+  body.kid-device [data-nlopen], body.kid-device [data-scgo="profile"], body.kid-device [data-scgo="reports"], body.kid-device [data-scgo="brief"],
+  body.kid-device [data-pactnew], body.kid-device [data-pactedit], body.kid-device [data-pactdel],
+  body.kid-device [data-scdel], body.kid-device [data-wsfdel], body.kid-device #fmDel, body.kid-device [data-del-user],
+  body.kid-device [data-adduser], body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
+  body.kid-device [data-hbdel] { display: none !important; }
+  body.kid-device .sc-topbtns { grid-template-columns: 1fr; }
+  .nl-events .checkline span { overflow-wrap: anywhere; }
+  @media (max-width: 600px) {
+    .sc-ov { grid-template-columns: 1fr; }
+    .sc-bignum { font-size: 48px; }
+    .sc-addbig { font-size: 20px; }
+    .sc-tabs button { font-size: 15px; }
+    .sc-wsstatus { margin-left: 0; }
+    .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (so "Newsletter" never breaks in the middle) */
+    .sc-topbtns .sc-addbig { font-size: 17px; padding: 10px 8px; }
+    .sc-topbtns small { font-size: 13px; }
+  }
   @media (max-width: 600px) {
     .home-big { gap: 10px; }
     .big-btn { min-height: 130px; border-radius: 24px; padding: 12px 8px; }
@@ -821,6 +926,55 @@
   .k-exam { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 1px 6px; border-radius: 8px; border: 1px solid #fecaca;
             background: #fee2e2; color: #b91c1c; font-size: 12px; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .k-exam:hover { background: #fecaca; }
+  /* 📌 A school date (from the 📰 newsletter): dashed border, light yellow */
+  .k-event { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 2px 6px; border-radius: 8px; border: 2px dashed #d4a017;
+             background: #fff9db; color: #6b4f05; font-size: 12px; font-weight: 700; text-align: left; line-height: 1.25; overflow-wrap: anywhere; }
+  .k-event:hover { background: #fff3bf; }
+  /* 📅 A parent's own activity: their color, with a small name tag. All day = a chip under the day name; ✈️ travel = one bar across the days */
+  .k-tag { display: inline-block; max-width: 100%; margin: 0 0 2px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--c);
+           background: #fff; color: var(--ink); font-size: 11px; font-weight: 800; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+  .k-pactday, .k-travel { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 2px 6px; border-radius: 8px; border: 2px solid var(--c);
+                          background: var(--soft); color: var(--ink); font-size: 12px; font-weight: 800; text-align: left; line-height: 1.3; overflow-wrap: anywhere; }
+  .k-travel { margin: 0; border-radius: 999px; padding: 3px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-pactday.faded, .k-travel.faded { opacity: .25; }
+  .k-week.rows .k-cell.k-barcell { padding: 0 6px; justify-content: center; }
+  /* 📅 The family calendar on a parent's home screen */
+  .fam-cal { margin: 0 0 18px; padding-left: 12px; padding-right: 12px; overflow: hidden; }
+  .fam-cal .sc-head { flex-wrap: wrap; gap: 8px; }
+  .fam-cal h2 { margin: 0; }
+  .fam-cal h2 small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .fam-cal .fc-who { margin: 10px 0 8px; }
+  .fam-cal .k-scroll { margin: 0 -4px; }
+  /* 👤 Kid profile: 📄 syllabus, "Do you know their level?", 🧪 placement test */
+  .sc-syl { margin: 4px 0 14px; padding: 12px; border: 2px dashed var(--line); border-radius: 14px; }
+  .sc-syl .hint { margin: 4px 0 8px; }
+  .sc-syl-file { margin: 0 0 8px; overflow-wrap: anywhere; }
+  .sc-syl-file small, .sc-know-test small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .sc-know { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 2px 0 10px; }
+  .sc-know-q { width: 100%; font-size: 15px; }
+  .sc-know label { cursor: pointer; }
+  .sc-know input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .sc-know span { display: inline-block; padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
+  .sc-know input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .sc-know input:focus-visible + span { outline: 3px solid #93c5fd; }
+  .sc-know-test { margin: 0 0 4px; padding: 10px 12px; border-radius: 12px; background: #f3f0ff; overflow-wrap: anywhere; }
+  .sc-level .linkbtn { margin-left: 8px; }
+  /* 📋 Brief for parents (on screen, and the same on paper) */
+  .bf-sheet { max-width: 760px; margin: 0 auto 18px; padding: 22px 20px; background: #fff; border-radius: 22px; box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,.08)); overflow-wrap: anywhere; }
+  .bf-summary { font-size: 17px; line-height: 1.5; margin: 10px 0 14px; }
+  .bf-sub { border-top: 2px solid var(--line); padding: 12px 0 4px; }
+  .bf-subhead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .bf-subhead h3 { margin: 0; font-size: 19px; }
+  .bf-level { padding: 2px 10px; border-radius: 999px; background: #fff3cd; color: #6b4f05; font-size: 14px; font-weight: 800; }
+  .bf-part { margin: 8px 0 0; }
+  .bf-part ul, .bf-home ul { margin: 4px 0 0; padding-left: 22px; }
+  .bf-part li, .bf-home li { margin: 2px 0; line-height: 1.45; }
+  .bf-home h3 { margin: 0; font-size: 19px; }
+  @media (max-width: 600px) { .bf-sheet { padding: 16px 14px; border-radius: 16px; } .bf-summary { font-size: 16px; } }
+  @media print {
+    .ai-print .bf-sheet { box-shadow: none; border-radius: 0; padding: 0; margin: 0; max-width: none; font-size: 12pt; }
+    .ai-print .bf-sub { break-inside: avoid; }
+  }
   /* "Save your changes?" box */
   .leave-card { max-width: 460px; text-align: center; padding-bottom: 22px; }
   .leave-emoji { font-size: 60px; line-height: 1; margin-top: 22px; }
@@ -1051,6 +1205,17 @@
   .login-card .hint { text-align: center; }
   .login-card input { margin-bottom: 10px; }
   .login-btn { min-height: 56px; border-radius: 999px; font-size: 20px; margin-top: 6px; }
+  .lg-step { display: flex; flex-direction: column; gap: 4px; }
+  .lg-step[hidden] { display: none; }
+  .login-big { min-height: 76px; margin-top: 12px; border-radius: 24px; font-size: 22px; font-weight: 800; }
+  .lg-kid, .lg-kid:hover { background: linear-gradient(135deg, #ffb347, #f0892b); border-color: #f0892b; color: #fff; }
+  .lg-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 6px 0 2px; border-radius: 16px; background: #f3ecdf; }
+  .lg-modes button { min-width: 0; min-height: 44px; padding: 2px 4px; border: none; border-radius: 12px; background: transparent; font-size: 15px; font-weight: 800; line-height: 1.1; }
+  .lg-modes button.on { background: #fff; box-shadow: var(--shadow); }
+  .lg-back { align-self: center; margin-top: 10px; }
+  .lg-codelabel { font-size: 20px; text-align: center; margin-top: 6px; }
+  .code-input { text-transform: uppercase; letter-spacing: .25em; font-size: 26px !important; font-weight: 800; text-align: center; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .code-big { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 24px; font-weight: 800; letter-spacing: .15em; }
   /* ☁️ The tiny "Synced / Offline" sign in the top corner */
   .sync-pill { position: fixed; top: 2px; right: 6px; z-index: 40; pointer-events: none;
     font-size: 11px; font-weight: 700; line-height: 1.4; padding: 1px 8px; border-radius: 999px;
@@ -1406,6 +1571,8 @@
   <div class="hello"><span class="hello-face" id="homeFace"></span>
     <div><h1 class="big-title" id="homeHello"></h1><p class="hello-points" id="homePoints"></p></div></div>
   <div class="note" id="homeNote" hidden></div>
+  <!-- Parents: 📅 the family's week (everyone in their own color) + ➕ My activity -->
+  <div id="homeCal"></div>
   <!-- Kids: two big buttons, 📅 Calendar and 🎒 School -->
   <div class="home-big" id="homeBig" hidden></div>
   <div class="menu" id="homeMenu"></div>
@@ -1622,6 +1789,12 @@
       </div>
     </div>
     <div>
+      <!-- 👨‍👩‍👧 Family: the kids' codes, school and year; add a parent -->
+      <div class="card" style="margin-bottom:18px">
+        <h2>👨‍👩‍👧 Family</h2>
+        <p class="hint">Each kid's code (for their own phone), their school and year. Add a second parent.</p>
+        <button class="primary" data-go="family">👨‍👩‍👧 Open Family</button>
+      </div>
       <!-- People -->
       <div class="card">
         <h2>👨‍👩‍👧‍👦 People</h2>
@@ -1692,6 +1865,14 @@
   </div>
 </section>
 
+<!-- ===== 👨‍👩‍👧 FAMILY (parents): the kids (school, system, year, 🔑 code), add a parent. Also the new family's setup. ===== -->
+<section class="screen" id="scr-family" hidden>
+  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill" data-go="settings">⚙️ Settings</button>
+    <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></div></header>
+  <h1 class="page-title">👨‍👩‍👧 Family</h1>
+  <div id="familyBody"></div>
+</section>
+
 <!-- ===== 🎒 SCHOOL (each kid; only Bro2a can add or change things, a kid sees only their own page) ===== -->
 <section class="screen" id="scr-school" hidden>
   <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 My calendar</button>
@@ -1707,11 +1888,11 @@
   <input type="file" id="aiFile" accept="image/*,application/pdf,.pdf,.pptx,.docx,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
 </section>
 
-<!-- 📥 Add school work: pick the PDF or photos, they're kept in the School files, then 🤖 reads them -->
+<!-- ⬆️ Upload today's work: pick the files, they're kept in the subject's Files, then 🤖 reads them (a new topic gets a level check) -->
 <div class="k-modal" id="aiWorkModal" hidden>
   <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="awTitle">
-    <div class="print-title" id="awTitle">📥 Add school work</div>
-    <p class="print-hint">Add the PDF or photos (from Seesaw, a worksheet, a test …). They're kept in the School files, then 🤖 reads them.</p>
+    <div class="print-title" id="awTitle">⬆️ Upload today's work</div>
+    <p class="print-hint">Add the photos, PDF, PowerPoint or Word (from Seesaw, a worksheet, a test …). They're kept in the subject's Files, then 🤖 reads them. A new topic gets a short level check.</p>
     <label class="small" for="awSubject">Subject</label>
     <select id="awSubject"></select>
     <div class="sc-photo-row" style="margin:12px 0 4px">
@@ -1724,6 +1905,22 @@
       <button class="primary" id="awRead" data-aiwait="analyze">🤖 Read it</button>
       <button id="awClose">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- 📰 School newsletter: pick the file and the kid, 🤖 reads it, then tick the school dates and ✅ Add to the plan (filled by drawNewsletter) -->
+<div class="k-modal" id="nlModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="nlTitle">
+    <div class="print-title" id="nlTitle">📰 School newsletter</div>
+    <div id="nlBody"></div>
+  </div>
+</div>
+
+<!-- ➕ My activity (a parent): 💼 Work / ✈️ Travel / 📌 Other on the family calendar (filled by drawPactForm) -->
+<div class="k-modal" id="pactModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="paTitle">
+    <div class="print-title" id="paTitle">➕ My activity</div>
+    <div id="paBody"></div>
   </div>
 </div>
 
@@ -1919,19 +2116,50 @@
     </div>
   </div>
 </div>
-<!-- ☁️ Family login: shown when nobody is signed in on this device -->
+<!-- ☁️ The first screen when nobody is signed in on this device: 👨‍👩‍👧 I'm a parent · 🧒 I'm a kid -->
 <div class="login-screen" id="loginScreen" hidden>
-  <form class="card login-card" id="loginForm" novalidate>
-    <div class="brand"><span class="brand-icon" aria-hidden="true">🏠</span><span class="brand-name">Hani's Family Plan</span></div>
-    <h1>Family login</h1>
-    <p class="hint" id="loginHint">Sign in with the family account. This device stays signed in.</p>
-    <label class="small" for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" autocomplete="username" inputmode="email" placeholder="family@example.com">
-    <label class="small" for="loginPass">Password</label>
-    <input type="password" id="loginPass" autocomplete="current-password" placeholder="Password">
-    <button type="submit" class="primary login-btn" id="loginBtn">Sign in</button>
-    <div class="err" id="loginErr" role="alert"></div>
-  </form>
+  <div class="card login-card">
+    <div class="brand"><span class="brand-icon" aria-hidden="true">🏠</span><span class="brand-name">Family Plan</span></div>
+    <!-- 1. Who are you? -->
+    <div id="lgChoose" class="lg-step">
+      <h1>Welcome! 👋</h1>
+      <p class="hint" id="loginHint">Who is using this phone?</p>
+      <button type="button" class="primary login-big" data-lg="parent">👨‍👩‍👧 I'm a parent</button>
+      <button type="button" class="login-big lg-kid" data-lg="kid">🧒 I'm a kid</button>
+    </div>
+    <!-- 2a. Parent: Sign in · Create a family account · I have a parent code -->
+    <form id="loginForm" class="lg-step" novalidate hidden>
+      <h1 id="lgTitle">Parent</h1>
+      <div class="lg-modes" role="tablist">
+        <button type="button" data-lgmode="signin" role="tab">Sign in</button>
+        <button type="button" data-lgmode="create" role="tab">New family</button>
+        <button type="button" data-lgmode="code" role="tab">Parent code</button>
+      </div>
+      <p class="hint" id="lgModeHint"></p>
+      <div id="lgFamilyRow"><label class="small" for="lgFamily">Family name</label>
+        <input type="text" id="lgFamily" maxlength="40" autocomplete="off" placeholder="The Smith family"></div>
+      <div id="lgNameRow"><label class="small" for="lgName">Your name</label>
+        <input type="text" id="lgName" maxlength="30" autocomplete="given-name" placeholder="Sara"></div>
+      <label class="small" for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" autocomplete="username" inputmode="email" placeholder="you@example.com">
+      <label class="small" for="loginPass">Password</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="Password (6 or more letters)">
+      <div id="lgCodeRow"><label class="small" for="lgPCode">Parent code</label>
+        <input type="text" id="lgPCode" class="code-input" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC234"></div>
+      <button type="submit" class="primary login-btn" id="loginBtn">Sign in</button>
+      <div class="err" id="loginErr" role="alert"></div>
+      <button type="button" class="linkbtn lg-back" data-lg="back">← Back</button>
+    </form>
+    <!-- 2b. Kid: just the code -->
+    <form id="kidForm" class="lg-step" novalidate hidden>
+      <h1>Hi! 🧒</h1>
+      <label class="small lg-codelabel" for="kidCode">Type your code</label>
+      <input type="text" id="kidCode" class="code-input" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC234">
+      <button type="submit" class="primary login-btn" id="kidBtn">Let's go! 🚀</button>
+      <div class="err" id="kidErr" role="alert"></div>
+      <button type="button" class="linkbtn lg-back" data-lg="back">← Back</button>
+    </form>
+  </div>
 </div>
 <!-- 🔔 What's new: the family's last 30 changes (the same list on every device) -->
 <div class="k-modal" id="newsModal" hidden>
@@ -1973,6 +2201,11 @@ const APP_NAME = "Hani's Family Plan";
 const DAD = "dad";                               // Dad's id. Dad can't be removed. (Only the shown name can change.)
 const DAD_NAME = "Bro2a";                        // the name Dad is shown with
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
+// 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
+const OLD_FAMILY_UID = "Hk3ZPk0xkTYLpLVBXrR8BUn3hfJ3";   // our first shared family account (its familyId = its uid)
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // codes: 6 of these (no 0 / O / 1 / I, they look alike)
+const isCode = x => typeof x === "string" && x.length === 6 && [...x].every(c => CODE_CHARS.includes(c));
+const SCHOOL_SYSTEMS = ["British", "American", "IB", "Indian (CBSE)", "UAE (MOE)", "Other"];
 const GET_READY = [0, 5, 10, 15, 20, 30];        // "Get ready before" / "Break after" choices (minutes)
 
 // The colors a person can have. color = strong color, soft = light background, ink = text on the light background.
@@ -2102,6 +2335,9 @@ function emptyData() {
     flexible: [],  // e.g. { id, name:"Math", duration:45, times:3, overlapWith:[ids], users:["mody"], needsDad:true }
     // Routines: daily things like eating and shower. Nothing is planned on top of them. No points.
     routines: [],  // e.g. { id, name:"Lunch", emoji:"🍽️", start:"13:00", duration:30, days:[0..6], users:[ids], custom:false }
+    // 📅 A parent's own activities (💼 Work, ✈️ Travel, 📌 Other): only on the calendar. The planner never moves them. No points.
+    parentActs: [], // e.g. { id, title:"Dad away", type:"travel", by:"dad", start:"2026-10-19", end:"2026-10-22", from:"", to:"", weekly:false }
+    //   (from / to = "09:00" / "17:00", or "" = all day; end = start except for travel)
     // When the day starts and ends. Free time = this minus fixed activities.
     // weekendOwn = true → Saturday and Sunday use weekendStart / weekendEnd instead.
     myDay: { start: "08:00", end: "21:00", weekendOwn: false, weekendStart: "08:00", weekendEnd: "21:00" },
@@ -2151,7 +2387,12 @@ function cleanData(d) {
                    color: hasOwn(PALETTE, u.color) ? u.color : "purple",
                    // 🕌 their own choice (older saved data: not set yet → they're asked once)
                    ...(typeof u.showPrayer === "boolean" ? { showPrayer: u.showPrayer } : {}),
-                   ...(typeof u.prayerRemind === "boolean" ? { prayerRemind: u.prayerRemind } : {}) }));
+                   ...(typeof u.prayerRemind === "boolean" ? { prayerRemind: u.prayerRemind } : {}),
+                   // 🎒 a kid's school, school system and year (the School's kid profile), and their 🔑 code (older data: none)
+                   ...(typeof u.school === "string" && u.school.trim() ? { school: u.school.trim().slice(0, 60) } : {}),
+                   ...(SCHOOL_SYSTEMS.includes(u.curriculum) ? { curriculum: u.curriculum } : {}),
+                   ...(typeof u.year === "string" && u.year.trim() ? { year: u.year.trim().slice(0, 20) } : {}),
+                   ...(isCode(u.code) ? { code: u.code } : {}) }));
     if (!users.some(u => u.id === DAD)) users.unshift(defaultUsers()[0]); // Dad is always there
     clean.users = users;
   }
@@ -2217,6 +2458,18 @@ function cleanData(d) {
                users: users.length ? users : [...userIds], custom: r.custom === true };
     })
     .filter(r => r.days.length);
+
+  // 📅 Parents' own activities (older saved data has none)
+  const isYmdText = s => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (Array.isArray(d.parentActs)) clean.parentActs = d.parentActs
+    .filter(a => a && typeof a.title === "string" && a.title.trim() && userIds.includes(a.by) && isYmdText(a.start))
+    .map(a => {
+      const type = ["work", "travel", "other"].includes(a.type) ? a.type : "other";
+      const end = type === "travel" && isYmdText(a.end) && a.end >= a.start ? a.end : a.start;
+      const timed = type !== "travel" && isTime(a.from) && isTime(a.to) && toMin(a.to) > toMin(a.from);
+      return { id: String(a.id || newId()), title: a.title.trim().slice(0, 40), type, by: a.by, start: a.start, end,
+               from: timed ? a.from : "", to: timed ? a.to : "", weekly: a.weekly === true };
+    });
 
   // Good habits (older saved data has none: start with the default list) and their ticks
   // ("Say please and thank you" was removed from the list: it's dropped from saved data too, with its ticks.)
@@ -2426,6 +2679,17 @@ function cleanData(d) {
 //   notes   = id → { subject, text, date, by }
 //   work    = id → { subject, title, date, what_to_do, topics: ["Fractions", …], files: [file ids], by }
 //             (📥 school work that 🤖 read; older data has none. Worksheets / explanations: see AI HELP)
+//   profile = { asked: true once 👤 was asked, subjects: { folder id → { level: 1–3 (⭐), good: "Good at…", hard: "Finds hard…",
+//               unsure?: true ("Not sure" → a 🧪 placement test), test?: that test's worksheet id } }, other }
+//             (an unsure subject has level 0 until its test is checked: then the level comes from the score)
+//   syllabus = { name, text (≤ 20000 characters), date, by } | null   (📄 the year's syllabus: sent with every 🤖 worksheet)
+//   brief    = { at, date, summary, subjects: [{ subject, level, strong_points, weak_points, next_steps }], home_tips } | null
+//              (📋 the latest Brief for parents)
+//   events  = id → { date: "2026-10-22", time: "08:30" | "" (all day), title, note, by }   (📌 school dates from the 📰 newsletter)
+//   week    = { label, n, start, end, subjects: [{ subject, topics }], reminders: [text] } | null   (📰 "This week", until end)
+//             (profile / events / week are newer: older data has none)
+//   requests = id → { kind: "work" | "practice", subject, files?: [file ids], topic?, part?, date, by }
+//             (⏳ a kid's device asked: a parent's device does the 🤖 part — ✅ Read now / ✅ Make now)
 const GRADE_TYPES = ["quiz", "exam", "homework", "worksheet"];
 const TASK_KINDS = ["homework", "exam"];
 const SEESAW_TYPES = ["homework", "comment", "grade"];
@@ -2439,8 +2703,10 @@ const DEFAULT_SUBJECTS = {
 };
 function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
-           subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {} };
+           subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
+           profile: { asked: false, subjects: {}, other: "" }, events: {}, week: null, requests: {}, syllabus: null, brief: null };
 }
+const isHm = x => typeof x === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);   // "08:30"
 function cleanSchool(s) {
   const out = {};
   if (!s || typeof s !== "object" || Array.isArray(s)) return out;
@@ -2501,6 +2767,37 @@ function cleanSchool(s) {
           topics: Array.isArray(w.topics) ? w.topics.map(x => txt(x, 40)).filter(Boolean).slice(0, 8) : [],
           files: Array.isArray(w.files) ? w.files.filter(x => okKey(String(x || ""))).slice(0, 20) : [],
           ...(okKey(String(w.by || "")) ? { by: w.by } : {}) });
+    // 👤 Kid profile, 📌 school dates, 📰 this week
+    const p = k.profile && typeof k.profile === "object" ? k.profile : {};
+    c.profile = { asked: p.asked === true, other: txt(p.other, 400), subjects: list(p.subjects, x => {
+      const level = [1, 2, 3].includes(Number(x.level)) ? Number(x.level) : 0, good = txt(x.good, 150), hard = txt(x.hard, 150);
+      const unsure = x.unsure === true, test = unsure && okKey(String(x.test || "")) ? { test: x.test } : {};
+      return level || good || hard || unsure ? { level, good, hard, ...(unsure ? { unsure } : {}), ...test } : null;
+    }) };
+    // 📄 Syllabus and 📋 Brief for parents (newer: older data has none)
+    const sy = k.syllabus;
+    c.syllabus = sy && typeof sy === "object" && txt(sy.text, 20000)
+      ? { name: txt(sy.name, 60) || "Syllabus", text: txt(sy.text, 20000), date: isDate(sy.date) ? sy.date : "", ...(okKey(String(sy.by || "")) ? { by: sy.by } : {}) } : null;
+    const bf = k.brief, strs = (x, n, len) => (Array.isArray(x) ? x : []).map(t => txt(t, len)).filter(Boolean).slice(0, n);
+    c.brief = bf && typeof bf === "object" && txt(bf.summary, 1500)
+      ? { at: txt(bf.at, 40), date: isDate(bf.date) ? bf.date : "", summary: txt(bf.summary, 1500),
+          subjects: (Array.isArray(bf.subjects) ? bf.subjects : []).filter(x => x && txt(x.subject, 30)).slice(0, 12)
+            .map(x => ({ subject: txt(x.subject, 30), level: txt(x.level, 80), strong_points: strs(x.strong_points, 5, 150),
+                         weak_points: strs(x.weak_points, 5, 150), next_steps: strs(x.next_steps, 5, 300) })),
+          home_tips: strs(bf.home_tips, 6, 400) } : null;
+    c.events = list(k.events, e => !txt(e.title, 80) || !isDate(e.date) ? null
+      : { date: e.date, time: isHm(e.time) ? e.time : "", title: txt(e.title, 80), note: txt(e.note, 300), ...(okKey(String(e.by || "")) ? { by: e.by } : {}) });
+    c.requests = list(k.requests, q => !["work", "practice"].includes(q.kind) || !txt(q.subject, 30) || !isDate(q.date) ? null
+      : { kind: q.kind, subject: txt(q.subject, 30), date: q.date, ...(okKey(String(q.by || "")) ? { by: q.by } : {}),
+          ...(q.kind === "work" ? { files: (Array.isArray(q.files) ? q.files : []).filter(x => okKey(String(x || ""))).slice(0, 20) }
+                                : { topic: txt(q.topic, 80), part: txt(q.part, 80) }) });
+    const wk = k.week;
+    c.week = wk && typeof wk === "object" && isDate(wk.start) && isDate(wk.end)
+      ? { label: txt(wk.label, 60), n: Math.max(0, Math.round(Number(wk.n)) || 0), start: wk.start, end: wk.end,
+          subjects: (Array.isArray(wk.subjects) ? wk.subjects : []).filter(x => x && txt(x.subject, 30)).slice(0, 12)
+            .map(x => ({ subject: txt(x.subject, 30), topics: (Array.isArray(x.topics) ? x.topics : []).map(t => txt(t, 60)).filter(Boolean).slice(0, 8) })),
+          reminders: (Array.isArray(wk.reminders) ? wk.reminders : []).map(t => txt(t, 200)).filter(Boolean).slice(0, 10) }
+      : null;
     c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
       ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
     c.reviews = list(k.reviews, (r, week) => !isDate(week) ? null
@@ -2554,6 +2851,11 @@ const cloud = {
   enabled: location.protocol.startsWith("http"),  // opened from a web address (file:// can't sign in)
   fb: null,          // the Firebase functions, once they're loaded from the internet
   auth: null, db: null, user: null,
+  familyId: null,    // whose family data this device uses (families/{familyId}/…), from members/{uid}
+  role: null,        // "parent" | "kid" (a kid's device opens straight as that kid, see KID DEVICE)
+  kidId: null,       // a kid's device: which person they are
+  pending: null,     // what the login screen is doing: { kind: "create" | "kid" | "parentcode", … } (see resolveMember)
+  fresh: null,       // a brand-new family: start with only the parent, then "Add your kids"
   refs: null,        // the 3 cloud documents: plan, points, habits
   unsub: [],         // to stop listening (when signing out)
   snaps: {},         // the newest copy of each document
@@ -2703,6 +3005,12 @@ const canEdit = act => me === DAD || (act.users.length === 1 && act.users[0] ===
 
 // fromHistory = true when we got here with the phone's/browser's Back button
 function go(name, fromHistory) {
+  // 🧒 A kid's device is always that kid: no "Who are you?", no Settings (see KID DEVICE)
+  if (isKidDevice()) {
+    if (exists(kidDeviceId())) me = kidDeviceId();
+    if (exists(me) && ["start", "settings", "family", "all"].includes(name)) name = "home";
+  }
+  if (name === "family" && me !== DAD) name = "home";   // 👨‍👩‍👧 Family: parents only
   if (name !== "start" && name !== "view" && !exists(me)) name = "start";  // "View all plan" doesn't need a person
   // Dad only (Dad is the admin). (Settings: everyone can open it, but the kids only see their own 🕌 Prayer times.)
   if (name === "all" && me !== DAD) name = "home";
@@ -2729,7 +3037,7 @@ function chooseUser(id) {
   resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
   go("home");
 }
-function switchUser() { me = null; go("start"); }
+function switchUser() { if (isKidDevice()) return; me = null; go("start"); }
 // "View all plan" on the home page: everyone's week, on the last view chosen on this device (first time: today)
 function openViewAll() { wholeWeek = !isPhone(); allFilter = "all"; restoreView(); go("view"); }
 
@@ -2748,6 +3056,7 @@ function render() {
   if (screen === "all") drawAll();
   if (screen === "settings") drawSettings();
   if (screen === "school") drawSchool();
+  if (screen === "family") drawFamily();
   if (screen === "mine" || screen === "view") saveCalPrefs();   // remember the day / view / person on this device
   updateSaveBars();
   drawNews();
@@ -3158,6 +3467,7 @@ function drawHome() {
   $("homeNote").hidden = !note;
   $("homeNote").textContent = note;
   $("homeHabits").innerHTML = habitsCardHtml(me);   // ⭐ my good habits today (kids)
+  $("homeCal").innerHTML = isDad ? familyCalHtml() : "";   // 📅 the family's week, on top (parents)
 }
 
 // =====================================================================
@@ -4057,7 +4367,13 @@ function weekHtml(days, opts) {
           title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${safe(s.emoji)} ${safe(s.name)}</span>${
           !opts.only && !isEveryone(s.users) ? `<span class="r-who">${safe(emojisOf(s.users))}</span>` : ""}</div>` });
     });
-    if (!merged.length) parts.push({ free: true, start: -1, html: `<div class="k-free">Free day! 🎉</div>` });
+    // 📌 School dates with a time: a strip at that time (all-day ones are under the day name). Never planned around.
+    eventsOn(d, opts.only || null).filter(e => e.time).forEach(e =>
+      parts.push({ start: toMin(e.time), end: toMin(e.time) + 30, strip: true, html: eventHtml(e, opts.only || null) }));
+    // 📅 A parent's own activity with a time: a card in their color with their name (just looking: no tick, no points)
+    const pacts = pactsOn(d, opts.only || null).filter(a => a.type !== "travel" && a.from);
+    pacts.forEach(a => parts.push({ start: toMin(a.from), end: toMin(a.to), html: pactCardHtml(a, d, opts) }));
+    if (!merged.length && !pacts.length) parts.push({ free: true, start: -1, html: `<div class="k-free">Free day! 🎉</div>` });
     // 🕌 Prayer times (only for people who want them): inside the activity happening then, otherwise a thin line of its own
     const prays = prayersOn(d), inPrayer = new Set();
     const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
@@ -4104,9 +4420,13 @@ function weekHtml(days, opts) {
     });
     dayParts.push(parts.sort((a, b) => a.start - b.start));
   });
+  // ✈️ Travel: one bar across its days (under the day names)
+  const bars = travelBars(opts.only || null).map(x => ({ ...x, html: travelBarHtml(x, opts) }));
   // opts.whole = always the whole week, without the Day / Week switch (View all plan → "🗓️ Full week")
   return (opts.whole ? "" : navHtml()) + weekRowsHtml(dayParts, d =>
-    `<div class="k-dayname" ${d === today ? `title="Today"` : ""}>${dayHead(d)}</div>${examTagsHtml(d, opts.only || null)}`, opts.whole || wholeWeek);
+    `<div class="k-dayname" ${d === today ? `title="Today"` : ""}>${dayHead(d)}</div>${examTagsHtml(d, opts.only || null)}${
+      eventsOn(d, opts.only || null).filter(e => !e.time).map(e => eventHtml(e, opts.only || null)).join("")}${
+      pactsOn(d, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, d, opts)).join("")}`, opts.whole || wholeWeek, bars);
 }
 
 // Rows by time of day: every different start time in the week (to the nearest 15 minutes) is one row,
@@ -4191,10 +4511,12 @@ function rowLayout(dayParts) {
   });
   return { rows, days };
 }
-function weekRowsHtml(dayParts, headHtml, whole = wholeWeek) {
+// bars = ✈️ travel bars, each across its days: [{ d0, d1, html }] (one row each, right under the day names)
+function weekRowsHtml(dayParts, headHtml, whole = wholeWeek, bars = []) {
   const today = todayIndex();
   const { rows, days } = rowLayout(dayParts);
-  const last = rows.length + 2;                 // the day names row + the rows + a little space at the bottom
+  const B = bars.length;
+  const last = rows.length + 2 + B;             // the day names row + the bars + the rows + a little space at the bottom
   const cls = d => `${d === today ? "today" : ""} ${d === viewDay ? "sel" : ""}`;
   // Columns: the time labels, then each day's lanes (one lane, or more when things overlap), with a small gap between days.
   // Computer: the 7 days share the width equally (each day = 1fr, split into its lanes), so there's no sideways scroll.
@@ -4213,7 +4535,7 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek) {
     }
   });
   let html = `<div class="k-scroll ${whole ? "wide" : ""}"><div class="k-week rows ${whole ? "" : "one-day"}"
-    style="--cols:${fluid.join(" ")};--cols-wide:${wide.join(" ")};--cols-day:${one.join(" ")};grid-template-rows:auto repeat(${rows.length}, auto) 6px">
+    style="--cols:${fluid.join(" ")};--cols-wide:${wide.join(" ")};--cols-day:${one.join(" ")};grid-template-rows:auto ${B ? `repeat(${B}, auto) ` : ""}repeat(${rows.length}, auto) 6px">
     <div class="k-corner"></div>`;
   days.forEach((x, d) => {
     const span = `grid-column:${first[d]} / span ${x.L}`;
@@ -4223,13 +4545,16 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek) {
     x.items.forEach(it => {
       const pad = `padding-left:${it.lane ? 1 : 6}px;padding-right:${it.lane + it.w < x.L ? 1 : 6}px`;
       html += `<div class="k-cell ${it.strip ? "k-stripcell" : "k-span"} ${it.narrow ? "narrow" : ""} ${cls(d)}"
-        style="grid-column:${first[d] + it.lane} / span ${it.w};grid-row:${it.r0 + 2} / span ${it.n};${pad}">${it.html}</div>`;
+        style="grid-column:${first[d] + it.lane} / span ${it.w};grid-row:${it.r0 + 2 + B} / span ${it.n};${pad}">${it.html}</div>`;
     });
   });
+  // ✈️ The travel bars (on the phone's one-day view: only the ones on that day)
+  bars.forEach((bar, i) => html += `<div class="k-cell k-barcell ${bar.d0 <= viewDay && viewDay <= bar.d1 ? "sel" : ""}"
+    style="grid-column:${first[bar.d0]} / ${first[bar.d1] + days[bar.d1].L};grid-row:${i + 2}">${bar.html}</div>`);
   // The time labels (on the phone's one-day view: only the times that day has)
   rows.forEach((t, r) => {
     const used = days[viewDay].items.some(it => it.r0 === r);
-    html += `<div class="k-time ${used ? "" : "not-sel"}" style="grid-row:${r + 2}">${t === null ? "" : rowTime(t)}</div>`;
+    html += `<div class="k-time ${used ? "" : "not-sel"}" style="grid-row:${r + 2 + B}">${t === null ? "" : rowTime(t)}</div>`;
   });
   return html + `</div></div>`;
 }const noPlanHtml = () => `<div class="k-empty"><span>🗓️</span>No plan yet!<br>${me === DAD
@@ -4238,6 +4563,7 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek) {
 // The big card: who, what, day, start and end
 function openCard(b) {
   if (b.routine) return openRoutineCard(b);
+  if (b.pact) return openPactCard(b);
   const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => x.actId === a.id));
   const rows = [
     b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
@@ -5097,16 +5423,21 @@ window.addEventListener("beforeprint", () => {
 
 // =====================================================================
 //  🎒 SCHOOL ("Binder"): one binder per kid
-//   School home: 6 tiles (📚 Subjects, 📝 Homework, 📊 Marks, ⭐ Reviews, 🏫 School info, 📄 Reports) + 📁 Recent files
-//   📚 Subjects: a colored folder per subject, with its Files, Homework & exams, Marks and Notes
+//   School home (like a private tutor): one big ⬆️ Upload today's work, then a tile per subject with its success %
+//     (the older pages — Homework, Marks, Reviews, School info, Reports, Seesaw — are small links under the tiles)
+//   📥 → files saved in the subject → 🤖 reads them → 🤖 makes a short LEVEL CHECK → print, ⬆ upload answers, 🤖 Check
+//   A subject: 📊 Overview (%, by part, 💪 strong points, 🎯 needs practice, 🦉 coach's tip) · 📁 Files · 📝 Worksheets
 //  Bro2a sees and changes everything for every kid. A kid sees only their OWN binder: they can add homework,
 //  upload files and answers, add notes and tick done. Only Bro2a adds marks and reviews, checks answers,
 //  and changes School info and the subject folders.
 //  Changes are kept right away (no 💾 Save), like ticks. (The data: see cleanSchool. The files: see SCHOOL FILES.)
 // =====================================================================
 let schoolKid = null;      // whose binder is showing
-let schoolView = "home";   // "home" | "subjects" | "subject" | "homework" | "marks" | "reviews" | "info" | "reports"
+let schoolView = "home";   // "home" | "subject" | "worksheet" | "explain" | older pages: "homework" | "marks" | "reviews" | "info" | "reports" | "seesaw"
 let schoolSubject = null;  // the open subject folder (its id)
+let schoolTab = "overview"; // the open subject's tab: "overview" | "files" | "worksheets"
+let schoolOlder = false;   // 🗂️ the subject's older records are open (in 📝 Worksheets)
+let schoolLevel = null;    // 🤖 the level check being made: { kid, folder, work, title, subject, state: "making" | "failed" }
 let schoolEdit = null;     // the open form: "task" | "grade" | "note" | "link" | "subject" | "info" | "review" | "check"
 let schoolEditId = null;   // the item being changed (null = adding a new one)
 let schoolFresh = false;   // true = a form was just opened or closed: don't put back what was typed before
@@ -5190,9 +5521,10 @@ function openSchool(kid) {
   schoolFresh = true;
   go("school");
 }
-function goSchool(view, subject) {
+function goSchool(view, subject, tab) {
   schoolView = view || "home";
   schoolSubject = subject || null;
+  schoolTab = tab || "overview"; schoolOlder = false;
   schoolEdit = schoolEditId = null; schoolFresh = true; schoolReport = false;
   render();
   window.scrollTo(0, 0);
@@ -5215,19 +5547,23 @@ function drawSchool() {
     return;
   }
   const u = userById(schoolKid), s = schoolOf(schoolKid);
-  if (schoolView === "subject" && !s.subjects[schoolSubject]) schoolView = "subjects";
+  if ((schoolView === "subject" && !s.subjects[schoolSubject]) || schoolView === "subjects") schoolView = "home";
   $("schoolTitle").textContent = isDad ? `🎒 ${u.emoji} ${u.name}'s school` : "🎒 My school";
   $("schoolSub").textContent = "";
   // Drawn again while a form is open (e.g. a change from another phone): keep what was typed
   const typed = {}, focus = document.activeElement && document.activeElement.id;
   if (!schoolFresh) $("schoolBody").querySelectorAll(".sc-form [id]").forEach(el => { if ("value" in el && el.type !== "radio") typed[el.id] = el.value; });
   schoolFresh = false;
-  const views = { home: schoolHomeHtml, subjects: schoolSubjectsHtml, subject: schoolFolderHtml, homework: schoolHomeworkHtml,
+  const views = { home: schoolHomeHtml, subject: schoolSubjectHtml, homework: schoolHomeworkHtml,
                   marks: schoolMarksHtml, reviews: schoolReviewsHtml, info: schoolInfoHtml, reports: schoolReportsHtml,
-                  worksheet: schoolWorksheetHtml, explain: schoolExplainHtml };
+                  seesaw: (s, isDad) => schoolSeesawHtml(s, isDad) || `<div class="card"><p class="sc-empty">Nothing from Seesaw yet.</p></div>`,
+                  worksheet: schoolWorksheetHtml, explain: schoolExplainHtml, profile: schoolProfileHtml, brief: schoolBriefHtml };
+  if (schoolView === "brief" && (!isDad || isKidDevice())) schoolView = "home";   // 📋 parents only
   aiMounts = [];
+  // 👤 The first time School opens for this kid: their profile first (asked once)
+  const view = schoolView === "home" && !s.profile.asked && !isKidDevice() ? "profile" : schoolView;   // (🧒 not on a kid's device)
   $("schoolBody").innerHTML = `<datalist id="scSubjects">${subjectsOf(s).map(x => `<option value="${safe(x)}">`).join("")}</datalist>`
-    + crumbHtml(s) + (views[schoolView] || schoolHomeHtml)(s, isDad, u);
+    + (view === schoolView ? crumbHtml(s) : "") + (views[view] || schoolHomeHtml)(s, isDad, u);
   fillAiMounts($("schoolBody"));   // 🤖 the parts with text from the AI (built as plain text)
   Object.entries(typed).forEach(([id, v]) => { const el = $(id); if (el) el.value = v; });
   $("schoolBody").querySelectorAll(".sc-starpick").forEach(showStars);
@@ -5236,43 +5572,353 @@ function drawSchool() {
   showAiWait();
 }
 
-// "🎒 School › Subjects › Math" (tap a part to go back there)
-const VIEW_NAMES = { subjects: "📚 Subjects", homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports" };
+// "🎒 School › ➗ Math › 📝 Worksheet" (tap a part to go back there)
+const VIEW_NAMES = { homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports", seesaw: "📥 From Seesaw" };
 function crumbHtml(s) {
   if (schoolView === "home") return "";
-  const parts = [["🎒 School", "home"]];
-  if (schoolView === "subject") {
-    const f = s.subjects[schoolSubject];
-    parts.push([VIEW_NAMES.subjects, "subjects"], [`${f.emoji} ${f.name}`, null]);
-  } else if (schoolView === "worksheet" || schoolView === "explain") {
-    // 🤖 a worksheet / explanation: back to its subject folder (or to Homework when the folder is gone)
-    const f = schoolSubject && s.subjects[schoolSubject];
-    if (f) parts.push([VIEW_NAMES.subjects, "subjects"], [`${f.emoji} ${f.name}`, "subject|" + schoolSubject]);
-    else parts.push([VIEW_NAMES.homework, "homework"]);
+  const parts = [["🎒 School", "home"]], f = schoolSubject && s.subjects[schoolSubject];
+  if (schoolView === "subject") parts.push([`${f.emoji} ${f.name}`, null]);
+  else if (schoolView === "worksheet" || schoolView === "explain") {
+    // 🤖 a worksheet / explanation: back to its subject's 📝 Worksheets (or to the School home when the folder is gone)
+    if (f) parts.push([`${f.emoji} ${f.name}`, "subject|" + schoolSubject + "|worksheets"]);
     parts.push([schoolView === "worksheet" ? "📝 Worksheet" : "📖 Explanation", null]);
-  } else parts.push([VIEW_NAMES[schoolView], null]);
+  } else if (schoolView === "brief") parts.push(["👤 Profile", "profile"], ["📋 Brief for parents", null]);
+  else parts.push([schoolView === "profile" ? "👤 Profile" : VIEW_NAMES[schoolView], null]);
   return `<nav class="bd-crumb" aria-label="Where you are">${parts.map(([label, view], i) => i < parts.length - 1
     ? `<button data-scgo="${view}">${safe(label)}</button><span class="sep">›</span>` : `<b>${safe(label)}</b>`).join("")}</nav>`;
 }
 
-// ---------- 🏠 School home: 6 tiles + 📁 Recent files ----------
+// ---------- 📊 How the kid is doing: from the 🤖 checked worksheets ----------
+const wsPct = w => Math.round(w.check.score / w.check.max_score * 100);
+// green ≥ 80, amber 60–79, red < 60 (the class "lv-good" | "lv-mid" | "lv-low")
+const pctLevel = p => p >= 80 ? "good" : p >= 60 ? "mid" : "low";
+const LEVEL_COLOR = { good: "#22a35a", mid: "#e8a020", low: "#dc4a4a" };
+// A subject's checked worksheets, newest check first
+const checkedOf = (kid, subject) => wsOf(kid, subject).filter(w => w.check)
+  .sort((a, b) => String(b.check.at).localeCompare(String(a.check.at)) || byNewest(a, b));
+const avgPct = list => list.length ? Math.round(list.reduce((n, w) => n + wsPct(w), 0) / list.length) : null;
+// The part (topic) of a worksheet: saved with it, or (older ones) its 📥 school work card's title, or its first topic
+const partOf = (w, s) => w.part || (w.work && s.work[w.work] ? s.work[w.work].title : "") || w.topics[0] || w.title;
+// 💪 / 🎯 from the newest checks: no doubles, at most 5 → [{ text, part }]
+function pointsOf(list, key, s) {
+  const seen = new Set(), out = [];
+  list.forEach(w => (w.check[key] || []).forEach(text => {
+    const k = text.toLowerCase();
+    if (out.length < 5 && !seen.has(k)) { seen.add(k); out.push({ text, part: partOf(w, s) }); }
+  }));
+  return out;
+}
+const pctBarNode = p => h("div", { class: "bd-bar", role: "img", "aria-label": p + "%" },
+  h("i", { style: `width:${Math.min(100, p)}%;background:${LEVEL_COLOR[pctLevel(p)]}` }));
+
+// ---------- 🏠 School home: ⬆️ Upload today's work + 📰 Newsletter, 🔔 reminders, a tile per subject, 📌 past school dates ----------
+// 📰 This week (from the newsletter) is shown until its last day
+const weekNow = s => s.week && s.week.end >= todayYmd() ? s.week : null;
 function schoolHomeHtml(s, isDad) {
-  const todo = todoOf(s).length, avg = avgOf(marksOf(s)), week = s.reviews[mondayOf(new Date())];
-  const tiles = [
-    ["subjects", "📚", "Subjects", `${subjectList(s).length} folders`],
-    ["homework", "📝", "Homework", todo ? `${todo} to do` : "All done 🎉"],
-    ["marks", "📊", "Marks", avg == null ? "No marks yet" : `Average ${avg}%`],
-    ["reviews", "⭐", "Reviews", week ? "This week ✓" : "This week: not yet"],
-    ["info", "🏫", "School info", s.info.name || "Timetable"],
-    ["reports", "📄", "Reports", "Make a report"]
-  ];
-  const recent = filesOf(s).slice(0, 3);
-  return `<div class="sc-actions ai-home-actions"><button class="pill ai-add" data-aiadd="">📥 Add school work</button></div>
-    <div class="bd-tiles">${tiles.map(([view, emoji, label, sub]) => `<button class="bd-tile bd-${view}" data-scgo="${view}">
-      <span class="e">${emoji}</span><b>${label}</b><small>${safe(sub)}</small></button>`).join("")}</div>
-    <div class="card bd-card"><h2>📁 Recent files</h2>${recent.length ? `<ul class="list">${recent.map(f => fileRowHtml(f, s)).join("")}</ul>`
-      : `<p class="sc-empty">No files yet. Open a subject and tap ⬆ Upload.</p>`}</div>
-    ${schoolSeesawHtml(s, isDad)}`;
+  const list = subjectList(s), adding = isDad && schoolEdit === "subject" && !schoolEditId, week = weekNow(s);
+  const past = Object.entries(s.events).map(([id, e]) => ({ id, ...e })).filter(e => e.date < todayYmd())
+    .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time)).slice(0, 20);
+  return `<div class="sc-topbtns"><button class="sc-addbig" data-aiadd="">⬆️ Upload today's work<small>Photo, PDF, PowerPoint or Word</small></button>
+      <button class="sc-addbig sc-news" data-nlopen>📰 Newsletter<small>School dates</small></button></div>
+    ${aiMount(() => waitingNode(s))}
+    ${week && week.reminders.length ? `<div class="card bd-card sc-remind"><h2>🔔 Reminders${week.label ? ` · ${safe(week.label)}` : ""}</h2>
+      <ul class="sc-points">${week.reminders.map(r => `<li>${safe(r)}</li>`).join("")}</ul></div>` : ""}
+    <div class="bd-head"><h2>📚 Subjects</h2><span class="bd-head-btns"><button class="edit" data-scgo="profile">👤 Profile</button>
+      ${isDad && !adding ? `<button class="edit" data-scedit="subject">➕ Subject</button>` : ""}</span></div>
+    ${adding ? subjectFormHtml({}) : ""}
+    ${list.length ? `<div class="sc-tiles">${list.map(x => subjectTileHtml(s, x)).join("")}</div>`
+      : `<div class="card"><p class="sc-empty">No subjects yet. Tap ⬆️ Upload today's work: 🤖 finds the subject.</p></div>`}
+    ${past.length ? `<div class="card bd-card sc-past"><h2>📌 Past school dates</h2><ul class="list">${past.map(e => `<li>
+      <div class="what">${safe(e.title)}<small>${shortDate(e.date)}${e.time ? " · " + clock(toMin(e.time), true) : ""}${e.note ? " · " + safe(e.note) : ""}</small></div>
+      ${isDad ? `<button class="x" data-scdel="event|${safe(e.id)}" aria-label="Delete">🗑️</button>` : ""}</li>`).join("")}</ul></div>` : ""}
+    <div class="sc-more"><span>More:</span>${Object.entries(VIEW_NAMES).map(([view, label]) =>
+      `<button class="linkbtn" data-scgo="${view}">${label}</button>`).join("")}</div>`;
+}
+
+// ---------- ⏳ WAITING: what a 🧒 kid's device sent (answers, school work, practice asks) ----------
+// For now a kid's device never calls the AI: a parent's device does it here (✅ Check now / ✅ Read now / ✅ Make now).
+function waitingNode(s) {
+  const kid = schoolKid, kidDev = isKidDevice();
+  const answers = wsOf(kid).filter(w => !w.check && w.answers.some(f => s.files[f]));
+  const reqs = Object.entries(s.requests).map(([id, q]) => ({ id, ...q })).sort((a, b) => a.date.localeCompare(b.date));
+  if (!answers.length && !reqs.length) return null;
+  const row = (text, small, btn) => h("li", null, h("div", { class: "what" }, text, h("small", null, small)),
+    kidDev ? h("span", { class: "ai-status up" }, "⏳ Waiting") : btn);
+  const btn = (data, label) => h("button", { class: "primary", data }, label);
+  return h("div", { class: "card bd-card sc-wait" }, h("h2", null, kidDev ? "⏳ Waiting for check" : "⏳ Waiting for you"),
+    h("ul", { class: "list" },
+      answers.map(w => row("📝 " + w.title, `${w.subject} · answers uploaded`, btn({ wsrow: "check|" + w.id, aiwait: "check|" + w.id }, "✅ Check now"))),
+      reqs.map(q => q.kind === "work"
+        ? row(`📥 New school work (${q.files.length} ${q.files.length === 1 ? "file" : "files"})`, `${q.subject} · ${shortDate(q.date)}`,
+              btn({ reqdo: q.id, aiwait: "req|" + q.id }, "✅ Read now"))
+        : row("🔁 Practice: " + q.topic, `${q.subject} · ${shortDate(q.date)}`, btn({ reqdo: q.id, aiwait: "req|" + q.id }, "✅ Make now")))));
+}
+async function doRequest(id) {
+  const kid = schoolKid, s = schoolOf(kid), q = s.requests[id];
+  if (!q || isKidDevice()) return;
+  if (q.kind === "practice") {
+    if (!(await newWorksheet(kid, q.subject, [q.topic], PRACTICE_COUNT, "practice", "req|" + id, { part: q.part || q.topic }))) return;
+    delete schoolFor(kid).requests[id];
+    writeData();
+    render();
+    return toast("🔁 The practice worksheet is ready!", 2500);
+  }
+  // 📥 School work: the kid's saved files → 🤖 read, the same as ⬆️ Upload today's work
+  const ids = q.files.filter(f => s.files[f]);
+  if (!ids.length) { delete schoolFor(kid).requests[id]; writeData(); render(); return toast("Those files aren't there any more."); }
+  let urls = [];
+  try { urls = await Promise.all(ids.map(fileUrl)); } catch (e) {}
+  if (urls.length !== ids.length || urls.some(u => !u)) return toast("📎 The files aren't on this device yet. Please try again in a moment.", 4500);
+  const total = urls.reduce((n, u) => n + bytesOf(u), 0);
+  if (total > AI_MAX) return toast(tooBigText(total), 6000);
+  let files;
+  try { files = await aiFilesFor(ids.map((f, i) => ({ name: s.files[f].name, url: urls[i] }))); }
+  catch (err) { return toast(aiFileError(err), 6000); }
+  const r = await callAi("analyze", { files, kidName: kidNameOf(kid), grade: gradeOf(kid) }, "req|" + id);
+  if (!r) return;
+  delete schoolFor(kid).requests[id];
+  const f = folderOf(s, q.subject);
+  afterAnalyze(kid, r, ids, f ? f.id : "");   // (this also saves the data)
+}
+
+// ---------- 👤 Kid profile: asked once (the first time School opens for the kid), then from 👤 Profile ----------
+const LEVEL_WORDS = { 1: "needs help", 2: "doing OK", 3: "strong" };
+// 🧪 A subject's placement test (a worksheet) → "pending" (not checked yet) | "done" | null (none yet)
+const testOf = x => x && x.test && aiDocs.worksheets[x.test] ? { id: x.test, w: aiDocs.worksheets[x.test] } : null;
+function testStatusText(x) {
+  const t = testOf(x);
+  if (!t) return "A short 10-question test is made when you tap 💾 Save. Print it from 📝 Worksheets.";
+  if (!t.w.check) return "🧪 Test pending: print it from 📝 Worksheets, then ⬆ upload the answers.";
+  return `✅ Checked: ${num(t.w.check.score)}/${num(t.w.check.max_score)} → Level ${"⭐".repeat(x.level || 1)}`;
+}
+function schoolProfileHtml(s, isDad, u) {
+  const p = s.profile, first = !p.asked, syl = s.syllabus;
+  return `${isDad ? `<div class="sc-actions"><button class="pill" data-scgo="brief">📋 Brief for parents</button></div>` : ""}
+    <div class="card bd-card sc-form sc-profile"><h2>👤 About ${safe(u.name)}</h2>
+    <p class="hint">${first ? `Before we start, tell me a little about ${safe(u.name)}. ` : ""}This helps 🤖 make worksheets that fit just right.</p>
+    <div class="sc-syl"><b>📄 Add the syllabus (optional)</b>
+      <p class="hint">The year's plan from school: PDF, Word, PowerPoint or a photo. 🤖 follows it in every worksheet.</p>
+      ${syl ? `<p class="sc-syl-file">📄 <b>${safe(syl.name)}</b><small>${syl.date ? shortDate(syl.date) + " · " : ""}${syl.text.split(/\s+/).filter(Boolean).length} words</small></p>` : ""}
+      <div class="ai-btns"><button type="button" data-sylpick data-aiwait="syllabus">${syl ? "🔁 Replace" : "📄 Add the syllabus"}</button>
+        ${syl ? `<button type="button" class="danger-text" data-syldel>🗑️ Remove</button>` : ""}</div></div>
+    ${subjectList(s).map(f => { const x = p.subjects[f.id] || {}, id = safe(f.id), unsure = x.unsure === true; return `<fieldset class="sc-prof-sub"><legend>${safe(f.emoji)} ${safe(f.name)}</legend>
+      <div class="sc-know" role="radiogroup" aria-label="Do you know their level in ${safe(f.name)}?"><b class="sc-know-q">Do you know their level?</b>
+        <label><input type="radio" name="spk-${id}" value="yes" data-spknow="${id}" ${unsure ? "" : "checked"}><span>Yes</span></label>
+        <label><input type="radio" name="spk-${id}" value="unsure" data-spknow="${id}" ${unsure ? "checked" : ""}><span>Not sure</span></label></div>
+      <div id="spy-${id}" ${unsure ? "hidden" : ""}>
+        <div class="sc-stars3" role="radiogroup" aria-label="${safe(f.name)} level">${[1, 2, 3].map(n => `<label title="${LEVEL_WORDS[n]}">
+          <input type="radio" name="spl-${id}" value="${n}" ${x.level === n && !unsure ? "checked" : ""}><span>${"⭐".repeat(n)}</span></label>`).join("")}</div>
+        <label class="small" for="spg-${id}">Good at…</label><input type="text" id="spg-${id}" maxlength="150" value="${safe(x.good || "")}" placeholder="Times tables">
+        <label class="small" for="sph-${id}">Finds hard…</label><input type="text" id="sph-${id}" maxlength="150" value="${safe(x.hard || "")}" placeholder="Long division"></div>
+      <p class="sc-know-test" id="spt-${id}" ${unsure ? "" : "hidden"}>🧪 <b>Placement test</b><small>${safe(testStatusText(x))}</small></p>
+      </fieldset>`; }).join("")}
+    <label class="small" for="spOther">Anything else?</label>
+    <textarea id="spOther" rows="3" maxlength="400" placeholder="Loves animals. Gets tired after 20 minutes.">${safe(p.other)}</textarea>
+    <div class="btnrow"><button class="primary" data-profsave>💾 Save</button><button data-profskip>${first ? "Skip for now" : "Cancel"}</button></div></div>`;
+}
+function saveProfile(skip) {
+  if (!schoolKid || !exists(me)) return;
+  const kid = schoolKid, s = schoolOf(kid);
+  if (skip && s.profile.asked) return goSchool("home");   // (Cancel)
+  const p = schoolFor(kid).profile;
+  let tests = [];
+  if (!skip) {
+    const subjects = {};
+    subjectList(s).forEach(f => {
+      const old = p.subjects[f.id] || {}, unsure = (document.querySelector(`input[name="spk-${f.id}"]:checked`) || {}).value === "unsure";
+      const good = $("spg-" + f.id).value.trim().slice(0, 150), hard = $("sph-" + f.id).value.trim().slice(0, 150);
+      if (unsure) {
+        // 🧪 Not sure: the level comes from the placement test (kept when that test is already made;
+        // offline the worksheets may not be here yet, so the test is kept unless it's really gone)
+        const t = old.unsure ? testOf(old) : null, keep = old.unsure && old.test && (t || !aiReady());
+        subjects[f.id] = { level: t && t.w.check ? old.level : 0, good, hard, unsure: true, ...(keep ? { test: old.test } : {}) };
+        if (!keep) tests.push(f.id);
+        return;
+      }
+      const level = Number((document.querySelector(`input[name="spl-${f.id}"]:checked`) || {}).value) || 0;
+      if (level || good || hard) subjects[f.id] = { level, good, hard };
+    });
+    Object.assign(p, { subjects, other: $("spOther").value.trim().slice(0, 400) });
+  }
+  p.asked = true;   // asked once: it doesn't come by itself again
+  writeData();
+  goSchool("home");
+  if (skip) return;
+  if (!tests.length) return toast("👤 Saved! Thank you.");
+  makePlacementTests(kid, tests);
+}
+// 🧪 One placement test for each "Not sure" subject, one after the other (they're in 📝 Worksheets, checked like any worksheet)
+const PLACEMENT_COUNT = 10;
+async function makePlacementTests(kid, folderIds) {
+  toast(`👤 Saved! Making ${folderIds.length === 1 ? "a placement test" : folderIds.length + " placement tests"}… 🧪`, 4000);
+  let made = 0;
+  for (const fid of folderIds) {
+    const f = schoolOf(kid).subjects[fid];
+    if (!f) continue;
+    const topics = [schoolOf(kid).syllabus ? `The main ${f.name} topics of this year, from the school syllabus`
+                                          : `The main ${f.name} topics of ${gradeOf(kid) || "this school year"}`];
+    const id = await newWorksheet(kid, f.name, topics, PLACEMENT_COUNT, "placement", "placement",
+                                  { title: `🧪 ${f.name} placement test`, part: "🧪 Placement test" }, false);
+    if (!id) continue;
+    made++;
+    const x = schoolFor(kid).profile.subjects[fid];
+    if (x && x.unsure) { x.test = id; writeData(); }
+  }
+  if (screen === "school") render();
+  toast(made === folderIds.length ? `🧪 ${made === 1 ? "The placement test is" : made + " placement tests are"} ready in 📝 Worksheets!`
+    : `🧪 ${made} of ${folderIds.length} placement tests were made. Save the profile again to try the others.`, 4500);
+}
+// A checked 🧪 placement test: the subject's level from the score, and 📋 the brief once ALL the kid's tests are checked
+function afterPlacement(kid, wsId, c, first) {
+  const p = schoolFor(kid).profile, x = Object.values(p.subjects).find(y => y.unsure && y.test === wsId);
+  if (x) { const pct = c.score / c.max_score * 100; x.level = pct >= 80 ? 3 : pct >= 50 ? 2 : 1; writeData(); }
+  const tests = Object.values(p.subjects).filter(y => y.unsure);
+  if (first && x && tests.every(y => { const t = testOf(y); return t && t.w.check; })) {
+    toast("🧪 All placement tests are checked! Writing the brief for parents… 📋", 4500);
+    makeBrief(kid, true);
+  }
+}
+// "📄 Add the syllabus": its text is taken out (PDF / Word / PowerPoint here; a photo or a scanned PDF: 🤖 reads it) and kept for the kid
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+let pdfjsLoading = null;
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return pdfjsLoading = pdfjsLoading || new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = PDFJS_URL;
+    el.onload = () => { if (!window.pdfjsLib) return reject(new Error("pdf")); window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL; resolve(window.pdfjsLib); };
+    el.onerror = () => { el.remove(); pdfjsLoading = null; reject(new Error("pdf")); };
+    document.head.appendChild(el);
+  });
+}
+// A PDF's text ("" when it has none, e.g. a scanned one, or the PDF reader couldn't load)
+async function pdfText(url) {
+  try {
+    const lib = await loadPdfJs(), bytes = Uint8Array.from(atob(url.slice(url.indexOf(",") + 1)), ch => ch.charCodeAt(0));
+    const pdf = await lib.getDocument({ data: bytes }).promise, out = [];
+    for (let i = 1; i <= Math.min(pdf.numPages, 80); i++) {
+      const tc = await (await pdf.getPage(i)).getTextContent();
+      const text = tc.items.map(x => x.str + (x.hasEOL ? "\n" : " ")).join("").replace(/[ \t]+/g, " ").trim();
+      if (text) out.push(text);
+    }
+    return out.join("\n\n");
+  } catch (e) { return ""; }
+}
+async function syllabusText(r) {
+  const type = r.url.slice(5, r.url.indexOf(";"));
+  if (type === "text/plain") return textOfUrl(r.url);
+  if (type === PPTX_TYPE || type === DOCX_TYPE) return officeText(r.url.slice(r.url.indexOf(",") + 1), type === PPTX_TYPE ? "pptx" : "docx");
+  if (type === "application/pdf") return pdfText(r.url);
+  return "";   // a photo
+}
+async function addSyllabus(files) {
+  const kid = schoolKid;
+  if (!kid || isKidDevice() || !exists(me)) return;
+  toast("📄 Reading the syllabus…", 3000);
+  const texts = [], pictures = [], problems = [];
+  for (const file of files) {
+    const { r, problem } = await readForAi(file);
+    if (problem) { problems.push(problem); continue; }
+    try { const text = (await syllabusText(r)).trim(); if (text) texts.push(text); else pictures.push(r); }
+    catch (err) { problems.push(aiFileError(err)); }
+  }
+  // Photos and scanned PDFs: 🤖 reads the subjects and topics from them
+  if (pictures.length) {
+    const total = pictures.reduce((n, x) => n + bytesOf(x.url), 0);
+    if (total > AI_MAX) problems.push(tooBigText(total));
+    else {
+      const r = await callAi("newsletter", { files: pictures.map(x => aiFile(x.name, x.url)), kidName: kidNameOf(kid), grade: gradeOf(kid), today: todayYmd() }, "syllabus");
+      if (r) {
+        const res = cleanNewsletter(r);
+        const lines = [...res.subjects.map(x => `${x.subject}: ${x.topics.join("; ")}`),
+                       ...res.events.map(e => `${e.date}: ${e.title}${e.note ? " (" + e.note + ")" : ""}`), ...res.reminders];
+        if (lines.length) texts.push(lines.join("\n"));
+        else problems.push("🤖 couldn't find subjects or topics in the photos.");
+      }
+    }
+  }
+  if (!texts.length) return toast(problems.join(" ") || "📄 Couldn't read the syllabus. Please try another file.", 6000);
+  const all = texts.join("\n\n"), name = files.length === 1 ? fileNameOf(files[0]) : `${fileNameOf(files[0])} +${files.length - 1}`;
+  schoolFor(kid).syllabus = { name: name.slice(0, 60), text: all.slice(0, 20000), date: todayYmd(), by: me };
+  writeData();
+  render();
+  toast(`📄 Syllabus saved for ${kidNameOf(kid)}!${all.length > 20000 ? " (It's long: the first part is kept.)" : ""}${problems.length ? " " + problems.join(" ") : ""}`, 4500);
+}
+function removeSyllabus() {
+  const s = schoolFor(schoolKid);
+  if (!s.syllabus || !confirm(`Remove the syllabus “${s.syllabus.name}”?`)) return;
+  s.syllabus = null;
+  writeData();
+  render();
+}
+
+// ---------- 📋 Brief for parents (parents only): 🤖 /brief from the 👤 profile + the last 10 checked worksheets ----------
+// It opens by itself once all the kid's 🧪 placement tests are checked (see afterPlacement). The latest one is kept (school.brief).
+function briefResults(kid) {
+  return wsOf(kid).filter(w => w.check).sort((a, b) => String(b.check.at).localeCompare(String(a.check.at)) || byNewest(a, b)).slice(0, 10)
+    .map(w => ({ subject: w.subject, title: w.title, score: w.check.score, max: w.check.max_score,
+                 strong: w.check.strong_points || [], weak: w.check.weak_points || [], ...(w.purpose === "placement" ? { placement: true } : {}) }));
+}
+function briefProfile(kid) {
+  const s = schoolOf(kid), p = s.profile;
+  return { subjects: subjectList(s).map(f => {
+             const x = p.subjects[f.id] || {};
+             const level = x.level ? `${x.level} of 3 stars (${LEVEL_WORDS[x.level]})${x.unsure ? ", from the placement test" : ", from the parents"}`
+               : x.unsure ? "not sure yet (placement test pending)" : "not given";
+             return { subject: f.name, level, good_at: x.good || "", finds_hard: x.hard || "" };
+           }), other: p.other || "" };
+}
+async function makeBrief(kid, auto) {
+  if (me !== DAD || isKidDevice() || !exists(kid)) return;
+  const u = userById(kid);
+  const r = await callAi("brief", { kidName: u.name, grade: gradeOf(kid), curriculum: u.curriculum && u.curriculum !== "Other" ? u.curriculum : "",
+                                    profile: briefProfile(kid), results: briefResults(kid) }, "brief");
+  if (!r) return;
+  const list = (x, n, len) => aiArr(x, n).map(t => aiTxt(t, len)).filter(Boolean);
+  const b = { at: new Date().toISOString(), date: todayYmd(), summary: aiTxt(r.summary, 1500),
+              subjects: aiObjs(r.subjects, 12).map(x => ({ subject: aiTxt(x.subject, 30), level: aiTxt(x.level, 80), strong_points: list(x.strong_points, 5, 150),
+                                                          weak_points: list(x.weak_points, 5, 150), next_steps: list(x.next_steps, 5, 300) })).filter(x => x.subject),
+              home_tips: list(r.home_tips, 6, 400) };
+  if (!b.summary) return toast("🤖 The brief came back empty. Please try again.", 4000);
+  schoolFor(kid).brief = b;
+  writeData();
+  addNews([newsItem("school", `📋 New brief for ${u.name}`, "", kid)]);   // 🔔 for the parents' devices
+  toast(`📋 New brief for ${u.name}`, 3500);
+  // Open it (by itself too, after the last placement test)
+  if (screen === "school" && schoolKid === kid) goSchool("brief");
+  else if (auto) { schoolKid = kid; leaveDraft(() => { schoolView = "brief"; schoolSubject = null; schoolEdit = schoolEditId = null; schoolFresh = true; go("school"); }); }
+}
+function schoolBriefHtml(s, isDad, u) {
+  if (!isDad || isKidDevice()) return `<div class="card"><p class="sc-empty">📋 The brief is for parents.</p></div>`;
+  const b = s.brief;
+  return aiMount(() => h("div", null,
+    h("div", { class: "ai-toolbar" },
+      h("button", { class: b ? null : "primary", data: { briefmake: "", aiwait: "brief" } }, b ? "🔁 Make a new brief" : "📋 Make the brief"),
+      b ? h("button", { class: "primary", data: { briefprint: "" } }, "🖨️ Print") : null),
+    b ? briefNode(schoolKid, b)
+      : h("div", { class: "card bd-card ai-narrow" }, h("p", { class: "sc-empty" },
+          `No brief yet. Tap 📋 Make the brief: 🤖 writes it from ${u.name}'s profile and the last checked worksheets.`))));
+}
+// The brief card (on screen, and the same on paper)
+function briefNode(kid, b) {
+  const u = userById(kid), items = (emoji, title, list) => list.length ? h("div", { class: "bf-part" }, h("b", null, `${emoji} ${title}`),
+    h("ul", null, list.map(t => h("li", null, t)))) : null;
+  return h("div", { class: "bf-sheet" },
+    h("div", { class: "ws-namerow" }, h("span", null, "📋 Brief for parents"), h("span", null, b.date ? longDate(b.date) : "")),
+    h("h1", { class: "ex-title" }, `${u.emoji} ${u.name}`),
+    h("div", { class: "ws-sub" }, [gradeOf(kid), u.school].filter(Boolean).join(" · ")),
+    h("p", { class: "bf-summary" }, b.summary),
+    b.subjects.map(x => h("section", { class: "bf-sub" },
+      h("div", { class: "bf-subhead" }, h("h3", null, `${subjectEmoji(schoolOf(kid), x.subject)} ${x.subject}`), x.level ? h("span", { class: "bf-level" }, x.level) : null),
+      items("💪", "Strong", x.strong_points), items("🎯", "To work on", x.weak_points), items("➡️", "Next steps", x.next_steps))),
+    b.home_tips.length ? h("section", { class: "bf-sub bf-home" }, h("h3", null, "🏠 Home tips"), h("ul", null, b.home_tips.map(t => h("li", null, t)))) : null);
+}
+function subjectTileHtml(s, x) {
+  const avg = avgPct(checkedOf(schoolKid, x.name));
+  return `<button class="sc-tile" data-scgo="subject|${safe(x.id)}" style="--c:${subjectColors(x).color}">
+    <span class="e">${safe(x.emoji)}</span><b>${safe(x.name)}</b>
+    ${avg == null ? `<span class="sc-pct none" aria-label="No checked worksheets yet">–</span>` : `<span class="sc-pct lv-${pctLevel(avg)}">${avg}%</span>`}</button>`;
 }
 
 // 📥 From Seesaw: text and photos, newest first (the photos load by themselves, see fillPhotos)
@@ -5286,20 +5932,7 @@ function schoolSeesawHtml(s, isDad) {
       : `<p class="sc-empty">Nothing from Seesaw yet. Tap ➕ Add to paste text or add a photo.</p>`}</div>`;
 }
 
-// ---------- 📚 Subjects: the folders ----------
-function schoolSubjectsHtml(s, isDad) {
-  const list = subjectList(s), open = isDad && schoolEdit === "subject" && !schoolEditId;
-  let html = `<div class="bd-head"><h2>📚 Subjects</h2>${isDad && !open ? `<button class="edit" data-scedit="subject">➕ Add subject</button>` : ""}</div>`;
-  if (open) html += subjectFormHtml({});
-  if (!list.length) return html + `<div class="card"><p class="sc-empty">No subject folders yet.${isDad ? " Tap ➕ Add subject." : ""}</p></div>`;
-  return html + `<div class="bd-folders">${list.map(x => {
-    const c = subjectColors(x), avg = avgOf(marksOf(s, x.name)), files = filesOf(s, x.name).length, todo = todoOf(s, x.name).length;
-    return `<button class="bd-folder" data-scgo="subject|${safe(x.id)}" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <span class="e">${safe(x.emoji)}</span><span class="nm">${safe(x.name)}</span>
-      <span class="bd-stats"><span><b>${avg == null ? "–" : avg + "%"}</b> average</span><span><b>${files}</b> ${files === 1 ? "file" : "files"}</span>
-        <span class="${todo ? "todo" : ""}"><b>${todo}</b> to do</span></span></button>`;
-  }).join("")}</div>`;
-}
+// ---------- The subject form (Bro2a: ➕ Subject on the School home, ✏️ on a subject) ----------
 function subjectFormHtml(x) {
   return `<div class="sc-form">
     <div class="row"><div style="flex:0 0 84px"><label class="small" for="scsEmoji">Emoji</label><input type="text" id="scsEmoji" maxlength="8" value="${safe(x.emoji || "")}" placeholder="📘"></div>
@@ -5310,40 +5943,139 @@ function subjectFormHtml(x) {
     ${scButtons("subject", !!schoolEditId)}</div>`;
 }
 
-// ---------- 📂 One subject folder ----------
-function schoolFolderHtml(s, isDad) {
-  const f = s.subjects[schoolSubject], c = subjectColors(f);
+// ---------- 📂 One subject: 📊 Overview · 📁 Files · 📝 Worksheets ----------
+const SUBJECT_TABS = [["overview", "📊 Overview"], ["files", "📁 Files"], ["worksheets", "📝 Worksheets"]];
+function schoolSubjectHtml(s, isDad) {
+  const f = { id: schoolSubject, ...s.subjects[schoolSubject] }, c = subjectColors(f);
   const editing = isDad && schoolEdit === "subject" && schoolEditId === schoolSubject;
-  const files = filesOf(s, f.name), tasks = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t })).filter(t => sameSubject(t.subject, f.name));
-  const marks = marksOf(s, f.name), notes = Object.entries(s.notes).map(([id, n]) => ({ id, ...n }))
-    .filter(n => sameSubject(n.subject, f.name)).sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-  const avg = avgOf(marks);
   let html = `<div class="bd-folder-head" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(f.emoji)}</span>
       <h2>${safe(f.name)}</h2>${isDad && !editing ? `<span class="bd-head-btns">${itemBtns("subject", schoolSubject)}</span>` : ""}</div>`;
   if (editing) html += subjectFormHtml(f);
-  html += `<div class="sc-actions bd-actions">
-      <button class="pill ai-add" data-aiadd="${safe(schoolSubject)}">📥 Add school work</button>
-      <button class="pill" data-scupload="${safe(f.name)}">⬆ Upload</button>
-      <button class="pill" data-scedit="link">🔗 Add link</button>
-      <button class="pill" data-scedit="note">➕ Note</button>
-      ${isDad ? `<button class="pill" data-scedit="grade">➕ Mark</button>` : ""}
-      <button class="pill" data-scedit="task">➕ Homework</button></div>`;
-  if (schoolEdit === "link") html += linkFormHtml();
+  html += levelBannerHtml();
+  html += `<div class="sc-tabs" role="tablist">${SUBJECT_TABS.map(([tab, label]) => `<button role="tab" class="${schoolTab === tab ? "on" : ""}"
+    aria-selected="${schoolTab === tab}" data-sctab="${tab}">${label}</button>`).join("")}</div>`;
+  if (schoolTab === "files") return html + subjectFilesHtml(s, f);
+  if (schoolTab === "worksheets") return html + aiMount(() => subjectWsNode(s, f)) + subjectOlderHtml(s, f, c, isDad);
+  return html + aiMount(() => overviewNode(s, f));
+}
+// "🆕 New topic: Fractions" while its level check is being made (or 🔁 when that didn't work)
+function levelBannerHtml() {
+  const L = schoolLevel;
+  if (!L || L.kid !== schoolKid || L.folder !== schoolSubject) return "";
+  return `<div class="card sc-newtopic" role="status"><b>🆕 New topic: ${safe(L.title)}</b>
+    <p>${L.state === "making" ? "📝 Making a short level check to see what you already know…" : "Couldn't make the level check."}</p>
+    ${L.state === "failed" ? `<div class="btnrow"><button class="primary" data-levelretry="${safe(L.work)}" data-aiwait="level">🔁 Try again</button>
+      <button data-levelclose>Close</button></div>` : ""}</div>`;
+}
+
+// 📊 Overview: the subject's %, by part, 💪 strong points, 🎯 needs practice, 🦉 coach's tip (built with h(): text from the AI)
+function overviewNode(s, f) {
+  const list = checkedOf(schoolKid, f.name), px = s.profile.subjects[f.id] || {}, level = px.level, test = testOf(px);
+  // 📰 This week's topics (from the newsletter) and 👤 the level (or 🧪 Test pending), on top
+  const week = weekNow(s), wk = week && week.subjects.find(x => sameSubject(x.subject, f.name));
+  const top = [
+    wk ? h("div", { class: "card bd-card sc-thisweek sc-wide" }, h("h2", null, "📰 This week" + (week.label ? " · " + week.label : "")),
+      h("ul", { class: "sc-points" }, wk.topics.map(t => h("li", null, t)))) : null,
+    level ? h("p", { class: "sc-level sc-wide" }, "Level: " + "⭐".repeat(level), h("small", null, " " + LEVEL_WORDS[level] + (px.unsure ? " · from the 🧪 placement test" : "")))
+      : px.unsure ? h("p", { class: "sc-level sc-wide" }, "🧪 Test pending",
+          test ? h("button", { class: "linkbtn", data: { aiopen: "worksheet|" + test.id } }, "Open the test") : h("small", null, " · save the 👤 Profile to make it")) : null];
+  if (!list.length) return h("div", { class: "sc-ov" }, top, h("div", { class: "card bd-card sc-wide" },
+    h("p", { class: "sc-empty" }, cloud.user ? "No checked work yet. Use ⬆️ Upload today's work." : "🔌 This shows when this device is online and signed in to the family account."),
+    h("button", { class: "pill ai-add", data: { aiadd: schoolSubject } }, "⬆️ Upload today's work")));
+  const avg = avgPct(list), parts = new Map();
+  list.forEach(w => {
+    const name = partOf(w, s), k = name.toLowerCase();
+    if (!parts.has(k)) parts.set(k, { name, list: [] });
+    parts.get(k).list.push(w);
+  });
+  // 💪 / 🎯: the latest check's lists; 🦉 the latest coach's tip
+  const last = list[0], strong = last.check.strong_points || [], weak = last.check.weak_points || [], tip = list.find(w => w.check.coach_tip);
+  return h("div", { class: "sc-ov" }, top,
+    h("div", { class: "card bd-card" }, h("h2", null, `${f.emoji} ${f.name}`),
+      h("div", { class: "sc-bignum lv-" + pctLevel(avg) }, avg + "%"),
+      h("small", null, `${list.length} checked ${list.length === 1 ? "worksheet" : "worksheets"}`), pctBarNode(avg)),
+    h("div", { class: "card bd-card" }, h("h2", null, "By part"), [...parts.values()].map(p => {
+      const a = avgPct(p.list);
+      return h("div", { class: "bd-avgrow" }, h("div", { class: "bd-avgtop" }, h("b", null, p.name),
+        h("span", null, h("b", { class: "lv-" + pctLevel(a) }, a + "%"), " ", h("small", null, `(${p.list.length})`))), pctBarNode(a));
+    })),
+    h("div", { class: "card bd-card" }, h("h2", null, "💪 Strong points"), strong.length
+      ? h("ul", { class: "sc-points" }, strong.map(x => h("li", null, x))) : h("p", { class: "sc-empty" }, "They show after the next 🤖 check.")),
+    h("div", { class: "card bd-card" }, h("h2", null, "🎯 Needs practice"), weak.length
+      ? h("ul", { class: "sc-weak" }, weak.map((x, i) => h("li", null, h("span", null, x),
+          h("button", { data: { wspractice: String(i), aiwait: "practice|" + i } }, "🔁 Make practice for this"))))
+      : h("p", { class: "sc-empty" }, "Nothing to practise right now. 🎉")),
+    tip ? h("div", { class: "card bd-card sc-tip sc-wide" }, h("h2", null, "🦉 Coach's tip"), h("p", null, tip.check.coach_tip),
+      h("small", null, `${shortDate(tip.check.at)} · ${partOf(tip, s)}`)) : null);
+}
+
+// 📁 Files: every file of the subject, newest first (tap one to see / ⬇ download it)
+function subjectFilesHtml(s, f) {
+  const files = filesOf(s, f.name);
+  return `<div class="sc-actions"><button class="pill" data-scupload="${safe(f.name)}">⬆ Upload</button><button class="pill" data-scedit="link">🔗 Add link</button></div>
+    ${schoolEdit === "link" ? linkFormHtml() : ""}
+    <div class="card bd-card"><h2>📁 Files</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s)).join("")}</ul>`
+      : `<p class="sc-empty">No files yet. Use ⬆️ Upload today's work, or ⬆ Upload.</p>`}</div>`;
+}
+
+// 📝 Worksheets: each with its status and 🖨️ ⬆ 🤖 🔑
+const WS_PURPOSE = { level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"],
+                     placement: ["🧪", "Placement test"] };
+function subjectWsNode(s, f) {
+  const list = wsOf(schoolKid, f.name);
+  return aiListCard("📝 Worksheets", list.length ? h("ul", { class: "list" }, list.map(w => wsRowNode(s, w))) : null,
+    "No worksheets yet. Use ⬆️ Upload today's work: a new topic gets a short level check.");
+}
+function wsRowNode(s, w) {
+  const files = w.answers.filter(x => s.files[x]), done = !!w.check, canAct = isDadNow() || !done, [emoji, label] = WS_PURPOSE[w.purpose] || ["📝", ""];
+  const status = done ? `${num(w.check.score)}/${num(w.check.max_score)} · ${wsPct(w)}%` : files.length ? "⏳ Waiting for check" : "Not done";
+  return h("li", { class: "sc-wsrow" },
+    h("button", { class: "bd-file", data: { aiopen: "worksheet|" + w.id } }, h("span", { class: "e" }, emoji),
+      h("span", { class: "what" }, w.title, h("small", null, [label, partOf(w, s), shortDate(w.date)].filter(Boolean).join(" · ")))),
+    h("div", { class: "sc-wsstatus" }, h("span", { class: "ai-status " + (done ? "lv-" + pctLevel(wsPct(w)) : files.length ? "up" : "") }, status)),
+    h("div", { class: "ai-btns sc-wsbtns" },
+      h("button", { data: { wsrow: "print|" + w.id } }, "🖨️ Print"),
+      canAct ? h("button", { data: { wsrow: "upload|" + w.id } }, "⬆ Upload answers") : null,
+      canAct && files.length && !isKidDevice() ? h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, done ? "🤖 Check again" : "✅ Check now") : null,
+      h("button", { data: { wsrow: "answers|" + w.id } }, "🔑 Show answers")));
+}
+function wsRowAction(v) {
+  const [act, id] = v.split("|"), w = aiDocs.worksheets[id];
+  if (!w) return;
+  if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
+  if (act === "answers") { openAiDoc("worksheet", id); wsAnswers = true; return render(); }
+  if (act === "upload") {
+    if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
+    aiPick = { ws: id };
+    $("aiFile").value = "";
+    return $("aiFile").click();
+  }
+  if (act === "check") return checkWorksheet(id);
+}
+
+// 🗂️ Older records of the subject (from before the tutor pages): school work cards, explanations, homework, marks, notes
+function subjectOlderHtml(s, f, c, isDad) {
+  const tasks = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t })).filter(t => sameSubject(t.subject, f.name));
+  const marks = marksOf(s, f.name).filter(g => !g.worksheet);   // (the worksheets' marks are in 📝 Worksheets already)
+  const notes = Object.entries(s.notes).map(([id, n]) => ({ id, ...n }))
+    .filter(n => sameSubject(n.subject, f.name)).sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  const works = Object.values(s.work).filter(w => sameSubject(w.subject, f.name)).length, explains = exOf(schoolKid, f.name).length;
+  const count = tasks.length + marks.length + notes.length + works + explains;
+  const editing = ["task", "note", "grade", "check"].includes(schoolEdit), open = schoolOlder || editing;
+  if (!count && !editing) return "";
+  let html = `<button class="sc-older-btn" data-scolder aria-expanded="${open}">🗂️ Older school records (${count}) ${open ? "▾" : "▸"}</button>`;
+  if (!open) return html;
   if (schoolEdit === "note") html += noteFormHtml(s);
   if (schoolEdit === "grade" && isDad) html += gradeFormHtml(s, f.name);
   if (schoolEdit === "task") html += taskFormHtml(s, f.name);
-  html += aiMount(() => workListNode(s, f.name, c));   // 📥 School work (🤖 read)
-  html += `<div class="sc-grid">
-    <div class="card bd-card"><h2>📁 Files</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s)).join("")}</ul>` : `<p class="sc-empty">No files yet. Tap ⬆ Upload.</p>`}</div>
-    <div class="card bd-card"><h2>📝 Homework & exams</h2>${tasksListHtml(s, tasks)}</div>
-    <div class="card bd-card"><h2>📊 Marks${avg == null ? "" : ` · <span class="bd-avg">${avg}%</span>`}</h2>${avg == null ? "" : barHtml(avg, c)}
-      ${marks.length ? marksListHtml(marks) : `<p class="sc-empty">No marks yet.</p>`}</div>
-    <div class="card bd-card"><h2>🗒️ Notes</h2>${notes.length ? notes.map(n => `<div class="sc-ss"><div class="sc-head" style="margin:0"><b>${shortDate(n.date)}</b>
-        ${canChange(n) ? `<span>${itemBtns("note", n.id)}</span>` : ""}</div><p>${safe(n.text)}</p></div>`).join("") : `<p class="sc-empty">No notes yet.</p>`}</div>
-    ${aiMount(() => aiListCard("📝 Worksheets", wsListNode(wsOf(schoolKid, f.name), false), "No worksheets yet. Tap 📝 Worksheet on a 📥 School work card."))}
-    ${aiMount(() => aiListCard("📖 Explanations", exListNode(exOf(schoolKid, f.name)), "No explanations yet. Tap 📖 Explain on a 📥 School work card."))}
+  return html + `<div class="sc-grid">
+    ${works ? aiMount(() => workListNode(s, f.name, c)) : ""}
+    ${explains ? aiMount(() => aiListCard("📖 Explanations", exListNode(exOf(schoolKid, f.name)), "")) : ""}
+    ${tasks.length ? `<div class="card bd-card"><h2>📝 Homework & exams</h2>${tasksListHtml(s, tasks)}</div>` : ""}
+    ${marks.length ? `<div class="card bd-card"><h2>📊 Marks</h2>${marksListHtml(marks)}</div>` : ""}
+    ${notes.length ? `<div class="card bd-card"><h2>🗒️ Notes</h2>${notes.map(n => `<div class="sc-ss"><div class="sc-head" style="margin:0"><b>${shortDate(n.date)}</b>
+        ${canChange(n) ? `<span>${itemBtns("note", n.id)}</span>` : ""}</div><p>${safe(n.text)}</p></div>`).join("")}</div>` : ""}
   </div>`;
-  return html;
 }
 const barHtml = (pct, c) => `<div class="bd-bar" role="img" aria-label="${pct}%"><i style="width:${Math.min(100, pct)}%;background:${c.color}"></i></div>`;
 
@@ -5389,7 +6121,7 @@ function schoolHomeworkHtml(s) {
   return `<div class="bd-head"><h2>📝 Homework & exams</h2>${open ? "" : `<button class="edit" data-scedit="task">➕ Add</button>`}</div>
     ${open ? taskFormHtml(s, "") : ""}<div class="card bd-card">${tasksListHtml(s, all)}</div>
     <div style="height:18px"></div>${aiMount(() => aiListCard("📝 Worksheets", wsListNode(wsOf(schoolKid), true),
-      "No worksheets yet. Open a subject, add 📥 School work, then tap 📝 Worksheet."))}`;
+      "No worksheets yet. Use ⬆️ Upload today's work: a new topic gets a short level check."))}`;
 }
 // To do (soonest first), then the last ones done
 function tasksListHtml(s, all) {
@@ -5712,16 +6444,16 @@ function saveSchoolForm(what) {
 }
 
 function deleteSchoolItem(what, id) {
-  if (!schoolKid) return;
+  if (!schoolKid || isKidDevice()) return;   // (🧒 a kid's device never deletes)
   const s = schoolFor(schoolKid);
-  const part = { grade: "grades", task: "tasks", review: "reviews", seesaw: "seesaw", note: "notes", subject: "subjects", file: "files", work: "work" }[what];
+  const part = { grade: "grades", task: "tasks", review: "reviews", seesaw: "seesaw", note: "notes", subject: "subjects", file: "files", work: "work", event: "events" }[what];
   const item = part && s[part][id];
   if (!item) return;
-  const dadOnly = ["grade", "review", "seesaw", "subject"];
+  const dadOnly = ["grade", "review", "seesaw", "subject", "event"];
   if (dadOnly.includes(what) ? !isDadNow() : !canChange(item)) return toast(`Ask ${dadName()} 🙂`);
   const label = what === "task" ? (item.kind === "exam" ? "exam" : "homework") : what === "seesaw" ? "Seesaw note"
     : what === "subject" ? `subject folder “${item.name}”` : what === "file" ? `file “${item.name}”` : what === "grade" ? "mark"
-    : what === "work" ? `school work “${item.title}”` : what;
+    : what === "work" ? `school work “${item.title}”` : what === "event" ? `school date “${item.title}”` : what;
   const extra = what === "subject" ? "\n\nIts homework, marks, files and notes are kept." : what === "work" ? "\n\nIts files, worksheets and explanations are kept." : "";
   if (!confirm(`Delete this ${label}?${extra}`)) return;
   if (what === "seesaw" && item.photo) deletePhoto(id);
@@ -5734,7 +6466,7 @@ function deleteSchoolItem(what, id) {
   if (what === "task") Object.entries(s.files).forEach(([fid, f]) => { if (f.task === id) delete f.task; });   // its answers stay as a file
   delete s[part][id];
   if (schoolEditId === id) schoolEdit = schoolEditId = null;
-  if (what === "subject") { schoolView = "subjects"; schoolSubject = null; }
+  if (what === "subject") { schoolView = "home"; schoolSubject = null; }
   schoolFresh = true;
   writeData();
   render();
@@ -5789,8 +6521,10 @@ $("scr-school").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   const ds = b.dataset;
-  if (ds.sckid) { schoolKid = ds.sckid; schoolView = "home"; schoolSubject = null; schoolReport = false; schoolEdit = schoolEditId = null; schoolFresh = true; return render(); }
-  if (ds.scgo) { const [view, id] = ds.scgo.split("|"); return goSchool(view, id); }
+  if (ds.sckid) { schoolKid = ds.sckid; return goSchool("home"); }
+  if (ds.scgo) { const [view, id, tab] = ds.scgo.split("|"); return goSchool(view, id, tab); }
+  if (ds.sctab) { schoolTab = ds.sctab; schoolOlder = false; schoolEdit = schoolEditId = null; schoolFresh = true; return render(); }
+  if ("scolder" in ds) { schoolOlder = !schoolOlder; schoolEdit = schoolEditId = null; schoolFresh = true; return render(); }
   if ("seesaw" in ds) return openSeesaw();
   if (ds.scedit) { const [what, id] = ds.scedit.split("|"); return openSchoolForm(what, id); }
   if (ds.scsave) return saveSchoolForm(ds.scsave);
@@ -5805,6 +6539,18 @@ $("scr-school").addEventListener("click", e => {
   if (ds.aiex) return exFromWork(ds.aiex);
   if (ds.aiopen) { const [view, id] = ds.aiopen.split("|"); return openAiDoc(view, id); }
   if (ds.wsact) return wsAction(ds.wsact);
+  if (ds.wsrow) return wsRowAction(ds.wsrow);
+  if ("profsave" in ds) return saveProfile(false);
+  if ("profskip" in ds) return saveProfile(true);
+  if ("sylpick" in ds) { aiPick = "syllabus"; $("aiFile").value = ""; return $("aiFile").click(); }
+  if ("syldel" in ds) return removeSyllabus();
+  if ("briefmake" in ds) return makeBrief(schoolKid, false);
+  if ("briefprint" in ds) { const s = schoolOf(schoolKid); return s.brief && printAi(briefNode(schoolKid, s.brief)); }
+  if ("nlopen" in ds) return openNewsletter();
+  if (ds.reqdo) return doRequest(ds.reqdo);
+  if (ds.wspractice) return makePractice(ds.wspractice);
+  if (ds.levelretry) return makeLevelCheck(schoolKid, ds.levelretry);
+  if ("levelclose" in ds) { schoolLevel = null; return render(); }
   if (ds.exact) return exAction(ds.exact);
   if (ds.wsfdel) return removeAnswerFile(ds.wsfdel);
   if (ds.screport) return reportAction(ds.screport);
@@ -5814,7 +6560,12 @@ $("scr-school").addEventListener("click", e => {
     return showStars(pick);
   }
 });
-$("scr-school").addEventListener("change", e => { if (e.target.dataset.sctick) tickSchoolTask(e.target.dataset.sctick, e.target); });
+$("scr-school").addEventListener("change", e => {
+  if (e.target.dataset.sctick) tickSchoolTask(e.target.dataset.sctick, e.target);
+  // 👤 "Do you know their level?" Yes → ⭐ + Good at / Finds hard; Not sure → 🧪 Placement test
+  const k = e.target.dataset.spknow;
+  if (k) { const unsure = e.target.value === "unsure"; $("spy-" + k).hidden = unsure; $("spt-" + k).hidden = !unsure; }
+});
 
 // A file in a list: 🖼️ photo, 📄 PDF, 🔗 link
 const FILE_EMOJI = { image: "🖼️", pdf: "📄", pptx: "📊", docx: "📃", link: "🔗" };
@@ -5840,6 +6591,232 @@ function examTagsHtml(d, who) {
     return `<button class="k-exam" data-same="${safe(text)}" title="${safe(text)}">${who ? "" : safe(u.emoji) + " "}📝 ${safe(t.subject)}</button>`;
   }).join("");
 }
+
+// ---------- 📌 School dates (a 3rd kind of activity: not fixed, not flexible) ----------
+// One date (and a time, or all day). Only on their own date: from the day after, the calendar hides them
+// (they stay in School's "Past school dates"). The planner never sees them: no planning around them, no points.
+// Shown on that kid's calendar, on Bro2a's, and on the family's (who = null).
+function eventsOn(d, who) {
+  const date = ymd(dayDate(d));
+  if (date < todayYmd()) return [];
+  return Object.entries(data.school).filter(([kid]) => exists(kid) && (!who || who === kid || who === DAD))
+    .flatMap(([kid, s]) => Object.entries(s.events || {}).filter(([, e]) => e.date === date).map(([id, e]) => ({ id, kid, ...e })))
+    .sort((a, b) => a.time.localeCompare(b.time) || a.title.localeCompare(b.title));
+}
+function eventHtml(e, who) {
+  const u = userById(e.kid), when = e.time ? clock(toMin(e.time), true) : "All day";
+  return `<button class="k-event" data-kevent="${safe(e.kid)}|${safe(e.id)}" title="${safe(`📌 ${e.title} · ${when} (${u.name})`)}">
+    📌 ${who === e.kid ? "" : safe(u.emoji) + " "}${e.time ? `<b>${clock(toMin(e.time))}</b> ` : ""}${safe(e.title)}</button>`;
+}
+// Tap one: its details (Bro2a can delete it from there)
+function showEvent(kid, id) {
+  const s = data.school[kid], e = s && s.events[id];
+  if (!e) return;
+  const text = `📌 ${e.title}\n${shortDate(e.date)} · ${e.time ? clock(toMin(e.time), true) : "All day"} · ${userById(kid).name}${e.note ? "\n" + e.note : ""}`;
+  if (me !== DAD) return toast(text.replace(/\n/g, " · "), 5000);
+  if (!confirm(`${text}\n\nDelete this school date?`)) return;
+  delete s.events[id];
+  writeData();
+  render();
+  toast("🗑️ Deleted");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-kevent]");
+  if (!b) return;
+  const [kid, id] = b.dataset.kevent.split("|");
+  showEvent(kid, id);
+});
+
+// ---------- 📅 A parent's own activities (💼 Work, ✈️ Travel, 📌 Other): a 4th kind of thing on the calendar ----------
+// A parent adds them with ➕ My activity (the family calendar on their home screen). Everyone sees them; kids only look.
+// The planner never sees them, so it never moves them (and nothing is planned around them). No tick, no points.
+// One date (or a date range for travel), a time or all day, and maybe every week. Travel = ONE bar across its days.
+const PACT_TYPES = [["work", "💼", "Work"], ["travel", "✈️", "Travel"], ["other", "📌", "Other"]];
+const pactType = a => PACT_TYPES.find(t => t[0] === a.type) || PACT_TYPES[2];
+const isParentId = id => id === DAD;
+const addDaysYmd = (s, n) => { const dt = fromYmd(s); dt.setDate(dt.getDate() + n); return ymd(dt); };
+const daysBetween = (a, b) => Math.round((fromYmd(b) - fromYmd(a)) / 86400000);
+const weekdayOf = s => (fromYmd(s).getDay() + 6) % 7;
+// Is it on this date? → the first day of that time (for a trip: the day it starts), or null
+function pactStartOn(a, date) {
+  const diff = daysBetween(a.start, date), len = daysBetween(a.start, a.end);
+  if (diff < 0) return null;
+  if (!a.weekly) return diff <= len ? a.start : null;
+  const k = Math.max(0, Math.ceil((diff - len) / 7));
+  return k * 7 <= diff ? addDaysYmd(a.start, k * 7) : null;
+}
+// Whose: everything (who = null), that parent's own, or every parent's on a kid's calendar (look only)
+const pactsFor = who => (data.parentActs || []).filter(a => exists(a.by) && (!who || a.by === who || !isParentId(who)));
+const pactsOn = (d, who) => { const date = ymd(dayDate(d)); return pactsFor(who).filter(a => pactStartOn(a, date)); };
+// ✈️ This week's trips: { a, from, d0, d1 } (the days of the calendar's week it covers)
+function travelBars(who) {
+  const bars = [];
+  pactsFor(who).filter(a => a.type === "travel").forEach(a => {
+    let cur = null;
+    for (let d = 0; d < DAYS.length; d++) {
+      const from = pactStartOn(a, ymd(dayDate(d)));
+      if (from && cur && cur.from === from) cur.d1 = d;
+      else if (from) bars.push(cur = { a, from, d0: d, d1: d });
+      else cur = null;
+    }
+  });
+  return bars;
+}
+const pactFaded = (a, opts) => opts.fade && opts.fade !== "all" && opts.fade !== a.by;
+const pactStyle = a => { const c = colorsOf(userById(a.by)); return `--soft:${c.soft};--ink:${c.ink};--c:${c.color};--line-c:${c.color}`; };
+const pactTag = a => { const u = userById(a.by); return `<span class="k-tag">${safe(u.emoji)} ${safe(u.name)}</span>`; };
+function pactCardHtml(a, d, opts) {
+  const n = blocks.push({ pact: a, day: d }) - 1, title = `${pactType(a)[1]} ${a.title}`;
+  return `<div class="k-block k-pact ${pactFaded(a, opts) ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0" style="${pactStyle(a)}"
+      title="${safe(title)} · ${clock(toMin(a.from), true)}–${clock(toMin(a.to), true)} (${safe(userById(a.by).name)})">
+    ${pactTag(a)}<span class="who"><span class="t-full">${safe(title)}</span><span class="t-short">${safe(title)}</span></span>
+    <span class="k-sub"><span class="when">${clock(toMin(a.from))} - ${clock(toMin(a.to))}</span></span></div>`;
+}
+// All day: a small chip under the day name
+function pactDayHtml(a, d, opts) {
+  const n = blocks.push({ pact: a, day: d }) - 1;
+  return `<button class="k-pactday ${pactFaded(a, opts) ? "faded" : ""}" data-kblock="${n}" style="${pactStyle(a)}" title="${safe(`${pactType(a)[1]} ${a.title} · All day (${userById(a.by).name})`)}">
+    ${pactTag(a)} ${safe(pactType(a)[1] + " " + a.title)}</button>`;
+}
+// "✈️ Dad away (Mon-Thu)"
+const tripDays = (a, from) => { const to = addDaysYmd(from, daysBetween(a.start, a.end)); return SHORT[weekdayOf(from)] + (to !== from ? "-" + SHORT[weekdayOf(to)] : ""); };
+function travelBarHtml(x, opts) {
+  const n = blocks.push({ pact: x.a, day: x.d0 }) - 1, text = `✈️ ${x.a.title} (${tripDays(x.a, x.from)})`;
+  return `<button class="k-travel ${pactFaded(x.a, opts) ? "faded" : ""}" data-kblock="${n}" style="${pactStyle(x.a)}" title="${safe(text)} · ${safe(userById(x.a.by).name)}">
+    ${pactTag(x.a)} ${safe(text)}</button>`;
+}
+// Tapped: the details (a parent can ✏️ change or 🗑️ delete it from here)
+function openPactCard(b) {
+  const a = b.pact, u = userById(a.by), [, emoji, label] = pactType(a);
+  const from = pactStartOn(a, ymd(dayDate(b.day))) || a.start, to = addDaysYmd(from, daysBetween(a.start, a.end));
+  const rows = [["📌 What", `${emoji} ${a.title}`], ["🏷️ Type", `${emoji} ${label}`], ["🙂 Who", whoText(a.by)],
+    ["📅 When", to !== from ? `${shortDate(from)} – ${shortDate(to)}` : shortDate(from)],
+    ["⏰ Time", a.from ? `${clock(toMin(a.from), true)} – ${clock(toMin(a.to), true)}` : "All day"],
+    a.weekly ? ["🔁 Repeats", "Every week"] : null].filter(Boolean);
+  const canEdit = me === DAD && !isKidDevice();
+  $("kCard").style.cssText = pactStyle(a);
+  $("kCard").innerHTML = `
+    <div class="k-card-top"><div class="big">${safe(emoji)}</div><div class="nm">${safe(a.title)}</div></div>
+    <div class="k-rows">${rows.map(([l, v]) => `<div><span>${safe(l)}</span><b>${safe(v)}</b></div>`).join("")}</div>
+    <p class="hint" style="text-align:center;margin:8px 16px 0">${canEdit ? "The ✨ planner never moves it. No points." : `Just so everyone knows. Only ${safe(u.name)} can change it.`}</p>
+    ${canEdit ? `<div class="btnrow" style="justify-content:center;margin:10px 16px 0"><button data-pactedit="${safe(a.id)}">✏️ Change</button>
+      <button class="danger-text" data-pactdel="${safe(a.id)}">🗑️ Delete</button></div>` : ""}
+    <button class="k-ok" id="kOk">OK 👍</button>`;
+  $("kModal").hidden = false;
+  $("kOk").focus();
+}
+
+// ➕ My activity (a parent): the small form
+let pa = null;   // the open form: { id (null = new), title, type, start, end, from, to, weekly }
+function openPactForm(id) {
+  if (me !== DAD || isKidDevice()) return;
+  const a = id && data.parentActs.find(x => x.id === id);
+  pa = a ? { ...a } : { id: null, title: "", type: "work", start: todayYmd(), end: todayYmd(), from: "09:00", to: "17:00", weekly: false };
+  closeCard();
+  drawPactForm();
+  $("pactModal").hidden = false;
+  $("paName").focus();
+}
+function closePactForm() { $("pactModal").hidden = true; pa = null; }
+function drawPactForm() {
+  const travel = pa.type === "travel", allDay = !travel && !pa.from && !!pa.id;
+  $("paTitle").textContent = pa.id ? "✏️ My activity" : "➕ My activity";
+  $("paBody").innerHTML = `
+    <label class="small" for="paName">What?</label>
+    <input type="text" id="paName" maxlength="40" value="${safe(pa.title)}" placeholder="${travel ? `${safe(dadName())} away` : "Team meeting"}">
+    <label class="small">Type</label>
+    <div class="daypick" role="radiogroup" aria-label="Type">${PACT_TYPES.map(([k, e, l]) => `<label><input type="radio" name="paType" value="${k}" ${pa.type === k ? "checked" : ""}>
+      <span>${e} ${l}</span></label>`).join("")}</div>
+    <div class="row"><div><label class="small" for="paStart" id="paStartLbl">${travel ? "First day" : "Date"}</label><input type="date" id="paStart" value="${safe(pa.start)}"></div>
+      <div id="paEndWrap" ${travel ? "" : "hidden"}><label class="small" for="paEnd">Last day</label><input type="date" id="paEnd" value="${safe(pa.end)}"></div></div>
+    <div id="paTimeWrap" ${travel ? "hidden" : ""}>
+      <label class="checkline"><input type="checkbox" id="paAllDay" ${allDay ? "checked" : ""}> All day</label>
+      <div class="row" id="paTimes" ${allDay ? "hidden" : ""}><div><label class="small" for="paFrom">Start</label><input type="time" id="paFrom" value="${safe(pa.from || "09:00")}"></div>
+        <div><label class="small" for="paTo">End</label><input type="time" id="paTo" value="${safe(pa.to || "17:00")}"></div></div></div>
+    <p class="hint" id="paTravelHint" ${travel ? "" : "hidden"}>✈️ Travel is one bar across the days, e.g. “✈️ ${safe(dadName())} away (Mon-Thu)”.</p>
+    <label class="checkline"><input type="checkbox" id="paWeekly" ${pa.weekly ? "checked" : ""}> 🔁 Repeat every week</label>
+    <p class="hint">Everyone sees it on their calendar. The ✨ planner never moves it. No points.</p>
+    <div class="err" id="paErr"></div>
+    <div class="btnrow"><button class="primary" data-pasave>${pa.id ? "💾 Save" : "➕ Add"}</button>
+      ${pa.id ? `<button class="danger-text" data-padel>🗑️ Delete</button>` : ""}<button data-pacancel>Cancel</button></div>`;
+}
+function savePact() {
+  if (!pa || me !== DAD) return;
+  const type = (document.querySelector('input[name="paType"]:checked') || {}).value || "other", travel = type === "travel";
+  const start = $("paStart").value, end = travel ? $("paEnd").value : start, weekly = $("paWeekly").checked;
+  const allDay = travel || $("paAllDay").checked, from = $("paFrom").value, to = $("paTo").value;
+  let title = $("paName").value.trim().slice(0, 40);
+  if (!title && travel) title = `${userById(me).name} away`;
+  const err = text => { $("paErr").textContent = text; };
+  if (!title) return err("Please type what it is.");
+  if (!isYmd(start)) return err("Please pick the date.");
+  if (travel && (!isYmd(end) || end < start)) return err("The last day can't be before the first day.");
+  if (travel && daysBetween(start, end) > 60) return err("A trip can be 60 days at most.");
+  if (weekly && daysBetween(start, end) >= 7) return err("A trip that repeats every week must be shorter than a week.");
+  if (!allDay && (!isHm(from) || !isHm(to) || toMin(to) <= toMin(from))) return err("The end time must be after the start time.");
+  const a = { id: pa.id || newId(), title, type, by: pa.by || me, start, end, from: allDay ? "" : from, to: allDay ? "" : to, weekly };
+  const i = data.parentActs.findIndex(x => x.id === a.id);
+  if (i >= 0) data.parentActs[i] = a; else data.parentActs.push(a);
+  closePactForm();
+  keepNow();
+  toast(`✓ ${pactType(a)[1]} ${a.title} is on the family calendar`, 3000);
+}
+function deletePact(id) {
+  const a = data.parentActs.find(x => x.id === id);
+  if (!a || me !== DAD || !confirm(`Delete “${a.title}”?`)) return;
+  data.parentActs = data.parentActs.filter(x => x.id !== id);
+  closeCard();
+  closePactForm();
+  keepNow();
+  toast("🗑️ Deleted");
+}
+$("pactModal").addEventListener("click", e => {
+  if (e.target === $("pactModal")) return closePactForm();
+  const b = e.target.closest("button");
+  if (!b || !pa) return;
+  if ("pasave" in b.dataset) return savePact();
+  if ("padel" in b.dataset) return deletePact(pa.id);
+  if ("pacancel" in b.dataset) return closePactForm();
+});
+$("pactModal").addEventListener("change", e => {
+  if (!pa) return;
+  if (e.target.name === "paType") {
+    const travel = e.target.value === "travel";
+    $("paEndWrap").hidden = !travel; $("paTimeWrap").hidden = travel; $("paTravelHint").hidden = !travel;
+    $("paStartLbl").textContent = travel ? "First day" : "Date";
+    if (travel && (!isYmd($("paEnd").value) || $("paEnd").value < $("paStart").value)) $("paEnd").value = $("paStart").value;
+    $("paName").placeholder = travel ? `${dadName()} away` : "Team meeting";
+  }
+  if (e.target.id === "paAllDay") $("paTimes").hidden = e.target.checked;
+  if (e.target.id === "paStart" && !$("paEndWrap").hidden && $("paEnd").value < e.target.value) $("paEnd").value = e.target.value;
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("pactModal").hidden) closePactForm(); });
+
+// ---------- 📅 The family calendar on a parent's home screen: the whole week, everyone in their own color ----------
+let famCalWho = "all";   // "All" or one person
+function familyCalHtml() {
+  if (famCalWho !== "all" && !exists(famCalWho)) famCalWho = "all";
+  // (no plan yet: the week still shows the routines, school dates and the parents' activities)
+  const days = planDays() || DAYS.map((_, i) => ({ window: dayWindow(i), items: [], routines: routinesOn(i) }));
+  const chips = [{ id: "all", emoji: "👨‍👩‍👧‍👦", name: "All" }, ...data.users].map(u => {
+    const c = u.id === "all" ? { soft: "#fef3c7", ink: "var(--text)" } : colorsOf(u);
+    return `<button class="chip ${famCalWho === u.id ? "on" : ""}" data-fcwho="${safe(u.id)}" style="--soft:${c.soft};--ink:${c.ink}"
+      aria-pressed="${famCalWho === u.id}"><span class="e">${safe(u.emoji)}</span>${safe(u.name)}</button>`;
+  }).join("");
+  return `<div class="card fam-cal"><div class="sc-head"><h2>📅 Family week<small>${weekRange()}</small></h2>
+      <button class="pill" data-pactnew>➕ My activity</button></div>
+    <div class="chips fc-who">${chips}</div>
+    ${weekHtml(days, { only: famCalWho === "all" ? null : famCalWho, readOnly: true, whole: true })}</div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-pactnew], [data-pactedit], [data-pactdel], [data-fcwho]");
+  if (!b) return;
+  const ds = b.dataset;
+  if ("pactnew" in ds) return openPactForm(null);
+  if (ds.pactedit) return openPactForm(ds.pactedit);
+  if (ds.pactdel) return deletePact(ds.pactdel);
+  if (ds.fcwho) { famCalWho = ds.fcwho; render(); }
+});
 
 // ---------- 📥 From Seesaw (Bro2a): paste text or add a photo, pick the kid and the type ----------
 let ssKid = null;     // which kid it's for
@@ -5949,7 +6926,7 @@ function shrinkPhoto(file, width = 800, LIMIT = 150 * 1024) {
 const PHOTO_KEY = SAVE_KEY + ".photo.";
 const photoCache = {};   // id → the photo (data URL), once loaded on this device
 const isPhotoUrl = u => typeof u === "string" && u.startsWith("data:image/jpeg;base64,");
-function photoRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "state", "photo-" + id); }
+function photoRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.familyId, "state", "photo-" + id); }
 function sendPhoto(id, kid, url) {
   return cloud.fb.setDoc(photoRef(id), { kid, data: url, at: new Date().toISOString() })
     .then(() => { try { localStorage.removeItem(PHOTO_KEY + id); } catch (e) {} });
@@ -6018,7 +6995,7 @@ const OFFICE_TYPES = { pptx: PPTX_TYPE, docx: DOCX_TYPE };
 const TYPE_TEXT = "Only photos, PDF, PowerPoint (.pptx) and Word (.docx) files, please.";
 const isFileUrl = u => typeof u === "string" && /^data:(image\/jpeg|application\/pdf|application\/vnd\.openxmlformats-officedocument\.(presentationml\.presentation|wordprocessingml\.document));base64,/.test(u);
 const bytesOf = url => Math.round((url.length - url.indexOf(",") - 1) * 0.75);
-function fileRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.user.uid, "files", id); }
+function fileRef(id) { return cloud.fb.doc(cloud.db, "families", cloud.familyId, "files", id); }
 // A chosen file → { kind, name, size, url }; throws "big" (too big) or "type" (not a photo / PDF)
 // (width: photos are made this wide at most. 🤖 AI help uses 1600px, so the AI can read the small writing.)
 const fileNameOf = file => String(file.name || "File").replace(/\.[^.]+$/, "").slice(0, 60) || "File";
@@ -6224,6 +7201,8 @@ function showAiWait() {
 }
 // Asks the AI server. → the result, or null (then a friendly message was shown)
 async function callAi(action, body, key) {
+  // 🧒 For now a kid's device never calls the AI: their uploads / requests wait for a parent's device (see ⏳ WAITING)
+  if (isKidDevice()) { toast("⏳ Your parent's phone does this part. Ask them! 🙂", 4000); return null; }
   if (!aiReady()) { toast("🔌 " + AI_OFF, 4500); return null; }
   if (aiWait) { toast("🤖 Still thinking… one moment, please.", 2500); return null; }
   aiWait = key || action;
@@ -6324,7 +7303,11 @@ async function officeText(base64, kind) {
 }
 const tooBigText = total => `📦 That's ${sizeText(total)}: too big for the AI (4 MB at most). Please remove some pages or photos.`;
 const kidNameOf = kid => userById(kid).name;
-const gradeOf = kid => schoolOf(kid).info.grade;   // the class from 🏫 School info, e.g. "Year 5"
+// The kid's year (and school system) from 👨‍👩‍👧 Family, e.g. "Year 5 (British)"; else the class from 🏫 School info
+const gradeOf = kid => {
+  const u = userById(kid), sys = u.curriculum && u.curriculum !== "Other" ? ` (${u.curriculum})` : "";
+  return u.year ? u.year + sys : schoolOf(kid).info.grade + (schoolOf(kid).info.grade ? sys : "");
+};
 // "2026-10-19" → "19 October 2026"
 const longDate = s => fromYmd(s).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
@@ -6343,7 +7326,10 @@ function aiMeta(d) {
            by: okId(d.by) ? d.by : "", at: aiTxt(d.at, 40), ...(okId(d.work) ? { work: d.work } : {}) };
 }
 // A worksheet: { kid, subject, topics, count, title, intro, questions, youtube_searches, printable_searches,
-//                date, status: "To do" | "Answers uploaded" | "Checked ✓", by, at, work?, answers: [file ids], check? }
+//                date, status: "To do" | "Answers uploaded" | "Checked ✓", by, at, work?, answers: [file ids], check?,
+//                part?: the topic title it's about (📊 "By part"), purpose?: the mode it was made with (see WS_MODES) }
+const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement"];
+const modeOf = x => x === "level" ? "level_check" : WS_MODES.includes(x) ? x : null;   // ("level": a few sheets from an earlier test version)
 function cleanWorksheet(d) {
   if (!d || typeof d !== "object") return null;
   const questions = aiObjs(d.questions, 40).map((q, i) => {
@@ -6360,9 +7346,11 @@ function cleanWorksheet(d) {
   return { ...aiMeta(d), title: aiTxt(d.title, 120) || "Worksheet", intro: aiTxt(d.intro, 1500),
            topics: aiArr(d.topics, 12).map(t => aiTxt(t, 60)).filter(Boolean), count: aiInt(d.count, 1, 40, questions.length),
            questions, youtube_searches: aiSearches(d.youtube_searches), printable_searches: aiSearches(d.printable_searches),
-           answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}) };
+           answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}),
+           ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}) };
 }
-// The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote? }
+// The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote?,
+//              strong_points?, weak_points?: ["Adding fractions", …], coach_tip?: for the parents }   (older checks have none of the last 3)
 function cleanCheck(c, fallbackMax) {
   if (!c || typeof c !== "object") return null;
   let max = aiNum(c.max_score, 0, 1000, 0);
@@ -6374,6 +7362,10 @@ function cleanCheck(c, fallbackMax) {
                 at: isYmd(c.at) ? c.at : todayYmd() };
   if (c.aiScore != null && Number.isFinite(Number(c.aiScore))) out.aiScore = aiNum(c.aiScore, 0, 1000, 0);
   if (aiTxt(c.dadNote, 400)) out.dadNote = aiTxt(c.dadNote, 400);
+  const skills = x => aiArr(x, 5).map(t => aiTxt(t, 80)).filter(Boolean);
+  if (Array.isArray(c.strong_points)) out.strong_points = skills(c.strong_points);
+  if (Array.isArray(c.weak_points)) out.weak_points = skills(c.weak_points);
+  if (aiTxt(c.coach_tip, 600)) out.coach_tip = aiTxt(c.coach_tip, 600);
   return out;
 }
 // An explanation: { kid, subject, topic, title, sections, key_words, try_this, youtube_searches, printable_searches, date, by, at, work? }
@@ -6388,7 +7380,7 @@ function cleanExplain(d) {
 }
 
 // ---------- The cloud: worksheets and explanations (each its own document) ----------
-const aiRef = (name, id) => cloud.fb.doc(cloud.db, "families", cloud.user.uid, name, id);
+const aiRef = (name, id) => cloud.fb.doc(cloud.db, "families", cloud.familyId, name, id);
 function aiSave(name, id, doc) {
   aiDocs[name][id] = doc;
   if (cloud.user && cloud.db) cloud.fb.setDoc(aiRef(name, id), doc).catch(cloudError);
@@ -6399,7 +7391,7 @@ function aiDelete(name, id) {
 }
 // Signed in: listen to both lists (changes from any phone arrive here; Firestore also keeps an offline copy)
 function aiListen() {
-  const fb = cloud.fb, uid = cloud.user.uid;
+  const fb = cloud.fb, uid = cloud.familyId;
   ["worksheets", "explanations"].forEach(name => {
     aiDocs[name] = {};
     cloud.unsub.push(fb.onSnapshot(fb.collection(cloud.db, "families", uid, name), snap => {
@@ -6428,10 +7420,12 @@ function openWork(folderId) {
   if (!schoolKid || !exists(me)) return;
   const s = schoolOf(schoolKid);
   aw = { kid: schoolKid, items: [] };
-  $("awSubject").replaceChildren(h("option", { value: "" }, "🤖 Let the AI find the subject"),
+  $("awSubject").replaceChildren(h("option", { value: "" }, isKidDevice() ? "— Pick the subject —" : "🤖 Let the AI find the subject"),
     ...subjectList(s).map(x => h("option", { value: x.id }, `${x.emoji} ${x.name}`)));
   $("awSubject").value = folderId && s.subjects[folderId] ? folderId : "";
-  $("awErr").textContent = aiReady() ? "" : `🔌 ${AI_OFF}. You can still add the files now.`;
+  $("awErr").textContent = aiReady() || isKidDevice() ? "" : `🔌 ${AI_OFF}. You can still add the files now.`;
+  $("awRead").textContent = isKidDevice() ? "⬆ Save it" : "🤖 Read it";   // (🧒 a parent's device reads it later)
+  delete $("awRead").dataset.label;
   drawWorkList();
   $("aiWorkModal").hidden = false;
   $("awPick").focus();
@@ -6446,7 +7440,30 @@ function drawWorkList() {
     h("div", { class: "what" }, x.name, h("small", null, sizeText(x.size) + (x.id ? " · kept in the School files" : " · too big to keep (700 KB at most): 🤖 only reads it now"))),
     h("button", { type: "button", class: "x", "aria-label": "Remove " + x.name, data: { awdel: i } }, "✕"))));
 }
-// The chosen files: kept in the School files (like ⬆ Upload), and ready for the AI (photos: 1600px JPEG)
+// A chosen file, ready for the AI (photos: 1600px JPEG) → { r: { kind, name, size, url }, keep } or { problem: "…" }
+// (keep = small enough to be kept in the School files)
+async function readForAi(file) {
+  try { return { r: await readSchoolFile(file, 1600), keep: true }; }
+  catch (err) {
+    // A PDF too big to keep can still be read by the AI now (up to 4 MB)
+    if (err.message === "big" && isPdfFile(file) && file.size <= AI_MAX) {
+      try { return { r: { kind: "pdf", name: fileNameOf(file), size: file.size, url: await readPdf(file) }, keep: false }; } catch (e) {}
+    }
+    // A PowerPoint / Word too big to keep (any size): only its text goes to the AI, so take the text out now
+    const office = err.message === "big" && officeKindOf(file);
+    if (office) {
+      try {
+        const url = await readAsUrl(file, OFFICE_TYPES[office]);
+        const text = await officeText(url.slice(url.indexOf(",") + 1), office);
+        if (!text) return { problem: `“${file.name}”: ${NO_TEXT}` };
+        return { r: { kind: office, name: fileNameOf(file), size: file.size, url: textUrl(text) }, keep: false };
+      } catch (e) { return { problem: aiFileError(e) }; }
+    }
+    return { problem: err.message === "type" ? `“${file.name}”: ${TYPE_TEXT.charAt(0).toLowerCase() + TYPE_TEXT.slice(1)}`
+      : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.` };
+  }
+}
+// The chosen files: kept in the School files (like ⬆ Upload), and ready for the AI
 async function addWorkFiles(files) {
   const box = aw;
   if (!box) return;
@@ -6454,26 +7471,8 @@ async function addWorkFiles(files) {
   $("awErr").textContent = "⏳ Getting the files ready…";
   let kept = 0;
   for (const file of files) {
-    let r = null, keep = true;
-    try { r = await readSchoolFile(file, 1600); }
-    catch (err) {
-      // A PDF too big to keep can still be read by the AI now (up to 4 MB)
-      if (err.message === "big" && isPdfFile(file) && file.size <= AI_MAX) {
-        try { r = { kind: "pdf", name: fileNameOf(file), size: file.size, url: await readPdf(file) }; keep = false; } catch (e) {}
-      }
-      // A PowerPoint / Word too big to keep (any size): only its text goes to the AI, so take the text out now
-      const office = err.message === "big" && officeKindOf(file);
-      if (office) {
-        try {
-          const url = await readAsUrl(file, OFFICE_TYPES[office]);
-          const text = await officeText(url.slice(url.indexOf(",") + 1), office);
-          if (!text) { problems.push(`“${file.name}”: ${NO_TEXT}`); continue; }
-          r = { kind: office, name: fileNameOf(file), size: file.size, url: textUrl(text) }; keep = false;
-        } catch (e) { problems.push(aiFileError(e)); continue; }
-      }
-      if (!r) problems.push(err.message === "type" ? `“${file.name}”: ${TYPE_TEXT.charAt(0).toLowerCase() + TYPE_TEXT.slice(1)}`
-        : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.`);
-    }
+    const { r, keep, problem } = await readForAi(file);
+    if (problem) problems.push(problem);
     if (!r) continue;
     let id = null;
     if (keep) {
@@ -6510,6 +7509,14 @@ function folderIdFor(s, name) {
   const known = findSubject(name), same = known && list.find(x => known.find.test(x.name));
   return same ? same.id : null;
 }
+// The folder for a subject the AI found (a subject without a folder yet gets one) → its id
+function ensureFolder(s, subject) {
+  const name = subject || "Other", found = folderIdFor(s, name);
+  if (found) return found;
+  const known = findSubject(name), colors = Object.keys(PALETTE), id = "s" + newId();
+  s.subjects[id] = { name, emoji: known ? known.emoji : "📘", color: colors[subjectList(s).length % colors.length] || "blue", order: subjectList(s).length };
+  return id;
+}
 // 🤖 Read it → { subject, title, topics[], what_to_do } → a "School work" card in that subject
 async function readWork() {
   const box = aw;
@@ -6519,26 +7526,123 @@ async function readWork() {
   if (total > AI_MAX) return $("awErr").textContent = tooBigText(total);
   const chosen = $("awSubject").value, items = [...box.items];
   $("awErr").textContent = "";
+  if (isKidDevice()) return sendWorkToParent(box, chosen, items);   // 🧒 ⏳ a parent's device reads it
   let files;
   try { files = await aiFilesFor(items); }
   catch (err) { if (aw === box) $("awErr").textContent = aiFileError(err); return; }
   const r = await callAi("analyze", { files, kidName: kidNameOf(box.kid), grade: gradeOf(box.kid) }, "analyze");
   if (!r) return;
-  const s = schoolFor(box.kid), subject = aiTxt(r.subject, 30);
-  let folderId = s.subjects[chosen] ? chosen : folderIdFor(s, subject);
-  if (!folderId) {   // a subject without a folder yet: make one
-    const name = subject || "Other", known = findSubject(name), colors = Object.keys(PALETTE);
-    folderId = folderIdFor(s, name) || "s" + newId();
-    if (!s.subjects[folderId]) s.subjects[folderId] = { name, emoji: known ? known.emoji : "📘", color: colors[subjectList(s).length % colors.length] || "blue", order: subjectList(s).length };
-  }
-  const folder = s.subjects[folderId], id = newId(), fileIds = items.map(x => x.id).filter(f => f && s.files[f]);
+  if (aw === box) closeWork();
+  afterAnalyze(box.kid, r, items.map(x => x.id), chosen);
+}
+// 🤖 What the AI read → a "School work" card in its subject (+ a 🧭 level check when the topic is new)
+function afterAnalyze(kid, r, ids, chosen) {
+  const s = schoolFor(kid), subject = aiTxt(r.subject, 30);
+  const folderId = s.subjects[chosen] ? chosen : ensureFolder(s, subject);
+  const folder = s.subjects[folderId], id = newId(), fileIds = ids.filter(f => f && s.files[f]);
   s.work[id] = { subject: folder.name, title: aiTxt(r.title, 80) || "School work", date: todayYmd(), what_to_do: aiTxt(r.what_to_do, 600),
                  topics: aiArr(r.topics, 8).map(t => aiTxt(t, 40)).filter(Boolean), files: fileIds, by: me };
   fileIds.forEach(f => { s.files[f].subject = folder.name; s.files[f].work = id; });
   writeData();
+  const title = s.work[id].title, fresh = isNewTopic(s, kid, folder.name, title, id);
+  if (schoolKid === kid && screen === "school") goSchool("subject", folderId, fresh ? "worksheets" : "overview");
+  if (!fresh) return toast(`📥 Saved in ${folder.emoji} ${folder.name}!`, 3000);
+  toast(`🆕 New topic: ${title}`, 4000);
+  makeLevelCheck(kid, id);   // a new topic: by itself, a short level check on it
+}
+// 🧒 A kid's device: the files stay in the subject's Files, ⏳ "Waiting for check" until a parent's device reads them
+function sendWorkToParent(box, chosen, items) {
+  const s = schoolFor(box.kid), folder = s.subjects[chosen];
+  if (!folder) return $("awErr").textContent = "Please pick the subject first.";
+  const ids = items.map(x => x.id).filter(f => f && s.files[f]);
+  if (!ids.length) return $("awErr").textContent = "These files are too big to keep. Try photos instead.";
+  ids.forEach(f => { s.files[f].subject = folder.name; });
+  s.requests[newId()] = { kind: "work", subject: folder.name, files: ids, date: todayYmd(), by: me };
+  writeData();
   if (aw === box) closeWork();
-  if (schoolKid === box.kid && screen === "school") goSchool("subject", folderId);
-  toast(`📥 Saved in ${folder.emoji} ${folder.name}!`, 3000);
+  if (screen === "school") goSchool("subject", chosen, "files");
+  toast("⏳ Saved! Waiting for check: your parent's phone reads it.", 4500);
+}
+// Is it a new topic for the kid? (no earlier school work card or worksheet with that title in the subject)
+function isNewTopic(s, kid, subject, title, workId) {
+  const t = title.trim().toLowerCase();
+  return !Object.entries(s.work).some(([id, w]) => id !== workId && sameSubject(w.subject, subject) && w.title.trim().toLowerCase() === t)
+    && !wsOf(kid, subject).some(w => partOf(w, s).trim().toLowerCase() === t);
+}
+
+// ---------- Every 🤖 worksheet: a mode + a short profile of the kid ----------
+//   mode: "level_check" (🧭 a new topic) | "practice" (🔁) | "week_review" (📰 the newsletter's week) | "challenge" (🚀)
+const LEVEL_COUNT = 8, PRACTICE_COUNT = 8, REVIEW_COUNT = 8;
+const MODE_NOTES = {
+  level_check: "short level check to see what the child already knows",
+  practice: "practice only these weak points",
+  week_review: "review of this week's school topics",
+  challenge: "a harder challenge sheet: the child is doing very well in this subject",
+  placement: "short placement test: we don't know the child's level in this subject yet"
+};
+// 🏫 The kid's school system and 📄 syllabus (when saved): sent with EVERY 🤖 worksheet
+function schoolSystemOf(kid) {
+  const u = userById(kid), syl = schoolOf(kid).syllabus;
+  return { ...(u.curriculum && u.curriculum !== "Other" ? { curriculum: u.curriculum } : {}), ...(syl && syl.text ? { syllabus: syl.text } : {}) };
+}
+// 🚀 Challenge when the last 3 checks of the subject average 85% or more,
+// but back to 🔁 practice when a challenge among them scored under 60%
+function pickMode(kid, subject) {
+  const last3 = checkedOf(kid, subject).slice(0, 3);
+  if (last3.some(w => w.purpose === "challenge" && wsPct(w) < 60)) return "practice";
+  return last3.length === 3 && avgPct(last3) >= 85 ? "challenge" : "practice";
+}
+// One short text about the kid in this subject: 👤 the Kid profile + the last check's 💪 / 🎯 ("" when there's nothing)
+function profileText(kid, subject) {
+  const s = schoolOf(kid), p = s.profile, f = folderOf(s, subject), x = f && p.subjects[f.id], last = checkedOf(kid, subject)[0], out = [];
+  if (x && x.level) out.push(`Level ${x.level} of 3 (${LEVEL_WORDS[x.level]}${x.unsure ? ", from a placement test" : ""})`);
+  else if (x && x.unsure) out.push("Level not known yet (the parents are not sure)");
+  if (x && x.good) out.push("Good at: " + x.good);
+  if (x && x.hard) out.push("Finds hard: " + x.hard);
+  if (p.other) out.push("Also: " + p.other);
+  if (last && last.check.strong_points && last.check.strong_points.length) out.push("Last strong points: " + last.check.strong_points.join(", "));
+  if (last && last.check.weak_points && last.check.weak_points.length) out.push("Last weak points: " + last.check.weak_points.join(", "));
+  return out.join(". ").slice(0, 800);
+}
+// A new worksheet from the AI, saved (and opened when open = true). extra = { part, work?, title? }. → its id, or null.
+async function newWorksheet(kid, subject, topics, count, mode, key, extra, open = true) {
+  const r = await callAi("worksheet", { kidName: kidNameOf(kid), grade: gradeOf(kid), subject, topics, count, notes: MODE_NOTES[mode],
+                                        mode, profile: profileText(kid, subject), ...schoolSystemOf(kid) }, key);
+  if (!r) return null;
+  const ws = cleanWorksheet({ ...r, kid, subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), answers: [], purpose: mode, ...extra });
+  if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
+  delete ws.check;
+  const id = newId();
+  aiSave("worksheets", id, ws);
+  if (open && screen === "school" && schoolKid === kid) openAiDoc("worksheet", id);
+  return id;
+}
+async function makeLevelCheck(kid, workId) {
+  const s = schoolOf(kid), w = s.work[workId];
+  if (!w) return;
+  const f = folderOf(s, w.subject);
+  schoolLevel = { kid, folder: f ? f.id : null, work: workId, title: w.title, subject: w.subject, state: "making" };
+  if (screen === "school") render();
+  const ok = await newWorksheet(kid, w.subject, w.topics.length ? w.topics : [w.title], LEVEL_COUNT, "level_check", "level", { work: workId, part: w.title });
+  schoolLevel = ok ? null : { ...schoolLevel, state: "failed" };
+  if (ok) toast("🧭 The level check is ready! 🖨️ Print it, then ⬆ upload the answers.", 4500);
+  else if (screen === "school") render();
+}
+// 🔁 Make practice for this: one 🎯 weak point of the subject's last check
+async function makePractice(i) {
+  const kid = schoolKid, s = schoolOf(kid), f = s.subjects[schoolSubject], last = f && checkedOf(kid, f.name)[0];
+  const point = last && (last.check.weak_points || [])[Number(i)];
+  if (!point) return;
+  if (isKidDevice()) {   // 🧒 ⏳ asked: a parent's device makes it (✅ Make now)
+    if (!Object.values(s.requests).some(q => q.kind === "practice" && sameSubject(q.subject, f.name) && q.topic === point)) {
+      schoolFor(kid).requests[newId()] = { kind: "practice", subject: f.name, topic: point, part: partOf(last, s), date: todayYmd(), by: me };
+      writeData();
+      render();
+    }
+    return toast("⏳ Asked! Your parent's phone makes your practice sheet.", 4000);
+  }
+  const ok = await newWorksheet(kid, f.name, [point], PRACTICE_COUNT, "practice", "practice|" + i, { part: partOf(last, s) });
+  if (ok) toast("🔁 Your practice worksheet is ready!", 2500);
 }
 $("aiWorkModal").addEventListener("click", e => {
   if (e.target === $("aiWorkModal")) return closeWork();
@@ -6555,8 +7659,152 @@ $("aiFile").addEventListener("change", e => {
   e.target.value = "";
   if (!files.length || !target) return;
   if (target === "work") return addWorkFiles(files);
+  if (target === "newsletter") return addNewsletterFiles(files);
+  if (target === "syllabus") return addSyllabus(files);
   if (target.ws) return addAnswerFiles(target.ws, files);
 });
+
+// ---------- 📰 School newsletter → 📌 school dates, 📰 This week (+ a week review per subject), 🔔 reminders ----------
+// /newsletter gives back { week_label, events: [{ date, time, title, note }], subjects: [{ subject, topics }], reminders: [text] }
+// (the newsletter's files are only read, not kept)
+let nl = null;   // the open box: { kid, items: [{ name, kind, url, size }], result, err }
+function openNewsletter() {
+  if (!schoolKid || !exists(me)) return;
+  nl = { kid: schoolKid, items: [], result: null, err: aiReady() ? "" : "🔌 " + AI_OFF + "." };
+  $("nlModal").hidden = false;
+  drawNewsletter();
+}
+function closeNewsletter() { $("nlModal").hidden = true; nl = null; }
+function drawNewsletter() {
+  if (!nl) return;
+  const res = nl.result, kids = me === DAD ? kidsList() : [];
+  const body = res
+    // The review: week label, each school date with a tick (ticked), what's in This week, the reminders
+    ? [h("p", { class: "print-hint" }, `For ${kidNameOf(nl.kid)}${res.week_label ? " · " + res.week_label : ""}. Untick what you don't want.`),
+       res.events.length ? h("ul", { class: "list nl-events" }, res.events.map((e, i) => h("li", null,
+         h("label", { class: "checkline" }, h("input", { type: "checkbox", checked: true, data: { nlev: i } }),
+           h("span", null, h("b", null, `📌 ${shortDate(e.date)}${e.time ? " · " + clock(toMin(e.time), true) : ""}`), " " + e.title,
+             e.note ? h("small", null, e.note) : null)))))
+         : h("p", { class: "sc-empty" }, "No school dates in this newsletter."),
+       res.subjects.length ? h("p", { class: "hint" }, "📰 This week: " + res.subjects.map(x => `${x.subject} (${x.topics.join(", ")})`).join(" · ")
+         + ". A week review worksheet is made for each subject.") : null,
+       res.reminders.length ? h("p", { class: "hint" }, "🔔 Reminders: " + res.reminders.join(" · ")) : null,
+       h("div", { class: "err" }, nl.err),
+       h("div", { class: "btnrow" }, h("button", { class: "primary", data: { nladd: "" } }, "✅ Add to the plan"), h("button", { data: { nlclose: "" } }, "Close"))]
+    // Step 1: the kid (Bro2a) and the file
+    : [h("p", { class: "print-hint" }, "Add the newsletter (photo, PDF, PowerPoint or Word). 🤖 finds the school dates and this week's topics."),
+       kids.length ? h("div", { class: "chips" }, kids.map(x => { const c = colorsOf(x);
+         return h("button", { type: "button", class: "chip" + (x.id === nl.kid ? " on" : ""), style: `--soft:${c.soft};--ink:${c.ink}`,
+                              "aria-pressed": String(x.id === nl.kid), data: { nlkid: x.id } }, h("span", { class: "e" }, x.emoji), x.name); })) : null,
+       h("div", { class: "sc-photo-row", style: "margin:12px 0 4px" }, h("button", { type: "button", class: "pill", data: { nlpick: "" } }, "📷 Add the newsletter"),
+         h("span", { class: "ai-size" }, nl.items.length ? `${nl.items.length} ${nl.items.length === 1 ? "file" : "files"}` : "")),
+       nl.items.length ? h("ul", { class: "list" }, nl.items.map((x, i) => h("li", null, h("span", { class: "uemoji" }, FILE_EMOJI[x.kind]),
+         h("div", { class: "what" }, x.name, h("small", null, sizeText(x.size))),
+         h("button", { type: "button", class: "x", "aria-label": "Remove " + x.name, data: { nldel: i } }, "✕")))) : null,
+       h("div", { class: "err" }, nl.err),
+       h("div", { class: "btnrow" }, h("button", { class: "primary", data: { nlread: "", aiwait: "newsletter" } }, "🤖 Read it"), h("button", { data: { nlclose: "" } }, "Close"))];
+  $("nlBody").replaceChildren(...body.filter(Boolean));
+  showAiWait();
+}
+async function addNewsletterFiles(files) {
+  const box = nl;
+  if (!box) return;
+  const problems = [];
+  for (const file of files) {
+    const { r, problem } = await readForAi(file);
+    if (problem) problems.push(problem);
+    if (r) box.items.push(r);
+  }
+  if (nl !== box) return;
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  box.err = problems.length ? problems.join(" ") : total > AI_MAX ? tooBigText(total) : "";
+  drawNewsletter();
+}
+// "09:30", "9:30 am", "2:15 PM" → "09:30" / "14:15" ("" when there's no time)
+function hmOf(x) {
+  const m = aiTxt(x, 20).match(/^(\d{1,2})[:.](\d{2})\s*([ap]\.?m\.?)?/i);
+  if (!m) return "";
+  let hr = Number(m[1]);
+  if (m[3] && /p/i.test(m[3]) && hr < 12) hr += 12;
+  if (m[3] && /a/i.test(m[3]) && hr === 12) hr = 0;
+  const t = `${String(hr).padStart(2, "0")}:${m[2]}`;
+  return isHm(t) ? t : "";
+}
+function cleanNewsletter(r) {
+  return { week_label: aiTxt(r.week_label, 60),
+           events: aiObjs(r.events, 30).map(e => ({ date: isYmd(e.date) ? e.date : "", time: hmOf(e.time), title: aiTxt(e.title, 80), note: aiTxt(e.note, 300) }))
+             .filter(e => e.date && e.title),
+           subjects: aiObjs(r.subjects, 12).map(x => ({ subject: aiTxt(x.subject, 30), topics: aiArr(x.topics, 8).map(t => aiTxt(t, 60)).filter(Boolean) }))
+             .filter(x => x.subject && x.topics.length),
+           reminders: aiArr(r.reminders, 10).map(t => aiTxt(t, 200)).filter(Boolean) };
+}
+async function readNewsletter() {
+  const box = nl;
+  if (!box) return;
+  if (!box.items.length) { box.err = "Add the newsletter first (📷 Add the newsletter)."; return drawNewsletter(); }
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  if (total > AI_MAX) { box.err = tooBigText(total); return drawNewsletter(); }
+  let files;
+  try { files = await aiFilesFor(box.items); }
+  catch (err) { box.err = aiFileError(err); return drawNewsletter(); }
+  const r = await callAi("newsletter", { files, kidName: kidNameOf(box.kid), grade: gradeOf(box.kid), today: todayYmd() }, "newsletter");
+  if (!r || nl !== box) return;
+  box.result = cleanNewsletter(r);
+  box.err = "";
+  drawNewsletter();
+}
+// "Week 6" → 6 (otherwise the week number of the year)
+function weekNumberOf(label) {
+  const m = String(label).match(/week\s*(\d{1,2})/i);
+  if (m) return Number(m[1]);
+  const d = new Date(), t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+}
+// ✅ Add to the plan: the ticked 📌 school dates (no doubles), 📰 This week + 🔔 reminders, then a 📰 week review per subject
+async function addNewsletter() {
+  const box = nl;
+  if (!box || !box.result) return;
+  const kid = box.kid, s = schoolFor(kid), res = box.result, same = x => x.trim().toLowerCase();
+  const picked = [...$("nlBody").querySelectorAll("input[data-nlev]:checked")].map(x => res.events[Number(x.dataset.nlev)]).filter(Boolean);
+  let added = 0;
+  picked.forEach(e => {
+    if (Object.values(s.events).some(x => x.date === e.date && same(x.title) === same(e.title))) return;   // already there
+    s.events[newId()] = { date: e.date, time: e.time, title: e.title, note: e.note, by: me };
+    added++;
+  });
+  // This week = the week of today (on Saturday / Sunday: the week that starts on Monday)
+  const now = new Date();
+  if ((now.getDay() + 6) % 7 >= 5) now.setDate(now.getDate() + 7);
+  const start = mondayOf(now), end = new Date(fromYmd(start)), n = weekNumberOf(res.week_label);
+  end.setDate(end.getDate() + 6);
+  const subjects = res.subjects.map(x => ({ subject: s.subjects[ensureFolder(s, x.subject)].name, topics: x.topics }));
+  s.week = { label: res.week_label, n, start, end: ymd(end), subjects, reminders: res.reminders };
+  writeData();
+  closeNewsletter();
+  if (screen === "school") { schoolKid = kid; goSchool("home"); }
+  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${subjects.length ? ". Making the week reviews…" : ""}`, 4000);
+  // 📰 Week {n} review: one for each subject, one after the other (checked like any worksheet)
+  let made = 0;
+  for (const x of subjects) {
+    if (await newWorksheet(kid, x.subject, x.topics, REVIEW_COUNT, "week_review", "review", { title: `📰 Week ${n} review`, part: `📰 Week ${n}` }, false)) made++;
+  }
+  if (subjects.length) toast(made === subjects.length ? `📰 ${made} week ${made === 1 ? "review is" : "reviews are"} ready in 📝 Worksheets!`
+    : `📰 ${made} of ${subjects.length} week reviews were made. Try the others again later.`, 4500);
+}
+$("nlModal").addEventListener("click", e => {
+  if (e.target === $("nlModal")) return closeNewsletter();
+  const b = e.target.closest("button");
+  if (!b || !nl) return;
+  const ds = b.dataset;
+  if ("nlclose" in ds) return closeNewsletter();
+  if (ds.nlkid) { nl.kid = ds.nlkid; return drawNewsletter(); }
+  if ("nlpick" in ds) { aiPick = "newsletter"; $("aiFile").value = ""; return $("aiFile").click(); }
+  if (ds.nldel !== undefined) { nl.items.splice(Number(ds.nldel), 1); nl.err = ""; return drawNewsletter(); }
+  if ("nlread" in ds) return readNewsletter();
+  if ("nladd" in ds) return addNewsletter();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("nlModal").hidden) closeNewsletter(); });
 
 // ---------- 📥 The School work cards (in the subject folder) ----------
 function workListNode(s, subject, c) {
@@ -6612,8 +7860,8 @@ function openAiDoc(view, id) {
   if (screen !== "school") go("school"); else render();
   window.scrollTo(0, 0);
 }
-// Back from a worksheet / explanation: its subject folder (or Homework)
-function leaveAiDoc() { if (schoolSubject && schoolOf(schoolKid).subjects[schoolSubject]) goSchool("subject", schoolSubject); else goSchool("homework"); }
+// Back from a worksheet / explanation: its subject's 📝 Worksheets (or the School home)
+function leaveAiDoc() { if (schoolSubject && schoolOf(schoolKid).subjects[schoolSubject]) goSchool("subject", schoolSubject, "worksheets"); else goSchool("home"); }
 const notHere = () => `<div class="card"><p class="sc-empty">${cloud.user ? "It isn't here (maybe it was deleted). It shows when this device is online." : "🔌 " + AI_OFF + "."}</p></div>`;
 
 // ---------- ▶️ YouTube / 🖨️ printable links (they open in a new tab) ----------
@@ -6643,10 +7891,10 @@ window.addEventListener("afterprint", () => {
 });
 
 // ---------- 📝 Make a worksheet (the small box: topics + how many questions) ----------
-let wso = null;   // { kid, subject, topics, count, work }
-function openWsOpts(kid, subject, topics, count, work) {
+let wso = null;   // { kid, subject, topics, count, work, part }
+function openWsOpts(kid, subject, topics, count, work, part) {
   if (!kid || !exists(me)) return;
-  wso = { kid, subject, topics: topics.length ? topics : [subject], count: WS_COUNTS.includes(count) ? count : 10, work: work || null };
+  wso = { kid, subject, topics: topics.length ? topics : [subject], count: WS_COUNTS.includes(count) ? count : 10, work: work || null, part: part || "" };
   $("wsoHint").textContent = `${subject} for ${kidNameOf(kid)}. The answers stay hidden until you tap 🔑.`;
   $("wsoTopics").replaceChildren(...wso.topics.map((t, i) => h("label", { class: "checkline" },
     h("input", { type: "checkbox", value: i, checked: true }), h("span", null, t))));
@@ -6662,7 +7910,7 @@ function wsFromWork(v) {
   const [wid, i] = v.split("|"), w = schoolOf(schoolKid).work[wid];
   if (!w) return;
   const topics = i !== undefined ? [w.topics[Number(i)]].filter(Boolean) : w.topics.length ? w.topics : [w.title];
-  openWsOpts(schoolKid, w.subject, topics, 10, wid);
+  openWsOpts(schoolKid, w.subject, topics, 10, wid, w.title);
 }
 async function makeWorksheet() {
   const o = wso;
@@ -6671,10 +7919,12 @@ async function makeWorksheet() {
   if (!topics.length) return $("wsoErr").textContent = "Please tick at least one topic.";
   const count = Number((document.querySelector('input[name="wsoN"]:checked') || {}).value) || 10;
   $("wsoErr").textContent = "";
-  const r = await callAi("worksheet", { kidName: kidNameOf(o.kid), grade: gradeOf(o.kid), subject: o.subject, topics, count }, "worksheet");
+  const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
+  const r = await callAi("worksheet", { kidName: kidNameOf(o.kid), grade: gradeOf(o.kid), subject: o.subject, topics, count,
+                                        notes: MODE_NOTES[mode], mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid) }, "worksheet");
   if (!r) return;
-  const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(),
-                              answers: [], ...(o.work ? { work: o.work } : {}) });
+  const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
+                              answers: [], ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) });
   if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
   delete ws.check;
   const id = newId();
@@ -6743,7 +7993,8 @@ function wsViewNode(w, id, s, isDad) {
     // ✅ Upload the answers → 🤖 Check
     h("div", { class: "card bd-card ai-narrow" },
       h("div", { class: "sc-head" }, h("h2", null, done ? "✅ Checked" : "✅ Finished? Check it!"), h("span", { class: "ai-status " + (done ? "done" : files.length ? "up" : "") }, w.status)),
-      done ? resultNode(w) : h("p", { class: "hint" }, files.length ? "Your answers are uploaded. Tap 🤖 Check!"
+      done ? resultNode(w) : h("p", { class: "hint" }, files.length
+        ? (isKidDevice() ? "⏳ Waiting for check. Your parent's phone checks it." : "The answers are uploaded. Tap ✅ Check now!")
         : "Do the worksheet on paper, then upload a photo (or PDF) of your answers."),
       files.length ? h("ul", { class: "list" }, files.map(fid => h("li", null,
         h("button", { class: "bd-file", data: { scfile: fid } }, h("span", { class: "e" }, FILE_EMOJI[s.files[fid].kind]),
@@ -6751,7 +8002,7 @@ function wsViewNode(w, id, s, isDad) {
         canAct && canChange(s.files[fid]) ? h("button", { class: "x", "aria-label": "Remove " + s.files[fid].name, data: { wsfdel: fid } }, "✕") : null))) : null,
       h("div", { class: "ai-btns", style: "margin-top:12px" },
         canAct ? h("button", { data: { wsact: "upload" } }, "⬆ Upload my answers") : null,
-        canAct && files.length ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "🤖 Check") : null,
+        canAct && files.length && !isKidDevice() ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "✅ Check now") : null,
         isDad ? h("button", { data: { wsact: "fix" } }, done ? "✏️ Change score" : "✏️ Add score") : null),
       isDad && wsFix ? fixFormNode(w) : null),
     aiLinksNode(w));
@@ -6763,6 +8014,9 @@ function resultNode(w) {
     h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}% ${pct >= 80 ? "🌟" : pct >= 50 ? "👍" : "💪"}`)),
     c.overall_note ? h("p", { class: "ai-note" }, "🤖 " + c.overall_note) : null,
     c.dadNote ? h("p", { class: "ai-note dad" }, `${userById(DAD).emoji} ${dadName()}: ${c.dadNote}`) : null,
+    c.strong_points && c.strong_points.length ? h("p", { class: "ai-note" }, "💪 Strong: " + c.strong_points.join(" · ")) : null,
+    c.weak_points && c.weak_points.length ? h("p", { class: "ai-note" }, "🎯 Practise: " + c.weak_points.join(" · ")) : null,
+    c.coach_tip ? h("p", { class: "ai-note" }, "🦉 " + c.coach_tip) : null,
     c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,
       h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
       h("div", { class: "what" }, `Question ${q.number}`,
@@ -6786,7 +8040,7 @@ function wsAction(act) {
   if (act === "answers") { wsAnswers = !wsAnswers; return render(); }
   if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
   if (act === "key") return printAi(wsKeyNode(w));
-  if (act === "again") return openWsOpts(w.kid, w.subject, w.topics, w.count, w.work);
+  if (act === "again") return openWsOpts(w.kid, w.subject, w.topics, w.count, w.work, w.part);
   if (act === "upload") {
     if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
     aiPick = { ws: id };
@@ -6824,11 +8078,11 @@ async function addAnswerFiles(wsId, files) {
   const now = aiDocs.worksheets[wsId] || w;
   aiSave("worksheets", wsId, { ...now, answers: [...now.answers, ...ids].slice(0, 20), status: now.check ? "Checked ✓" : "Answers uploaded" });
   render();
-  toast("📎 Your answers are uploaded! Now tap 🤖 Check.", 3500);
+  toast(isKidDevice() ? "📎 Your answers are uploaded! ⏳ Waiting for check." : "📎 The answers are uploaded! Now tap ✅ Check now.", 3500);
 }
 function removeAnswerFile(fid) {
   const w = aiDocs.worksheets[schoolDoc], s = schoolFor(schoolKid), f = s.files[fid];
-  if (!w || !f || !canChange(f) || (w.check && !isDadNow())) return;
+  if (!w || !f || !canChange(f) || (w.check && !isDadNow()) || isKidDevice()) return;
   if (!confirm(`Remove “${f.name}”?`)) return;
   deleteFileData(fid);
   delete s.files[fid];
@@ -6860,14 +8114,21 @@ async function checkWorksheet(wsId) {
   if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;
-  aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });
+  aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });   // (with its subject and part, and 💪 🎯 🦉)
   const first = saveWsMark(now.kid, wsId, now, c);
+  notifyCheck(now, c);
+  if (now.purpose === "placement") afterPlacement(now.kid, wsId, c, first);   // 🧪 → the level (and 📋 the brief when all are checked)
   render();
   const color = colorsOf(userById(now.kid)).color;
   if (first) {
     celebrate(innerWidth / 2, innerHeight / 3, color, true);
     toast(`🎉 ${num(c.score)}/${num(c.max_score)}! Worksheet done +${POINTS_EACH} ⭐`, 3500, color);
   } else toast(`✅ Checked again: ${num(c.score)}/${num(c.max_score)}`, 3000);
+}
+// 🔔 "🦉 Mody · Math: 5/6" + the coach's tip, in the family's What's new (it pops up on the parents' devices)
+function notifyCheck(w, c) {
+  const text = `🦉 ${kidNameOf(w.kid)} · ${w.subject}: ${num(c.score)}/${num(c.max_score)}${c.coach_tip ? " — " + c.coach_tip : ""}`;
+  addNews([newsItem("school", text.slice(0, 700), "", w.kid)]);
 }
 // The worksheet's mark in its subject (type "Worksheet"). true = the first time (that's when the +10 ⭐ come)
 function saveWsMark(kid, wsId, w, c) {
@@ -6887,7 +8148,8 @@ function saveWsFix(wsId) {
   const c = { ...(w.check || { overall_note: "", questions: [], at: todayYmd() }), score, max_score: max };
   if (note) c.dadNote = note; else delete c.dadNote;
   aiSave("worksheets", wsId, { ...w, check: c, status: "Checked ✓" });
-  saveWsMark(w.kid, wsId, w, c);
+  const first = saveWsMark(w.kid, wsId, w, c);
+  if (w.purpose === "placement") afterPlacement(w.kid, wsId, c, first);
   wsFix = false; schoolFresh = true;
   render();
   toast("✓ Saved, and the mark too");
@@ -7291,7 +8553,138 @@ function removeUser(id) {
   if (allFilter === id) allFilter = "all";
   if (editingUser === id) resetUserForm();
   changed();
+  return true;
 }
+
+// =====================================================================
+//  👨‍👩‍👧 FAMILY (parents): kids with their school, school system, year and 🔑 code · ➕ Add a kid · Add a parent
+//  A kid's code: codes/{CODE} = { familyId, kidId, createdBy, createdAt } (and user.code, so it can be shown again).
+//  A parent code: kidId "parent", works once (the 2nd parent signs up with their email, then types it).
+//  Changes here are kept right away (no 💾 Save).
+// =====================================================================
+let familySetup = false;   // a new family's first visit: "Add your kids"
+let famEdit = null;        // the open form: a kid's id, "new", or null
+let famParentCode = "";    // the last parent code made on this device (shown until you leave)
+function drawFamily() {
+  const kids = kidsList(), online = !!(cloud.user && cloud.familyId);
+  const form = famEdit ? familyFormHtml(famEdit === "new" ? {} : userById(famEdit)) : "";
+  $("familyBody").innerHTML = `
+    ${familySetup ? `<div class="card sc-newtopic"><b>🎉 Your family is ready!</b><p>Now add your kids. Each kid gets a code to sign in on their own phone or tablet.</p></div>` : ""}
+    ${online ? "" : `<div class="card"><p class="sc-empty">🔌 Codes need the internet and the family sign-in.</p></div>`}
+    <div class="bd-head"><h2>🧒 Kids</h2>${famEdit === "new" ? "" : `<button class="edit" data-famedit="new">➕ Add a kid</button>`}</div>
+    ${famEdit === "new" ? form : ""}
+    ${kids.length ? `<div class="fam-list">${kids.map(u => {
+      const c = colorsOf(u), about = [u.school, u.curriculum, u.year].filter(Boolean).join(" · ");
+      return `<div class="card bd-card fam-kid" style="--c:${c.color}">
+        <div class="fam-top"><span class="fam-face" style="background:${c.soft}">${safe(u.emoji)}</span>
+          <div class="what"><b>${safe(u.name)}</b><small>${about ? safe(about) : "No school or year yet"}</small></div></div>
+        ${famEdit === u.id ? form : ""}
+        <div class="fam-code">${u.code ? `🔑 <span class="code-big">${safe(u.code)}</span>` : `<span class="sc-empty">No code yet</span>`}</div>
+        <div class="ai-btns">
+          ${u.code ? `<button data-famcopy="${safe(u.id)}">📋 Copy</button><button data-famshare="${safe(u.id)}">📤 Share</button>` : ""}
+          <button data-famcode="${safe(u.id)}">${u.code ? "🔁 New code" : "🔑 Make code"}</button>
+          ${famEdit === u.id ? "" : `<button data-famedit="${safe(u.id)}">✏️ Edit</button>`}
+          <button class="danger-text" data-famdel="${safe(u.id)}">🗑️ Remove</button></div></div>`;
+    }).join("")}</div>` : `<div class="card"><p class="sc-empty">No kids yet. Tap ➕ Add a kid.</p></div>`}
+    <div class="card bd-card" style="margin-top:18px"><h2>👨‍👩‍👧 Add a parent</h2>
+      <p class="hint">Makes a code for the other parent. They open the app, tap 👨‍👩‍👧 I'm a parent → Parent code, sign up with their own email, and type the code. It works once.</p>
+      ${famParentCode ? `<div class="fam-code">🔑 <span class="code-big">${safe(famParentCode)}</span></div>
+        <div class="ai-btns"><button data-famcopy="parent">📋 Copy</button><button data-famshare="parent">📤 Share</button></div>` : ""}
+      <div class="ai-btns" style="margin-top:10px"><button class="primary" data-famcode="parent">${famParentCode ? "🔁 New parent code" : "🔑 Make a parent code"}</button></div></div>
+    ${familySetup ? `<div class="btnrow" style="margin-top:18px"><button class="primary" data-famdone>✅ Done</button></div>` : ""}`;
+}
+function familyFormHtml(u) {
+  const color = u.color || freeColor();
+  return `<div class="sc-form fam-form">
+    <div class="row"><div style="flex:0 0 84px"><label class="small" for="famEmoji">Emoji</label><input type="text" id="famEmoji" maxlength="8" value="${safe(u.emoji || "")}" placeholder="🐼"></div>
+      <div><label class="small" for="famName">Name</label><input type="text" id="famName" maxlength="30" value="${safe(u.name || "")}" placeholder="Name"></div></div>
+    <div class="emoji-pick">${EMOJIS.map(e => `<button type="button" data-famemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("")}</div>
+    <label class="small">Colour</label>
+    <div class="swatches">${Object.entries(PALETTE).map(([key, c]) => `<label title="${key}"><input type="radio" name="famColor" value="${key}" ${color === key ? "checked" : ""}>
+      <span style="background:${c.color}"></span></label>`).join("")}</div>
+    ${scField("famSchool", "School name", `<input type="text" id="famSchool" maxlength="60" value="${safe(u.school || "")}" placeholder="Al Noor School">`)}
+    <div class="row"><div><label class="small" for="famSys">School system</label><select id="famSys"><option value="">—</option>${SCHOOL_SYSTEMS.map(x =>
+        `<option ${u.curriculum === x ? "selected" : ""}>${x}</option>`).join("")}</select></div>
+      <div><label class="small" for="famYear">Year</label><input type="text" id="famYear" maxlength="20" value="${safe(u.year || "")}" placeholder="Year 5"></div></div>
+    <div class="btnrow"><button class="primary" data-famsave>${u.id ? "💾 Save" : "➕ Add"}</button><button data-famcancel>Cancel</button></div>
+    <div class="err" id="famErr"></div></div>`;
+}
+async function saveFamilyKid() {
+  if (me !== DAD) return;
+  const name = $("famName").value.trim().slice(0, 30), emoji = $("famEmoji").value.trim().slice(0, 8) || "🙂";
+  const color = (document.querySelector('input[name="famColor"]:checked') || {}).value || freeColor();
+  if (!name) return $("famErr").textContent = "Please type a name.";
+  if (data.users.some(u => u.id !== famEdit && u.name.toLowerCase() === name.toLowerCase())) return $("famErr").textContent = "Someone already has that name.";
+  const about = { school: $("famSchool").value.trim().slice(0, 60), curriculum: $("famSys").value, year: $("famYear").value.trim().slice(0, 20) };
+  let u = famEdit !== "new" && data.users.find(x => x.id === famEdit);
+  if (u) Object.assign(u, { name, emoji, color }, about);
+  else { u = { id: newId(), name, emoji, color, ...about }; data.users.push(u); }
+  Object.keys(about).forEach(k => { if (!u[k]) delete u[k]; });
+  const isNew = famEdit === "new";
+  famEdit = null;
+  keepNow();
+  toast(isNew ? `✓ ${emoji} ${name} added!` : "✓ Saved");
+  if (isNew) makeCode(u.id);   // a new kid gets their code right away
+}
+// 🔑 A new code (a kid's, or "parent"): unique, saved in codes/{CODE}; a kid's old code stops working for new phones
+async function makeCode(kidId) {
+  if (me !== DAD) return;
+  if (!cloud.user || !cloud.familyId || !navigator.onLine) return toast("🔌 Codes need the internet and the family sign-in.", 4000);
+  const fb = cloud.fb, u = kidId === "parent" ? null : data.users.find(x => x.id === kidId);
+  if (kidId !== "parent" && !u) return;
+  try {
+    let code = "";
+    for (let tries = 0; tries < 6 && !code; tries++) {
+      const pick = Array.from(crypto.getRandomValues(new Uint32Array(6)), n => CODE_CHARS[n % CODE_CHARS.length]).join("");
+      if (!(await fb.getDoc(fb.doc(cloud.db, "codes", pick))).exists()) code = pick;
+    }
+    if (!code) throw new Error("busy");
+    await fb.setDoc(fb.doc(cloud.db, "codes", code), { familyId: cloud.familyId, kidId, createdBy: cloud.user.uid, createdAt: new Date().toISOString() });
+    if (u) {
+      if (u.code) fb.deleteDoc(fb.doc(cloud.db, "codes", u.code)).catch(() => {});
+      u.code = code;
+      keepNow();
+    } else { famParentCode = code; render(); }
+    toast(`🔑 New code: ${code}`, 3500);
+  } catch (err) {
+    console.warn("Code:", err);
+    toast(err && err.code === "permission-denied" ? "⚠ The cloud said no. Deploy the new Firestore rules first (firestore.rules)." : "Couldn't make a code. Please try again.", 5000);
+  }
+}
+// The words to send: the code and how to use it
+function codeText(kidId) {
+  const link = location.origin + location.pathname;
+  if (kidId === "parent") return `👨‍👩‍👧 Join our family in Family Plan: open ${link}, tap “I'm a parent” → “Parent code”, sign up with your email, and type ${famParentCode}.`;
+  const u = userById(kidId);
+  return `🧒 ${u.name}'s code for Family Plan: ${u.code}\nOpen ${link}, tap “I'm a kid”, and type the code.`;
+}
+function shareCode(kidId, how) {
+  const text = codeText(kidId);
+  if (how === "share" && navigator.share) return navigator.share({ title: "Family Plan code", text }).catch(() => {});
+  copyText(text).then(ok => toast(ok ? "📋 Copied! Paste it in a message." : "Couldn't copy on this device.", 3000));
+}
+// 🗑️ Remove a kid: like removing a person in Settings, kept right away, and their code stops working
+function removeFamilyKid(id) {
+  const u = data.users.find(x => x.id === id), code = u && u.code;
+  if (!removeUser(id)) return;
+  if (code && cloud.user) cloud.fb.deleteDoc(cloud.fb.doc(cloud.db, "codes", code)).catch(() => {});
+  if (famEdit === id) famEdit = null;
+  keepNow();
+}
+$("scr-family").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b || me !== DAD) return;
+  const ds = b.dataset;
+  if (ds.famedit) { famEdit = ds.famedit; render(); const n = $("famName"); if (n) n.focus(); return; }
+  if ("famcancel" in ds) { famEdit = null; return render(); }
+  if ("famsave" in ds) return saveFamilyKid();
+  if (ds.famemoji) { $("famEmoji").value = ds.famemoji; return; }
+  if (ds.famcode) return makeCode(ds.famcode);
+  if (ds.famcopy) return shareCode(ds.famcopy, "copy");
+  if (ds.famshare) return shareCode(ds.famshare, "share");
+  if (ds.famdel) return removeFamilyKid(ds.famdel);
+  if ("famdone" in ds) { familySetup = false; return go("home"); }
+});
 
 // ---------- Backup: Export and Import ----------
 // Export: turn your data into a text file (JSON) and download it.
@@ -7616,14 +9009,51 @@ async function startCloud() {
   fb.onAuthStateChanged(cloud.auth, user => user ? cloudSignedIn(user) : cloudSignedOut());
 }
 
-// ---------- Family login ----------
+// ---------- The first screen: 👨‍👩‍👧 I'm a parent (sign in / new family / parent code) · 🧒 I'm a kid (a code) ----------
+let lgMode = "signin";
 function showLogin(message, busy) {
   $("loginScreen").hidden = false;
-  $("loginHint").textContent = message || "Sign in with the family account. This device stays signed in.";
-  $("loginBtn").disabled = !!busy;
+  $("loginHint").textContent = message || "Who is using this phone?";
+  $("loginBtn").disabled = $("kidBtn").disabled = !!busy;
   showSync();
 }
-function hideLogin() { $("loginScreen").hidden = true; $("loginErr").textContent = ""; $("loginPass").value = ""; }
+function hideLogin() { $("loginScreen").hidden = true; $("loginErr").textContent = $("kidErr").textContent = ""; $("loginPass").value = ""; }
+// step: "choose" | "parent" | "kid"
+function loginStep(step) {
+  $("lgChoose").hidden = step !== "choose";
+  $("loginForm").hidden = step !== "parent";
+  $("kidForm").hidden = step !== "kid";
+  if (step === "parent") loginMode(lgMode);
+  if (step === "kid") $("kidCode").focus();
+}
+const LG_MODES = {
+  signin: ["Sign in", "Sign in with your parent email.", "Sign in"],
+  create: ["New family", "Make a family account. You'll add your kids next.", "Create a family account"],
+  code:   ["Parent code", "Another parent gave you a code? Sign up with your own email, then type the code.", "Join the family"]
+};
+function loginMode(mode) {
+  lgMode = mode;
+  const [title, hint, btn] = LG_MODES[mode];
+  $("lgTitle").textContent = "👨‍👩‍👧 " + title;
+  $("lgModeHint").textContent = hint;
+  $("loginBtn").textContent = btn;
+  $("lgFamilyRow").hidden = mode !== "create";
+  $("lgNameRow").hidden = mode === "signin";
+  $("lgCodeRow").hidden = mode !== "code";
+  $("loginPass").autocomplete = mode === "signin" ? "current-password" : "new-password";
+  document.querySelectorAll("[data-lgmode]").forEach(b => { b.classList.toggle("on", b.dataset.lgmode === mode); b.setAttribute("aria-selected", b.dataset.lgmode === mode); });
+  $("loginErr").textContent = "";
+}
+$("loginScreen").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.lg === "parent") return loginStep("parent");
+  if (b.dataset.lg === "kid") return loginStep("kid");
+  if (b.dataset.lg === "back") return loginStep("choose");
+  if (b.dataset.lgmode) return loginMode(b.dataset.lgmode);
+});
+// A code as typed → "ABC234" (spaces gone, capitals; O → 0 is not a code letter, so it stays and fails)
+const typedCode = id => $(id).value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
 // Friendly words for Firebase's error codes
 function loginError(err) {
   const code = (err && err.code) || "";
@@ -7637,26 +9067,131 @@ function loginError(err) {
   if (code.includes("unauthorized-domain")) return "This web address isn't allowed yet. Add it in Firebase → Authentication → Settings → Authorized domains.";
   return "Couldn't sign in. Please try again." + (code ? ` (${code})` : "");
 }
+// 👨‍👩‍👧 Parent: sign in, or create the account (new family / parent code). Then cloudSignedIn() → resolveMember() takes over.
 $("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const email = $("loginEmail").value.trim(), pass = $("loginPass").value;
+  const email = $("loginEmail").value.trim(), pass = $("loginPass").value, fb = cloud.fb, mode = lgMode;
+  const familyName = $("lgFamily").value.trim().slice(0, 40), parentName = $("lgName").value.trim().slice(0, 30), code = typedCode("lgPCode");
   if (!email || !pass) return $("loginErr").textContent = "Please type the email and the password.";
-  if (!cloud.fb) return $("loginErr").textContent = "No internet yet. Connect to the internet and try again.";
+  if (mode === "create" && !familyName) return $("loginErr").textContent = "Please type your family name.";
+  if (mode === "code" && !isCode(code)) return $("loginErr").textContent = "Please type the 6-letter parent code.";
+  if (!fb) return $("loginErr").textContent = "No internet yet. Connect to the internet and try again.";
   $("loginBtn").disabled = true;
-  $("loginBtn").textContent = "Signing in…";
+  $("loginBtn").textContent = "One moment…";
   $("loginErr").textContent = "";
-  try { await cloud.fb.signInWithEmailAndPassword(cloud.auth, email, pass); }   // then cloudSignedIn() takes over
-  catch (err) { $("loginErr").textContent = loginError(err); }
+  cloud.pending = mode === "create" ? { kind: "create", familyName, parentName } : mode === "code" ? { kind: "parentcode", code, parentName } : null;
+  try {
+    if (mode === "signin") await fb.signInWithEmailAndPassword(cloud.auth, email, pass);
+    else {
+      // A new account. (Already has one? Then sign in with it.)
+      try { await fb.createUserWithEmailAndPassword(cloud.auth, email, pass); }
+      catch (err) { if ((err.code || "").includes("email-already-in-use")) await fb.signInWithEmailAndPassword(cloud.auth, email, pass); else throw err; }
+    }
+  } catch (err) { cloud.pending = null; $("loginErr").textContent = loginError(err); }
   $("loginBtn").disabled = false;
-  $("loginBtn").textContent = "Sign in";
+  loginMode(lgMode);
+});
+// 🧒 Kid: the code → signed in without an email (anonymous), as that kid. This device remembers it.
+$("kidForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const code = typedCode("kidCode"), fb = cloud.fb;
+  if (!isCode(code)) return $("kidErr").textContent = "Your code has 6 letters and numbers. Ask your parent for your code.";
+  if (!fb) return $("kidErr").textContent = "No internet yet. Connect to the internet and try again.";
+  $("kidBtn").disabled = true;
+  $("kidErr").textContent = "";
+  cloud.pending = { kind: "kid", code };
+  try { await fb.signInAnonymously(cloud.auth); }
+  catch (err) {
+    cloud.pending = null;
+    $("kidErr").textContent = (err.code || "").includes("operation-not-allowed") ? "Kid sign-in isn't turned on yet. Ask your parent (Firebase → Anonymous)." : loginError(err);
+  }
+  $("kidBtn").disabled = false;
 });
 
-// Signed in: listen to the family's 3 documents. Every change (from any phone) arrives here.
-function cloudSignedIn(user) {
+// ---------- Who is this account? members/{uid} = { familyId, role: "parent" | "kid", kidId?, code?, name? } ----------
+// Made here the first time: a new family (familyId = the new uid), a kid's code, a 2nd parent's code,
+// or our first family account (it becomes that family's parent). Throws "badcode" / "nofamily" / a Firestore error.
+async function resolveMember(user) {
+  const fb = cloud.fb, ref = fb.doc(cloud.db, "members", user.uid), pending = cloud.pending;
+  cloud.pending = null;
+  let snap;
+  try { snap = await fb.getDoc(ref); }
+  catch (err) {
+    // The Firestore rules from before families (no "members" yet): our family's account works exactly as before
+    if (user.uid === OLD_FAMILY_UID) return { familyId: user.uid, role: "parent" };
+    throw err;
+  }
+  if (snap.exists()) return snap.data();
+  if (user.uid === OLD_FAMILY_UID) {
+    const m = { familyId: user.uid, role: "parent" };
+    await fb.setDoc(ref, m).catch(err => console.warn("Member:", err));
+    return m;
+  }
+  if (!pending) throw new Error("nofamily");
+  if (pending.kind === "create") {
+    const m = { familyId: user.uid, role: "parent", name: pending.parentName || "" };
+    await fb.setDoc(ref, m);
+    await fb.setDoc(fb.doc(cloud.db, "families", user.uid), { name: pending.familyName, createdBy: user.uid, createdAt: new Date().toISOString() }, { merge: true });
+    cloud.fresh = pending;
+    return m;
+  }
+  // A code: a kid's (kidId = that kid), or a 2nd parent's (kidId = "parent")
+  const codeRef = fb.doc(cloud.db, "codes", pending.code), c = await fb.getDoc(codeRef).catch(() => null);
+  const code = c && c.exists() ? c.data() : null, forParent = pending.kind === "parentcode";
+  if (!code || !code.familyId || (code.kidId === "parent") !== forParent) throw new Error("badcode");
+  const m = forParent ? { familyId: code.familyId, role: "parent", name: pending.parentName || "", code: pending.code }
+                      : { familyId: code.familyId, role: "kid", kidId: code.kidId, code: pending.code };
+  await fb.setDoc(ref, m);
+  if (forParent) fb.deleteDoc(codeRef).catch(() => {});   // a parent code works once
+  return m;
+}
+const isKidDevice = () => (cloud.role || cloudMeta().role) === "kid";
+const kidDeviceId = () => cloud.kidId || cloudMeta().kidId || null;
+
+// Signed in: find the family, then listen to its 3 documents. Every change (from any phone) arrives here.
+async function cloudSignedIn(user) {
+  if (cloud.user && cloud.user.uid === user.uid) { hideLogin(); return showSync(); }
+  const turn = cloud.turn = (cloud.turn || 0) + 1, wasKid = cloud.pending && cloud.pending.kind === "kid", known = cloudMeta().member;
+  if (!known || known.uid !== user.uid) showLogin("Signing in…", true);
+  let m = null;
+  try { m = await resolveMember(user); }
+  catch (err) {
+    if (turn !== cloud.turn) return;
+    const sure = err.message === "badcode" || err.message === "nofamily" || err.code === "permission-denied";
+    // No internet (or the cloud is slow): use what this device already knows about this account, and keep it signed in
+    if (!sure && known && known.uid === user.uid) m = known;
+    else if (!sure) {
+      showLogin("No internet? Connect to the internet, then open the app again.", false);
+      window.addEventListener("online", () => { cloud.user = null; cloudSignedIn(user); }, { once: true });
+      return;
+    } else {
+      // Wrong code / no family / not allowed: signed out again, with a friendly message on the right step
+      const msg = err.message === "badcode" ? (wasKid ? "Ask your parent for your code." : "That parent code isn't right. Ask the other parent for a new one.")
+        : err.message === "nofamily" ? "This account isn't in a family yet. Tap “New family”, or “Parent code”."
+        : "The cloud said no. The family's Firestore rules need updating (see firestore.rules).";
+      if (user.isAnonymous) fb_deleteQuietly(user); else cloud.fb.signOut(cloud.auth).catch(() => {});
+      showLogin();
+      loginStep(wasKid ? "kid" : "parent");
+      $(wasKid ? "kidErr" : "loginErr").textContent = msg;
+      return;
+    }
+  }
+  if (turn !== cloud.turn) return;
   hideLogin();
-  if (cloud.user && cloud.user.uid === user.uid) return showSync();
   cloud.user = user;
-  const fb = cloud.fb, ref = name => fb.doc(cloud.db, "families", user.uid, "state", name);
+  cloud.familyId = m.familyId;
+  cloud.role = m.role === "kid" ? "kid" : "parent";
+  cloud.kidId = cloud.role === "kid" ? m.kidId : null;
+  setCloudMeta({ role: cloud.role, kidId: cloud.kidId, member: { uid: user.uid, familyId: m.familyId, role: cloud.role, kidId: cloud.kidId } });
+  applyRole();
+  // 🆕 A new family: this device starts with only the parent (then "Add your kids")
+  if (cloud.fresh) {
+    data = freshFamilyData(cloud.fresh.parentName);
+    savedJson = JSON.stringify(data);
+    storeLocal();
+    me = DAD;
+  }
+  const fb = cloud.fb, ref = name => fb.doc(cloud.db, "families", cloud.familyId, "state", name);
   cloud.refs = { plan: ref("plan"), points: ref("points"), habits: ref("habits") };
   cloud.snaps = {};
   cloud.ready = false;
@@ -7673,10 +9208,27 @@ function cloudSignedIn(user) {
   showSync();
   if (screen === "settings") render();
 }
+// A kid's wrong code: the empty no-email account is removed again
+function fb_deleteQuietly(user) { cloud.fb.deleteUser(user).catch(() => cloud.fb.signOut(cloud.auth).catch(() => {})); }
+// A new family's first data: only the parent (the family's admin, like Bro2a in ours)
+function freshFamilyData(parentName) {
+  const d = emptyData();
+  d.users = [{ id: DAD, name: parentName || "Parent", emoji: "🦸‍♂️", color: "blue" }];
+  return d;
+}
+// 🧒 / 👨‍👩‍👧 The device's role: a kid's device hides Settings, Switch user, backups and deleting (see the kid-device CSS)
+function applyRole() {
+  document.body.classList.toggle("kid-device", isKidDevice());
+  if (isKidDevice() && exists(kidDeviceId())) { me = kidDeviceId(); if (screen === "start") go("home"); }
+}
 function cloudSignedOut() {
+  cloud.turn = (cloud.turn || 0) + 1;
   cloud.unsub.forEach(stop => stop());
   cloud.unsub = [];
   cloud.user = null;
+  cloud.familyId = cloud.role = cloud.kidId = null;
+  setCloudMeta({ role: null, kidId: null, member: null });   // nobody is signed in: not a kid's device any more
+  document.body.classList.remove("kid-device");
   cloud.ready = false;
   cloud.snaps = {};
   feed.ref = null;
@@ -7703,13 +9255,17 @@ function cloudFirstSync() {
   if (!cloudHasData) {
     cloudUploadAll();
     cloudReady();
+    // 🆕 A new family: "Add your kids" first
+    if (cloud.fresh) { cloud.fresh = null; me = DAD; familySetup = true; return go("family"); }
     return toast("☁️ Your data is now in the family cloud. Sign in on the other phones to see it.", 5000);
   }
   const remote = cloudData(), local = JSON.parse(savedJson), meta = cloudMeta();
   const nothingHere = !local.fixed.length && !local.flexible.length && !local.routines.length
     && !Object.keys(local.points.marks).length && !Object.keys(local.habitMarks).length && !Object.keys(local.school || {}).length;
   // 2) Same data, nothing on this device yet, or this device was already in sync (the cloud is just newer): use the cloud
-  if (sameText(remote) === sameText(local) || nothingHere || (meta.uid === cloud.user.uid && !meta.dirty))
+  // (a 🧒 kid's device never replaces the family's data, and neither does a device that was with ANOTHER family)
+  if (sameText(remote) === sameText(local) || nothingHere || isKidDevice() || (meta.uid && meta.uid !== cloud.familyId)
+      || (meta.uid === cloud.familyId && !meta.dirty))
     return cloudUseCloud(true);
   // 3) Both have different data: ask
   const count = d => `${d.users.length} people, ${d.fixed.length + d.flexible.length} activities, ` +
@@ -7771,8 +9327,9 @@ function keepEarlyChanges(remote, base, local) {
 function cloudReady() {
   cloud.ready = true;
   cloud.asking = false;
-  setCloudMeta({ uid: cloud.user.uid, dirty: false });
+  setCloudMeta({ uid: cloud.familyId, dirty: false });   // (uid = the family this device synced with)
   writeData("auto");   // stores it here, and uploads anything the app tidied up (e.g. a new week)
+  applyRole();         // 🧒 a kid's device: open as that kid now that their family's people are here
   uploadPhotos();      // 📥 Seesaw photos added before the cloud was ready
   uploadFiles();       // 🎒 school files too
   showSync();
@@ -7850,7 +9407,7 @@ function schoolChanges(was, is) {
     Object.keys(b).forEach(part => {
       const x = a[part], y = b[part];
       if (sameText(x) === sameText(y)) return;
-      if (part === "info" || !obj(x)) return out.push(path(kid, part), y);
+      if (part === "info" || !obj(x) || !obj(y)) return out.push(path(kid, part), y);
       new Set([...Object.keys(x), ...Object.keys(y)]).forEach(id => {
         if (sameText(x[id]) !== sameText(y[id])) out.push(path(kid, part, id), hasOwn(y, id) ? y[id] : fb.deleteField());
       });
@@ -7998,7 +9555,8 @@ function habitNews(before, now) {
 }
 // A saved plan change, in words: "added Math · changed School · changed the routines"
 function planNews(before, now) {
-  const acts = p => [...(p.fixed || []), ...(p.flexible || [])];
+  const acts = p => [...(p.fixed || []), ...(p.flexible || []),
+                     ...(p.parentActs || []).map(a => ({ ...a, name: `${pactType(a)[1]} ${a.title}` }))];   // (📅 a parent's own activities too)
   const was = acts(before), is = acts(now), find = (list, id) => list.find(a => a.id === id);
   const few = list => list.slice(0, 3).map(a => a.name).join(", ") + (list.length > 3 ? ` +${list.length - 3} more` : "");
   const added = is.filter(a => !find(was, a.id)), removed = was.filter(a => !find(is, a.id));
@@ -8071,10 +9629,14 @@ function newsWhat(it) {
   return n > 1 ? `made ${n} ticks: ${n > list.length ? "… " : ""}${list.slice(-4).join(", ")}${list.length > 4 ? " …" : ""}` : it.what;
 }
 const newsLine = it => `${newsWho(it)} ${newsWhat(it)}`;
-// Pop-ups: one for each plan change, and one for all the ticks of the same minute (it's updated, not repeated)
+// 🦉 School results ("school": a 🤖 check, its what = the whole line) are only for the parents (Bro2a's devices)
+const newsForMe = it => it.kind !== "school" || me === DAD;
+// Pop-ups: one for each plan change / school result, and one for all the ticks of the same minute (it's updated, not repeated)
 function announce(list) {
   if (!newsPrefs().on) return;
-  list.filter(it => it.kind !== "tick").forEach(it => showNews(newsLine(it), "", "plan-" + it.id));
+  list = list.filter(newsForMe);
+  list.filter(it => it.kind === "school").forEach(it => showNews(it.what, "", "school-" + it.id));
+  list.filter(it => it.kind !== "tick" && it.kind !== "school").forEach(it => showNews(newsLine(it), "", "plan-" + it.id));
   const ticks = list.filter(it => it.kind === "tick");
   if (!ticks.length) return;
   if (!feed.bundle || Date.now() - feed.bundle.start > NEWS_MINUTE) feed.bundle = { start: Date.now(), items: new Map() };
@@ -8104,7 +9666,7 @@ function unreadNews() {
   const p = newsPrefs();
   if (!p.init) return 0;
   const opened = new Set(p.opened || []);
-  return Object.values(feed.items).filter(it => it.dev !== DEVICE && !opened.has(newsSig(it))).length;
+  return Object.values(feed.items).filter(it => it.dev !== DEVICE && newsForMe(it) && !opened.has(newsSig(it))).length;
 }
 function drawNews() {
   const n = unreadNews();
@@ -8115,12 +9677,12 @@ function drawNews() {
     b.setAttribute("aria-label", n ? `What's new: ${n} new` : "What's new");
   });
   if ($("newsModal").hidden) return;
-  const list = Object.values(feed.items).sort(newestFirst);
+  const list = Object.values(feed.items).filter(newsForMe).sort(newestFirst);
   $("newsList").innerHTML = list.length ? list.map(it => {
     const u = exists(it.by) ? userById(it.by) : null, saved = (it.who || "🙂 Someone").split(" ");
     return `<li class="news-item ${feed.fresh.has(newsSig(it)) ? "new" : ""}">
       <span class="news-face">${safe(u ? u.emoji : saved[0])}</span>
-      <div><b>${safe(u ? u.name : saved.slice(1).join(" ") || "Someone")}</b> ${safe(newsWhat(it))}
+      <div>${it.kind === "school" ? safe(it.what) : `<b>${safe(u ? u.name : saved.slice(1).join(" ") || "Someone")}</b> ${safe(newsWhat(it))}`}
         <small>${agoText(it.at)}${it.dev === DEVICE ? " · on this device" : ""}</small></div></li>`;
   }).join("") : `<li class="news-empty">Nothing new yet. Ticks and plan changes will show up here.</li>`;
   $("newsNotify").innerHTML = notifyHtml();
@@ -8202,7 +9764,9 @@ newWeek();                     // a new week since last time? Points start again
 writeData("auto");              // stores the updated data (people, owners, "Needs Dad", plan, points)
 try { history.replaceState({ screen: "start" }, ""); } catch (e) {}   // the Back button's first stop
 resetFixedForm(); resetFlexForm(); resetUserForm(); closeRoutineForm(); resetHabitForm();
-// Always open on the home page ("Who are you?") — after the family login, if nobody is signed in yet
+// Always open on the home page ("Who are you?") — after the family login, if nobody is signed in yet.
+// 🧒 A kid's device opens straight as that kid (go() does that).
+document.body.classList.toggle("kid-device", isKidDevice());
 go("start");
 startCloud();
 

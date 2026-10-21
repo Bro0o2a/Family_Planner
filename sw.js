@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v48";
+const CACHE = "family-planner-v53";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
@@ -28,7 +28,10 @@ const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "i
 const ADHAN_URL = "https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js";
 // 📦 JSZip (opens PowerPoint / Word files for 🤖 AI help). Same idea: the version is in the address, so it never changes.
 const JSZIP_URL = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-const LIBRARIES = [ADHAN_URL, JSZIP_URL];
+// 📄 pdf.js (takes the text out of a 📄 syllabus PDF). Same idea: the version is in the address.
+const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const LIBRARIES = [ADHAN_URL, JSZIP_URL, PDFJS_URL, PDFJS_WORKER_URL];
 
 // 1) Install: save a copy of the app files (and the libraries).
 self.addEventListener("install", event => {
