@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v69";
+const CACHE = "family-planner-v72";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
@@ -31,7 +31,10 @@ const JSZIP_URL = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min
 // 📄 pdf.js (takes the text out of a 📄 syllabus PDF). Same idea: the version is in the address.
 const PDFJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
 const PDFJS_WORKER_URL = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-const LIBRARIES = [ADHAN_URL, JSZIP_URL, PDFJS_URL, PDFJS_WORKER_URL];
+// 📄 jsPDF + html2canvas (make a real PDF of a worksheet or a brief, on the phone). Same idea: the version is in the address.
+const JSPDF_URL = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+const HTML2CANVAS_URL = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+const LIBRARIES = [ADHAN_URL, JSZIP_URL, PDFJS_URL, PDFJS_WORKER_URL, JSPDF_URL, HTML2CANVAS_URL];
 
 // 1) Install: save a copy of the app files (and the libraries).
 self.addEventListener("install", event => {

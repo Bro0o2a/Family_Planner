@@ -312,6 +312,36 @@
   .su-save { position: sticky; bottom: 10px; justify-content: center; }
   .su-save .primary { min-width: 200px; min-height: 52px; font-size: 19px; }
   .su-edit { justify-content: center; margin-top: 18px; }
+  /* ✏️ Make a worksheet */
+  .mk-card h3.ph-group { margin-top: 16px; }
+  .mk-subjects { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 10px; margin-bottom: 14px; }
+  .mk-sub { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 96px; padding: 10px 6px; border-radius: 20px;
+            border: 3px solid var(--c); background: #fff; overflow-wrap: anywhere; }
+  .mk-sub .e { font-size: 34px; line-height: 1.1; }
+  .mk-sub b { font-size: 16px; }
+  .mk-aihead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
+  .mk-label { display: block; margin: 12px 0 6px; }
+  .mk-topic small { flex: none; color: var(--muted); font-size: 12px; font-weight: 800; }
+  .mk-topic .mk-now { color: #b45309; }
+  .mk-type, .mk-other { margin: 12px 0 0; }
+  .mk-type input, .mk-other input { width: 100%; }
+  .mk-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .mk-counts button { min-height: 52px; font-size: 20px; font-weight: 800; border-radius: 16px; }
+  .mk-counts button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .mk-go { justify-content: center; margin-top: 16px; }
+  .mk-go .primary { min-width: 200px; min-height: 54px; font-size: 19px; }
+  .mk-subbtn { margin: 12px 0 0; }
+  /* 📄 PDF: the sheet is drawn off-screen at A4 width (186 mm ≈ 703 px), then turned into pictures */
+  .pdf-stage { position: fixed; left: -10000px; top: 0; width: 703px; background: #fff; color: #111; pointer-events: none; }
+  .pdf-stage .ai-print { width: 703px; }
+  .pdf-ready { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+               max-width: 480px; margin: 0 auto; padding: 10px 14px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); font-weight: 800; }
+  .pdf-ready span { flex: 1 1 140px; }
+  /* 👨‍👩‍👧 Family ID and 🤖 this month's AI use */
+  .fam-id { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 18px; font-weight: 700; }
+  .fam-id code { font-size: 14px; overflow-wrap: anywhere; word-break: break-all; }
+  .fam-id .ai-usage { flex-basis: 100%; }
+  .ai-usage { margin: 0 0 12px; font-size: 15px; color: var(--muted); font-weight: 700; }
   /* 👋 The tour: swipe cards */
   .tour { position: fixed; inset: 0; z-index: 9100; display: grid; place-items: center; padding: 16px; background: rgba(30, 20, 60, .55); }
   .tour-box { width: min(100%, 400px); padding: 18px 16px; border-radius: 28px; background: #fff; border-top: 10px solid var(--c); box-shadow: var(--shadow); }
@@ -1047,7 +1077,8 @@
   .sc-wsbtns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
   .sc-older-btn { width: 100%; margin: 18px 0 12px; text-align: left; }
   /* ⬆️ Upload + 📰 Newsletter side by side; 🔔 reminders; 📌 past school dates */
-  .sc-topbtns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 10px; margin: 0 0 18px; }
+  .sc-topbtns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; }
+  .sc-make, .sc-make:hover { background: linear-gradient(135deg, #34c38f, #1e9e6e); }
   .sc-topbtns .sc-addbig { margin: 0; }
   .sc-news, .sc-news:hover { background: linear-gradient(135deg, #8b7cf6, #6457d9); }
   .sc-remind { margin: 0 0 18px; background: #fff9db; }
@@ -1094,11 +1125,11 @@
   body.kid-device [data-scdel], body.kid-device [data-wsfdel], body.kid-device #fmDel, body.kid-device [data-del-user],
   body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
   body.kid-device [data-hbdel] { display: none !important; }
-  body.kid-device .sc-topbtns { grid-template-columns: 1fr; }
+  body.kid-device .sc-topbtns, body.off-newsletter .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (⬆️ + ✏️, no 📰) */
   /* ⚙️ FEATURES OFF: their buttons are hidden (the cards are left out when drawing) */
-  body.off-newsletter [data-nlopen], body.off-coach [data-aiadd], body.off-coach .sc-addbig, body.off-diary [data-dyopen],
+  body.off-newsletter [data-nlopen], body.off-coach [data-aiadd], body.off-coach .sc-addbig, body.off-coach [data-mkopen], body.off-diary [data-dyopen],
   body.off-prayer #prayCard { display: none !important; }
-  body.off-newsletter .sc-topbtns, body.off-coach .sc-topbtns { grid-template-columns: 1fr; }
+  body.off-coach .sc-topbtns { grid-template-columns: 1fr; }
   .nl-events .checkline span { overflow-wrap: anywhere; }
   @media (max-width: 600px) {
     .sc-ov { grid-template-columns: 1fr; }
@@ -1107,7 +1138,8 @@
     .sc-kbtn { min-height: 108px; }
     .sc-kbtn b { font-size: 16px; }
     .sc-wsstatus, .sc-wsnote { margin-left: 0; }
-    .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (so "Newsletter" never breaks in the middle) */
+    .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (⬆️ and ✏️ side by side, 📰 underneath) */
+    .sc-topbtns .sc-news { grid-column: 1 / -1; }
     .sc-topbtns .sc-addbig { font-size: 17px; padding: 10px 8px; }
     .sc-topbtns small { font-size: 13px; }
   }
@@ -3323,7 +3355,8 @@ function cleanData(d) {
 //   events  = id → { date: "2026-10-22", time: "08:30" | "" (all day), title, note, by }   (📌 school dates from the 📰 newsletter)
 //   week    = { label, n, start, end, subjects: [{ subject, topics }], reminders: [text] } | null   (📰 "This week", until end)
 //             (profile / events / week are newer: older data has none)
-//   requests = id → { kind: "work" | "practice", subject, files?: [file ids], topic?, part?, date, by }
+//   requests = id → { kind: "work" | "practice", subject, files?: [file ids], topic?, part?, topics?, count?, mode?, date, by }
+//   topics   = subject (lower case) → { at, list: [{ title, term, now }] }   (✏️ Make a worksheet: the subject's topics from 🤖)
 //             (⏳ a kid's device asked: a parent's device does the 🤖 part — ✅ Read now / ✅ Make now)
 const GRADE_TYPES = ["quiz", "exam", "homework", "worksheet"];
 const TASK_KINDS = ["homework", "exam"];
@@ -3339,7 +3372,7 @@ const DEFAULT_SUBJECTS = {
 function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
            subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
-           profile: { asked: false, subjects: {}, other: "" }, events: {}, week: null, requests: {}, syllabus: null, brief: null };
+           profile: { asked: false, subjects: {}, other: "" }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {} };
 }
 const isHm = x => typeof x === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);   // "08:30"
 function cleanSchool(s) {
@@ -3425,7 +3458,17 @@ function cleanSchool(s) {
     c.requests = list(k.requests, q => !["work", "practice"].includes(q.kind) || !txt(q.subject, 30) || !isDate(q.date) ? null
       : { kind: q.kind, subject: txt(q.subject, 30), date: q.date, ...(okKey(String(q.by || "")) ? { by: q.by } : {}),
           ...(q.kind === "work" ? { files: (Array.isArray(q.files) ? q.files : []).filter(x => okKey(String(x || ""))).slice(0, 20) }
-                                : { topic: txt(q.topic, 80), part: txt(q.part, 80) }) });
+                                : { topic: txt(q.topic, 80), part: txt(q.part, 80),
+                                    // (✏️ Make a worksheet on a kid's phone: several topics, how many questions, which kind)
+                                    ...(Array.isArray(q.topics) ? { topics: q.topics.map(t => txt(t, 80)).filter(Boolean).slice(0, 8) } : {}),
+                                    ...([5, 10, 15].includes(q.count) ? { count: q.count } : {}),
+                                    ...(["practice", "challenge", "level_check"].includes(q.mode) ? { mode: q.mode } : {}) }) });
+    // ✏️ The topics of each subject from 🤖 (/topics): subject (lower case) → { at, list: [{ title, term, now }] }
+    c.topics = {};
+    if (k.topics && typeof k.topics === "object") Object.entries(k.topics).forEach(([sub, x]) => {
+      if (!x || !Array.isArray(x.list) || sub.length > 40) return;
+      c.topics[sub] = { at: txt(x.at, 40), list: x.list.filter(t => t && txt(t.title, 80)).slice(0, 20).map(t => ({ title: txt(t.title, 80), term: txt(t.term, 20), now: t.now === true })) };
+    });
     const wk = k.week;
     c.week = wk && typeof wk === "object" && isDate(wk.start) && isDate(wk.end)
       ? { label: txt(wk.label, 60), n: Math.max(0, Math.round(Number(wk.n)) || 0), start: wk.start, end: wk.end,
@@ -7462,7 +7505,7 @@ function drawSchool() {
   const views = { home: schoolHomeHtml, subject: schoolSubjectHtml, homework: schoolHomeworkHtml,
                   marks: schoolMarksHtml, reviews: schoolReviewsHtml, info: schoolInfoHtml, reports: schoolReportsHtml,
                   seesaw: (s, isDad) => schoolSeesawHtml(s, isDad) || `<div class="card"><p class="sc-empty">Nothing from Seesaw yet.</p></div>`,
-                  worksheet: schoolWorksheetHtml, explain: schoolExplainHtml, profile: schoolProfileHtml, brief: schoolBriefHtml };
+                  worksheet: schoolWorksheetHtml, explain: schoolExplainHtml, profile: schoolProfileHtml, brief: schoolBriefHtml, make: schoolMakeHtml };
   if (schoolView === "brief" && (!isDad || isKidDevice())) schoolView = "home";   // 📋 parents only
   aiMounts = [];
   // 👤 The first time School opens for this kid: their profile first (asked once)
@@ -7478,7 +7521,7 @@ function drawSchool() {
 }
 
 // "🎒 School › ➗ Math › 📝 Worksheet" (tap a part to go back there)
-const VIEW_NAMES = { homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports", seesaw: "📥 From Seesaw" };
+const VIEW_NAMES = { make: "✏️ Make a worksheet", homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports", seesaw: "📥 From Seesaw" };
 function crumbHtml(s) {
   if (schoolView === "home") return "";
   const parts = [["🎒 School", "home"]], f = schoolSubject && s.subjects[schoolSubject];
@@ -7524,7 +7567,9 @@ function schoolHomeHtml(s, isDad) {
   const past = Object.entries(s.events).map(([id, e]) => ({ id, ...e })).filter(e => e.date < todayYmd())
     .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time)).slice(0, 20);
   return `<div class="sc-topbtns"><button class="sc-addbig" data-aiadd="">⬆️ Upload today's work<small>Photo, PDF, PowerPoint or Word</small></button>
+      <button class="sc-addbig sc-make" data-mkopen="">✏️ Make a worksheet<small>Pick a topic</small></button>
       <button class="sc-addbig sc-news" data-nlopen>📰 Newsletter<small>School dates</small></button></div>
+    ${isDad ? aiUsageHtml() : ""}
     ${aiMount(() => waitingNode(s))}
     ${week && week.reminders.length ? `<div class="card bd-card sc-remind"><h2>🔔 Reminders${week.label ? ` · ${safe(week.label)}` : ""}</h2>
       <ul class="sc-points">${week.reminders.map(r => `<li>${safe(r)}</li>`).join("")}</ul></div>` : ""}
@@ -7562,7 +7607,8 @@ async function doRequest(id) {
   const kid = schoolKid, s = schoolOf(kid), q = s.requests[id];
   if (!q || isKidDevice()) return;
   if (q.kind === "practice") {
-    if (!(await newWorksheet(kid, q.subject, [q.topic], PRACTICE_COUNT, "practice", "req|" + id, { part: q.part || q.topic }))) return;
+    const topics = q.topics && q.topics.length ? q.topics : [q.topic];   // (✏️ Make a worksheet: several topics, its own count and kind)
+    if (!(await newWorksheet(kid, q.subject, topics, q.count || PRACTICE_COUNT, q.mode || "practice", "req|" + id, { part: q.part || topics[0] }))) return;
     delete schoolFor(kid).requests[id];
     writeData();
     render();
@@ -7804,7 +7850,8 @@ function schoolBriefHtml(s, isDad, u) {
   return aiMount(() => h("div", null,
     h("div", { class: "ai-toolbar" },
       h("button", { class: b ? null : "primary", data: { briefmake: "", aiwait: "brief" } }, b ? "🔁 Make a new brief" : "📋 Make the brief"),
-      b ? h("button", { class: "primary", data: { briefprint: "" } }, "🖨️ Print") : null),
+      b ? h("button", { class: "primary", data: { briefprint: "" } }, "🖨️ Print") : null,
+      b ? h("button", { data: { briefpdf: "" } }, "📄 PDF") : null),
     b ? briefNode(schoolKid, b)
       : h("div", { class: "card bd-card ai-narrow" }, h("p", { class: "sc-empty" },
           `No brief yet. Tap 📋 Make the brief: 🤖 writes it from ${u.name}'s profile and the last checked worksheets.`))));
@@ -7869,6 +7916,7 @@ function schoolSubjectHtml(s, isDad, u) {
   const strong = last ? last.check.strong_points || [] : [], weak = last ? last.check.weak_points || [] : [];
   const todo = wsOf(schoolKid, f.name).filter(w => !w.check), files = filesOf(s, f.name);
   html += aiMount(() => subjectTopNode(s, f, checked));
+  html += `<div class="btnrow mk-subbtn"><button class="primary" data-mkopen="${safe(f.name)}">✏️ Make a worksheet</button></div>`;
   const btns = [["strong", "💪", `${name} is good at`, strong.length], ["weak", "🎯", `${name} should work on`, weak.length],
                 ["todo", "📝", "Worksheets to do", todo.length], ["done", "✅", `Worksheets ${name} finished`, checked.length],
                 ["files", "📁", `${name}'s uploaded files`, files.length]];
@@ -7964,6 +8012,7 @@ function wsRowNode(s, w) {
     h("div", { class: "ai-btns sc-wsbtns" },
       h("button", { data: { aiopen: "worksheet|" + w.id } }, "📂 Open"),
       h("button", { data: { wsrow: "print|" + w.id } }, "🖨️ Print"),
+      h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"),
       canAct ? h("button", { data: { wsrow: "upload|" + w.id } }, "📸 Upload my answers") : null,
       canAct && files.length && !isKidDevice() ? h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, done ? "🤖 Check again" : "✅ Check now") : null,
       h("button", { data: { wsrow: "answers|" + w.id } }, "🔑 Show answers")));
@@ -7972,6 +8021,7 @@ function wsRowAction(v) {
   const [act, id] = v.split("|"), w = aiDocs.worksheets[id];
   if (!w) return;
   if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
+  if (act === "pdf") return worksheetPdf(w);                     // (never with the answers either)
   if (act === "answers") { openAiDoc("worksheet", id); wsAnswers = true; return render(); }
   if (act === "upload") {
     if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
@@ -8475,6 +8525,8 @@ $("scr-school").addEventListener("click", e => {
   if ("syldel" in ds) return removeSyllabus();
   if ("briefmake" in ds) return makeBrief(schoolKid, false);
   if ("briefprint" in ds) { const s = schoolOf(schoolKid); return s.brief && printAi(briefNode(schoolKid, s.brief)); }
+  if ("briefpdf" in ds) return briefPdf(schoolKid);
+  if (Object.keys(ds).some(k => MAKE_KEYS.includes(k))) return makeTap(ds);   // ✏️ Make a worksheet
   if ("nlopen" in ds) return openNewsletter();
   if (ds.reqdo) return doRequest(ds.reqdo);
   if (ds.wspractice) return makePractice(ds.wspractice);
@@ -9140,6 +9192,15 @@ function showAiWait() {
   });
 }
 // Asks the AI server. → the result, or null (then a friendly message was shown)
+// 🤖 This month's AI use for a family with a limit (kept on this device: { used, limit, month }); our family has no limit, so nothing shows
+const AI_USAGE_KEY = SAVE_KEY + ".aiUsage";
+function aiUsage() {
+  try { const u = JSON.parse(localStorage.getItem(AI_USAGE_KEY)); return u && u.month === dubaiNow().date.slice(0, 7) ? u : null; } catch (e) { return null; }
+}
+function saveAiUsage(used, limit) {
+  try { localStorage.setItem(AI_USAGE_KEY, JSON.stringify({ used, limit, month: dubaiNow().date.slice(0, 7) })); } catch (e) {}
+}
+const aiUsageHtml = () => { const u = aiUsage(); return u ? `<p class="ai-usage">🤖 AI this month: <b>${u.used}</b> of ${u.limit}</p>` : ""; };
 async function callAi(action, body, key) {
   // 🧒 For now a kid's device never calls the AI: their uploads / requests wait for a parent's device (see ⏳ WAITING)
   if (isKidDevice()) { toast("⏳ Your parent's phone does this part. Ask them! 🙂", 4000); return null; }
@@ -9156,6 +9217,8 @@ async function callAi(action, body, key) {
     });
     let out = null;
     try { out = await res.json(); } catch (e) {}
+    // 🤖 A family with a monthly limit: the server says how many are used ("🤖 AI this month: 3 of 15")
+    if (out && Number.isFinite(out.used) && Number.isFinite(out.limit)) saveAiUsage(out.used, out.limit);
     if (res.ok && out && out.result && typeof out.result === "object" && !out.error) return out.result;
     const why = out && typeof out.error === "string" && out.error.trim() ? out.error.trim().slice(0, 200) : "The AI helper couldn't answer. Please try again.";
     toast("🤖 " + why, 5500);
@@ -9526,6 +9589,100 @@ function schoolSystemOf(kid) {
   const syl = schoolOf(kid).syllabus;
   return { ...(curriculumOf(kid) ? { curriculum: curriculumOf(kid) } : {}), ...(syl && syl.text ? { syllabus: syl.text } : {}) };
 }
+// ---------- ✏️ Make a worksheet: 1) the subject → 2) its topics (🤖 /topics, kept per kid + subject) → how many → ✨ Make it ----------
+// The kind is picked the usual way: 🧭 a level check for a topic that's new in the subject, else 🔁 practice or 🚀 challenge (see pickMode).
+// A kid's phone can't ask 🤖: it sends the request to a parent's phone (⏳, like 🔁 practice), and the class topics load there.
+let mk = null;   // { subject, picked: [topic titles], typed: [topics typed by hand], count }
+const MAKE_COUNTS = [5, 10, 15];
+const topicsKey = subject => subject.trim().toLowerCase().slice(0, 40);
+function openMake(subject) {
+  mk = { subject: subject || "", picked: [], typed: [], count: 10 };
+  goSchool("make");
+  if (subject) maybeLoadTopics();
+}
+// Topics already met: 📥 school work cards and 📰 this week's newsletter (no doubles)
+function learnedTopics(s, subject) {
+  const all = [];
+  Object.values(s.work).filter(w => sameSubject(w.subject, subject)).forEach(w => all.push(w.title, ...w.topics));
+  const week = weekNow(s), x = week && week.subjects.find(y => sameSubject(y.subject, subject));
+  if (x) all.push(...x.topics);
+  const seen = new Set();
+  return all.filter(t => t && !seen.has(t.toLowerCase()) && seen.add(t.toLowerCase())).slice(0, 16);
+}
+function maybeLoadTopics() {
+  const s = schoolOf(schoolKid);
+  if (mk && mk.subject && !s.topics[topicsKey(mk.subject)] && !isKidDevice() && aiReady() && !aiWait) loadTopics();
+}
+async function loadTopics() {
+  if (!mk || !mk.subject) return;
+  const kid = schoolKid, subject = mk.subject, syl = schoolOf(kid).syllabus;
+  const r = await callAi("topics", { ...kidInfo(kid), subject, today: todayYmd(), ...(syl && syl.text ? { syllabus: syl.text } : {}) }, "topics");
+  const list = (r && Array.isArray(r.topics) ? r.topics : []).map(t => ({ title: aiTxt(t.title, 80), term: aiTxt(t.term, 20), now: t.now === true })).filter(t => t.title).slice(0, 20);
+  if (!list.length) return;
+  schoolFor(kid).topics[topicsKey(subject)] = { at: new Date().toISOString(), list };
+  writeData();
+  if (screen === "school") render();
+}
+function schoolMakeHtml(s) {
+  if (!mk) mk = { subject: "", picked: [], typed: [], count: 10 };
+  if (!mk.subject) return `<div class="card mk-card"><h2>1️⃣ Which subject?</h2>
+    <div class="mk-subjects">${subjectList(s).map(f => `<button class="mk-sub" data-mksub="${safe(f.name)}" style="--c:${subjectColors(f).color}"><span class="e">${safe(f.emoji)}</span><b>${safe(f.name)}</b></button>`).join("")}</div>
+    <div class="row mk-other"><div><label class="small" for="mkOther">➕ Other subject</label><input type="text" id="mkOther" maxlength="30" placeholder="Science, French…"></div></div>
+    <div class="btnrow"><button data-mkother>➕ Use this subject</button></div></div>`;
+  const ai = s.topics[topicsKey(mk.subject)], parent = !isKidDevice(), f = folderOf(s, mk.subject);
+  const chip = (title, extra) => { const on = mk.picked.includes(title); return `<button class="ph-chip mk-topic ${on ? "on" : ""}" data-mktopic="${safe(title)}" aria-pressed="${on}"><span>${safe(title)}</span>${extra || ""}${on ? `<b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; };
+  const aiList = ai ? [...ai.list].sort((a, b) => b.now - a.now) : [];
+  const learned = learnedTopics(s, mk.subject).filter(t => !aiList.some(x => x.title.toLowerCase() === t.toLowerCase()));
+  const aiPart = ai ? `<div class="ph-chips">${aiList.map(t => chip(t.title, t.now ? `<small class="mk-now">📍 Now in class</small>` : t.term ? `<small>${safe(t.term)}</small>` : "")).join("")}</div>`
+    : aiWait === "topics" ? `<p class="sc-empty">🤖 Finding the topics…</p>`
+    : parent ? `<div class="btnrow"><button class="primary" data-mkload data-aiwait="topics">🤖 Find the topics</button></div>`
+    : `<p class="sc-empty">📍 The class topics load on a parent's phone. Pick one below or type one.</p>`;
+  return `<div class="card mk-card"><div class="sc-head"><h2>${f ? safe(f.emoji) : "📘"} ${safe(mk.subject)}</h2><button class="linkbtn" data-mksub="">Change subject</button></div>
+    <h3 class="ph-group">2️⃣ Pick one or more topics</h3>
+    <div class="mk-aihead"><b>📚 This year's topics</b>${ai && parent ? `<button class="linkbtn" data-mkload data-aiwait="topics" aria-label="Find the topics again">🔄</button>` : ""}</div>
+    ${aiPart}
+    ${learned.length ? `<b class="mk-label">📥 Learned already</b><div class="ph-chips">${learned.map(t => chip(t)).join("")}</div>` : ""}
+    ${mk.typed.length ? `<b class="mk-label">✍️ Typed</b><div class="ph-chips">${mk.typed.map(t => chip(t)).join("")}</div>` : ""}
+    <div class="row mk-type"><div><label class="small" for="mkType">✍️ Or type a topic</label><input type="text" id="mkType" maxlength="60" placeholder="Fractions, the water cycle…"></div></div>
+    <div class="btnrow"><button data-mkadd>➕ Add</button></div>
+    <h3 class="ph-group">3️⃣ How many questions?</h3>
+    <div class="mk-counts">${MAKE_COUNTS.map(n => `<button class="${mk.count === n ? "on" : ""}" data-mkcount="${n}" aria-pressed="${mk.count === n}">${n}</button>`).join("")}</div>
+    <div class="btnrow mk-go"><button class="primary" data-mkgo data-aiwait="make" ${mk.picked.length ? "" : "disabled"}>✨ Make it${mk.picked.length ? ` (${mk.picked.length} ${mk.picked.length === 1 ? "topic" : "topics"})` : ""}</button></div></div>`;
+}
+async function makeFromPicker() {
+  if (!mk || !mk.subject || !mk.picked.length) return toast("Tap a topic first 🙂");
+  const kid = schoolKid, s = schoolFor(kid), topics = [...mk.picked], count = mk.count;
+  const folderId = ensureFolder(s, mk.subject), subject = s.subjects[folderId].name;
+  // 🧭 A topic that's new in this subject (no worksheet on it yet): a level check; otherwise 🔁 / 🚀
+  const known = wsOf(kid, subject).some(w => w.topics.some(t => topics.some(p => t.toLowerCase() === p.toLowerCase())));
+  const mode = known ? pickMode(kid, subject) : "level_check";
+  if (isKidDevice()) {
+    s.requests[newId()] = { kind: "practice", subject, topic: topics.join(", ").slice(0, 80), part: topics[0], topics, count, mode, date: todayYmd(), by: me };
+    mk = null;
+    writeData();
+    goSchool("subject", folderId);
+    return toast("⏳ Asked! Your parent's phone makes the worksheet.", 4000);
+  }
+  writeData();   // (a new subject folder)
+  const id = await newWorksheet(kid, subject, topics, count, mode, "make", { part: topics[0] }, false);
+  if (!id) return;
+  mk = null;
+  goSchool("subject", folderId, "todo");
+  toast("✨ Your worksheet is ready! 🖨️ Print or 📄 PDF.", 4000);
+}
+function makeTap(ds) {
+  if (ds.mkopen !== undefined) return openMake(ds.mkopen);
+  if (!mk) return;
+  if (ds.mksub !== undefined) { mk = { subject: ds.mksub, picked: [], typed: [], count: mk.count }; render(); return maybeLoadTopics(); }
+  if ("mkother" in ds) { const v = $("mkOther").value.trim().slice(0, 30); if (!v) return; mk.subject = v; render(); return maybeLoadTopics(); }
+  if (ds.mktopic) { mk.picked = mk.picked.includes(ds.mktopic) ? mk.picked.filter(t => t !== ds.mktopic) : [...mk.picked, ds.mktopic].slice(0, 8); return render(); }
+  if ("mkadd" in ds) { const v = $("mkType").value.trim().slice(0, 60); if (!v) return; if (!mk.typed.includes(v)) mk.typed.push(v); if (!mk.picked.includes(v)) mk.picked.push(v); return render(); }
+  if (ds.mkcount) { mk.count = Number(ds.mkcount); return render(); }
+  if ("mkload" in ds) return loadTopics();
+  if ("mkgo" in ds) return makeFromPicker();
+}
+const MAKE_KEYS = ["mkopen", "mksub", "mkother", "mktopic", "mkadd", "mkcount", "mkload", "mkgo"];
+
 // 🚀 Challenge when the last 3 checks of the subject average 85% or more,
 // but back to 🔁 practice when a challenge among them scored under 60%
 function pickMode(kid, subject) {
@@ -9820,6 +9977,90 @@ function aiLinksNode(d) {
 
 // ---------- 🖨️ Printing a worksheet / answer key / explanation: A4 portrait, only that sheet ----------
 // (The app's print style already hides everything but #printArea. A4 portrait is added just for this print.)
+// ---------- 📄 PDF: a real A4 PDF made on the phone (jsPDF + html2canvas, loaded the first time it's needed; offline after that) ----------
+// The sheet is drawn off-screen, each part (the title, each question, the total) becomes a picture, and the pictures go on A4 pages
+// one after the other: a question is never cut in half. Page numbers at the bottom. Then: the share sheet (printer app, WhatsApp…)
+// when the phone can share files, otherwise a download. (Worksheets: always WITHOUT the answers.)
+const JSPDF_URL = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+const HTML2CANVAS_URL = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+const scriptLoads = {};
+function loadScript(url, ready) {
+  if (ready()) return Promise.resolve();
+  return scriptLoads[url] = scriptLoads[url] || new Promise((resolve, reject) => {
+    const el = document.createElement("script");
+    el.src = url;
+    el.onload = () => ready() ? resolve() : reject(new Error("lib"));
+    el.onerror = () => { el.remove(); delete scriptLoads[url]; reject(new Error("lib")); };
+    document.head.appendChild(el);
+  });
+}
+let pdfBusy = false;
+const pdfName = (...parts) => parts.filter(Boolean).join(" - ").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) + ".pdf";
+async function makePdf(node, fileName) {
+  if (pdfBusy) return;
+  pdfBusy = true;
+  toast("⏳ Making your PDF…", 20000);
+  const stage = h("div", { class: "pdf-stage", "aria-hidden": "true" }, h("div", { class: "ai-print" }, node));
+  document.body.appendChild(stage);
+  try {
+    await Promise.all([loadScript(JSPDF_URL, () => window.jspdf && window.jspdf.jsPDF), loadScript(HTML2CANVAS_URL, () => window.html2canvas)]);
+    // The parts: each question of a list on its own, everything else as it is
+    const sheet = node, parts = [];
+    [...sheet.children].forEach(el => { if (el.matches("ol, ul") && el.children.length) parts.push(...el.children); else parts.push(el); });
+    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4" }), W = 210, H = 297, M = 12, FOOT = 10, GAP = 2.5;
+    const mmPerPx = (W - 2 * M) / sheet.getBoundingClientRect().width;
+    let y = M;
+    for (const el of parts) {
+      if (!el.getBoundingClientRect().height) continue;
+      const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: "#ffffff", logging: false, useCORS: true });
+      let w = el.getBoundingClientRect().width * mmPerPx, hgt = el.getBoundingClientRect().height * mmPerPx;
+      const room = H - M - FOOT - M;
+      if (hgt > room) { w *= room / hgt; hgt = room; }   // (a very tall part: made smaller to fit one page)
+      if (y + hgt > H - M - FOOT && y > M) { pdf.addPage(); y = M; }
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", M, y, w, hgt);
+      y += hgt + GAP;
+    }
+    const n = pdf.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { pdf.setPage(i); pdf.setFontSize(9); pdf.setTextColor(120); pdf.text(`${i} / ${n}`, W / 2, H - 7, { align: "center" }); }
+    const file = new File([pdf.output("blob")], fileName, { type: "application/pdf" });
+    $("toast").hidden = true;
+    await sharePdf(file);
+  } catch (e) {
+    toast("😕 Couldn't make the PDF. Try again, or use 🖨️ Print.", 5000);
+  } finally {
+    stage.remove();
+    pdfBusy = false;
+  }
+}
+// The share sheet when the phone can share files, otherwise a download. (Some phones only share right after a tap: then a small "📤 Share" bar.)
+async function sharePdf(file) {
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: file.name.replace(/\.pdf$/, "") }); return; }
+    catch (e) { if (e && e.name === "AbortError") return; if (e && e.name === "NotAllowedError") return pdfReadyBar(file); }
+  }
+  downloadFile(file);
+}
+function downloadFile(file) {
+  const url = URL.createObjectURL(file), a = h("a", { href: url, download: file.name });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  toast("📄 PDF saved!", 2500);
+}
+function pdfReadyBar(file) {
+  document.querySelectorAll(".pdf-ready").forEach(x => x.remove());
+  const share = h("button", { class: "primary" }, "📤 Share"), save = h("button", null, "⬇ Save");
+  const bar = h("div", { class: "pdf-ready", role: "status" }, h("span", null, "📄 Your PDF is ready"), share, save);
+  share.addEventListener("click", () => { bar.remove(); navigator.share({ files: [file], title: file.name }).catch(e => { if (!e || e.name !== "AbortError") downloadFile(file); }); });
+  save.addEventListener("click", () => { bar.remove(); downloadFile(file); });
+  document.body.appendChild(bar);
+  setTimeout(() => bar.remove(), 30000);
+}
+// 📄 A worksheet (never the answers) and 📋 the parents' brief
+const worksheetPdf = w => makePdf(wsSheetNode(w, false), pdfName(kidNameOf(w.kid), w.subject, w.title));
+const briefPdf = kid => { const b = schoolOf(kid).brief; if (b) makePdf(briefNode(kid, b), pdfName(kidNameOf(kid), "Brief for parents", b.date)); };
+
 function printAi(node) {
   $("printArea").replaceChildren(h("div", { class: "ai-print" }, node));
   if (!$("aiPageSize")) document.head.appendChild(h("style", { id: "aiPageSize" }, "@page { size: A4 portrait; margin: 12mm; }"));
@@ -9928,6 +10169,7 @@ function wsViewNode(w, id, s, isDad) {
     h("div", { class: "ai-toolbar" },
       h("button", { class: wsAnswers ? "primary" : null, "aria-pressed": String(wsAnswers), data: { wsact: "answers" } }, wsAnswers ? "🔑 Hide answers" : "🔑 Show answers"),
       h("button", { data: { wsact: "print" } }, "🖨️ Print worksheet"),
+      h("button", { data: { wsact: "pdf" } }, "📄 PDF"),
       h("button", { data: { wsact: "key" } }, "🖨️ Print answer key"),
       h("button", { data: { wsact: "again" } }, "🔁 Make another"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
@@ -9981,6 +10223,7 @@ function wsAction(act) {
   if (!w) return;
   if (act === "answers") { wsAnswers = !wsAnswers; return render(); }
   if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
+  if (act === "pdf") return worksheetPdf(w);                     // (never with the answers, even when 🔑 is open)
   if (act === "key") return printAi(wsKeyNode(w));
   if (act === "again") return openWsOpts(w.kid, w.subject, w.topics, w.count, w.work, w.part);
   if (act === "upload") {
@@ -10486,6 +10729,8 @@ function drawFamily() {
   $("familyBody").innerHTML = `
     ${familySetup ? `<div class="card sc-newtopic"><b>🎉 Your family is ready!</b><p>Now add your kids. Each kid gets a code to sign in on their own phone or tablet.</p></div>` : ""}
     ${online ? "" : `<div class="card"><p class="sc-empty">🔌 Codes need the internet and the family sign-in.</p></div>`}
+    ${cloud.familyId && isParentDevice() ? `<div class="card fam-id"><span>Family ID: <code>${safe(cloud.familyId)}</code></span>
+      <button class="pill" data-famidcopy>📋 Copy</button>${aiUsageHtml()}</div>` : ""}
     <div class="bd-head"><h2>🧒 Kids</h2>${famEdit === "new" ? "" : `<button class="edit" data-famedit="new">➕ Add a kid</button>`}</div>
     ${famEdit === "new" ? form : ""}
     ${kids.length ? `<div class="fam-list">${kids.map(u => {
@@ -10593,6 +10838,7 @@ $("scr-family").addEventListener("click", e => {
   if (ds.famemoji) { $("famEmoji").value = ds.famemoji; return; }
   if (ds.famcode) return makeCode(ds.famcode);
   if (ds.famcopy) return shareCode(ds.famcopy, "copy");
+  if ("famidcopy" in ds) return copyText(cloud.familyId || "").then(ok => toast(ok ? "📋 Family ID copied" : "Couldn't copy. Please write it down.", 2400));
   if (ds.famshare) return shareCode(ds.famshare, "share");
   if (ds.famdel) return removeFamilyKid(ds.famdel);
   if ("famdone" in ds) { familySetup = false; return go("home"); }
