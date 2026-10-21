@@ -182,12 +182,34 @@
   .bu-pick button { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 92px; padding: 8px; border-radius: 18px;
                     font-size: 14px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
   .bu-pick .e { font-size: 34px; }
-  .bu-mini { width: 34px; height: 34px; margin-right: 6px; vertical-align: middle; }   /* (the ring takes the row's colour) */
+  /* The small buddy on the leaderboard: the ring and "Lv 2" side by side, on the name's line */
+  .bu-minirow { display: inline-flex; align-items: center; gap: 4px; flex: none; min-height: 0; padding: 0; border: none; background: none; box-shadow: none; vertical-align: middle; }
+  button.bu-minirow { cursor: pointer; }
+  button.bu-minirow:hover { background: none; }
+  .bu-mini { width: 34px; height: 34px; }   /* (the ring takes the row's colour) */
   .bu-mini .e { font-size: 17px; }
   .bu-mini .bu-trk, .bu-mini .bu-bar { stroke-width: 11; }
-  .bu-lv { position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); padding: 0 4px; border-radius: 999px; background: #fff;
-           color: var(--ink); font-size: 10px; font-weight: 800; line-height: 13px; white-space: nowrap; box-shadow: 0 0 0 1px var(--line); }
-  button.bu-mini { cursor: pointer; }
+  .bu-lv { padding: 0 6px; border-radius: 999px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 800; line-height: 18px; white-space: nowrap;
+           box-shadow: 0 0 0 1px var(--line); }
+  /* 🏆 Leaderboard rows: name line, 🎁 prize chip, 💬 note, 🌱 what held me back (soft colours, never red) */
+  .pt-nameline { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
+  .pt-name .star-label { margin-top: 4px; }
+  .pt-want { min-height: 34px; max-width: 100%; padding: 2px 10px; border-radius: 999px; border: 2px dashed var(--line); background: #fff; color: var(--text);
+             font-size: 14px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; text-align: left; }
+  .pt-want.add { color: var(--muted); }
+  .pt-want.ok { border: 2px solid #e8b400; background: linear-gradient(135deg, #fff3c4, #ffe08a); color: #6b4f00; }
+  .pt-want small { font-size: 12px; }
+  span.pt-want { display: inline-flex; align-items: center; }
+  .pt-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+  .pt-note small { color: var(--muted); font-weight: 700; }
+  .pt-note .linkbtn { min-height: 30px; font-size: 13px; }
+  .pt-form { margin: 8px 0; padding: 10px; border-radius: 16px; background: #f6f7fb; }
+  .pt-form input { width: 100%; margin: 4px 0 8px; }
+  .pt-held { margin-top: 8px; padding: 6px 12px; border-radius: 14px; background: #f1f8f1; color: #3f5d45; font-size: 15px; }
+  .pt-held summary { cursor: pointer; font-weight: 800; min-height: 32px; display: flex; align-items: center; }
+  .pt-held ul { margin: 4px 0 6px; padding-left: 20px; }
+  .pt-held li { margin: 2px 0; }
+  .pt-tip { margin: 6px 0 4px; padding: 6px 10px; border-radius: 12px; background: #fff; font-weight: 800; color: #2f6b3a; overflow-wrap: anywhere; }
   .bu-hist { margin: 8px 0 0; padding: 8px 12px; border-radius: 14px; background: #f6f7fb; font-size: 15px; }
   .bu-hist ul { margin: 4px 0 0; padding-left: 20px; }
   /* 🎉 Level up! */
@@ -257,6 +279,39 @@
   .ft-time { flex: 0 0 66px; color: var(--muted); font-weight: 800; font-size: 14px; }
   .ft-who { flex: none; font-size: 20px; }
   .ft-what { min-width: 0; overflow-wrap: anywhere; }
+  /* 👨‍👩‍👧 A parent's Family tiles: the same tiles, smaller (3 a row on a phone, 5 on a computer) */
+  .fam-tiles-card { margin-top: 18px; }
+  .fam-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  /* (".fam-tiles .tile …": stronger than the big ".tile …" rules further down, so they always win) */
+  .fam-tiles .tile { min-height: 104px; padding: 10px 6px; border-radius: 20px; gap: 2px; overflow-wrap: normal; word-break: normal; }
+  .fam-tiles .tile .t-emoji { font-size: 30px; }
+  .fam-tiles .tile .t-label { font-size: 15px; line-height: 1.15; }
+  .fam-tiles .tile .t-sub { display: none; }
+  /* ⭐ Choose my 5: a normal pill (not one of the round ◀ ▶ buttons) */
+  .hb-nav .ph-editbtn { width: auto; min-height: 40px; padding: 0 12px; border-radius: 999px; font-size: 15px; white-space: nowrap; }
+  @media (max-width: 699px) {
+    .fam-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .fam-tiles .tile { min-height: 84px; padding: 8px 4px; border-radius: 18px; }
+    .fam-tiles .tile .t-emoji { font-size: 26px; }
+    .fam-tiles .tile .t-label { font-size: 13px; }
+  }
+  /* ✨ Make the app yours: a big card per feature with a switch (on = coloured, off = grey) */
+  .su-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; font-weight: 800; color: var(--muted); }
+  .su-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+  .su-card { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 76px; padding: 10px 12px; border-radius: 20px; text-align: left;
+             border: 3px solid var(--line); background: #f4f4f6; color: var(--muted); filter: grayscale(.7); transition: background .2s, border-color .2s; }
+  .su-card.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); filter: none; }
+  .su-card .e { flex: none; font-size: 34px; line-height: 1; }
+  .su-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .su-text b { font-size: 17px; overflow-wrap: anywhere; }
+  .su-text small { font-size: 13px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+  .su-switch { flex: none; position: relative; width: 46px; height: 26px; border-radius: 999px; background: #cfd2da; transition: background .2s; }
+  .su-switch i { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; }
+  .su-card.on .su-switch { background: var(--accent); }
+  .su-card.on .su-switch i { left: 23px; }
+  .su-save { position: sticky; bottom: 10px; justify-content: center; }
+  .su-save .primary { min-width: 200px; min-height: 52px; font-size: 19px; }
+  .su-edit { justify-content: center; margin-top: 18px; }
   /* 👋 The tour: swipe cards */
   .tour { position: fixed; inset: 0; z-index: 9100; display: grid; place-items: center; padding: 16px; background: rgba(30, 20, 60, .55); }
   .tour-box { width: min(100%, 400px); padding: 18px 16px; border-radius: 28px; background: #fff; border-top: 10px solid var(--c); box-shadow: var(--shadow); }
@@ -277,10 +332,6 @@
   .feat-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 17px; font-weight: 700; }
   .feat-row input { width: 24px; height: 24px; flex: none; }
   /* ☰ More pages */
-  .shop-list li { align-items: center; gap: 10px; }
-  .shop-list li.done .what { text-decoration: line-through; color: var(--muted); }
-  .shop-list .k-check { width: 32px; height: 32px; }
-  .shop-list .what small { margin-left: 6px; }
   .mt-one { padding: 8px 0; border-bottom: 2px solid var(--line); }
   .mt-one:last-child { border-bottom: none; }
   .mt-one p { margin: 4px 0; overflow-wrap: anywhere; }
@@ -288,22 +339,29 @@
   .mt-goal ul { margin: 4px 0 0; padding-left: 22px; font-size: 17px; }
   .mt-prompt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; margin-top: 18px; text-align: left; font-size: 18px; background: #fff3cd; }
   .mt-prompt small { color: var(--muted); font-size: 14px; }
-  .pm-line, .st-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: 18px; font-size: 18px; text-align: left; }
-  .pm-line small { color: var(--muted); }
-  .pm-req { margin-top: 18px; }
+  .st-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: 18px; font-size: 18px; text-align: left; }
   .st-card { text-align: center; }
   .st-timer { font-size: 72px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; margin: 6px 0; }
   .st-buy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .st-buy button { display: flex; flex-direction: column; align-items: center; min-height: 60px; font-size: 17px; font-weight: 800; }
   .st-buy small { color: var(--muted); font-size: 13px; }
-  .pr-card { margin-top: 18px; }
-  .pr-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .pr-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; min-height: 96px; padding: 8px 4px; border-radius: 20px;
-             border: 3px solid var(--line); background: #fffdf8; }
-  .pr-step .e { font-size: 40px; line-height: 1.1; }
-  .pr-step small { font-size: 14px; font-weight: 800; overflow-wrap: anywhere; }
-  .pr-step.on { border-color: #22a35a; background: #dcfce7; }
-  .pr-step .ph-tick { position: absolute; top: 6px; right: 6px; }
+  /* ⭐ Good habits: round picture buttons */
+  .pic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px 6px; margin-top: 12px; }
+  .pic-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 0; padding: 2px; border: none; background: none; box-shadow: none; }
+  .pic-btn:hover { background: none; }
+  .pic-btn:disabled { cursor: default; }
+  .pic-dot { position: relative; display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; background: #fff;
+             border: 3px solid var(--line); transition: background .2s, border-color .2s; }
+  .pic-dot .e { font-size: 30px; line-height: 1; }
+  .pic-btn.on .pic-dot { background: var(--c); border-color: var(--c); }
+  .pic-ok { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+            background: #fff; color: var(--c); border: 2px solid var(--c); font-size: 13px; font-weight: 800; }
+  .pic-btn small { max-width: 100%; font-size: 12px; font-weight: 800; line-height: 1.15; text-align: center; color: var(--text); overflow-wrap: anywhere; }
+  .pic-btn.pop .pic-dot { animation: picBounce .35s ease-out; }
+  .pic-btn.pop .pic-ok { animation: picPop .35s ease-out; }
+  @keyframes picBounce { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes picPop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .pic-btn.pop .pic-dot, .pic-btn.pop .pic-ok { animation: none; } }
   .qr-list li { align-items: center; gap: 10px; }
   .qr-state { flex: none; width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; border: 3px solid var(--line); background: #fff; font-size: 16px; font-weight: 800; }
   .qr-state.done { border-color: #22a35a; background: #dcfce7; color: #15803d; }
@@ -743,11 +801,6 @@
   .cancel-btn { border-radius: 999px; min-height: 52px; }
   .savebar button:disabled { cursor: default; }
   .savebar .cancel-btn:disabled { opacity: .45; }
-  /* ➕ Add user box */
-  .add-user-card { max-width: 480px; padding-bottom: 22px; }
-  .add-user-card .save-btn { background: #16a34a; border-color: #16a34a; color: #fff; }
-  .add-user-card .save-btn:hover { background: #15803d; border-color: #15803d; }
-  .add-user-form { padding: 16px 24px 0; }
   /* =============================================================
      🎒 SCHOOL page (info + timetable, grades, homework & exams, weekly review, Seesaw)
      ============================================================= */
@@ -1039,7 +1092,7 @@
   body.kid-device [data-nlopen], body.kid-device [data-scgo="profile"], body.kid-device [data-scgo="reports"], body.kid-device [data-scgo="brief"],
   body.kid-device [data-pactnew], body.kid-device [data-pactedit], body.kid-device [data-pactdel],
   body.kid-device [data-scdel], body.kid-device [data-wsfdel], body.kid-device #fmDel, body.kid-device [data-del-user],
-  body.kid-device [data-adduser], body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
+  body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
   body.kid-device [data-hbdel] { display: none !important; }
   body.kid-device .sc-topbtns { grid-template-columns: 1fr; }
   /* ⚙️ FEATURES OFF: their buttons are hidden (the cards are left out when drawing) */
@@ -1198,6 +1251,15 @@
   .sc-syl .sc-sylnote { margin: 10px 0 0; font-size: 14px; }
   /* 🏫 School · 📚 Curriculum · 🎓 Year / Grade */
   .sc-schoolpick { margin: 0 0 12px; }
+  /* 🏫 The school suggestions under the box */
+  .sc-schoolpick .row > div { position: relative; }
+  .sch-sug { position: absolute; left: 0; right: 0; z-index: 30; margin-top: 4px; max-height: 300px; overflow-y: auto; border-radius: 14px; border: 2px solid var(--line);
+             background: #fff; box-shadow: var(--shadow); }
+  .sch-sug button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-height: 44px; padding: 6px 12px; border: none;
+                    border-bottom: 1px solid var(--line); border-radius: 0; background: #fff; text-align: left; font-size: 15px; font-weight: 700; box-shadow: none; overflow-wrap: anywhere; }
+  .sch-sug button:hover, .sch-sug button:focus-visible { background: var(--accent-soft); }
+  .sch-sug button small { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .sch-sug button.other { color: var(--accent); }
   .sc-schoolpick .row > div { min-width: 0; }
   .sc-schoolpick select, .sc-schoolpick input { width: 100%; min-width: 0; }
   .sc-schoolpick input[id$="CurrOther"] { margin-top: 6px; }
@@ -1967,11 +2029,18 @@
   <div id="mineHabits"></div>
 </section>
 
-<!-- ===== ☰ MORE PAGES: 🛒 🗣️ 💰 📱 🌅 📗 🧹 (one screen, see MORE PAGES) ===== -->
+<!-- ===== ☰ MORE PAGES: 🗣️ 📱 📗 🧹 (one screen, see MORE PAGES) ===== -->
 <section class="screen" id="scr-extra" hidden>
   <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill" data-switch>🔄 Switch user</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title" id="extraTitle"></h1>
   <div id="extraBody"></div>
+</section>
+
+<!-- ===== ✨ MAKE THE APP YOURS (parents): which features the family uses ===== -->
+<section class="screen" id="scr-setup" hidden>
+  <header class="bar"><button class="pill" data-go="home">🏠 Home</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔<span class="bell-num" hidden></span></button></header>
+  <h1 class="page-title">✨ Make the app yours</h1>
+  <div id="setupBody"></div>
 </section>
 
 <!-- ===== 📔 MY DAY ===== -->
@@ -2064,8 +2133,10 @@
       <!-- People -->
       <div class="card">
         <h2>👨‍👩‍👧‍👦 People</h2>
-        <p class="hint">Each person has a name, an emoji and a color.</p>
+        <p class="hint">Each person has a name, an emoji and a color. To add a kid or a parent: <button class="linkbtn" data-go="family">👨‍👩‍👧 Family</button></p>
         <ul class="list" id="userList" style="margin-bottom:16px"></ul>
+        <!-- (only for ✏️ Edit: new people are added in 👨‍👩‍👧 Family) -->
+        <div id="uForm" hidden>
         <div class="row">
           <div style="flex:0 0 84px"><label class="small">Emoji</label><input type="text" id="uEmoji" maxlength="8" placeholder="🐼"></div>
           <div><label class="small">Name</label><input type="text" id="uName" placeholder="Name"></div>
@@ -2074,10 +2145,11 @@
         <label class="small">Color</label>
         <div class="swatches" id="uColors"></div>
         <div class="btnrow">
-          <button class="primary" id="uAdd">Add person</button>
-          <button id="uCancel" hidden>Cancel</button>
+          <button class="primary" id="uAdd">Save changes</button>
+          <button id="uCancel">Cancel</button>
         </div>
         <div class="err" id="uErr"></div>
+        </div>
       </div>
       <!-- Backup -->
       <div class="card" style="margin-top:18px">
@@ -2289,27 +2361,6 @@
     <button class="k-ok" data-printclose style="background:#fff;color:var(--text);border-color:var(--line)">Cancel</button>
   </div>
 </div>
-<!-- ➕ Add user (Dad only): name, emoji and color -->
-<div class="k-modal" id="userModal" hidden>
-  <div class="k-card add-user-card" role="dialog" aria-modal="true" aria-labelledby="addUserTitle">
-    <div class="print-title" id="addUserTitle">➕ Add user</div>
-    <p class="print-hint">They'll appear in “Who are you?” right away.</p>
-    <div class="add-user-form">
-      <div class="row">
-        <div style="flex:0 0 84px"><label class="small" for="auEmoji">Emoji</label><input type="text" id="auEmoji" maxlength="8" placeholder="🐼"></div>
-        <div><label class="small" for="auName">Name</label><input type="text" id="auName" placeholder="Name"></div>
-      </div>
-      <div class="emoji-pick" id="auEmojiPick"></div>
-      <label class="small">Color</label>
-      <div class="swatches" id="auColors"></div>
-      <div class="err" id="auErr"></div>
-    </div>
-    <div class="leave-btns">
-      <button class="save-btn" data-adduserok>➕ Add</button>
-      <button data-addusercancel>Cancel</button>
-    </div>
-  </div>
-</div>
 <!-- 💾 Backup (Bro2a only, from the home page): export or import -->
 <div class="k-modal" id="backupModal" hidden>
   <div class="k-card leave-card" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
@@ -2472,33 +2523,88 @@ const OLD_FAMILY_UID = "Hk3ZPk0xkTYLpLVBXrR8BUn3hfJ3";   // our first shared fam
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // codes: 6 of these (no 0 / O / 1 / I, they look alike)
 const isCode = x => typeof x === "string" && x.length === 6 && [...x].every(c => CODE_CHARS.includes(c));
 // 📚 Curricula: [saved name, short name for messages]. "Other" = typed by the parent (saved as typed)
-const CURRICULA = [["British (UK National Curriculum)", "British"], ["American (Common Core)", "American"], ["IB (PYP/MYP)", "IB"],
-                   ["Indian (CBSE)", "CBSE"], ["Indian (ICSE)", "ICSE"], ["UAE (MOE)", "UAE MOE"], ["French", "French"], ["German", "German"]];
-const OLD_CURRICULA = { British: CURRICULA[0][0], American: CURRICULA[1][0], IB: CURRICULA[2][0] };   // (older saved data)
-// 🏫 Dubai schools → their curriculum (add more schools here: [name, curriculum])
-const [UK, US, IB, CBSE, FR, DE] = [CURRICULA[0][0], CURRICULA[1][0], CURRICULA[2][0], CURRICULA[3][0], "French", "German"];
+const CURRICULA = [["British (UK National Curriculum / IGCSE)", "British"], ["British IGCSE (Cambridge / Edexcel)", "British IGCSE"],
+                   ["American (Common Core)", "American"], ["IB (PYP/MYP)", "IB"],
+                   ["Indian (CBSE)", "CBSE"], ["Indian (ICSE)", "ICSE"], ["UAE (MOE)", "UAE MOE"], ["French", "French"], ["German", "German"],
+                   // (these use Grade 1–12)
+                   ...["Iranian", "Australian", "Chinese", "Japanese", "Russian", "SABIS", "Pakistani", "Philippine"].map(c => [c, c])];
+// (older saved data: the old names → the new ones)
+const OLD_CURRICULA = { British: CURRICULA[0][0], "British (UK National Curriculum)": CURRICULA[0][0], American: CURRICULA[2][0], IB: CURRICULA[3][0] };
+const IGCSE = CURRICULA[1][0];
+// 🏫 Dubai private schools (KHDA ratings list) → their curriculum. Keep it A–Z; add more schools here: [name, curriculum]
+const [UK, US, IB, CBSE, FR, DE] = [CURRICULA[0][0], CURRICULA[2][0], CURRICULA[3][0], CURRICULA[4][0], "French", "German"];
+const [IR, AU, CN, JP, RU, SABIS, PK, PH] = ["Iranian", "Australian", "Chinese", "Japanese", "Russian", "SABIS", "Pakistani", "Philippine"];
+// (214 schools)
 const DUBAI_SCHOOLS = [
-  ["Dubai College", UK], ["Jumeirah College", UK], ["Dubai British School", UK], ["Kings' School Dubai", UK], ["Kings' School Al Barsha", UK],
-  ["Repton School Dubai", UK], ["Brighton College Dubai", UK], ["Dubai English Speaking School (DESS)", UK], ["English College Dubai", UK],
-  ["Jumeirah English Speaking School (JESS)", UK], ["Nord Anglia International School Dubai", UK], ["Wellington International School", UK],
-  ["Arcadia School", UK], ["Foremarke School Dubai", UK], ["Horizon English School", UK], ["Safa British School", UK], ["Kent College Dubai", UK],
-  ["Hartland International School", UK], ["Dubai Heights Academy", UK], ["Royal Grammar School Guildford Dubai", UK],
-  ["GEMS Wellington Academy Al Khail", UK],
-  ["Dubai International Academy", IB], ["GEMS World Academy", IB], ["Emirates International School Jumeirah", IB],
-  ["Emirates International School Meadows", IB], ["Uptown International School", IB], ["Swiss International Scientific School", IB],
-  ["North London Collegiate School Dubai", IB],
-  ["American School of Dubai", US], ["Dubai American Academy", US], ["Universal American School", US], ["Al Mizhar American Academy", US],
-  ["Dunecrest American School", US], ["Al Mawakeb School", US],
-  ["Delhi Private School Dubai", CBSE], ["Indian High School", CBSE], ["GEMS Our Own Indian School", CBSE], ["Our Own English High School", CBSE],
-  ["The Millennium School", CBSE],
-  ["Lycée Français International Georges Pompidou", FR],
-  ["Deutsche Internationale Schule Dubai", DE]
+  ["AFLEC Lycee Francais International", FR], ["Al Adab Iranian Private School for Boys", IR], ["Al Adab Iranian Private School for Girls", IR],
+  ["Al Diyafah High School", UK], ["Al Ittihad Private School Al Safa", US], ["Al Ittihad Private School Mamzar", US],
+  ["Al Maaref Private School", US], ["Al Mawakeb School Al Barsha", US], ["Al Mawakeb School Al Garhoud", US],
+  ["Al Mawakeb School Al Khawaneej", US], ["Al Nibras International Private School", US], ["Al Sadiq Islamic English School", UK],
+  ["Al Salam Community School", UK], ["Al Salam Private School", UK], ["Ambassador International Academy", IB], ["Ambassador School Dubai", CBSE],
+  ["American Academy for Girls", US], ["American International School", US], ["American School of Creative Science", US],
+  ["American School of Dubai", US], ["Amity School Dubai", CBSE], ["Apple International Community School", UK], ["Apple International School", UK],
+  ["Arab Unity School", UK], ["Arcadia British School", UK], ["Arcadia Global School", UK], ["Australian International School", AU],
+  ["BC Academy International School", UK], ["Bi-lingual French International School", FR], ["Bloom World Academy", IB],
+  ["Bright Learners Private School", US], ["Bright Riders School", CBSE], ["Brighton College Dubai", UK], ["Buds Public School", CBSE],
+  ["Cambridge International School", UK], ["Capital School", UK], ["Cedar School Dubai", UK], ["Chinese School Dubai", CN], ["Citizens School", UK],
+  ["Clarion School", US], ["Collegiate International School", US], ["Credence High School", CBSE], ["Crescent English School", CBSE],
+  ["Dar Al Marefa Private School", IB], ["Deira International School", UK], ["Deira Private School", UK], ["Delhi Private School", CBSE],
+  ["DESS College", UK], ["DESS Primary Academic City", UK], ["DESS Primary Oud Metha", UK], ["Dewvale School Dubai", CBSE],
+  ["Dhruv Global School", CBSE], ["Dove Green Private School", UK], ["Dubai Arabian American Private School", US],
+  ["Dubai British School Emirates Hills", UK], ["Dubai British School Jumeira", UK], ["Dubai British School Jumeirah Park", UK],
+  ["Dubai British School Mira", UK], ["Dubai Carmel School", UK], ["Dubai College", UK], ["Dubai Gem Private School", UK],
+  ["Dubai Heights Academy", UK], ["Dubai International Academy Al Barsha", IB], ["Dubai International Academy Emirates Hills", IB],
+  ["Dubai International Private School Al Qouz", US], ["Dubai International Private School Garhoud", US], ["Dubai Modern Education School", US],
+  ["Dubai National School Al Barsha", US], ["Dubai National School Al Twar", US], ["Dubai Scholars Private School", UK],
+  ["Dubai Schools Al Barsha", US], ["Dubai Schools Al Khawaneej", US], ["Dubai Schools Nad Al Sheba", US], ["Dunecrest American School", US],
+  ["Durham School Dubai", UK], ["Dwight School Dubai", IB], ["Elite English School", CBSE], ["Emirates International School Jumeirah", IB],
+  ["Emirates International School Meadows", IB], ["Emirates National Schools Dubai", IB], ["English Language Private School", UK],
+  ["Fairgreen International School", IB], ["Fifth Dimension Private School", US], ["GEMS Al Barsha National School", UK],
+  ["GEMS Al Khaleej International School", US], ["GEMS Dubai American Academy", US], ["GEMS First Point School", UK],
+  ["GEMS Founders School Dubai", UK], ["GEMS Founders School Dubai South", UK], ["GEMS Founders School Mizhar", UK],
+  ["GEMS International School Al Khail", IB], ["GEMS Jumeira Primary School", UK], ["GEMS Legacy School Dubai", CBSE],
+  ["GEMS Metropole School Al Waha", UK], ["GEMS Metropole School Motor City", UK], ["GEMS Modern Academy", CBSE],
+  ["GEMS New Millennium School", CBSE], ["GEMS Our Own English High School", CBSE], ["GEMS Our Own Indian School", CBSE],
+  ["GEMS Royal Dubai School", UK], ["GEMS School of Research and Innovation", UK], ["GEMS Wellington Academy Al Khail", UK],
+  ["GEMS Wellington Academy DSO", UK], ["GEMS Wellington International School", UK], ["GEMS Winchester School", UK], ["GEMS World Academy", IB],
+  ["German International School", DE], ["Ghaf Private School", UK], ["Glendale International School", UK],
+  ["Global Indian International School", CBSE], ["Grammar School Dubai", UK], ["Greenfield International School", IB],
+  ["Greenwood International School", US], ["Gulf Indian High School", CBSE], ["Gulf Model School", CBSE],
+  ["Hampton Heights International School", UK], ["Hartland International School", UK], ["Horizon English School", UK],
+  ["Horizon International School", UK], ["International Academic School", US], ["International School of Creative Science Nad Al Sheba", UK],
+  ["Iranian Khadije Kobra School", IR], ["Iranian Salman Farsi Boys School", IR], ["Iranian Towheed Boys School", IR],
+  ["Iranian Towheed Girls School", IR], ["Japanese School Dubai", JP], ["Jebel Ali School", UK], ["JSS International School", CBSE],
+  ["JSS Private School", CBSE], ["Jumeira Baccalaureate School", IB], ["Jumeirah College", UK], ["Jumeirah English Speaking School", UK],
+  ["Jumeirah English Speaking School Arabian Ranches", UK], ["Kent College Dubai", UK], ["Kings School Al Barsha", UK], ["Kings School Dubai", UK],
+  ["Kings School Nad Al Sheba", UK], ["Little Flower English School", CBSE], ["Lycee Francais International AFLEC Mudon", FR],
+  ["Lycee Francais International Georges Pompidou School", FR], ["Lycee Francais International Georges Pompidou School Oud Metha", FR],
+  ["Lycee Francais Jean Mermoz North", FR], ["Lycee Francais Jean Mermoz South", FR], ["Lycee Libanais Francophone Prive", FR],
+  ["Mirdif American School", US], ["Modern Skills School", US], ["MSB Private School", UK], ["New Academy School", US],
+  ["New Dawn Private School", UK], ["New Indian Model School", CBSE], ["Newlands School", UK], ["Next Generation School", US],
+  ["Nord Anglia International School", UK], ["North American International School", US], ["North London Collegiate School", IB],
+  ["Oak Tree Primary School", UK], ["Our Own High School Dubai", CBSE], ["Oxford School", UK], ["Pace Modern British School", UK],
+  ["Pace Springfield International School", UK], ["Pakistan Educational Academy", PK], ["Pearl Wisdom School", CBSE],
+  ["Philadelphia Private School", US], ["Primus Private School", CBSE], ["Pristine Private School", UK], ["Queen International School", UK],
+  ["Raffles International School", UK], ["Raffles World Academy", UK], ["Ranches Primary School", UK], ["Regent International School", UK],
+  ["Renaissance School", US], ["Repton School Al Barsha", UK], ["Repton School Dubai", UK], ["Royal Grammar School Guildford Dubai", UK],
+  ["Russian International School", RU], ["Sabari Indian School", CBSE], ["Safa British School", UK], ["Safa Community School", UK],
+  ["Shaikh Rashid Al Maktoum Pakistani School", PK], ["Sharjah American International Private School", US], ["Smart Vision School", UK],
+  ["SMM High School Muhaisnah", UK], ["South View School", UK], ["Springdales School", CBSE], ["St. Mary Catholic High School", UK],
+  ["Star International School Al Qusais", UK], ["Star International School Mirdif", UK], ["Sunmarke School", UK],
+  ["Swiss International Scientific School", IB], ["The Aquila School", UK], ["The Arbor School", UK], ["The Central School", CBSE],
+  ["The City School International", UK], ["The English College", UK], ["The Indian Academy", CBSE], ["The Indian High School", CBSE],
+  ["The Indian High School Garhoud", CBSE], ["The Indian International School", CBSE], ["The International School of Choueifat DIP", US],
+  ["The International School of Choueifat Umm Suqeim", SABIS], ["The Millennium School", CBSE], ["The Philippine School", PH],
+  ["The School of Research Science", UK], ["The School of Research Science US", US], ["The Sheffield Private School", UK],
+  ["The Westminster School", UK], ["The Winchester School", UK], ["United International Private School", PH], ["Universal American School", US],
+  ["Uptown International School", IB], ["Vernus International School", US], ["Victory Heights Primary School", UK],
+  ["Victory Heights Primary School City of Arabia", UK], ["Woodlem Park School", CBSE]
 ];
 const OTHER_SCHOOL = "Other school (type the name)";
 // 🎓 The years of a curriculum
 const range = (from, to, f) => Array.from({ length: to - from + 1 }, (_, i) => f(from + i));
 function yearsOf(curriculum) {
-  if (curriculum === UK) return range(1, 13, n => "Year " + n);
+  if (curriculum === UK || curriculum === IGCSE) return range(1, 13, n => "Year " + n);
   if (curriculum === US) return ["KG", ...range(1, 12, n => "Grade " + n)];
   if (curriculum === IB) return [...range(1, 5, n => "PYP " + n), ...range(1, 5, n => "MYP " + n)];
   return range(1, 12, n => "Grade " + n);
@@ -2508,9 +2614,9 @@ const curriculumShort = c => (CURRICULA.find(x => x[0] === c) || [c, c])[1];
 function schoolFieldsHtml(p, u) {
   const known = CURRICULA.some(x => x[0] === u.curriculum), other = !!u.curriculum && !known;
   return `<div class="sc-schoolpick">
-    ${scField(p + "School", "🏫 School", `<input type="text" id="${p}School" list="${p}Schools" maxlength="60" value="${safe(u.school || "")}"
-      placeholder="Type to search…" autocomplete="off" data-schoolpick="${p}">
-      <datalist id="${p}Schools">${[...DUBAI_SCHOOLS.map(x => x[0]), OTHER_SCHOOL].map(n => `<option value="${safe(n)}">`).join("")}</datalist>`)}
+    ${scField(p + "School", "🏫 School", `<input type="text" id="${p}School" maxlength="60" value="${safe(u.school || "")}" role="combobox"
+      aria-autocomplete="list" aria-controls="${p}Sug" aria-expanded="false" placeholder="Type to search…" autocomplete="off" data-schoolpick="${p}">
+      <div class="sch-sug" id="${p}Sug" role="listbox" hidden></div>`)}
     <div class="row"><div><label class="small" for="${p}Curr">📚 Curriculum</label><select id="${p}Curr" data-currpick="${p}"><option value="">—</option>
         ${CURRICULA.map(([c]) => `<option ${u.curriculum === c ? "selected" : ""}>${c}</option>`).join("")}<option value="Other" ${other ? "selected" : ""}>Other (type it)</option></select>
         <input type="text" id="${p}CurrOther" maxlength="40" value="${other ? safe(u.curriculum) : ""}" placeholder="Type the curriculum" data-yearpick="${p}" ${other ? "" : "hidden"}></div>
@@ -2530,12 +2636,35 @@ function sylNoteText(curriculum, year) {
   return `No syllabus? No problem. 🤖 already knows the ${[curriculum && curriculumShort(curriculum), year].filter(Boolean).join(" ") || "school year's"} plan.`;
 }
 // A school picked from the list → its curriculum; "Other school" → type the name
+// Typing: matches any part of the name, ignoring capitals and the words "GEMS" / "School" ("founders" finds every GEMS Founders school)
+const schoolKey = s => String(s).toLowerCase().replace(/\bgems\b|\bschools?\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+const SCHOOL_KEYS = DUBAI_SCHOOLS.map(([n]) => schoolKey(n));
 function onSchoolPick(el) {
-  const p = el.dataset.schoolpick;
-  if (el.value === OTHER_SCHOOL) { el.value = ""; el.placeholder = "Type the school's name"; return; }
+  const p = el.dataset.schoolpick, q = schoolKey(el.value);
   const hit = DUBAI_SCHOOLS.find(([n]) => n.toLowerCase() === el.value.trim().toLowerCase());
   if (hit && $(p + "Curr").value !== hit[1]) { $(p + "Curr").value = hit[1]; onCurrPick(p); }
+  // The suggestions under the box (up to 8), and "Other school (type the name)" last
+  const words = q.split(" ").filter(Boolean);   // (every word typed must be somewhere in the name, in any order)
+  const list = words.length ? DUBAI_SCHOOLS.map((s, i) => [s, i]).filter(([, i]) => words.every(w => SCHOOL_KEYS[i].includes(w))).slice(0, 8) : [];
+  const sug = $(p + "Sug");
+  sug.innerHTML = list.map(([[name, c], i]) => `<button type="button" role="option" data-schsug="${p}|${i}">${safe(name)}<small>${safe(curriculumShort(c))}</small></button>`).join("")
+    + (el.value.trim() && !hit ? `<button type="button" role="option" class="other" data-schsug="${p}|other">${OTHER_SCHOOL}</button>` : "");
+  sug.hidden = !sug.innerHTML || !!hit;
+  el.setAttribute("aria-expanded", String(!sug.hidden));
 }
+// A suggestion tapped: the school's name (and its curriculum), or "Other school": keep what's typed
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-schsug]");
+  document.querySelectorAll(".sch-sug").forEach(s => { if (!b || !s.contains(b)) s.hidden = true; });
+  if (!b) return;
+  const [p, i] = b.dataset.schsug.split("|"), box = $(p + "School");
+  b.parentElement.hidden = true;
+  box.setAttribute("aria-expanded", "false");
+  if (i === "other") { box.placeholder = "Type the school's name"; return box.focus(); }
+  const [name, c] = DUBAI_SCHOOLS[Number(i)];
+  box.value = name;
+  if ($(p + "Curr").value !== c) { $(p + "Curr").value = c; onCurrPick(p); }
+});
 // A curriculum → its years (the year is kept when it's in the new list) and the syllabus note
 function onCurrPick(p) {
   const c = $(p + "Curr").value, other = c === "Other", year = $(p + "Year");
@@ -2607,15 +2736,10 @@ const DUTY_HABIT = "h-duties";
 // A new family: all on except 🧹 Home duties.
 const FEATURES = [["coach", "🎒", "School coach"], ["newsletter", "📰", "Newsletter"], ["riddles", "🧩", "Riddles"], ["diary", "📔", "My day"],
                   ["buddy", "🌱", "Buddy levels"], ["parentPoints", "👨‍👩‍👧", "Parent points"], ["wishes", "💌", "Kids' wishes"], ["prayer", "🕌", "Prayer times"],
-                  ["chores", "🧹", "Home duties"], ["pocket", "💰", "Pocket money"], ["screen", "📱", "Screen time"], ["routines", "🌅", "Picture routines"],
-                  ["meeting", "🗣️", "Family meeting"], ["shopping", "🛒", "Shopping list"], ["quran", "📗", "Quran & Arabic"]];
+                  ["chores", "🧹", "Home duties"], ["screen", "📱", "Screen time"], ["meeting", "🗣️", "Family meeting"], ["quran", "📗", "Quran & Arabic"]];
 const FEATURES_OFF = ["chores"];
 const defaultFeatures = () => Object.fromEntries(FEATURES.map(([k]) => [k, !FEATURES_OFF.includes(k)]));
 const feat = k => !!(data && data.features && data.features[k]);
-// 🌅 Picture routines: the steps to pick from, and the ones a kid starts with
-const PIC_STEPS = { brush: ["🪥", "Brush teeth"], dress: ["👕", "Get dressed"], pack: ["🎒", "Pack bag"], breakfast: ["🥣", "Breakfast"], face: ["🧼", "Wash face"],
-                    bed: ["🛏️", "Make bed"], bath: ["🛁", "Bath"], pyjamas: ["👚", "Pyjamas"], read: ["📚", "Read"], tidy: ["🧸", "Tidy toys"], sleep: ["😴", "Bed"] };
-const PIC_DEFAULT = { morning: ["brush", "dress", "pack"], bedtime: ["bath", "brush", "read", "sleep"] };
 // 📗 The surahs on the tracker: Al-Fatiha and Juz 'Amma (shown from An-Nas up)
 const SURAHS = ["Al-Fatiha", "An-Naba", "An-Nazi'at", "Abasa", "At-Takwir", "Al-Infitar", "Al-Mutaffifin", "Al-Inshiqaq", "Al-Buruj", "At-Tariq", "Al-A'la",
                 "Al-Ghashiyah", "Al-Fajr", "Al-Balad", "Ash-Shams", "Al-Layl", "Ad-Duha", "Ash-Sharh", "At-Tin", "Al-Alaq", "Al-Qadr", "Al-Bayyinah",
@@ -2756,15 +2880,17 @@ function emptyData() {
     //   levels   = 🌱 person → [{ level, date }] (each level reached, for the level history)
     points: { week: mondayOf(new Date()), since: ymd(new Date()), marks: {}, history: [], log: [], auto: {}, prizes: {}, riddles: {}, riddleAns: {},
               diary: {}, lifetime: {}, levels: {}, duties: {}, wishes: {},   // (✅ duties, 💌 wishes: see DUTIES ON TIME and WISHES)
-              shop: {}, meeting: {}, money: {}, screen: {}, pics: {}, quran: {}, quranHeard: {}, chores: {} },   // (☰ MORE PAGES)
-    // ☰ More pages' settings (see MORE PAGES): 💰 rate, 📱 rate, 🌅 steps per kid, 🧹 duties
-    money: { points: 100, aed: 5 }, screenRate: { points: 10, minutes: 5, max: 60 }, pics: {}, chores: [],
+              meeting: {}, screen: {}, quran: {}, quranHeard: {}, chores: {},   // (☰ MORE PAGES)
+              want: {}, notes: {} },   // (🎁 the prize I want, 💬 notes: see LEADERBOARD ROWS)
+    // ☰ More pages' settings (see MORE PAGES): 📱 rate, 🧹 duties
+    screenRate: { points: 10, minutes: 5, max: 60 }, chores: [],
     // Good habits: a daily checklist for the kids (not on the calendar). 1 point each (each prayer = 15 points, see habitValuePoints).
     habits: defaultHabits(),
     // 👨‍👩‍👧 The parents' good habits (their ticks are in habitMarks too, with these "ph-" ids)
     parentHabits: defaultParentHabits(),
-    // ⚙️ Features on / off for the family (see FEATURES)
+    // ⚙️ Features on / off for the family (see FEATURES); featuresChosen = a parent went through "✨ Make the app yours" once
     features: defaultFeatures(),
+    featuresChosen: false,
     // Habit ticks: "date|habit id|person" → true (one tick), [0/1 × 5] (prayers) or 1–6 (water drops). Kept 5 weeks.
     habitMarks: {},
     // 🎒 School, per kid (see cleanSchool): kid id → { info, grades, tasks, reviews, seesaw }
@@ -2910,18 +3036,15 @@ function cleanData(d) {
                  points: h.points === 10 ? 10 : PARENT_HABIT_POINTS,
                  off: Array.isArray(h.off) ? [...new Set(h.off.map(String))].filter(id => userIds.includes(id)) : [] }));
   // ☰ More pages' settings (older saved data has none: the defaults)
-  if (d.money && Number(d.money.points) > 0) clean.money = { points: Math.round(Number(d.money.points)), aed: Math.max(0, Number(d.money.aed) || 0) };
   if (d.screenRate && Number(d.screenRate.points) > 0 && Number(d.screenRate.minutes) > 0)
     clean.screenRate = { points: Math.round(Number(d.screenRate.points)), minutes: Math.round(Number(d.screenRate.minutes)), max: Math.max(0, Math.round(Number(d.screenRate.max) || 0)) };
-  if (d.pics && typeof d.pics === "object") Object.entries(d.pics).forEach(([kid, p]) => {
-    if (userIds.includes(kid) && p && typeof p === "object") clean.pics[kid] = Object.fromEntries(["morning", "bedtime"].map(w => [w, Array.isArray(p[w]) ? p[w].filter(x => hasOwn(PIC_STEPS, x)) : PIC_DEFAULT[w]]));
-  });
   if (Array.isArray(d.chores)) clean.chores = d.chores.filter(ch => ch && typeof ch.title === "string" && ch.title.trim() && Array.isArray(ch.kids) && Array.isArray(ch.days))
     .map(ch => ({ id: String(ch.id || newId()), title: ch.title.trim().slice(0, 40), emoji: typeof ch.emoji === "string" && ch.emoji.trim() ? ch.emoji.trim().slice(0, 8) : "🧹",
                   kids: ch.kids.filter(id => userIds.includes(id)), days: [...new Set(ch.days.map(Number).filter(i => i >= 0 && i <= 6))].sort(),
                   turns: ch.turns === true, every: ch.every === "week" ? "week" : "day" }));
   // ⚙️ Features (older saved data has none: the defaults, so 🧹 Home duties is off)
   if (d.features && typeof d.features === "object") FEATURES.forEach(([k]) => { if (typeof d.features[k] === "boolean") clean.features[k] = d.features[k]; });
+  clean.featuresChosen = d.featuresChosen === true;
   // 👂 ⏰ (kids) and 🍳 (parents) were added later: older saved lists get them once (removing them later is kept)
   if (d.habitsV2 !== true) {
     NEW_KID_HABITS.forEach(([id, emoji, name]) => { if (!clean.habits.some(h => h.id === id)) clean.habits.push({ id, emoji, name, kind: "single", off: [] }); });
@@ -3129,18 +3252,17 @@ function cleanData(d) {
     // ☰ More pages (older saved data has none)
     const obj = x => x && typeof x === "object" && !Array.isArray(x), each = (m, f) => { if (obj(m)) Object.entries(m).forEach(([k, v]) => { if (obj(v) || Array.isArray(v)) f(k, v); }); };
     const dayKey = (k, parts) => new RegExp(`^\\d{4}-\\d{2}-\\d{2}(\\|[^|]+){${parts}}$`).test(k);
-    each(pts.shop, (k, v) => { if (typeof v.text === "string" && v.text.trim()) clean.points.shop[k] = { text: s(v.text, 60), by: s(v.by, 40), at: s(v.at, 40), done: v.done === true }; });
     each(pts.meeting, (k, v) => { if (dayKey(k, 1)) clean.points.meeting[k] = { great: s(v.great, 140), better: s(v.better, 140), goal: s(v.goal, 140), at: s(v.at, 40) }; });
-    each(pts.money, (k, v) => { if (typeof v.kid === "string" && Number(v.points) > 0)
-      clean.points.money[k] = { kid: v.kid, points: Math.round(Number(v.points)), aed: Number(v.aed) || 0, at: s(v.at, 40) || new Date().toISOString(), paid: v.paid === true, by: s(v.by, 40) }; });
     each(pts.screen, (k, v) => { if (dayKey(k, 1)) { const bought = Math.max(0, Math.round(Number(v.bought) || 0));
       clean.points.screen[k] = { bought, used: Math.min(bought, Math.max(0, Math.round(Number(v.used) || 0))), run: s(v.run, 40) }; } });
-    each(pts.pics, (k, v) => { if (dayKey(k, 2) && Array.isArray(v)) clean.points.pics[k] = v.filter(x => hasOwn(PIC_STEPS, x)); });
     each(pts.quran, (k, v) => { clean.points.quran[k] = {
       surahs: Object.fromEntries(Object.entries(obj(v.surahs) ? v.surahs : {}).filter(([i, st]) => Number(i) >= 0 && Number(i) < SURAHS.length && (st === "done" || st === "revising"))),
       words: (Array.isArray(v.words) ? v.words : []).filter(w => w && typeof w.text === "string").map(w => ({ id: s(w.id, 40) || newId(), text: s(w.text, 40), date: isDate(w.date) ? w.date : "" })).slice(-200) }; });
     each(pts.quranHeard, (k, v) => { if (dayKey(k, 2)) clean.points.quranHeard[k] = { by: s(v.by, 40), at: s(v.at, 40) }; });
     each(pts.chores, (k, v) => { if (dayKey(k, 2)) clean.points.chores[k] = { at: s(v.at, 40) }; });
+    // 🎁 The prize I want and 💬 notes (older saved data has none)
+    each(pts.want, (k, v) => { if (dayKey(k, 1) && typeof v.text === "string" && v.text.trim()) clean.points.want[k] = { text: s(v.text, 40), ok: v.ok === true, by: s(v.by, 40) }; });
+    each(pts.notes, (k, v) => { if (dayKey(k, 1) && typeof v.text === "string" && v.text.trim()) clean.points.notes[k] = { text: s(v.text, 80), by: s(v.by, 40), at: s(v.at, 40) }; });
     // ✅ Duties and 💌 wishes (older saved data has none)
     if (pts.duties && typeof pts.duties === "object") Object.entries(pts.duties).forEach(([key, x]) => {
       if (/^\d{4}-\d{2}-\d{2}\|[^|]+$/.test(key) && x && ["yes", "partly", "no"].includes(x.v)) clean.points.duties[key] = { v: x.v, by: s(x.by, 40), at: s(x.at, 40) };
@@ -3571,6 +3693,7 @@ function render() {
   if (screen === "family") drawFamily();
   if (screen === "diary") drawDiary();
   if (screen === "extra") drawExtra();
+  if (screen === "setup") drawSetup();
   // ⚙️ A feature that's off: body.off-<feature> hides its buttons (see the CSS "FEATURES OFF")
   FEATURES.forEach(([k]) => document.body.classList.toggle("off-" + k, !feat(k)));
   checkLevels();   // 🌱 a new level? (history, 🔔, 🎉)
@@ -3682,7 +3805,7 @@ function bonusPoints(id, from, to) { const k = pointKinds(id, from, to, 0); retu
 function pointKinds(id, from, to, acts) {
   const on = k => feat(k) ? 1 : 0, pp = isParentId(id) ? on("parentPoints") : 1;
   return { tasks: acts + homeworkPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
-           habits: habitPoints(id, from, to) * pp + diaryPoints(id, from, to) * on("diary") + extraHabitPoints(id, from, to),
+           habits: habitPoints(id, from, to) * pp + diaryPoints(id, from, to) * on("diary"),
            fun: riddlePoints(id, from, to) * on("riddles") + (autoPoints(id, from, to) + prizePoints(id, from, to)) * pp
               + wishPoints(id, from, to) * on("wishes") + extraFunPoints(id, from, to) };
 }
@@ -3795,9 +3918,9 @@ function newWeek() {
   Object.keys(data.points.diary).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.diary[key]; });
   Object.keys(data.points.wishes).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.wishes[key]; });   // 💌 too
   Object.keys(data.points.duties).forEach(key => { if (key.slice(0, 10) < ymd(cut)) delete data.points.duties[key]; });   // ✅ 5 weeks
-  ["pics", "quranHeard", "chores"].forEach(k => Object.keys(data.points[k]).forEach(key => { if (key.slice(0, 10) < ymd(cut)) delete data.points[k][key]; }));   // ☰ 5 weeks
+  ["quranHeard", "chores"].forEach(k => Object.keys(data.points[k]).forEach(key => { if (key.slice(0, 10) < ymd(cut)) delete data.points[k][key]; }));   // ☰ 5 weeks
   const eight = new Date(); eight.setDate(eight.getDate() - 56);   // 🗣️ meetings: 8 weeks
-  Object.keys(data.points.meeting).forEach(key => { if (key.slice(0, 10) < ymd(eight)) delete data.points.meeting[key]; });
+  ["meeting", "want", "notes"].forEach(k => Object.keys(data.points[k]).forEach(key => { if (key.slice(0, 10) < ymd(eight)) delete data.points[k][key]; }));
   // (🎁 prizes are kept, like the past Shining Stars: about two years)
   Object.keys(data.points.prizes).sort().reverse().slice(104 * 2).forEach(key => delete data.points.prizes[key]);
   data.points.week = thisWeek;
@@ -3870,6 +3993,7 @@ function habitDone(h, v) {
 }
 
 // The card "⭐ My good habits today": big rows to tap, small round ticks in the kid's color
+// The one-tick habits are round picture buttons; 🕌 prayers and 💧 water keep their small ticks in a row.
 function habitsCardHtml(who) {
   const list = habitsFor(who);
   if (!list.length) return "";
@@ -3894,10 +4018,12 @@ function habitsCardHtml(who) {
         const on = (v || 0) > i;
         return tick(h, i, on, `<span class="e">💧</span>`, `Glass ${i + 1} of ${WATER_DROPS}`);
       }).join("")}</span></div>`;
-    // One tick: the whole row is a big button
-    return `<button class="hb-row ${full ? "done" : ""}" data-hb="${safe(who)}|${safe(h.id)}|0" ${dis} aria-pressed="${full}">${head}
-      <span class="k-check hb-check ${full ? "on" : ""}" aria-hidden="true">${full ? "✓" : ""}</span></button>`;
+    return "";   // (one-tick habits: the round buttons below)
   }).join("");
+  // One tick: a round picture button (the circle fills with my colour, a ✓ pops in)
+  const singles = list.filter(h => h.kind !== "prayers" && h.kind !== "water").map(h => { const on = habitDone(h, mark(h)); return `<button class="pic-btn ${on ? "on" : ""}"
+    data-hb="${safe(who)}|${safe(h.id)}|0" ${dis} aria-pressed="${on}"><span class="pic-dot"><span class="e">${safe(h.emoji)}</span>${on ? `<b class="pic-ok" aria-hidden="true">✓</b>` : ""}</span>
+    <small>${safe(h.name)}</small></button>`; }).join("");
   return `<div class="card hb-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
     <div class="hb-top"><h2>${who === me ? "⭐ My good habits" : `⭐ ${safe(u.name)}'s good habits`}${isToday ? " today" : ""}</h2>
       <span class="hb-progress">${done} / ${list.length}${isToday ? " today" : ""} ${done === list.length ? "🌟" : "💪"}</span></div>
@@ -3907,7 +4033,11 @@ function habitsCardHtml(who) {
       <button data-hbday="1" ${d >= today ? "disabled" : ""} aria-label="Next day">▶</button>
       ${canTick ? "" : `<span class="hb-look">Just looking 👀</span>`}
     </div>
-    <div class="hb-rows">${rows}</div></div>`;
+    ${rows ? `<div class="hb-rows">${rows}</div>` : ""}${singles ? `<div class="pic-grid">${singles}</div>` : ""}</div>`;
+}
+// A small bounce on the button that was just tapped (after the screen is drawn again)
+function popButton(sel) {
+  requestAnimationFrame(() => { const b = document.querySelector(sel); if (b) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); } });
 }
 
 // Tapping a habit tick. part = which prayer (0–4) or which water drop (0–5); 0 for one-tick habits.
@@ -4557,10 +4687,11 @@ function buddyCardHtml(who) {
 function buddyMiniHtml(id) {
   if (!feat("buddy")) return "";
   const p = lifetimePoints(id), L = levelOf(p), pct = levelPct(p), tap = isParentViewer() && !isParentId(id);
-  const inner = `${buddyRingSvg(pct)}<span class="bu-in"><span class="e">${buddyFace(id, L)}</span></span>`;
+  // The ring and "Lv 2" side by side on the name's line (never on top of other text)
+  const inner = `<span class="bu-ring bu-mini" aria-hidden="true">${buddyRingSvg(pct)}<span class="bu-in"><span class="e">${buddyFace(id, L)}</span></span></span><b class="bu-lv">Lv ${L}</b>`;
   const label = `Level ${L}, ${pct}% to level ${L + 1}`;
-  return tap ? `<button class="bu-ring bu-mini" data-buhist="${safe(id)}" aria-label="${label}. Level history" title="${label}">${inner}<b class="bu-lv">Lv ${L}</b></button>`
-    : `<span class="bu-ring bu-mini" role="img" aria-label="${label}" title="${label}">${inner}<b class="bu-lv">Lv ${L}</b></span>`;
+  return tap ? `<button class="bu-minirow" data-buhist="${safe(id)}" aria-label="${label}. Level history" title="${label}">${inner}</button>`
+    : `<span class="bu-minirow" role="img" aria-label="${label}" title="${label}">${inner}</span>`;
 }
 function levelHistoryHtml(id) {
   const list = (data.points.levels[id] || []).slice().reverse();
@@ -4608,6 +4739,107 @@ function showLevelUp(id, L) {
   celebrate(innerWidth / 2, innerHeight / 3, c.color, true);
 }
 
+// =====================================================================
+//  🏆 LEADERBOARD ROWS: 🎁 the prize I want · 💬 an encouraging note · 🌱 what held me back
+//   data.points.want  = "monday|person" → { text, ok, by }   (ok = a parent approved it; kept 8 weeks)
+//   data.points.notes = "monday|person" → { text, by, at }   (a parent's note this week; kept 8 weeks)
+// =====================================================================
+let ptEdit = null;   // the small form open under a row: { id, kind: "want" | "note" }
+const weekItem = (map, id) => data.points[map][`${data.points.week}|${id}`] || null;
+// 🎁 The chip: "🎁 Ice cream" (gold when approved; "🏆 You won: …!" for the Shining Star). Tap: the person changes it, a parent ✅ approves / changes it.
+function wantChipHtml(id, isStar) {
+  const w = weekItem("want", id), parent = isParentDevice();
+  if (!w) return id === me ? `<button class="pt-want add" data-want="${safe(id)}">🎁 Add the prize you want</button>` : "";
+  const text = isStar && w.ok ? `🏆 You won: ${safe(w.text)}!` : `🎁 ${safe(w.text)}${w.ok ? "" : " <small>⏳</small>"}`;
+  return id === me || parent ? `<button class="pt-want ${w.ok ? "ok" : ""}" data-want="${safe(id)}" aria-label="Prize: ${safe(w.text)}${w.ok ? ", approved" : ", waiting for OK"}">${text}</button>`
+    : `<span class="pt-want ${w.ok ? "ok" : ""}">${text}</span>`;
+}
+function wantFormHtml(id) {
+  const w = weekItem("want", id), parent = isParentDevice() && id !== me;
+  return `<div class="pt-form"><label class="small" for="wantText">🎁 ${id === me ? "The prize I want" : `${safe(userById(id).name)}'s prize`}</label>
+    <input type="text" id="wantText" maxlength="40" value="${safe((w && w.text) || "")}" placeholder="Ice cream, cinema…">
+    <div class="btnrow">${parent && w && !w.ok ? `<button class="primary" data-wantok="${safe(id)}">✅ Approve</button>` : ""}
+      <button class="${parent && w && !w.ok ? "" : "primary"}" data-wantsave="${safe(id)}">💾 ${parent ? "Save & approve" : "Save"}</button><button data-ptcancel>Cancel</button></div></div>`;
+}
+// 💬 The note under the bar: a parent's (to this person: kids see only notes to them), or a kind line by rank
+function noteHtml(id, rank) {
+  const n = weekItem("notes", id), canSee = n && (id === me || isParentDevice());
+  const auto = rank === 0 ? "You're the star! 🌟" : rank <= 2 ? "So close! Keep going 💪" : "Every tick counts! 🌱";
+  return `<div class="pt-note">${canSee ? `💬 ${safe(n.text)} <small>— ${exists(n.by) ? safe(userById(n.by).name) : "Mum and Dad"}</small>` : auto}
+    ${isParentDevice() && id !== me ? `<button class="linkbtn" data-ptnote="${safe(id)}">💬 ${n ? "Change note" : "Write a note"}</button>` : ""}</div>`;
+}
+function noteFormHtml(id) {
+  const n = weekItem("notes", id);
+  return `<div class="pt-form"><label class="small" for="noteText">💬 A note to ${safe(userById(id).name)}</label>
+    <input type="text" id="noteText" maxlength="80" value="${safe((n && n.text) || "")}" placeholder="Proud of you! 💛">
+    <div class="btnrow"><button class="primary" data-notesave="${safe(id)}">💌 Send</button><button data-ptcancel>Cancel</button></div></div>`;
+}
+// 🌱 What held me back (not for the Shining Star; only the person and the parents see it): this week's missed things in kind words + one tip
+function heldBackHtml(id, totals, sorted) {
+  if (id !== me && !isParentDevice()) return "";
+  const today = todayIndex(), days = planDays(), from = data.points.week, mine = id === me;
+  const parts = [];
+  // Activities not done (days up to today)
+  let notDone = 0, left = 0;
+  for (let d = 0; d <= 6; d++) {
+    const date = ymd(dayDate(d));
+    const ids = [...(days ? days[d].items.filter(it => it.users.includes(id)).map(it => it.actId) : []),
+                 ...(data.parentActs || []).filter(a => a.by === id && a.type !== "travel" && pactStartOn(a, date)).map(a => a.id)];
+    ids.forEach(a => { if (!isDone(d, a, id)) { if (d < today) notDone++; else left++; } });
+  }
+  if (notDone) parts.push(`${notDone} ${notDone === 1 ? "activity" : "activities"} not done yet`);
+  // Riddles, My day, habits (only when the feature is on)
+  if (feat("riddles")) {
+    const dates = Object.keys(data.points.riddles).filter(k => k >= from && k < weekEnd() && (data.points.riddles[k].list || []).some(r => r.for === id));
+    if (dates.length) parts.push(`Riddles: ${dates.filter(k => riddleDone(id, k) && (riddleState(id, k).solved || (riddleHelp(id, k) || {}).right)).length} of ${dates.length}`);
+  }
+  const dayList = Array.from({ length: today + 1 }, (_, d) => ymd(dayDate(d)));
+  if (feat("diary")) parts.push(`My day: ${dayList.filter(date => diaryOf(id, date)).length} of ${dayList.length} days`);
+  const ticksOn = date => Object.keys(data.habitMarks).some(k => { const [dt, hid, who] = k.split("|"); return dt === date && who === id && (isParentId(id) ? hid.startsWith("ph-") : !hid.startsWith("ph-")); });
+  const hasHabits = isParentId(id) ? feat("parentPoints") && parentHabitsFor(id).length : habitsFor(id).length;
+  if (hasHabits) { const none = dayList.filter(date => !ticksOn(date)).length; if (none) parts.push(`Habits: ${none} ${none === 1 ? "day" : "days"} without ticks`); }
+  // One tip: the single thing that gives the most points (to catch up with the person just above)
+  const above = [...sorted].reverse().find(x => totals[x.id] > totals[id]);
+  const gap = above ? totals[above.id] - totals[id] + 1 : 0;
+  const goal = above ? (stars().includes(above.id) ? `to become the Shining Star` : `to catch up with ${above.name}`) : "";
+  const todayDate = todayYmd(), opts = [];
+  const actsCan = notDone + left;
+  if (actsCan) { const k = Math.max(1, Math.min(actsCan, Math.ceil(gap / POINTS_EACH) || 1)); opts.push([k * POINTS_EACH, `Finish ${k} more ${k === 1 ? "activity" : "activities"} = +${k * POINTS_EACH} ✅`]); }
+  if (feat("riddles") && riddleOf(id) && !riddleDone(id)) opts.push([RIDDLE_PTS, `Solve today's riddle = +${RIDDLE_PTS} 🧩`]);
+  if (feat("diary") && !diaryOf(id, todayDate)) opts.push([DIARY_POINTS, `Write today's My day = +${DIARY_POINTS} ⭐`]);
+  if (isParentId(id) && feat("parentPoints")) { const n = parentHabitsFor(id).filter(h => data.habitMarks[habitKey(todayDate, h.id, id)] !== true).length; if (n) opts.push([n * PARENT_HABIT_POINTS, `Tick your ${n} habits today = +${n * PARENT_HABIT_POINTS} ⭐`]); }
+  if (!isParentId(id)) { const n = habitsFor(id).filter(h => !habitDone(h, data.habitMarks[habitKey(todayDate, h.id, id)])).length; if (n) opts.push([n, `Tick your good habits today ⭐`]); }
+  const best = opts.sort((a, b) => b[0] - a[0])[0];
+  if (!parts.length && !best) return "";
+  return `<details class="pt-held"><summary>🌱 ${mine ? "What held me back" : "What held them back"}</summary>
+    ${parts.length ? `<ul>${parts.map(p => `<li>${safe(p)}</li>`).join("")}</ul>` : ""}
+    ${best ? `<p class="pt-tip">💡 ${safe(best[1])}${goal ? ` ${safe(goal)}!` : "!"}</p>` : ""}</details>`;
+}
+function leaderTap(ds) {
+  const parent = isParentDevice(), key = id => `${data.points.week}|${id}`;
+  if ("ptcancel" in ds) { ptEdit = null; return render(); }
+  if (ds.want) { if (ds.want !== me && !parent) return; ptEdit = { id: ds.want, kind: "want" }; return render(); }
+  if (ds.wantsave) {
+    const id = ds.wantsave, text = $("wantText").value.trim().slice(0, 40);
+    if (id !== me && !parent) return;
+    if (!text) delete data.points.want[key(id)];
+    else data.points.want[key(id)] = { text, ok: parent, by: me };   // (set by a parent = approved; a kid's own wish waits for a parent's ✅)
+    ptEdit = null; keepNow();
+    if (text && id === me && !parent) addNews([newsItem("school", `🎁 ${userById(me).name} would like: ${text}`, "🎁 a prize wish", me)]);
+    return;
+  }
+  if (ds.wantok && parent) { const w = data.points.want[key(ds.wantok)]; if (w) { data.points.want[key(ds.wantok)] = { ...w, ok: true }; ptEdit = null; keepNow(); toast("✅ Approved"); } return; }
+  if (ds.ptnote && parent) { ptEdit = { id: ds.ptnote, kind: "note" }; return render(); }
+  if (ds.notesave && parent) {
+    const id = ds.notesave, text = $("noteText").value.trim().slice(0, 80);
+    if (!text) delete data.points.notes[key(id)];
+    else data.points.notes[key(id)] = { text, by: me, at: new Date().toISOString() };
+    ptEdit = null; keepNow();
+    if (text) { addNews([newsItem("school", `💬 a note for ${userById(id).name}: ${text}`, "💬 a note", me)]); toast("💌 Sent!"); }
+  }
+}
+const LEADER_KEYS = ["ptcancel", "want", "wantsave", "wantok", "ptnote", "notesave"];
+
 // ---------- Points screen ----------
 function drawPoints() {
   const totals = pointsByUser(), acts = activityPointsByUser(), star = stars(), from = data.points.week, to = weekEnd();
@@ -4626,13 +4858,17 @@ function drawPoints() {
       <div class="pt-rank">${totals[u.id] > 0 && rank < 3 ? medals[rank] : rank + 1}</div>
       <div class="face">${safe(u.emoji)}${starBadge(u.id)}</div>
       <div>
-        <div class="pt-top"><span class="pt-name">${buddyMiniHtml(u.id)}${safe(u.name)}${star.includes(u.id) ? `<span class="star-label">Shining Star of the Week!</span>` : ""}</span>
-          <span class="pt-num">${totals[u.id]} <small>points</small></span></div>
+        <div class="pt-top"><span class="pt-name"><span class="pt-nameline">${buddyMiniHtml(u.id)}<span>${safe(u.name)}</span></span>${star.includes(u.id) ? `<span class="star-label">Shining Star of the Week!</span>` : ""}</span>
+          ${wantChipHtml(u.id, star.includes(u.id))}<span class="pt-num">${totals[u.id]} <small>points</small></span></div>
+        ${ptEdit && ptEdit.id === u.id && ptEdit.kind === "want" ? wantFormHtml(u.id) : ""}
         <div class="pt-bar${star.includes(u.id) ? " shine" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${totals[u.id]}"><i style="width:${pct}%"></i>
           ${star.includes(u.id) && pct ? `<span class="pt-spark" style="left:max(2px, calc(${pct}% - 20px))" aria-hidden="true">✨</span>` : ""}
           ${max ? `<span class="pt-pct">${pct}%</span>` : ""}</div>
         <div class="pt-kinds">${kindsText(kinds)}</div>
         <div class="pt-sub">${max ? `${acts[u.id] / POINTS_EACH} of ${max / POINTS_EACH} activities done` : "No planned activities yet"}</div>
+        ${noteHtml(u.id, totals[u.id] > 0 ? rank : 99)}
+        ${ptEdit && ptEdit.id === u.id && ptEdit.kind === "note" ? noteFormHtml(u.id) : ""}
+        ${star.includes(u.id) ? "" : heldBackHtml(u.id, totals, sorted)}
         ${buHist === u.id ? levelHistoryHtml(u.id) : ""}
       </div></div>`;
   }).join("") + funLineHtml(totals);
@@ -4751,30 +4987,49 @@ function drawHome() {
   $("homeNote").textContent = note;
   // 🏠 TODAY: 📋 my next activities · 🧩 my riddle · 📔 My day, then the rest (each card leaves itself out when it's off or empty);
   // parents also get the family rows: kids' moods, ✅ duties check, 💌 wishes, 📅 the family today
-  $("homeHabits").innerHTML = (u.buddy ? "" : buddyCardHtml(me)) + todayCardHtml(me) + riddleCardHtml(me) + diaryButtonHtml()
-    + dutyNoteHtml(me) + wishCardHtml(me) + prizeCardHtml(me) + extraHomeHtml(me) + habitsCardHtml(me) + parentHabitsCardHtml(me, true)
-    + (parent ? kidsMoodHtml() + dutiesCardHtml() + wishesListHtml() + familyTodayHtml() : "");
+  // 👨‍👩‍👧 A parent's home: my habit chips, the 👨‍👩‍👧 Family tiles, then Today, the family calendar, kids' moods, duties check, wishes (and the rest)
+  $("homeHabits").innerHTML = parent
+    ? parentHabitsCardHtml(me, true) + familyTilesHtml() + todayCardHtml(me) + familyTodayHtml() + kidsMoodHtml() + dutiesCardHtml() + wishesListHtml()
+      + (u.buddy ? "" : buddyCardHtml(me)) + prizeCardHtml(me) + riddleCardHtml(me) + diaryButtonHtml() + extraHomeHtml(me) + habitsCardHtml(me)
+      + `<div class="btnrow su-edit"><button data-setupopen>✏️ Edit my home</button></div>`
+    : (u.buddy ? "" : buddyCardHtml(me)) + todayCardHtml(me) + riddleCardHtml(me) + diaryButtonHtml()
+      + dutyNoteHtml(me) + wishCardHtml(me) + prizeCardHtml(me) + extraHomeHtml(me) + habitsCardHtml(me) + parentHabitsCardHtml(me, true);
   $("homeCal").innerHTML = "";
   maybeMakeRiddles();
   maybeShowTour();
+  maybeShowSetup();   // ✨ a parent, the first time: "Make the app yours"
 }
 // ☰ More: everything that isn't on the Today screen
+// (👨‍👩‍👧 a parent's ☰ More is only 📌 Unpin all · 🖨️ Print · 👨‍👩‍👧 Family · ⚙️ Settings · 👋 Show the tour: the rest is in their Family tiles)
 let homeMore = false;
+const tileHtml = t => `<button class="tile ${t.cls || ""}" ${t.plan ? "data-plan" : t.unpinall ? "data-unpinall" : t.extra ? `data-extra="${t.extra}"`
+  : t.printmenu ? "data-printmenu" : t.tour ? "data-tour" : `data-go="${t.go}"`}>
+    <span class="t-emoji">${t.emoji}</span><span class="t-label">${t.label}</span><span class="t-sub">${t.sub}</span></button>`;
+const TOUR_TILE = { tour: true, emoji: "👋", label: "Show the tour", sub: "How the app works" };
+// 👨‍👩‍👧 Parents: the Family tiles at the top of their home (a tile whose ⚙️ feature is off is hidden)
+function familyTilesHtml() {
+  const tiles = [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },
+    ...(me === DAD ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
+    ...EXTRA_PAGES.filter(([k]) => feat(k)).map(([k, emoji, label, sub]) => ({ extra: k, emoji, label, sub }))];
+  return `<div class="card fam-tiles-card"><h2>👨‍👩‍👧 Family</h2><div class="fam-tiles">${tiles.map(tileHtml).join("")}</div></div>`;
+}
 function moreTilesHtml() {
   const isDad = me === DAD;
+  if (isParentDevice()) return [...(isDad && hasPinned() ? [{ unpinall: true, emoji: "📌", label: "Unpin all", sub: "Let the app plan them again" }] : []),
+    ...(isDad ? [{ printmenu: true, emoji: "🖨️", label: "Print", sub: "Paper schedules to tick" },
+                 { go: "family", emoji: "👨‍👩‍👧", label: "Family", sub: "Add a kid or a parent, codes" }] : []),   // (people are added only here)
+    { go: "settings", emoji: "⚙️", label: "Settings", sub: "Features, my day, people, backup" }, TOUR_TILE].map(tileHtml).join("");
   const tiles = [
     { go: "add", emoji: "✏️", label: "Add activities", sub: isDad ? "Yours and everyone's" : "Add or change yours" },
     ...(isDad ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
     ...(isDad && hasPinned() ? [{ unpinall: true, emoji: "📌", label: "Unpin all", sub: "Let the app plan them again" }] : []),
     ...EXTRA_PAGES.filter(([k]) => feat(k) && extraVisible(k)).map(([k, emoji, label, sub]) => ({ extra: k, emoji, label, sub })),
     ...(isDad ? [{ printmenu: true, emoji: "🖨️", label: "Print", sub: "Paper schedules to tick" },
-                 { adduser: true, emoji: "➕", label: "Add user", sub: "Name, emoji and color" }] : []),
+                 { go: "family", emoji: "👨‍👩‍👧", label: "Family", sub: "Add a kid or a parent, codes" }] : []),
     { go: "settings", emoji: "⚙️", label: "Settings", sub: isDad ? "Features, my day, people, backup" : "🕌 Prayer times" },
-    { tour: true, emoji: "👋", label: "Show the tour", sub: "How the app works" }
+    TOUR_TILE
   ];
-  return tiles.map(t => `<button class="tile ${t.cls || ""}" ${t.plan ? "data-plan" : t.unpinall ? "data-unpinall" : t.extra ? `data-extra="${t.extra}"`
-    : t.printmenu ? "data-printmenu" : t.adduser ? "data-adduser" : t.tour ? "data-tour" : `data-go="${t.go}"`}>
-      <span class="t-emoji">${t.emoji}</span><span class="t-label">${t.label}</span><span class="t-sub">${t.sub}</span></button>`).join("");
+  return tiles.map(tileHtml).join("");
 }
 // 📋 Today: my next activities (not done yet, up to 5) with big ✅ ticks; "See all" opens 📅 Calendar
 function todayItems(who) {
@@ -4814,28 +5069,22 @@ function familyTodayHtml() {
 }
 
 // =====================================================================
-//  ☰ MORE PAGES: 🛒 shopping · 🗣️ family meeting · 💰 pocket money · 📱 screen time · 🌅 picture routines · 📗 Quran & Arabic · 🧹 home duties
+//  ☰ MORE PAGES: 🗣️ family meeting · 📱 screen time · 📗 Quran & Arabic · 🧹 home duties
 //   One "extra" screen (extraPage = which one). Each is a ⚙️ feature (off = hidden, no points).
-//   Settings (plan document): data.money { points, aed } · data.screenRate { points, minutes, max } · data.pics { kid: { morning, bedtime } }
-//                             data.chores [{ id, title, emoji, kids, days, turns, every }]
+//   Settings (plan document): data.screenRate { points, minutes, max } · data.chores [{ id, title, emoji, kids, days, turns, every }]
 //   Shared items (points document, one field per item):
-//     shop       = id → { text, by, at, done }                       (until 🧹 Clear bought)
 //     meeting    = "monday|person" → { great, better, goal, at }       (kept 8 weeks)
-//     money      = id → { kid, points, aed, at, paid, by }             (kept: they're the points already used)
 //     screen     = "date|kid" → { bought, used, run }                  (minutes; run = when the timer started; kept: points used)
-//     pics       = "date|kid|morning|bedtime" → [step ids done]        (+5 when all done; 5 weeks)
 //     quran      = kid → { surahs: { index: "done" | "revising" }, words: [{ id, text, date }] }
 //     quranHeard = "date|kid|what" → { by, at }                        (+10, a parent heard it; 5 weeks)
 //     chores     = "date|chore|kid" → { at }                           (+10; 5 weeks)
 // =====================================================================
-const EXTRA_PAGES = [["shopping", "🛒", "Shopping list", "One list for everyone"], ["meeting", "🗣️", "Family meeting", "Every Friday"],
-                     ["pocket", "💰", "Pocket money", "Points into money"], ["screen", "📱", "Screen time", "Buy minutes with points"],
-                     ["routines", "🌅", "Picture routines", "Morning and bedtime"], ["quran", "📗", "Quran & Arabic", "Surahs and words"],
-                     ["chores", "🧹", "Home duties", "Jobs at home"]];
+const EXTRA_PAGES = [["meeting", "🗣️", "Family meeting", "Every Friday"], ["screen", "📱", "Screen time", "Buy minutes with points"],
+                     ["quran", "📗", "Quran & Arabic", "Surahs and words"], ["chores", "🧹", "Home duties", "Jobs at home"]];
 const extraVisible = () => true;
 let extraPage = null, extraKid = null, extraEdit = null;   // the page, the kid a parent is looking at, an open form
-const CHORE_POINTS = 10, HEARD_POINTS = 10, PICS_POINTS = 5, MEETING_DAY = 4;
-// (PIC_STEPS, PIC_DEFAULT and SURAHS are with the other lists at the top: the saved data is checked with them)
+const CHORE_POINTS = 10, HEARD_POINTS = 10, MEETING_DAY = 4;
+// (SURAHS is with the other lists at the top: the saved data is checked with it)
 function openExtra(k) {
   if (!feat(k)) return;
   extraPage = k; extraEdit = null;
@@ -4843,7 +5092,7 @@ function openExtra(k) {
   homeMore = false;
   go("extra");
 }
-// The points from these pages (⚙️ off = none): ✅ home duties and 📗 "heard it" are Tasks, 🌅 routines are Habits
+// The points from these pages (⚙️ off = none): ✅ home duties and 📗 "heard it" are Tasks
 function extraTaskPoints(id, from, to) {
   let n = 0;
   const inRange = key => { const date = key.slice(0, 10); return date >= from && date < to; };
@@ -4851,39 +5100,21 @@ function extraTaskPoints(id, from, to) {
   if (feat("quran")) n += Object.keys(data.points.quranHeard).filter(k => inRange(k) && k.split("|")[1] === id).length * HEARD_POINTS;
   return n;
 }
-function extraHabitPoints(id, from, to) {
-  if (!feat("routines")) return 0;
-  return Object.entries(data.points.pics).filter(([k, done]) => { const [date, kid, which] = k.split("|"); return kid === id && date >= from && date < to && picsDone(kid, which, done); }).length * PICS_POINTS;
-}
 const extraFunPoints = () => 0;
 const kidChips = (cur, attr) => `<div class="chips">${kidsList().map(k => { const c = colorsOf(k); return `<button class="chip ${k.id === cur ? "on" : ""}" data-${attr}="${safe(k.id)}"
   style="--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(k.emoji)}</span>${safe(k.name)}</button>`; }).join("")}</div>`;
 function drawExtra() {
-  if (!extraPage || !feat(extraPage)) return go("home");
+  if (!extraPage || !feat(extraPage) || !EXTRA_PAGES.some(p => p[0] === extraPage)) return go("home");
   const [, emoji, label] = EXTRA_PAGES.find(p => p[0] === extraPage);
   $("extraTitle").textContent = `${emoji} ${label}`;
-  const views = { shopping: shopHtml, meeting: meetingHtml, pocket: pocketHtml, screen: screenHtml, routines: picsPageHtml, quran: quranHtml, chores: choresPageHtml };
+  const views = { meeting: meetingHtml, screen: screenHtml, quran: quranHtml, chores: choresPageHtml };
   $("extraBody").innerHTML = views[extraPage]();
 }
 // What's on the Today screen from these pages
 function extraHomeHtml(who) {
   if (!exists(who) || who !== me) return "";
   const kid = !isParentId(who);
-  return (feat("meeting") ? meetingHomeHtml() : "") + (kid && feat("routines") ? picsCardHtml(who, picsNow()) : "")
-    + (kid && feat("chores") ? choresTodayHtml(who) : "") + (kid && feat("pocket") ? pocketLineHtml(who) : "")
-    + (kid && feat("screen") ? screenLineHtml(who) : "") + (!kid && isParentDevice() && feat("pocket") ? moneyRequestsHtml() : "");
-}
-
-// ---------- 🛒 Shopping list: anyone adds, tick when bought, 🧹 Clear bought ----------
-function shopHtml() {
-  const list = Object.entries(data.points.shop).sort((a, b) => !!a[1].done - !!b[1].done || String(a[1].at).localeCompare(String(b[1].at)));
-  return `<div class="card sc-form"><div class="row"><div><label class="small" for="shopText">Add something</label>
-      <input type="text" id="shopText" maxlength="60" placeholder="🎤 Milk, bread…"></div></div>
-    <div class="btnrow"><button class="primary" data-shopadd>➕ Add</button></div></div>
-    <div class="card"><ul class="list shop-list">${list.map(([id, x]) => `<li class="${x.done ? "done" : ""}">
-      <button class="k-check ${x.done ? "on" : ""}" data-shoptick="${safe(id)}" style="--c:#22a35a" aria-pressed="${!!x.done}" aria-label="Bought: ${safe(x.text)}">${x.done ? "✓" : ""}</button>
-      <span class="what">${safe(x.text)}<small>${exists(x.by) ? safe(userById(x.by).emoji) : ""}</small></span></li>`).join("") || `<li class="sc-empty">The list is empty. 🛒</li>`}</ul>
-    ${list.some(([, x]) => x.done) ? `<div class="btnrow"><button data-shopclear>🧹 Clear bought</button></div>` : ""}</div>`;
+  return (feat("meeting") ? meetingHomeHtml() : "") + (kid && feat("chores") ? choresTodayHtml(who) : "") + (kid && feat("screen") ? screenLineHtml(who) : "");
 }
 
 // ---------- 🗣️ Family meeting (Friday): 3 questions each, everyone's answers together, the goals on the home next week ----------
@@ -4906,35 +5137,10 @@ function meetingHomeHtml() {
     + (friday ? `<button class="card mt-prompt" data-extra="meeting">🗣️ <b>Family meeting today!</b><small>Tap to answer 3 short questions.</small></button>` : "");
 }
 
-// ---------- 💰 Pocket money: points → money at the parents' rate. The points used are noted; the leaderboard stays ----------
-const moneyRate = () => data.money || { points: 100, aed: 5 };
-// Points still free to use (all points − money asked for − screen time bought)
+// Points still free to use for 📱 screen time (all points − screen time bought). The leaderboard never goes down.
 function spendable(kid) {
-  const usedMoney = Object.values(data.points.money).filter(r => r.kid === kid).reduce((n, r) => n + r.points, 0);
   const usedScreen = Object.entries(data.points.screen).filter(([k]) => k.split("|")[1] === kid).reduce((n, [, s]) => n + screenCost(s.bought), 0);
-  return Math.max(0, lifetimePoints(kid) - usedMoney - usedScreen);
-}
-const moneyCanGet = kid => { const r = moneyRate(), units = Math.floor(spendable(kid) / r.points); return { units, aed: units * r.aed, points: units * r.points }; };
-function pocketLineHtml(kid) {
-  const g = moneyCanGet(kid), pending = Object.values(data.points.money).some(r => r.kid === kid && !r.paid);
-  return `<div class="card pm-line"><b>💰 You can get ${g.aed} AED</b>${pending ? `<small>⏳ Waiting for Mum and Dad…</small>`
-    : g.units ? `<button data-moneyask>Ask for my money</button>` : `<small>${moneyRate().points} points = ${moneyRate().aed} AED</small>`}</div>`;
-}
-function pocketHtml() {
-  const r = moneyRate(), parent = isParentDevice();
-  const reqs = Object.entries(data.points.money).filter(([, x]) => parent || x.kid === me).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at)));
-  return (parent ? `<div class="card sc-form"><h2>Rate</h2><div class="row"><div><label class="small" for="pmPts">Points</label><input type="number" id="pmPts" min="1" value="${r.points}"></div>
-      <div><label class="small" for="pmAed">= AED</label><input type="number" id="pmAed" min="0" step="0.5" value="${r.aed}"></div></div>
-      <div class="btnrow"><button class="primary" data-moneyrate>💾 Save</button></div>
-      <p class="hint">${kidsList().map(k => `${safe(k.emoji)} ${safe(k.name)}: ${moneyCanGet(k.id).aed} AED`).join(" · ")}</p></div>` : pocketLineHtml(me))
-    + `<div class="card"><h2>${parent ? "Requests" : "My money"}</h2><ul class="list">${reqs.map(([id, x]) => `<li><span class="what">${parent ? safe(userById(x.kid).emoji + " " + userById(x.kid).name) + " · " : ""}
-      <b>${x.aed} AED</b><small>${x.points} points · ${safe(shortDate(x.at.slice(0, 10)))}</small></span>
-      ${x.paid ? `<span class="wi-done">Paid ✅</span>` : parent ? `<button data-moneypaid="${safe(id)}">Paid ✅</button>` : `<small>⏳</small>`}</li>`).join("") || `<li class="sc-empty">Nothing yet.</li>`}</ul></div>`;
-}
-function moneyRequestsHtml() {
-  const reqs = Object.entries(data.points.money).filter(([, x]) => !x.paid && exists(x.kid));
-  return reqs.length ? `<div class="card pm-req"><h2>💰 Pocket money asked</h2><ul class="list">${reqs.map(([id, x]) => `<li><span class="what">${safe(userById(x.kid).emoji)} ${safe(userById(x.kid).name)}: <b>${x.aed} AED</b></span>
-    <button data-moneypaid="${safe(id)}">Paid ✅</button></li>`).join("")}</ul></div>` : "";
+  return Math.max(0, lifetimePoints(kid) - usedScreen);
 }
 
 // ---------- 📱 Screen time: buy minutes with points (daily max), a big countdown the kid starts ----------
@@ -4977,26 +5183,6 @@ function screenStop() {
   if (!s.run) return;
   data.points.screen[key] = { ...s, used: Math.min(s.bought, s.used + Math.ceil((Date.now() - Date.parse(s.run)) / 60000)), run: "" };
   keepNow();
-}
-
-// ---------- 🌅 Picture routines: morning and bedtime, big pictures, all done = +5 ----------
-const picsNow = () => new Date().getHours() < 12 ? "morning" : "bedtime";
-const picsOf = (kid, which) => ((data.pics || {})[kid] || PIC_DEFAULT)[which] || PIC_DEFAULT[which];
-const picsDone = (kid, which, done) => { const steps = picsOf(kid, which); return steps.length > 0 && steps.every(s => (done || []).includes(s)); };
-function picsCardHtml(kid, which) {
-  const steps = picsOf(kid, which), done = data.points.pics[`${todayYmd()}|${kid}|${which}`] || [], all = picsDone(kid, which, done);
-  if (!steps.length) return "";
-  return `<div class="card pr-card"><h2>${which === "morning" ? "🌅 Morning" : "🌙 Bedtime"}${all ? ` · ✅ +${PICS_POINTS} ⭐` : ""}</h2>
-    <div class="pr-steps">${steps.map(s => { const [e, name] = PIC_STEPS[s] || ["⭐", s], on = done.includes(s); return `<button class="pr-step ${on ? "on" : ""}"
-      data-pic="${kid}|${which}|${s}" aria-pressed="${on}" ${kid === me || isParentDevice() ? "" : "disabled"}><span class="e">${e}</span><small>${name}</small>${on ? `<b class="ph-tick">✓</b>` : ""}</button>`; }).join("")}</div></div>`;
-}
-function picsPageHtml() {
-  const kid = extraKid, parent = isParentDevice();
-  if (!kid || !exists(kid)) return `<div class="card"><p class="sc-empty">No kids yet.</p></div>`;
-  const edit = parent ? `<div class="card"><h2>✏️ ${safe(userById(kid).name)}'s steps</h2>${["morning", "bedtime"].map(which => `<h3 class="ph-group">${which === "morning" ? "🌅 Morning" : "🌙 Bedtime"}</h3>
-    <div class="ph-chips">${Object.entries(PIC_STEPS).map(([s, [e, name]]) => { const on = picsOf(kid, which).includes(s); return `<button class="ph-chip ${on ? "on" : ""}" data-picstep="${which}|${s}"
-      aria-pressed="${on}"><span class="e">${e}</span><span>${name}</span>${on ? `<b class="ph-tick">✓</b>` : ""}</button>`; }).join("")}</div>`).join("")}</div>` : "";
-  return (parent ? kidChips(kid, "extrakid") : "") + picsCardHtml(kid, "morning") + picsCardHtml(kid, "bedtime") + edit;
 }
 
 // ---------- 📗 Quran & Arabic: surahs memorised (✓ / 🔁 revising), Arabic words & letters; a parent's "✅ heard it" = +10 ----------
@@ -5058,18 +5244,14 @@ function choresPageHtml() {
 }
 
 // ---------- The taps on these pages ----------
-const EXTRA_KEYS = ["extra", "extrakid", "shopadd", "shoptick", "shopclear", "meetsave", "meetedit", "meetcancel", "moneyask", "moneypaid", "moneyrate",
-                    "screenrate", "screenbuy", "screenstart", "screenstop", "pic", "picstep", "qsurah", "qword", "qheard",
+const EXTRA_KEYS = ["extra", "extrakid", "meetsave", "meetedit", "meetcancel",
+                    "screenrate", "screenbuy", "screenstart", "screenstop", "qsurah", "qword", "qheard",
                     "chore", "chnew", "chedit", "chcancel", "chdel", "chsave"];
 const isExtraTap = ds => Object.keys(ds).some(k => EXTRA_KEYS.includes(k));
 function extraTap(ds, t) {
   const kidOK = kid => kid === me || isParentDevice();
   if (ds.extra) return openExtra(ds.extra);
   if (ds.extrakid) { extraKid = ds.extrakid; return render(); }
-  // 🛒
-  if ("shopadd" in ds) { const text = $("shopText").value.trim().slice(0, 60); if (!text) return; data.points.shop[newId()] = { text, by: me, at: new Date().toISOString(), done: false }; return keepNow(); }
-  if (ds.shoptick) { const x = data.points.shop[ds.shoptick]; if (x) { data.points.shop[ds.shoptick] = { ...x, done: !x.done }; keepNow(); } return; }
-  if ("shopclear" in ds) { Object.keys(data.points.shop).forEach(k => { if (data.points.shop[k].done) delete data.points.shop[k]; }); return keepNow(); }
   // 🗣️
   if ("meetsave" in ds) {
     const v = k => $("mt-" + k).value.trim().slice(0, 140);
@@ -5078,17 +5260,6 @@ function extraTap(ds, t) {
   }
   if ("meetedit" in ds) { extraEdit = "meeting"; return render(); }
   if ("meetcancel" in ds) { extraEdit = null; return render(); }
-  // 💰
-  if ("moneyask" in ds) {
-    const g = moneyCanGet(me);
-    if (!g.units || isParentId(me) || Object.values(data.points.money).some(r => r.kid === me && !r.paid)) return;
-    data.points.money[newId()] = { kid: me, points: g.points, aed: g.aed, at: new Date().toISOString(), paid: false, by: "" };
-    keepNow();
-    addNews([newsItem("school", `💰 ${userById(me).name} asked for ${g.aed} AED pocket money`, "💰 asked for pocket money", me)]);
-    return toast(`💰 Asked for ${g.aed} AED! ⏳`, 3000);
-  }
-  if (ds.moneypaid && isParentDevice()) { const r = data.points.money[ds.moneypaid]; if (r) { data.points.money[ds.moneypaid] = { ...r, paid: true, by: me }; keepNow(); toast("Paid ✅"); } return; }
-  if ("moneyrate" in ds && isParentDevice()) { data.money = { points: Math.max(1, Math.round(Number($("pmPts").value) || 100)), aed: Math.max(0, Number($("pmAed").value) || 0) }; keepNow(); return toast("💾 Saved"); }
   // 📱
   if ("screenrate" in ds && isParentDevice()) {
     data.screenRate = { points: Math.max(1, Math.round(Number($("stPts").value) || 10)), minutes: Math.max(1, Math.round(Number($("stMin").value) || 5)), max: Math.max(0, Math.round(Number($("stMax").value) || 0)) };
@@ -5102,25 +5273,6 @@ function extraTap(ds, t) {
   }
   if ("screenstart" in ds) { const s = screenOf(me); if (s.run || s.bought <= s.used) return; data.points.screen[`${todayYmd()}|${me}`] = { ...s, run: new Date().toISOString() }; return keepNow(); }
   if ("screenstop" in ds) return screenStop();
-  // 🌅
-  if (ds.pic) {
-    const [kid, which, step] = ds.pic.split("|");
-    if (!kidOK(kid)) return;
-    if (newWeek()) keepNow();
-    const key = `${todayYmd()}|${kid}|${which}`, done = data.points.pics[key] || [], was = picsDone(kid, which, done);
-    data.points.pics[key] = done.includes(step) ? done.filter(s => s !== step) : [...done, step];
-    keepNow();
-    if (!was && picsDone(kid, which, data.points.pics[key])) { const r = t.getBoundingClientRect(); celebrate(r.left + r.width / 2, r.top, colorsOf(userById(kid)).color, true); toast(`🌟 All done! +${PICS_POINTS} ⭐`, 2600); }
-    return;
-  }
-  if (ds.picstep && isParentDevice()) {
-    const [which, step] = ds.picstep.split("|"), kid = extraKid;
-    data.pics = data.pics || {};
-    const cur = { ...PIC_DEFAULT, ...(data.pics[kid] || {}) };
-    cur[which] = cur[which].includes(step) ? cur[which].filter(s => s !== step) : [...cur[which], step];
-    data.pics[kid] = cur;
-    return keepNow();
-  }
   // 📗
   if (ds.qsurah) {
     const kid = extraKid;
@@ -5202,7 +5354,7 @@ function showTour() {
   const track = box.querySelector(".tour-track"), dots = box.querySelectorAll(".tour-dots i"), next = box.querySelector("[data-tournext]");
   const at = () => Math.round(track.scrollLeft / track.clientWidth);
   const show = () => { const i = at(); dots.forEach((d, k) => d.classList.toggle("on", k === i)); next.textContent = i >= cards.length - 1 ? "Let's go! 🎉" : "Next ›"; };
-  const close = () => { box.remove(); const u = data.users.find(x => x.id === me); if (u && !u.toured) { u.toured = true; writeData("auto"); } };
+  const close = () => { box.remove(); const u = data.users.find(x => x.id === me); if (u && !u.toured) { u.toured = true; writeData("auto"); } maybeShowSetup(); };
   track.addEventListener("scroll", () => requestAnimationFrame(show), { passive: true });
   box.addEventListener("click", e => {
     if (e.target.closest("[data-tourskip]")) return close();
@@ -5212,14 +5364,62 @@ function showTour() {
   next.focus();
 }
 
-// ---------- ⚙️ Features (Settings, parents): on / off for the family ----------
+// ---------- ✨ Make the app yours (parents): which features the family uses ----------
+// Asked once (after the tour; an existing family: the next time a parent opens the app). Later: "✏️ Edit my home" (parent home)
+// or ⚙️ Settings → Features. Off = hidden everywhere (tiles, habits, menus, points), never deleted: on again brings it all back.
+// data.featuresChosen = a parent saved it (or said "Not now") once.
+const FEATURE_INFO = {
+  coach: ["🎒", "School coach", "Upload school work: 🤖 makes worksheets and checks them"], newsletter: ["📰", "Newsletter", "Read the school newsletter into the calendar"],
+  riddles: ["🧩", "Riddles", "A fun riddle of the day for everyone"], diary: ["📔", "My day", "A mood and a few lines about the day"],
+  buddy: ["🌱", "Buddy levels", "A buddy that grows with all your points"], parentPoints: ["⭐", "Parent points", "Parents earn points too: habits and helping"],
+  wishes: ["💌", "Kids' wishes", "Every Friday the kids tell you their wishes"], prayer: ["🕌", "Prayer times", "Prayer times on the calendar"],
+  chores: ["🧹", "Home duties", "Jobs at home, or taking turns"], screen: ["📱", "Screen time", "Buy screen minutes with points"],
+  meeting: ["🗣️", "Family meeting", "3 short questions every Friday"], quran: ["📗", "Quran & Arabic", "Surahs memorised and Arabic words"]
+};
+let setupDraft = null;   // the switches being chosen (a copy of data.features)
+function openSetup() {
+  if (!isParentDevice()) return;
+  setupDraft = { ...data.features };
+  homeMore = false;
+  go("setup");
+}
+function drawSetup() {
+  if (!isParentDevice()) return go("home");
+  if (!setupDraft) setupDraft = { ...data.features };
+  $("setupBody").innerHTML = `<p class="lead">What would you like in your family app?</p>
+    <div class="su-top"><span>${Object.values(setupDraft).filter(Boolean).length} of ${FEATURES.length} on</span><button class="linkbtn" data-setupall>Turn all on</button></div>
+    <div class="su-grid">${FEATURES.map(([k]) => { const [e, name, what] = FEATURE_INFO[k], on = !!setupDraft[k]; return `<button class="su-card ${on ? "on" : ""}"
+      data-setupfeat="${k}" role="switch" aria-checked="${on}"><span class="e">${e}</span><span class="su-text"><b>${name}</b><small>${what}</small></span>
+      <span class="su-switch" aria-hidden="true"><i></i></span></button>`; }).join("")}</div>
+    <p class="hint">Turned off = hidden, never deleted. Turn it on again and everything comes back.</p>
+    <div class="btnrow su-save"><button class="primary" data-setupsave>✅ Save</button>${data.featuresChosen ? "" : `<button data-setuplater>Not now</button>`}</div>`;
+}
+function saveSetup(later) {
+  if (!isParentDevice()) return;
+  if (!later && setupDraft) data.features = { ...data.features, ...setupDraft };
+  data.featuresChosen = true;
+  setupDraft = null;
+  writeData();
+  go("home");
+  if (!later) toast("✅ Your family app is ready!", 2600);
+}
+// The first time: after the tour (if it's still to come, the tour's end opens it)
+let setupAsked = false;
+function maybeShowSetup() {
+  const u = userById(me);
+  if (setupAsked || data.featuresChosen || !isParentDevice() || !u || !u.toured || document.querySelector(".tour") || screen === "setup" || !(!cloud.enabled || cloud.ready)) return;
+  setupAsked = true;
+  setTimeout(openSetup, 300);
+}
+
+// ---------- ⚙️ Features (Settings, parents): the same choices, on the "✨ Make the app yours" screen ----------
 function drawFeatures() {
   const card = $("featCard");
   if (!isParentDevice()) { card.innerHTML = ""; card.hidden = true; return; }
   card.hidden = false;
-  card.innerHTML = `<h2>⚙️ Features</h2><p class="hint">Turn things on or off for the whole family. Off = its buttons, cards and points are hidden (nothing is deleted).</p>
-    <div class="feat-list">${FEATURES.map(([k, e, label]) => `<label class="feat-row"><span>${e} ${label}</span>
-      <input type="checkbox" role="switch" data-feat="${k}" ${feat(k) ? "checked" : ""}></label>`).join("")}</div>`;
+  const on = FEATURES.filter(([k]) => feat(k));
+  card.innerHTML = `<h2>⚙️ Features</h2><p class="hint">${on.length} of ${FEATURES.length} on: ${on.map(([, e]) => e).join(" ")}</p>
+    <div class="btnrow"><button class="primary" data-setupopen>✨ Choose the features</button></div>`;
 }
 document.addEventListener("change", e => {
   const k = e.target.dataset && e.target.dataset.feat;
@@ -7248,7 +7448,7 @@ function drawSchool() {
   if (!schoolKid) {
     $("schoolTitle").textContent = "🎒 School";
     $("schoolSub").textContent = "";
-    $("schoolBody").innerHTML = `<div class="card"><p class="sc-empty">There are no kids yet. Add one with ➕ Add user.</p></div>`;
+    $("schoolBody").innerHTML = `<div class="card"><p class="sc-empty">There are no kids yet. Add one in ☰ More → 👨‍👩‍👧 Family.</p></div>`;
     return;
   }
   const u = userById(schoolKid), s = schoolOf(schoolKid);
@@ -8564,7 +8764,7 @@ let ssPhoto = null;   // the photo, already made smaller (a JPEG data URL), or n
 function openSeesaw() {
   if (me !== DAD) return;
   const kids = kidsList();
-  if (!kids.length) return toast("Add a kid first (➕ Add user).");
+  if (!kids.length) return toast("Add a kid first (☰ More → 👨‍👩‍👧 Family).");
   ssKid = kids.some(k => k.id === schoolKid) ? schoolKid : kids[0].id;
   ssPhoto = null;
   $("ssType").value = "homework";
@@ -9045,9 +9245,10 @@ const tooBigText = total => `📦 That's ${sizeText(total)}: too big for the AI 
 const kidNameOf = kid => userById(kid).name;
 // The kid's year from 👤 About / 👨‍👩‍👧 Family, e.g. "Year 5"; else the class from 🏫 School info
 const gradeOf = kid => userById(kid).year || schoolOf(kid).info.grade;
-const curriculumOf = kid => { const c = userById(kid).curriculum; return c && c !== "Other" ? c : ""; };
+// (the AI gets the short name for IGCSE: "British IGCSE", so worksheets follow the IGCSE syllabus for Years 10–11)
+const curriculumOf = kid => { const c = userById(kid).curriculum; return !c || c === "Other" ? "" : c === IGCSE ? "British IGCSE" : c; };
 // Sent with EVERY 🤖 call: the kid's name, 🎓 year / grade and 📚 curriculum
-const kidInfo = kid => ({ ...kidInfo(kid), ...(curriculumOf(kid) ? { curriculum: curriculumOf(kid) } : {}) });
+const kidInfo = kid => ({ kidName: kidNameOf(kid), grade: gradeOf(kid), ...(curriculumOf(kid) ? { curriculum: curriculumOf(kid) } : {}) });
 // "2026-10-19" → "19 October 2026"
 const longDate = s => fromYmd(s).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
@@ -10201,34 +10402,7 @@ function deleteHabit(id) {
   changed();
 }
 
-// ---------- ➕ Add user (from Dad's home page) ----------
-// Only Dad (the admin) can add people. The new person is kept right away and shows in "Who are you?".
-$("auEmojiPick").innerHTML = EMOJIS.map(e => `<button type="button" data-auemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("");
-$("auColors").innerHTML = Object.entries(PALETTE).map(([key, c]) =>
-  `<label title="${key}"><input type="radio" name="auColor" value="${key}"><span style="background:${c.color}"></span></label>`).join("");
-function openAddUser() {
-  if (me !== DAD) return toast(`Ask ${dadName()} 🙂`);
-  $("auName").value = "";
-  $("auEmoji").value = "";
-  $("auColors").querySelectorAll("input").forEach(c => c.checked = c.value === freeColor());
-  $("auErr").textContent = "";
-  $("userModal").hidden = false;
-  $("auName").focus();
-}
-function closeAddUser() { $("userModal").hidden = true; }
-function addUserNow() {
-  if (me !== DAD) return toast(`Ask ${dadName()} 🙂`);
-  const name = $("auName").value.trim().slice(0, 30);
-  const emoji = $("auEmoji").value.trim().slice(0, 8) || "🙂";
-  const picked = $("auColors").querySelector("input:checked");
-  if (!name) return $("auErr").textContent = "Please type a name.";
-  if (data.users.some(u => u.name.toLowerCase() === name.toLowerCase())) return $("auErr").textContent = "Someone already has that name.";
-  data.users.push({ id: newId(), name, emoji, color: picked ? picked.value : freeColor() });
-  closeAddUser();
-  keepNow();
-  toast(`✓ ${emoji} ${name} added! They're in “Who are you?” now.`, 3500);
-}
-
+// (New people are added only in 👨‍👩‍👧 Family → ➕ Add a kid / Add a parent. Settings → People only changes or removes them.)
 function drawUsers() {
   $("userList").innerHTML = data.users.map(u => {
     const count = allActs().filter(a => a.users.includes(u.id)).length;
@@ -10243,8 +10417,7 @@ function resetUserForm() {
   $("uEmoji").value = "";
   $("uName").value = "";
   setColor(freeColor());
-  $("uAdd").textContent = "Add person";
-  $("uCancel").hidden = true;
+  $("uForm").hidden = true;   // (the form is only for ✏️ Edit)
   $("uErr").textContent = "";
   if (screen === "settings") drawUsers();
 }
@@ -10256,14 +10429,13 @@ function startEditUser(id) {
   $("uEmoji").value = u.emoji;
   $("uName").value = u.name;
   setColor(u.color);
-  $("uAdd").textContent = "Save changes";
-  $("uCancel").hidden = false;
+  $("uForm").hidden = false;
   $("uErr").textContent = "";
   drawUsers();
   $("uName").focus();
 }
 $("uAdd").onclick = () => {
-  if (me !== DAD) return;
+  if (me !== DAD || !editingUser) return;   // (only changes: new people are added in 👨‍👩‍👧 Family)
   const name = $("uName").value.trim().slice(0, 30);
   const emoji = $("uEmoji").value.trim().slice(0, 8) || "🙂";
   const color = pickedColor() || freeColor();
@@ -10534,7 +10706,6 @@ document.addEventListener("click", e => {
   if (e.target === $("kModal")) return closeCard();  // tapped outside the big card
   if (e.target === $("printModal")) return closePrintMenu();
   if (e.target === $("leaveModal")) return answerLeave("stay");   // tapped outside the box = Stay
-  if (e.target === $("userModal")) return closeAddUser();
   if (e.target === $("moveModal")) return closeMoveBox();
   if (e.target === $("backupModal")) return closeBackupBox();
   if (e.target === $("newsModal")) return closeNews();
@@ -10575,13 +10746,8 @@ document.addEventListener("click", e => {
     return $("backupModal").querySelector("[data-backupyes]").focus();
   }
   if ("backupyes" in ds) { closeBackupBox(); return pickBackupFile(true); }
-  // ➕ Add user (Dad only)
-  if ("adduser" in ds) return openAddUser();
-  if ("adduserok" in ds) return addUserNow();
-  if ("addusercancel" in ds) return closeAddUser();
-  if (ds.auemoji) { $("auEmoji").value = ds.auemoji; return; }
   // ⭐ Good habits: a tick, and ◀ ▶ for earlier days this week
-  if (ds.hb) { const [who, id, part] = ds.hb.split("|"); return toggleHabit(who, id, Number(part), t); }
+  if (ds.hb) { const [who, id, part] = ds.hb.split("|"); toggleHabit(who, id, Number(part), t); return popButton(`[data-hb="${ds.hb}"]`); }
   if (ds.hbday) { habitDay = Math.max(0, Math.min(todayIndex(), habitDay + Number(ds.hbday))); return render(); }
   // 👨‍👩‍👧 A parent's habits: a chip, ✏️ Edit habits, and 🎁 the weekly prize
   if (ds.ph) { const [who, id] = ds.ph.split("|"); return toggleParentHabit(who, id, t); }
@@ -10595,11 +10761,18 @@ document.addEventListener("click", e => {
   if ("phsave" in ds) return parentHabitEdit("save");
   if ("phcancel" in ds) return parentHabitEdit("cancel");
   if ("pzgive" in ds) return givePrize();
-  // 🏠 Today: ☰ More, 👋 the tour, 📅 the family calendar; ☰ More pages (🛒 🗣️ 💰 📱 🌅 📗 🧹)
+  // 🏠 Today: ☰ More, 👋 the tour, 📅 the family calendar; ☰ More pages (🗣️ 📱 📗 🧹)
   if ("homemore" in ds) { homeMore = !homeMore; return render(); }
   if ("tour" in ds) { homeMore = false; render(); return showTour(); }
   if ("calall" in ds) { calWho = "all"; return go("mine"); }
+  // ✨ Make the app yours (parents)
+  if ("setupopen" in ds) return openSetup();
+  if (ds.setupfeat) { if (setupDraft) setupDraft[ds.setupfeat] = !setupDraft[ds.setupfeat]; return render(); }
+  if ("setupall" in ds) { if (setupDraft) FEATURES.forEach(([k]) => setupDraft[k] = true); return render(); }
+  if ("setupsave" in ds) return saveSetup(false);
+  if ("setuplater" in ds) return saveSetup(true);
   if (isExtraTap(ds)) return extraTap(ds, t);
+  if (Object.keys(ds).some(k => LEADER_KEYS.includes(k))) return leaderTap(ds);   // 🏆 🎁 prize · 💬 note
   // 📔 My day: open (mine or a kid's), a face, a day in the strip, whose days, 💾 Save
   if (ds.dyopen !== undefined) return openDiary(ds.dyopen || me);
   if (ds.dymood) { diaryMood = ds.dymood; document.querySelectorAll("[data-dymood]").forEach(b => { const on = b.dataset.dymood === ds.dymood; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); }); return; }
@@ -10697,11 +10870,9 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("kModal").hidden) closeCard();
   if (e.key === "Escape" && !$("printModal").hidden) closePrintMenu();
   if (e.key === "Escape" && !$("leaveModal").hidden) answerLeave("stay");
-  if (e.key === "Escape" && !$("userModal").hidden) closeAddUser();
   if (e.key === "Escape" && !$("moveModal").hidden) closeMoveBox();
   if (e.key === "Escape" && !$("backupModal").hidden) closeBackupBox();
   if (e.key === "Escape" && !$("newsModal").hidden) closeNews();
-  if (e.key === "Enter" && !$("userModal").hidden && e.target.matches && e.target.matches("#auName, #auEmoji")) addUserNow();
   // Keyboard: Enter or Space on a block opens its big card
   if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("[data-kblock]")) {
     e.preventDefault();
@@ -11155,7 +11326,7 @@ function cloudUpdateFields(name, now) {
   const fb = cloud.fb, before = cloud.sent[name] || {}, changes = [];
   // Ticks, 👨‍👩‍👧 auto points, 🎁 prizes, 🧩 riddles and answers: one field per item (so two phones don't overwrite each other)
   const BY_ITEM = ["marks", "auto", "prizes", "riddles", "riddleAns", "diary", "lifetime", "levels", "duties", "wishes",
-                   "shop", "meeting", "money", "screen", "pics", "quran", "quranHeard", "chores"];
+                   "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes"];
   BY_ITEM.filter(k => now[k] && typeof now[k] === "object").forEach(k => {
     const was = before[k] && typeof before[k] === "object" ? before[k] : {}, is = now[k];
     new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
@@ -11351,7 +11522,7 @@ function planNews(before, now) {
   if (edited.length) parts.push("changed " + few(edited));
   // (a person's own 🕌 prayer choice isn't news for the family)
   const plain = (k, p) => k !== "users" ? p[k] : (p.users || []).map(({ showPrayer, prayerRemind, buddy, focus, toured, ...u }) => u);   // (🌱 a buddy, ⭐ focus habits, 👋 the tour: not news either)
-  [["users", "the people"], ["routines", "the routines"], ["habits", "the good habits"], ["parentHabits", "the parents' habits"]].forEach(([k, label]) => {
+  [["users", "the people"], ["routines", "the routines"], ["habits", "the good habits"], ["parentHabits", "the parents' habits"], ["features", "the app's features"]].forEach(([k, label]) => {
     if (sameText(plain(k, before)) !== sameText(plain(k, now))) parts.push("changed " + label);
   });
   if (sameText(before.myDay) !== sameText(now.myDay) || before.maxTogether !== now.maxTogether
