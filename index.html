@@ -262,7 +262,19 @@
   .home-date span { display: block; font-size: 19px; font-weight: 700; color: var(--muted); }
   .home-date.kid b { font-size: 28px; }
   .home-date.kid span { font-size: 16px; }
-  /* 👀 Your kids' work today */
+  /* 👀 Your kids' work today: one short card per kid (wraps on a 360px phone), the details folded */
+  .kw-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+  .kw-card { display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 100%; margin: 0; text-align: left; white-space: normal;
+             background: var(--soft); border: 2px solid var(--c); border-left-width: 8px; color: var(--text); font: inherit; font-weight: 500; }
+  .kw-name { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 19px; }
+  .kw-name .e { font-size: 26px; }
+  .kw-name small { margin-left: auto; font-size: 13px; font-weight: 800; }
+  .kw-line { font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+  .kw-line small { color: var(--muted); font-weight: 700; white-space: nowrap; }
+  .kw-counts { font-weight: 700; color: var(--ink); }
+  .kw-all { margin-top: 12px; }
+  .kw-all summary { cursor: pointer; font-weight: 800; min-height: 44px; display: flex; align-items: center; }
+  /* (the older list rows, now inside the details) */
   .kw-list { list-style: none; margin: 0; padding: 0; }
   .kw-list li + li { border-top: 1px solid var(--line); }
   .kw-item { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: baseline; width: 100%; padding: 12px 4px; border: none; background: none;
@@ -453,8 +465,8 @@
   .fam-list-today { list-style: none; margin: 0; padding: 0; }
   .fam-list-today li { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
   .ft-time { flex: 0 0 66px; color: var(--muted); font-weight: 800; font-size: 14px; }
-  .ft-who { flex: none; font-size: 20px; }
-  .ft-what { min-width: 0; overflow-wrap: anywhere; }
+  .ft-who { flex: none; margin-left: auto; font-size: 18px; letter-spacing: 1px; text-align: right; max-width: 45%; overflow-wrap: anywhere; }
+  .ft-what { flex: 1 1 auto; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
   /* 👨‍👩‍👧 A parent's Family tiles: the same tiles, smaller (3 a row on a phone, 5 on a computer) */
   .fam-tiles-card { margin-top: 18px; }
   .fam-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
@@ -5031,17 +5043,15 @@ function riddlesSolved(user, from, to) {
 }
 
 // ---------- 🤖 Making today's riddles (the first family device after 5:00, a kid's too; never twice the same day) ----------
+// 🧩 What /riddles gets about each person: ONLY name, role, age / year, curriculum, level and school subjects
+// (never the calendar, activities, habits or anything private: the riddles are brain teasers, school knowledge and world facts)
 function riddleMembers() {
-  const d = todayIndex(), days = planDays(), date = ymd(dayDate(d));
   return data.users.map(u => {
-    const parent = isParentId(u.id), s = schoolOf(u.id);
-    const acts = (days ? days[d].items.filter(it => it.users.includes(u.id)).map(it => (allActs().find(a => a.id === it.actId) || {}).name) : [])
-      .concat((data.parentActs || []).filter(a => a.by === u.id && pactStartOn(a, date)).map(a => a.title)).filter(Boolean);
+    const parent = isParentId(u.id), s = schoolOf(u.id), bd = birthdayInfo(u.birthday);
     const levels = subjectList(s).map(f => { const x = s.profile.subjects[f.id]; return x && x.level ? `${f.name}: ${LEVEL_WORDS[x.level]}` : ""; }).filter(Boolean);
-    return { name: u.name, role: parent ? "parent" : "kid", year: parent ? "adult" : gradeOf(u.id) || "primary school",
-             level: parent ? "adult" : levels.join(", ") || "not known yet",
-             habits: (parent ? parentHabitsFor(u.id) : habitsFor(u.id)).map(h => h.name),
-             activities: [...new Set(acts)], subjects: parent ? [] : subjectList(s).map(f => f.name) };
+    return { name: u.name, role: parent ? "parent" : "kid", ...(!parent && bd && bd.age != null ? { age: bd.age } : {}),
+             year: parent ? "adult" : gradeOf(u.id) || "primary school", ...(!parent && curriculumOf(u.id) ? { curriculum: curriculumOf(u.id) } : {}),
+             level: parent ? "adult" : levels.join(", ") || "not known yet", subjects: parent ? [] : subjectList(s).map(f => f.name) };
   });
 }
 // The last 60 questions (so nothing repeats)
@@ -5844,34 +5854,35 @@ function noteWhen(date, kind, ref, who, on) {
 }
 function kidsWorkItems() {
   const date = todayYmd(), today = todayIndex(), kids = kidsList().map(k => k.id), out = [], when = data.points.when;
-  const add = (at, kid, text, open) => { if (kids.includes(kid)) out.push({ at: at || "", kid, text, open: open || "" }); };
+  // (cat: "school" | "act" | "habit" | "prayer" | "riddle" | "mood" | "duty": the summary names only school work and activities)
+  const add = (at, kid, text, open, cat) => { if (kids.includes(kid)) out.push({ at: at || "", kid, text, open: open || "", cat: cat || "school" }); };
   // ✅ activities ticked today
   Object.entries(data.points.marks).forEach(([key, m]) => {
     const [d, actId] = key.split("|");
     if (Number(d) !== today) return;
     const a = allActs().find(x => x.id === actId);
-    add(m.at, m.user, `✅ finished ${a ? a.name : "an activity"}`, "go|mine");
+    add(m.at, m.user, `✅ finished ${a ? a.name : "an activity"}`, "go|mine", "act");
   });
   // ⭐ habits and 🕌 prayers
   Object.entries(data.habitMarks).forEach(([key, v]) => {
     const [dt, hid, who] = key.split("|"), h = dt === date && data.habits.find(x => x.id === hid);
     if (!h) return;
     const w = part => when[`${date}|hb|${hid}-${part}|${who}`];
-    if (h.kind === "prayers") { if (Array.isArray(v)) v.forEach((on, i) => { if (on) add(w(i), who, `🕌 prayed ${PRAYERS[i]}`, "me|" + who); }); }
-    else if (habitDone(h, v)) add(w(0), who, `${h.emoji} ${h.name}`, "me|" + who);
+    if (h.kind === "prayers") { if (Array.isArray(v)) v.forEach((on, i) => { if (on) add(w(i), who, `🕌 prayed ${PRAYERS[i]}`, "me|" + who, "prayer"); }); }
+    else if (habitDone(h, v)) add(w(0), who, `${h.emoji} ${h.name}`, "me|" + who, "habit");
   });
   // 🧩 riddles solved
   Object.entries(data.points.riddleAns).forEach(([key, v]) => {
     const p = riddleKeyParts(key);
     if (p.help || p.date !== riddleDay() || !v.solved) return;
-    add(when[`${p.date}|rd|${p.n}|${p.who}`], p.who, `🧩 solved a riddle${v.pts ? ` (+${v.pts})` : ""}`, "go|points");
+    add(when[`${p.date}|rd|${p.n}|${p.who}`], p.who, `🧩 solved a riddle${v.pts ? ` (+${v.pts})` : ""}`, "go|points", "riddle");
   });
   // 📔 My day: the mood only
-  kids.forEach(kid => { const e = data.points.diary[`${date}|${kid}`]; if (e && moodFace(e.mood)) add(e.at, kid, `📔 My day: ${moodFace(e.mood)}`, ""); });
+  kids.forEach(kid => { const e = data.points.diary[`${date}|${kid}`]; if (e && moodFace(e.mood)) add(e.at, kid, `📔 My day: ${moodFace(e.mood)}`, "", "mood"); });
   // 🧹 duties
   Object.entries(data.points.chores).forEach(([key, v]) => {
     const [dt, chId, kid] = key.split("|"), ch = choresList().find(x => x.id === chId);
-    if (dt === date) add(v.at, kid, `🧹 ${ch ? ch.emoji + " " + ch.title : "did a duty"}`, "");
+    if (dt === date) add(v.at, kid, `🧹 ${ch ? ch.emoji + " " + ch.title : "did a duty"}`, "", "duty");
   });
   // 🎒 School: homework done, school work uploaded
   kids.forEach(kid => {
@@ -5898,18 +5909,45 @@ function kidsWorkItems() {
   });
   return out.sort((a, b) => (b.at || "").localeCompare(a.at || ""));
 }
-const kwTime = at => at ? new Date(at).toLocaleTimeString("en-US", { timeZone: "Asia/Dubai", hour: "numeric", minute: "2-digit" }) : "Earlier";
+const kwTime = at => at ? new Date(at).toLocaleTimeString("en-US", { timeZone: "Asia/Dubai", hour: "numeric", minute: "2-digit" }) : "";
+// A short school line: "finished a Math worksheet: 8/10 4:35 PM" (no emoji in front, no "(+5)")
+const kwShort = x => x.text.replace(/^\S+\s/, "").replace(/\s*\(\+\d+\)$/, "") + (x.at ? ` <small>${kwTime(x.at)}</small>` : "");
+// 👀 A SHORT summary: one small card per kid (📚 school work and ✅ activities named, with times; habits, prayers, riddles,
+// mood just counts on one line). Tap a card → that kid's details, the long list folded (collapsed) at first.
+function kwCardHtml(k, items) {
+  const c = colorsOf(k), date = todayYmd(), mine = items.filter(x => x.kid === k.id);
+  const school = mine.filter(x => x.cat === "school").slice(0, 4);
+  const acts = todayItems(k.id), done = acts.filter(x => isDone(todayIndex(), x.id, k.id));
+  const markAt = id => (data.points.marks[markKey(todayIndex(), id, k.id)] || {}).at;
+  const habits = mine.filter(x => x.cat === "habit").length, prayers = mine.filter(x => x.cat === "prayer").length;
+  const riddles = mine.filter(x => x.cat === "riddle").length, duties = mine.filter(x => x.cat === "duty").length;
+  const mood = (mine.find(x => x.cat === "mood") || {}).text, face = mood ? mood.replace("📔 My day: ", "") : "";
+  const hasPrayers = habitsFor(k.id).some(h => h.kind === "prayers");
+  return `<button class="card kw-card" data-kwdetail="${safe(k.id)}" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
+    <span class="kw-name"><span class="e">${safe(k.emoji)}</span><b>${safe(k.name)}</b><small>Details ›</small></span>
+    <span class="kw-line">📚 <b>School:</b> ${school.length ? school.map(kwShort).join(" · ") : "nothing yet"}</span>
+    <span class="kw-line">✅ <b>Activities:</b> ${acts.length ? `${done.length} of ${acts.length} done (${acts.map(x => { const ok = done.includes(x), at = ok && markAt(x.id);
+        return `${safe(x.name)} ${ok ? "✅" : "⏳"}${at ? ` <small>${kwTime(at)}</small>` : ""}`; }).join(", ")})` : "none today"}</span>
+    <span class="kw-line kw-counts">⭐ Habits ${habits}${hasPrayers ? ` · 🕌 Prayers ${prayers}/5` : ""}${feat("riddles") ? ` · 🧩 Riddles ${riddles}` : ""}${duties ? ` · 🧹 Duties ${duties}` : ""}${feat("diary") ? ` · 📔 Mood ${face || "–"}` : ""}</span></button>`;
+}
+let kwDetail = null;   // the kid whose details are open, or null (the summary)
 function drawKidsWork() {
   if (!isParentDevice()) return go("home");
-  const kids = kidsList();
-  if (kwKid !== "all" && !kids.some(k => k.id === kwKid)) kwKid = "all";
-  const items = kidsWorkItems().filter(x => kwKid === "all" || x.kid === kwKid);
-  const chip = (id, label, c) => `<button class="chip ${kwKid === id ? "on" : ""}" data-kwkid="${safe(id)}" aria-pressed="${kwKid === id}" ${c ? `style="--soft:${c.soft};--ink:${c.ink}"` : ""}>${label}</button>`;
-  $("kidsWorkBody").innerHTML = `<div class="chips kw-kids">${chip("all", "All")}${kids.map(k => chip(k.id, `<span class="e">${safe(k.emoji)}</span>${safe(k.name)}`, colorsOf(k))).join("")}</div>
-    <div class="card">${items.length ? `<ul class="kw-list">${items.map(x => {
-      const u = userById(x.kid), c = colorsOf(u), inner = `<span class="kw-time">${kwTime(x.at)}</span><span class="kw-what"><b style="color:${c.ink}">${safe(u.name)}</b> ${safe(x.text)}</span>`;
-      return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`;
-    }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</div>`;
+  const kids = kidsList(), items = kidsWorkItems();
+  if (kwDetail && !kids.some(k => k.id === kwDetail)) kwDetail = null;
+  if (!kwDetail) {
+    $("kidsWorkBody").innerHTML = kids.length ? `<div class="kw-cards">${kids.map(k => kwCardHtml(k, items)).join("")}</div>`
+      : `<div class="card"><p class="sc-empty">No kids yet.</p></div>`;
+    return;
+  }
+  // One kid: the card on top, then everything they did today (folded until opened)
+  const k = userById(kwDetail), c = colorsOf(k), list = items.filter(x => x.kid === k.id);
+  $("kidsWorkBody").innerHTML = `<div class="btnrow"><button class="pill" data-kwback>‹ All kids</button></div>${kwCardHtml(k, items).replace("data-kwdetail", "data-kwsame").replace("<small>Details ›</small>", "")}
+    <details class="card kw-all"><summary>📋 Everything ${safe(k.name)} did today (${list.length})</summary>
+      ${list.length ? `<ul class="kw-list">${list.map(x => {
+        const inner = `<span class="kw-time">${x.cat === "school" || x.cat === "act" ? kwTime(x.at) : ""}</span><span class="kw-what">${safe(x.text)}</span>`;
+        return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`;
+      }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</details>`;
 }
 // Tap an item → that thing (parents' devices only look)
 function kidsWorkOpen(v) {
@@ -5922,7 +5960,8 @@ function kidsWorkOpen(v) {
 document.addEventListener("click", e => {
   const b = e.target.closest("#scr-kidswork button");
   if (!b) return;
-  if (b.dataset.kwkid) { kwKid = b.dataset.kwkid; return drawKidsWork(); }
+  if (b.dataset.kwdetail) { kwDetail = b.dataset.kwdetail; drawKidsWork(); return window.scrollTo(0, 0); }   // a kid's card → their details
+  if ("kwback" in b.dataset) { kwDetail = null; return drawKidsWork(); }
   if (b.dataset.kwopen) return kidsWorkOpen(b.dataset.kwopen);
 });
 // (it redraws with every change that comes in; this keeps the times fresh while it's open)
@@ -6852,15 +6891,29 @@ function diaryButtonHtml() {
   return `<button class="big-btn diary dy-home" data-dyopen=""><span class="e">${e ? moodFace(e.mood) : "📔"}</span><b>My day</b><small>${e ? "Saved today ✓ Tap to change" : "How do you feel today?"}</small></button>`;
 }
 // 👨‍👩‍👧 Parents: the family today (everyone's activities, in time order) + ➕ My activity
+// 📅 The family today, SHORT: the same title at the same time = ONE row with everyone's emojis ("6:30 · School · 🚀🦄🦊"),
+// only what's NEXT (not finished yet: past ones are hidden), the next 3 rows, then "See all →" (📅 Calendar → Everyone, today).
 function familyTodayHtml() {
-  const days = planDays(), d = todayIndex(), date = todayYmd();
-  const list = [...(days ? days[d].items.flatMap(it => it.users.map(id => ({ id, name: it.name, start: it.start }))) : []),
-                ...(data.parentActs || []).filter(a => pactStartOn(a, date)).map(a => ({ id: a.by, name: `${pactType(a)[1]} ${a.title}`, start: a.from ? toMin(a.from) : -1 }))]
-    .filter(x => exists(x.id)).sort((a, b) => a.start - b.start);
+  const days = planDays(), d = todayIndex(), date = todayYmd(), now = dubaiMinutes();
+  const list = [...(days ? days[d].items.flatMap(it => it.users.map(id => ({ id, name: it.name, start: it.start, end: it.end }))) : []),
+                ...(data.parentActs || []).filter(a => pactStartOn(a, date)).map(a => ({ id: a.by, name: `${pactType(a)[1]} ${a.title}`,
+                  start: a.from ? toMin(a.from) : -1, end: a.to ? toMin(a.to) : 1440 }))]
+    .filter(x => exists(x.id));
+  const rows = new Map();
+  list.forEach(x => {
+    const key = x.name.trim().toLowerCase() + "|" + x.start;
+    if (!rows.has(key)) rows.set(key, { name: x.name, start: x.start, end: x.end, ids: [] });
+    const r = rows.get(key);
+    r.end = Math.max(r.end, x.end);
+    if (!r.ids.includes(x.id)) r.ids.push(x.id);
+  });
+  const next = [...rows.values()].filter(r => r.end > now).sort((a, b) => a.start - b.start).slice(0, 3);   // (finished: hidden)
+  const order = id => data.users.findIndex(u => u.id === id);
   return `<div class="card fam-today"><div class="sc-head"><h2>📅 The family today</h2><button class="pill" data-pactnew>➕ My activity</button></div>
-    ${list.length ? `<ul class="fam-list-today">${list.slice(0, 10).map(x => `<li><span class="ft-time">${x.start >= 0 ? clock(x.start) : "All day"}</span>
-      <span class="ft-who">${safe(userById(x.id).emoji)}</span><span class="ft-what">${safe(x.name)}</span></li>`).join("")}</ul>` : `<p class="sc-empty">Nothing planned today.</p>`}
-    <div class="td-more"><button class="linkbtn" data-calall>Open the calendar ›</button></div></div>`;
+    ${next.length ? `<ul class="fam-list-today">${next.map(r => `<li><span class="ft-time">${r.start >= 0 ? clock(r.start) : "All day"}</span>
+      <span class="ft-what">${safe(r.name)}</span><span class="ft-who">${r.ids.sort((a, b) => order(a) - order(b)).map(id => safe(userById(id).emoji)).join("")}</span></li>`).join("")}</ul>`
+      : `<p class="sc-empty">${list.length ? "All done for today 🎉" : "Nothing planned today."}</p>`}
+    <div class="td-more"><button class="linkbtn" data-calall>See all →</button></div></div>`;
 }
 
 // =====================================================================
