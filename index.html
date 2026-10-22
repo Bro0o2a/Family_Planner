@@ -1358,8 +1358,8 @@
   .sc-sugg { margin-bottom: 10px; }
   .sc-stars { font-size: 13px; line-height: 1; letter-spacing: -1px; }
   /* 👨‍👩‍👧 A parent's phone: look only (the kids upload and make worksheets) */
-  body.parent-phone #scr-school [data-aiadd], body.parent-phone #scr-school [data-mkopen],
-  body.parent-phone #scr-school [data-scupload], body.parent-phone #scr-school [data-aiws], body.parent-phone #scr-school [data-aiex],
+  /* (✏️ Make a worksheet and 🤖 Explain it are for parents too: only the uploads are the kids') */
+  body.parent-phone #scr-school [data-aiadd], body.parent-phone #scr-school [data-scupload],
   body.parent-phone #scr-school [data-wsrow^="upload|"] { display: none !important; }
   .sc-badge { position: absolute; top: 8px; right: 8px; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 999px;
               background: #dc4a4a; color: #fff; font-size: 15px; font-weight: 800; line-height: 28px; }
@@ -9890,12 +9890,10 @@ function subjectTopics(s, f) {
   weak.forEach(p => { if (!out.some(x => alike(x.title, p))) add({ title: p, work: last.work || null, workTitle: partOf(last, s), topics: [p], weak: true }); });
   return [...out.filter(x => x.weak), ...out.filter(x => !x.weak)];
 }
-// The chips: tap = "sctopic" (the small sheet), "sctopicws" (make a worksheet) or "sctopicex" (explain); on a parent's phone just labels
+// The chips: tap = "sctopic" (the small sheet), "sctopicws" (make a worksheet) or "sctopicex" (explain): kids and parents
 function topicChipsHtml(attr) {
-  const look = isParentPhone();
-  return `<div class="ph-chips sc-tchips">${scTopics.map((t, i) => look
-    ? `<span class="ph-chip sc-tchip ${t.weak ? "weak" : ""}">${t.weak ? "🎯 " : ""}${safe(t.title)}</span>`
-    : `<button class="ph-chip sc-tchip ${t.weak ? "weak" : ""}" data-${attr}="${i}">${t.weak ? "🎯 " : ""}${safe(t.title)}</button>`).join("")}</div>`;
+  return `<div class="ph-chips sc-tchips">${scTopics.map((t, i) =>
+    `<button class="ph-chip sc-tchip ${t.weak ? "weak" : ""}" data-${attr}="${i}">${t.weak ? "🎯 " : ""}${safe(t.title)}</button>`).join("")}</div>`;
 }
 // ▶️ Videos: YouTube searches for the topics needed most (no 🤖 call)
 function videoLinksHtml(f, u) {
@@ -9929,7 +9927,7 @@ function schoolSubjectHtml(s, isDad, u) {
     const rows = files.map(x => {
       const w = x.work && s.work[x.work], first = w && !seen.has(x.work);
       if (w) seen.add(x.work);
-      const btns = !look && first ? `<div class="ai-btns sc-filebtns"><button data-aiws="${safe(x.work)}">✏️ Make a worksheet</button><button data-aiex="${safe(x.work)}" data-aiwait="ex|${safe(x.work)}">🤖 Explain it</button></div>` : "";
+      const btns = first ? `<div class="ai-btns sc-filebtns"><button data-aiws="${safe(x.work)}">✏️ Make a worksheet</button><button data-aiex="${safe(x.work)}" data-aiwait="ex|${safe(x.work)}">🤖 Explain it</button></div>` : "";
       return fileRowHtml(x, s, true).replace(/<\/li>\s*$/, btns + "</li>");
     });
     html += `${look ? "" : `<button class="sc-addbig sc-study" data-aiadd="${safe(f.id)}">⬆️ I want to study this<small>Photo, PDF, PowerPoint or Word · 📥 From Seesaw too</small></button>`}
@@ -9938,12 +9936,15 @@ function schoolSubjectHtml(s, isDad, u) {
   }
   // ✏️ The subject's worksheets, under the file they came from (to do first, then done with the mark), explanations, homework
   if (schoolTab === "worksheets") {
-    if (!look) html += `<div class="btnrow sc-makerow"><button class="primary" data-mkopen="${safe(f.name)}">➕ Make a new worksheet</button></div>`;
+    // (➕ for the kid, or a parent for that kid: "👨‍👩‍👧 from Bro2a" on it, and the kid gets the points when they finish it)
+    html += `<div class="btnrow sc-makerow"><button class="primary" data-mkopen="${safe(f.name)}">➕ Make a new worksheet${look ? ` for ${safe(name)}` : ""}</button>
+      ${scTopics.length ? `<button data-scmake aria-expanded="${scMakeOpen}">🤖 Explain a topic</button>` : ""}</div>
+      ${scMakeOpen && scTopics.length ? `<div class="card bd-card"><p class="hint">🤖 Tap a topic to explain it${look ? ` for ${safe(name)}` : ""}:</p>${topicChipsHtml("sctopicex")}</div>` : ""}`;
     html += aiMount(() => waitingNode(s, f.name));
     const groups = new Map();
     all.forEach(w => { const key = w.work && s.work[w.work] ? w.work : ""; if (!groups.has(key)) groups.set(key, []); groups.get(key).push(w); });
     const order = w => (w.check ? 1 : 0);
-    if (!all.length) html += `<div class="card"><p class="sc-empty">No worksheets yet. ${look ? "" : "Upload a file in 📂, then tap ✏️ Make a worksheet."}</p></div>`;
+    if (!all.length) html += `<div class="card"><p class="sc-empty">No worksheets yet. ${look ? "Tap ➕ to make one, or wait for the kid's uploads." : "Upload a file in 📂, then tap ✏️ Make a worksheet."}</p></div>`;
     [...groups.entries()].sort((a, b) => (a[0] ? 0 : 1) - (b[0] ? 0 : 1)).forEach(([key, list]) => {
       const w0 = key && s.work[key];
       html += aiMount(() => aiListCard(w0 ? `📄 ${w0.title}` : "📝 Other worksheets", h("ul", { class: "list" }, [...list].sort((a, b) => order(a) - order(b)).map(w => wsRowNode(s, w))), ""));
@@ -9966,11 +9967,11 @@ function schoolSubjectHtml(s, isDad, u) {
   if (isDad && !isKidDevice() && checked.length) html += aiMount(() => parentExtrasNode(s, checked));
   return html + subjectOlderHtml(s, f, c, isDad);
 }
-// ---------- 📌 A topic chip → the small sheet: 🤖 Explain it to me · ✏️ Make a worksheet (kids; never on a parent's phone) ----------
+// ---------- 📌 A topic chip → the small sheet: 🤖 Explain it to me · ✏️ Make a worksheet (the kid, or a parent for that kid) ----------
 let tp = null;   // { kid, subject, title, work, workTitle, topics }
 function openTopicSheet(i) {
   const t = scTopics[Number(i)], f = s0Subject();
-  if (!t || !f || isParentPhone()) return;
+  if (!t || !f) return;
   tp = { kid: schoolKid, subject: f.name, ...t };
   $("topicTitle").textContent = `📌 ${t.title}`;
   $("topicFrom").textContent = t.workTitle ? `From: ${t.workTitle}` : f.name;
@@ -9981,7 +9982,7 @@ function closeTopicSheet() { $("topicModal").hidden = true; tp = null; }
 const s0Subject = () => { const s = schoolOf(schoolKid), x = s.subjects[schoolSubject]; return x ? { id: schoolSubject, ...x } : null; };
 // 🤖 Explain: the topic at the kid's level, with the upload's title as context
 async function topicExplain(t) {
-  if (!t || isParentPhone() || aiWait) return;
+  if (!t || aiWait) return;
   const topic = (t.workTitle && t.workTitle.toLowerCase() !== t.title.toLowerCase() ? `${t.title} (from “${t.workTitle}”)` : t.title).slice(0, 200);
   if ($("topicModal").hidden) toast("🤖 Thinking…", 2500);
   await explainTopic(t.kid || schoolKid, t.subject, topic, "tpex", t.work || undefined);   // (the sheet shows "🤖 Thinking…" meanwhile)
@@ -9989,7 +9990,7 @@ async function topicExplain(t) {
 }
 // ✏️ A 🔁 practice worksheet on the topic (with the other topics from that upload)
 async function topicWorksheet(t) {
-  if (!t || isParentPhone() || aiWait) return;
+  if (!t || aiWait) return;
   if ($("topicModal").hidden) toast("🤖 Thinking…", 2500);
   const kid = t.kid || schoolKid, topics = [t.title, ...(t.topics || []).filter(x => x.toLowerCase() !== t.title.toLowerCase())].slice(0, 6);
   const ok = await newWorksheet(kid, t.subject, topics, PRACTICE_COUNT, "practice", "tpws", { part: t.workTitle || t.title, ...(t.work ? { work: t.work } : {}) });
@@ -10066,13 +10067,15 @@ function fileStatus(f, s) {
 const WS_PURPOSE = { level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"],
                      placement: ["🧪", "Placement test"] };
 // A worksheet row: its status (✅ the score and the short note), then 📂 🖨️ 📸 ✅ 🔑
+// "👨‍👩‍👧 from Bro2a": a worksheet / explanation a parent made for the kid (it's in the kid's lists too)
+const madeByParent = d => d.by && d.by !== d.kid && exists(d.by) && isParentId(d.by) ? `👨‍👩‍👧 from ${userById(d.by).name}` : "";
 function wsRowNode(s, w) {
   const files = w.answers.filter(x => s.files[x]), done = !!w.check, canAct = isDadNow() || !done, [emoji, label] = WS_PURPOSE[w.purpose] || ["📝", ""];
   const status = done ? `${num(w.check.score)}/${num(w.check.max_score)} · ${wsPct(w)}%` : files.length ? "⏳ Waiting for check" : "Not done";
   const note = done ? w.check.dadNote || w.check.overall_note : "";
   return h("li", { class: "sc-wsrow" },
     h("button", { class: "bd-file", data: { aiopen: "worksheet|" + w.id } }, h("span", { class: "e" }, emoji),
-      h("span", { class: "what" }, w.title, h("small", null, [label, partOf(w, s), shortDate(w.date)].filter(Boolean).join(" · ")))),
+      h("span", { class: "what" }, w.title, h("small", null, [label, partOf(w, s), shortDate(w.date), madeByParent(w)].filter(Boolean).join(" · ")))),
     h("div", { class: "sc-wsstatus" }, h("span", { class: "ai-status " + (done ? "lv-" + pctLevel(wsPct(w)) : files.length ? "up" : "") }, status)),
     note ? h("p", { class: "sc-wsnote" }, note.length > 140 ? note.slice(0, 137) + "…" : note) : null,
     h("div", { class: "ai-btns sc-wsbtns" },
@@ -10583,8 +10586,8 @@ $("scr-school").addEventListener("click", e => {
   if (ds.scsubhide) return hideSubject(ds.scsubhide);
   if (ds.scsubdel) return deleteSubject(ds.scsubdel);
   if (ds.scsugg) { const [e, n] = ds.scsugg.split("|"); if ($("scsEmoji")) $("scsEmoji").value = e; if ($("scsName")) { $("scsName").value = n; $("scsName").focus(); } return; }
-  // 👨‍👩‍👧 A parent's phone looks only: the kids upload, make worksheets and ask 🤖 to explain
-  const KID_ONLY = ["scupload", "aiadd", "aiws", "aiex", "mkopen", "scmake", "sctopic", "sctopicws", "sctopicex"];
+  // 👨‍👩‍👧 A parent's phone: the kids upload their files and answers; parents may ✏️ make worksheets and 🤖 explain for a kid
+  const KID_ONLY = ["scupload", "aiadd"];
   if (isParentPhone() && (KID_ONLY.some(k => k in ds) || (ds.wsrow || "").startsWith("upload|"))) return toast(`🙂 ${userById(schoolKid) ? userById(schoolKid).name : "The kids"} does this on their own phone.`, 3000);
   // 📌 Topic chips: the small sheet · ✏️ make a worksheet · 🤖 explain
   if ("scmake" in ds) { scMakeOpen = !scMakeOpen; return render(); }
@@ -11681,7 +11684,6 @@ let mk = null;   // { subject, picked: [topic titles], typed: [topics typed by h
 const MAKE_COUNTS = [5, 10, 15];
 const topicsKey = subject => subject.trim().toLowerCase().slice(0, 40);
 function openMake(subject) {
-  if (isParentPhone()) return toast("🙂 The kids make worksheets on their own phone.", 3000);   // 👨‍👩‍👧 parents look only
   mk ={ subject: subject || "", picked: [], typed: [], count: 10 };
   goSchool("make");
   if (subject) maybeLoadTopics();
@@ -11790,7 +11792,7 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
   const id = newId();
   aiSave("worksheets", id, ws);
   if (open && screen === "school" && schoolKid === kid) openAiDoc("worksheet", id);
-  if (mode === "practice") giveAuto("practice", id);   // 👨‍👩‍👧 +5 for the parent who made it
+  // (👨‍👩‍👧 a parent who makes it earns no school points: the kid earns them when they finish it)
   return id;
 }
 async function makeLevelCheck(kid, workId) {
@@ -12016,14 +12018,15 @@ function wsListNode(list, showSubject) {
 function exListNode(list) {
   if (!list.length) return null;
   return h("ul", { class: "list" }, list.map(x => h("li", null, h("button", { class: "bd-file", data: { aiopen: "explain|" + x.id } },
-    h("span", { class: "e" }, "📖"), h("span", { class: "what" }, x.title, h("small", null, shortDate(x.date) + (x.topic && x.topic !== x.title ? " · " + x.topic : "")))))));
+    h("span", { class: "e" }, "📖"), h("span", { class: "what" }, x.title, h("small", null, shortDate(x.date) + (x.topic && x.topic !== x.title ? " · " + x.topic : "") + (madeByParent(x) ? " · " + madeByParent(x) : "")))))));
 }
 // Open a saved worksheet / explanation (from the lists, or right after it was made)
 function openAiDoc(view, id) {
   const d = (view === "worksheet" ? aiDocs.worksheets : aiDocs.explanations)[id];
   if (!d || (view !== "worksheet" && view !== "explain")) return;
-  if (me !== DAD && d.kid !== me) return;   // a kid only opens their own
-  if (me === DAD && exists(d.kid)) schoolKid = d.kid;
+  const parent = me === DAD || isParentDevice();
+  if (!parent && d.kid !== me) return;   // a kid only opens their own (a parent: any kid's)
+  if (parent && exists(d.kid)) schoolKid = d.kid;
   const f = folderOf(schoolOf(d.kid), d.subject);
   schoolView = view; schoolSubject = f ? f.id : null; schoolDoc = id;
   schoolEdit = schoolEditId = null; schoolFresh = true; schoolReport = false; wsAnswers = false; wsFix = false;
@@ -12387,7 +12390,7 @@ async function checkWorksheet(wsId) {
   const now = aiDocs.worksheets[wsId] || w;
   aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });   // (with its subject and part, and 💪 🎯 🦉)
   const first = saveWsMark(now.kid, wsId, now, c);
-  giveAuto("check", wsId);   // 👨‍👩‍👧 +5 for the parent who checked it (once a worksheet)
+  // (👨‍👩‍👧 no school points for a parent who checks it: the kid earns them)
   notifyCheck(now, c);
   if (now.purpose === "placement") afterPlacement(now.kid, wsId, c, first);   // 🧪 → the level (and 📋 the brief when all are checked)
   if (now.purpose === "level_check") afterLevelCheck(now.kid, now, c);       // 🧭 the subject's first level check → its level (saved once)
@@ -13211,11 +13214,12 @@ document.addEventListener("click", e => {
   if (ds.school) return leaveDraft(() => openSchool(ds.school));   // 🎒 School page
   if (ds.editFixed) return startEditFixed(ds.editFixed);
   if (ds.editFlex) return startEditFlex(ds.editFlex);
-  if (ds.delFixed) return deleteActivity(ds.delFixed, true);
-  if (ds.delFlex) return deleteActivity(ds.delFlex, false);
+  // (🗑️ a parent deleting in the activities editor, on purpose: the only way the plan may be emptied in the cloud)
+  if (ds.delFixed) { planWipeOk = isParentDevice(); return deleteActivity(ds.delFixed, true); }
+  if (ds.delFlex) { planWipeOk = isParentDevice(); return deleteActivity(ds.delFlex, false); }
   if (ds.rtnew) return openRoutineForm(ds.rtnew === "custom" ? null : ROUTINE_PRESETS[Number(ds.rtnew)], null);
   if (ds.editRt) return openRoutineForm(null, data.routines.find(r => r.id === ds.editRt));
-  if (ds.delRt) return deleteRoutine(ds.delRt);
+  if (ds.delRt) { planWipeOk = isParentDevice(); return deleteRoutine(ds.delRt); }
   if (ds.editUser) return startEditUser(ds.editUser);
   if (ds.delUser) return removeUser(ds.delUser);
   if (ds.emoji) { $("uEmoji").value = ds.emoji; return; }
@@ -13694,23 +13698,37 @@ function cloudUseCloud(keepEarly) {
 // ticks added or removed are copied over one by one; a saved plan change wins as a whole.
 function keepEarlyChanges(remote, base, local) {
   if (sameText(base) === sameText(local)) return remote;
-  const b = splitData(base), l = splitData(local), r = splitData(remote);
+  const b = splitData(base), l = splitData(local), r = splitData(remote), kid = isKidDevice() ? kidDeviceId() : null;
   if (sameText(b.plan) !== sameText(l.plan)) {
-    const cloudPlan = r.plan;
-    r.plan = { ...l.plan, users: (l.plan.users || []).map(u => ({ ...u })) };
-    mergePicks(r.plan, cloudPlan);   // 🌱 👋 ⭐ (a buddy, the tour, habits chosen on another phone aren't lost)
+    // ⚠️ This device's plan may win ONLY when: not a kid's device, the plan it started from had real activities, and this
+    // device was already synced with this same family. (An emptied device, e.g. right after signing out and in with a code,
+    // must never replace the family's activities and week plan.) Otherwise: the cloud's plan, plus this device's first-time picks.
+    const mayWin = !isKidDevice() && planSize(b.plan) > 0 && cloudMeta().uid === cloud.familyId;
+    if (mayWin) {
+      const cloudPlan = r.plan;
+      r.plan = { ...l.plan, users: (l.plan.users || []).map(u => ({ ...u })) };
+      mergePicks(r.plan, cloudPlan);   // 🌱 👋 ⭐ (a buddy, the tour, habits chosen on another phone aren't lost)
+    } else mergePicks(r.plan, l.plan);   // (the cloud's plan stays; only 🌱 👋 ⭐ picks made here are added)
   }
   ["points", "habits"].forEach(part => {
     const bm = b[part].marks || {}, lm = l[part].marks || {}, rm = r[part].marks = r[part].marks || {};
     new Set([...Object.keys(bm), ...Object.keys(lm)]).forEach(key => {
       if (sameText(bm[key]) === sameText(lm[key])) return;
+      if (kid && key.split("|").pop() !== kid) return;   // (🧒 a kid's device: only their own ticks)
       if (hasOwn(lm, key)) rm[key] = lm[key]; else delete rm[key];
     });
   });
-  // 🎒 School changes made here in those first seconds win as a whole
-  if (sameText(b.habits.school) !== sameText(l.habits.school)) r.habits.school = l.habits.school;
+  // 🎒 School changes made here in those first seconds win (🧒 a kid's device: only that kid's own school data)
+  if (sameText(b.habits.school) !== sameText(l.habits.school)) {
+    if (!kid) r.habits.school = l.habits.school;
+    else if (l.habits.school && hasOwn(l.habits.school, kid)) r.habits.school = { ...(r.habits.school || {}), [kid]: l.habits.school[kid] };
+  }
   return cleanData(joinData(r.plan, r.points, r.habits));
 }
+// How much real plan there is: fixed + flexible activities + routines (0 = an empty plan)
+const planSize = p => ((p && p.fixed) || []).length + ((p && p.flexible) || []).length + ((p && p.routines) || []).length;
+// 🗑️ A parent deleted activities on purpose in the activities editor (on a parent's device): the only time an empty plan may be sent
+let planWipeOk = false;
 // From now on every change goes to the cloud right away
 function cloudReady() {
   cloud.ready = true;
@@ -13731,7 +13749,13 @@ function changeNote(what) { return { by: me || "", at: new Date().toISOString(),
 // Everything: replaces the 3 cloud documents (first upload, "Replace cloud", Import backup, Clear everything)
 // told = someone did it on purpose (Import backup, Clear everything, Load example): tell the family
 function cloudUploadAll(told) {
+  if (isKidDevice()) return console.warn("☁️ Not sent: a kid's device never replaces the family's cloud data.");
   const parts = splitData(data);
+  // ⚠️ Safety net: an empty plan never replaces a cloud plan that has activities (unless a parent deleted them on purpose)
+  if (cloud.sent && planSize(planOnly(cloud.sent.plan)) > 0 && planSize(parts.plan) === 0 && !(planWipeOk && isParentDevice())) {
+    console.warn("☁️ Plan NOT replaced: it has no activities or routines, but the family's cloud plan has some. The cloud copy is kept.");
+    parts.plan = planOnly(cloud.sent.plan);
+  }
   if (told) {
     const what = "replaced all the family data";
     parts.plan.change = changeNote(what);
@@ -13746,12 +13770,27 @@ function cloudUpload(how) {
   const now = splitData(data), told = how !== "auto", news = [];
   // The plan document is sent whole (it only changes with 💾 Save, "Plan my week", adding a person …)
   const before = planOnly(cloud.sent.plan);
+  // 🧒 A kid's device never removes or replaces activities, the week plan or other people's data: from its plan only the
+  // kid's OWN profile (name, emoji, colour, birthday, picks, school basics …) goes up; everything else stays as the cloud has it.
+  const kid = isKidDevice() ? kidDeviceId() : null;
+  if (kid) {
+    const own = (now.plan.users || []).find(u => u.id === kid), list = Array.isArray(before.users) ? before.users : null;
+    now.plan = list && own && list.some(u => u.id === kid) ? { ...before, users: list.map(u => u.id === kid ? own : u) } : before;
+  }
   if (sameText(now.plan) !== sameText(before)) {
-    const what = planNews(before, now.plan);   // ("" = only someone's own prayer choice: not news)
-    const change = told && what ? changeNote(what) : (cloud.sent.plan || {}).change;
-    cloud.sent.plan = change ? { ...now.plan, change } : now.plan;
-    cloud.fb.setDoc(cloud.refs.plan, cloud.sent.plan).catch(cloudError);
-    if (told && what) news.push(newsItem("plan", what));
+    // ⚠️ Safety net: never send a plan with 0 activities and 0 routines over a cloud plan that has some
+    // (only a parent deleting them on purpose in the activities editor, on a parent's device, may do that)
+    if (planSize(before) > 0 && planSize(now.plan) === 0 && !(planWipeOk && isParentDevice() && !kid)) {
+      console.warn("☁️ Plan NOT sent: it has no activities or routines, but the family's cloud plan has " + planSize(before)
+        + ". The cloud copy is kept (only a parent deleting them in the activities editor may empty it).");
+    } else {
+      planWipeOk = false;
+      const what = planNews(before, now.plan);   // ("" = only someone's own prayer choice: not news)
+      const change = told && what ? changeNote(what) : (cloud.sent.plan || {}).change;
+      cloud.sent.plan = change ? { ...now.plan, change } : now.plan;
+      cloud.fb.setDoc(cloud.refs.plan, cloud.sent.plan).catch(cloudError);
+      if (told && what) news.push(newsItem("plan", what));
+    }
   }
   // Ticks and unticks (worked out before cloud.sent is updated below)
   if (told) news.push(...tickNews(cloud.sent.points, now.points), ...habitNews(cloud.sent.habits, now.habits));
@@ -13765,9 +13804,11 @@ function cloudUpdateFields(name, now) {
   // Ticks, 👨‍👩‍👧 auto points, 🎁 prizes, 🧩 riddles and answers: one field per item (so two phones don't overwrite each other)
   const BY_ITEM = ["marks", "auto", "prizes", "riddles", "riddleAns", "diary", "lifetime", "levels", "duties", "wishes",
                    "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes", "study", "prizeMsg", "reach", "when", "hall", "community", "cmReact", "cmDone"];
+  const kid = isKidDevice() ? kidDeviceId() : null;   // (🧒 a kid's device: only their own ticks and their own school data go up)
   BY_ITEM.filter(k => now[k] && typeof now[k] === "object").forEach(k => {
     const was = before[k] && typeof before[k] === "object" ? before[k] : {}, is = now[k];
     new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
+      if (kid && k === "marks" && key.split("|").pop() !== kid) return;
       if (!hasOwn(is, key)) changes.push(new fb.FieldPath(k, key), fb.deleteField());   // unticked
       else if (sameText(was[key]) !== sameText(is[key])) changes.push(new fb.FieldPath(k, key), is[key]);
     });
@@ -13776,6 +13817,13 @@ function cloudUpdateFields(name, now) {
   // 🎒 "school" (habits document): only the items that changed (e.g. school.mody.tasks.abc12), when the cloud has it already.
   Object.keys(now).forEach(k => {
     if (BY_ITEM.includes(k) || sameText(before[k]) === sameText(now[k])) return;
+    if (k === "school" && kid) {   // 🧒 only school.<this kid>, never the other kids' school data
+      const w = before.school && typeof before.school === "object" ? before.school : {}, n = now.school || {};
+      if (sameText(w[kid]) === sameText(n[kid])) return;
+      if (w[kid] && n[kid]) changes.push(...schoolChanges({ [kid]: w[kid] }, { [kid]: n[kid] }));
+      else if (n[kid]) changes.push(new fb.FieldPath("school", kid), n[kid]);
+      return;
+    }
     if (k === "school" && before.school && typeof before.school === "object") changes.push(...schoolChanges(before.school, now.school));
     else changes.push(k, now[k]);
   });
@@ -13783,7 +13831,9 @@ function cloudUpdateFields(name, now) {
   cloud.sent[name] = now;
   fb.updateDoc(cloud.refs[name], ...changes).catch(err => {
     // The document isn't in the cloud yet: create it with everything
-    if (err && err.code === "not-found") fb.setDoc(cloud.refs[name], splitData(data)[name]).catch(cloudError);
+    // (🧒 never from a kid's device: it would write the whole document)
+    if (err && err.code === "not-found" && !kid) fb.setDoc(cloud.refs[name], splitData(data)[name]).catch(cloudError);
+    else if (err && err.code === "not-found") console.warn("☁️ Not sent: a kid's device doesn't create the family's " + name + " document.");
     else cloudError(err);
   });
 }
