@@ -1547,6 +1547,11 @@
   .fam-code { margin: 6px 0 10px; font-size: 18px; overflow-wrap: anywhere; }
   .fam-form { margin: 8px 0 12px; }
   .fam-kid .ai-btns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
+  /* 🗑️ Reset study data: a red button, and its box (type the kid's name to confirm) */
+  button.danger-fill, .fam-kid .ai-btns button.danger-fill { background: var(--danger); border-color: var(--danger); color: #fff; }
+  button.danger-fill:hover { background: #b91c1c; border-color: #b91c1c; }
+  button.danger-fill:disabled { opacity: .4; cursor: default; }
+  #rsName { width: 100%; margin: 4px 0 14px; }
   /* ⏳ Waiting for a parent (kids' uploads and requests: a parent's device does the 🤖 part) */
   .sc-wait { margin: 0 0 18px; background: #eef6ff; border: 3px solid #93c5fd; }
   .sc-wait li { flex-wrap: wrap; }
@@ -2816,6 +2821,20 @@
       <button class="primary" id="pmOpen">🤖 Open Claude</button>
       <button id="pmAnswers" hidden>📎 Open the answers</button>
       <button id="pmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🗑️ Reset a kid's study data (👨‍👩‍👧 Family, parents' devices only): type the kid's name, then Delete -->
+<div class="k-modal" id="resetModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
+    <div class="print-title" id="rsTitle">🗑️ Reset study data</div>
+    <p class="print-hint" id="rsHint"></p>
+    <label class="small" for="rsName" id="rsLabel"></label>
+    <input type="text" id="rsName" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="btnrow">
+      <button class="danger-fill" id="rsDel" disabled>🗑️ Delete</button>
+      <button id="rsCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -5061,6 +5080,8 @@ function newWeek() {
   Object.keys(data.points.prizes).sort().reverse().slice(104 * 2).forEach(key => delete data.points.prizes[key]);
   data.points.week = thisWeek;
   data.points.marks = {};
+  // 📅 A plan from last week (it may have kept days from the middle of the week): this week is planned in full, all 7 days
+  if (data.plan && data.plan !== "redo" && data.plan.week && data.plan.week !== thisWeek) makeAndKeepPlan(true);
   return true;
 }
 
@@ -8029,6 +8050,11 @@ function deleteActivity(id, isFixedOne) {
   const act = list.find(a => a.id === id);
   if (!act || !canEdit(act)) return;
   if (!confirm(`Delete “${act.name}”?`)) return;
+  // 📅 Its items on the days that are gone (and today) stay as history: they remember its name, people and type
+  // (today's ones that haven't started and aren't ticked are taken out when the week is planned again, see makePlan)
+  if (data.plan && data.plan !== "redo") data.plan.days.forEach((day, d) => d <= todayIndex() && day.items.forEach(it => {
+    if (it.actId === id && !!it.fixed === !!isFixedOne) it.gone = { name: act.name, users: [...act.users], people: peopleOf(act), type: actTypeOf(act) };
+  }));
   if (isFixedOne) data.fixed = data.fixed.filter(f => f.id !== id);
   else data.flexible = data.flexible.filter(f => f.id !== id);
   allActs().forEach(a => a.overlapWith = a.overlapWith.filter(x => x !== id)); // remove it from other checklists
@@ -8231,7 +8257,7 @@ function spreadDay(day) {
   const shares = (a, b) => a.people.some(p => b.people.includes(p));
   const overlaps = (a, b) => a.start < b.end && b.start < a.end;
   // (📌 pinned activities stay exactly where Bro2a put them)
-  const movable = day.items.filter(it => !it.fixed && !it.pinned && !day.items.some(o => o !== it && shares(it, o) && overlaps(it, o)));
+  const movable = day.items.filter(it => !it.fixed && !it.pinned && !it.kept && !day.items.some(o => o !== it && shares(it, o) && overlaps(it, o)));
   for (let pass = 0; pass < 3; pass++) {
     for (const it of movable) {
       const len = it.end - it.start;
@@ -8259,17 +8285,43 @@ function spreadDay(day) {
   }
 }
 
-function makePlan() {
+// full = plan all 7 days (a new week). Otherwise (the middle of the week) nothing new goes on a day that's gone:
+// Monday … yesterday stay exactly as saved, today keeps what it has and only gets new things AFTER now (Dubai time),
+// and tomorrow … Sunday are planned again. No saved plan yet (or "redo"): from now on.
+// A deleted activity's items stay on the days that are gone, and today if they started or were ticked (history).
+function makePlan(full = false) {
   const warnings = [];
+  const old = data.plan && data.plan !== "redo" ? data.plan : null;
+  if (old && old.week && old.week !== mondayOf(new Date())) full = true;   // (a plan from another week: the whole week again)
+  const from = full ? 0 : todayIndex(), now = full ? 0 : dubaiMinutes();
 
   // STEP A: For each day, note "My day", and how much free time each person has.
-  const days = DAYS.map((name, i) => ({ items: [], window: dayWindow(i) }));
+  // (Days that are gone: no room for anything new. Today: only from now, on a tidy 5 minutes.)
+  const days = DAYS.map((name, i) => {
+    const w = dayWindow(i), s = i === from ? Math.max(w[0], Math.ceil(now / 5) * 5) : w[0];
+    return { items: [], window: i < from || s >= w[1] ? null : [s, w[1]] };
+  });
   const capacity = DAYS.map((_, i) => Object.fromEntries(data.users.map(u => [u.id, totalLength(freeFor(i, u.id))])));
 
+  // STEP A2 (the middle of the week): keep the saved items of the days that are gone and of today, as they are.
+  const keptOf = {};   // flexible activity id → the days it's already on (they count towards its "times a week")
+  if (!full && old) old.days.forEach((day, d) => { if (d <= from) day.items.forEach(it => {
+    const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === it.actId);
+    const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${d}|${it.actId}|`));
+    if (!act && d === from && it.start > now && !ticked) return;   // deleted, not started, not ticked: gone from now on
+    const pre = act && !it.fixed ? act.getReady || 0 : 0, post = act && !it.fixed ? act.breakAfter || 0 : 0;
+    const people = act ? peopleOf(act) : it.gone ? it.gone.people : [];
+    days[d].items.push({ name: act ? act.name : "", start: it.start - pre, end: it.end + post, pre, post, fixed: !!it.fixed,
+                         kept: it, actId: it.actId, users: act ? act.users : people, people });
+    if (act && !it.fixed) (keptOf[act.id] = keptOf[act.id] || []).push(d);
+  }); });
+
   // STEP B: Put fixed activities at their exact times.
+  // (The middle of the week: not on days that are gone; today only if it isn't there yet and starts from now.)
   for (const f of data.fixed) {
     const s = toMin(f.start), e = toMin(f.end), people = peopleOf(f);
     for (const d of f.days) {
+      if (d < from || (!full && d === from && (s < now || days[d].items.some(it => it.kept && it.actId === f.id)))) continue;
       // Same person busy twice at once? (activities you allowed together are fine)
       // (Different people at the same time is always fine.)
       const clash = days[d].items.find(it => it.start < e && s < it.end && it.people.some(p => people.includes(p)) && !f.overlapWith.includes(it.actId));
@@ -8298,8 +8350,9 @@ function makePlan() {
 
   // 📌 Activities Bro2a moved by hand are pinned: put them first, exactly where he put them.
   // The others are planned around them.
-  const pinnedOf = {};   // activity id → the days it's pinned on
-  if (data.plan && data.plan !== "redo") data.plan.days.forEach((day, d) => day.items.forEach(it => {
+  // (The middle of the week: only the pins from tomorrow on; the ones on today and before are already kept above.)
+  const pinnedOf = keptOf;   // activity id → the days it's pinned (or kept) on
+  if (old) old.days.forEach((day, d) => (full || d > from) && day.items.forEach(it => {
     const act = !it.fixed && it.pinned && data.flexible.find(a => a.id === it.actId);
     if (!act) return;
     const pre = act.getReady || 0, post = act.breakAfter || 0;
@@ -8387,15 +8440,18 @@ function planKey() {
 }
 function planIsOld() { return !!data.plan && data.plan.key !== planKey(); }
 // Plan the week now and keep it (only the times; names and colors are looked up when drawing)
-function makeAndKeepPlan() {
-  const p = makePlan();
+// full = all 7 days (a new week); otherwise the days that are gone stay as they are (see makePlan)
+function makeAndKeepPlan(full = false) {
+  const p = makePlan(full);
   data.plan = {
     // (routines aren't saved in the plan: they're added live when drawing)
     // (the plan keeps the activity's own times: the get ready / break around it are added when drawing)
-    days: p.days.map(day => ({ items: day.items.filter(it => !it.routine).map(it =>
+    // (kept items are saved exactly as they were)
+    days: p.days.map(day => ({ items: day.items.filter(it => !it.routine).map(it => it.kept ? { ...it.kept } :
       ({ actId: it.actId, fixed: !!it.fixed, start: it.start + (it.pre || 0), end: it.end - (it.post || 0), ...(it.pinned ? { pinned: true } : {}) })) })),
     warnings: p.warnings,
-    key: planKey()
+    key: planKey(),
+    week: mondayOf(new Date())   // (the Monday of the week it's for: a new week is planned again in full, see newWeek)
   };
   return p;
 }
@@ -8414,6 +8470,9 @@ function planDays() {
   return data.plan.days.map((day, i) => {
     const items = day.items.map(it => {
       const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === it.actId);
+      // (🗂️ a deleted activity kept as history on a day that's gone: drawn from what it remembers, look-only)
+      const g = !act && it.gone, users = g ? g.users.filter(exists) : [];
+      if (g) return users.length ? { ...it, name: g.name, users, people: g.people.filter(exists), helper: "", type: g.type } : null;
       return act ? { ...it, name: act.name, users: act.users, people: peopleOf(act), helper: helperOf(act) ? act.helper : "", type: actTypeOf(act) } : null;
     }).filter(Boolean).sort((a, b) => a.start - b.start || b.fixed - a.fixed);
     // Strips (kept apart from activities: no checkbox, no points): routines, the fixed activities' get ready / break,
@@ -8582,7 +8641,7 @@ function weekHtml(days, opts) {
                   aria-label="${safe(`Locked until ${d > today ? DAYS[d] : clock(b.start, true)}: ${b.name}`)}" title="${safe(d > today ? `On ${DAYS[d]}` : `At ${clock(b.start, true)}`)}">🔒</button>`;
         const label = `${on ? "Done! Tap to untick" : d > today ? "Not yet" : "Tap when done"}: ${owner.name}, ${b.name}`;
         // 🔒 A kid's device: someone else's tick is only a picture (look-only, no button)
-        if (kidLockedOut(a.user)) return `<span class="k-check ${on ? "on" : ""}" role="img" style="--c:${colorsOf(owner).color}"
+        if (kidLockedOut(a.user) || b.gone) return `<span class="k-check ${on ? "on" : ""}" role="img" style="--c:${colorsOf(owner).color}"
                   aria-label="${safe(`${on ? "Done" : "Not done yet"}: ${owner.name}, ${b.name}`)}">${on ? "✓" : b.acts.length > 1 ? `<span class="e">${safe(owner.emoji)}</span>` : ""}</span>`;
         return `<button class="k-check ${on ? "on" : ""}" data-check="${d}|${safe(a.actId)}|${safe(a.user)}" ${allowed ? "" : "disabled"}
                   style="--c:${colorsOf(owner).color}" aria-pressed="${on}" aria-label="${safe(label)}" title="${safe(label)}">
@@ -8591,7 +8650,7 @@ function weekHtml(days, opts) {
       // Bro2a can drag flexible activities (not fixed ones). A moved one has a 📌 (Bro2a taps it to unpin).
       // Edit mode (Bro2a): flexible activities get a ✥ handle and a dashed border and can be moved;
       // fixed ones look locked 🔒. A moved one has a 📌 (tap it in edit mode to unpin).
-      const drag = opts.drag && !b.fixed ? `data-drag="${d}|${safe(b.actId)}"` : "";
+      const drag = opts.drag && !b.fixed && !b.gone ? `data-drag="${d}|${safe(b.actId)}"` : "";
       const pin = !b.pinned ? "" : opts.drag
         ? `<button class="k-pin" data-unpin="${d}|${safe(b.actId)}" title="Moved by hand. Tap to unpin" aria-label="Pinned. Tap to unpin">📌</button>`
         : `<span class="k-pin" title="Placed by ${safe(dadName())}">📌</span>`;
@@ -13873,7 +13932,8 @@ function drawFamily() {
           ${u.code ? `<button data-famcopy="${safe(u.id)}">📋 Copy</button><button data-famshare="${safe(u.id)}">📤 Share</button>` : ""}
           <button data-famcode="${safe(u.id)}">${u.code ? "🔁 New code" : "🔑 Make code"}</button>
           ${famEdit === u.id ? "" : `<button data-famedit="${safe(u.id)}">✏️ Edit</button>`}
-          <button class="danger-text" data-famdel="${safe(u.id)}">🗑️ Remove</button></div></div>`;
+          <button class="danger-text" data-famdel="${safe(u.id)}">🗑️ Remove</button>
+          ${isParentDevice() ? `<button class="danger-fill" data-famreset="${safe(u.id)}">🗑️ Reset study data</button>` : ""}</div></div>`;
     }).join("")}</div>` : `<div class="card"><p class="sc-empty">No kids yet. Tap ➕ Add a kid.</p></div>`}
     <div class="card bd-card" style="margin-top:18px"><h2>👨‍👩‍👧 Add a parent</h2>
       <p class="hint">Makes a code for the other parent. They open the app, tap 👨‍👩‍👧 I'm a parent → Parent code, sign up with their own email, and type the code. It works once.</p>
@@ -13971,8 +14031,83 @@ $("scr-family").addEventListener("click", e => {
   if ("famidcopy" in ds) return copyText(cloud.familyId || "").then(ok => toast(ok ? "📋 Family ID copied" : "Couldn't copy. Please write it down.", 2400));
   if (ds.famshare) return shareCode(ds.famshare, "share");
   if (ds.famdel) return removeFamilyKid(ds.famdel);
+  if (ds.famreset) return openResetStudy(ds.famreset);
   if ("famdone" in ds) { familySetup = false; return go("home"); }
 });
+
+// ---------- 🗑️ Reset a kid's study data (parents, on a parent's device) ----------
+// Deletes, for THAT kid only: their files, worksheets and explanations (cloud documents with kid == them), and in their school data
+// the 📚 topics, 📂 files list, 📥 school work, 🧠 learning profile, 🌍 official curriculum map and the worksheet results;
+// and their 📚 study session results. Subjects, school basics (profile), calendar (events), activities and points stay.
+// (The school data and the session results go up as field changes: school.<kid>.<part>.<id> / sessions.<key>, see cloudUpdateFields,
+// so the other kids' data is never touched.)
+let resetKid = null;
+const resetOk = kid => isParentId(me) && isParentDevice() && exists(kid) && !isParentId(kid);
+function openResetStudy(kid) {
+  if (!resetOk(kid)) return;
+  const name = userById(kid).name;
+  resetKid = kid;
+  $("rsHint").textContent = `This deletes ALL of ${name}'s study data: files, topics, worksheets and results, explanations, learning profile, ` +
+    `study session results and the official curriculum map. Subjects, school basics, calendar, activities and points stay. ` +
+    `This can't be undone. Tip: 💾 Export a backup first.`;
+  $("rsLabel").textContent = `Type ${name} to confirm`;
+  $("rsName").value = "";
+  $("rsDel").disabled = true;
+  $("resetModal").hidden = false;
+  $("rsName").focus();
+}
+function closeResetStudy() { $("resetModal").hidden = true; resetKid = null; }
+// (the name as typed, without spaces around it; capitals don't matter, phones often add one)
+const resetNameOk = () => !!resetKid && exists(resetKid) && sameSubject($("rsName").value, userById(resetKid).name);
+$("rsName").addEventListener("input", () => $("rsDel").disabled = !resetNameOk());
+$("rsName").addEventListener("keydown", e => { if (e.key === "Enter" && resetNameOk()) $("rsDel").click(); });
+$("rsCancel").onclick = closeResetStudy;
+$("resetModal").addEventListener("click", e => { if (e.target === $("resetModal")) closeResetStudy(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("resetModal").hidden) closeResetStudy(); });
+$("rsDel").onclick = () => { if (!resetNameOk()) return; const kid = resetKid; closeResetStudy(); resetStudyData(kid); };
+async function resetStudyData(kid) {
+  if (!resetOk(kid)) return;
+  if (!cloud.ready || !cloud.familyId || !navigator.onLine) return toast("🔌 Resetting study data needs the internet and the family sign-in.", 4000);
+  const fb = cloud.fb, name = userById(kid).name;
+  toast(`🗑️ Deleting ${name}'s study data…`, 8000);
+  // 1) The cloud documents (files, worksheets, explanations) that are this kid's: batch deletes (at most 400 a batch)
+  const gone = { files: [], worksheets: [], explanations: [] };
+  try {
+    const refs = [];
+    for (const col of Object.keys(gone)) {
+      const snap = await fb.getDocs(fb.query(fb.collection(cloud.db, "families", cloud.familyId, col), fb.where("kid", "==", kid)));
+      snap.forEach(d => { refs.push(d.ref); gone[col].push(d.id); });
+    }
+    for (let i = 0; i < refs.length; i += 400) {
+      const batch = fb.writeBatch(cloud.db);
+      refs.slice(i, i + 400).forEach(r => batch.delete(r));
+      await batch.commit();
+    }
+  } catch (err) {
+    console.warn("Reset study data:", err);
+    return toast("⚠ Couldn't delete the study data. Nothing in the school data was changed. Please try again.", 5000);
+  }
+  // … and this device's copies of them (also files still waiting to go up)
+  gone.worksheets.forEach(id => delete aiDocs.worksheets[id]);
+  gone.explanations.forEach(id => delete aiDocs.explanations[id]);
+  const s = data.school[kid], fileIds = new Set([...gone.files, ...Object.keys(s ? s.files : {}),
+    ...Object.entries(fileWaiting).filter(([, p]) => p.kid === kid).map(([id]) => id)]);
+  fileIds.forEach(id => { delete fileCache[id]; delete fileWaiting[id]; try { localStorage.removeItem(FILE_KEY + id); } catch (e) {} });
+  // 2) The school data: topics, files list, work, learning profile, curriculum map, worksheet results
+  // (curr and map are emptied, not removed, so they aren't made again from older data; see cleanSchool)
+  if (s) {
+    Object.assign(s, { files: {}, work: {}, learn: {}, map: {}, topics: {}, curr: {} });
+    Object.keys(s.grades).forEach(id => { if (s.grades[id].type === "worksheet" || s.grades[id].worksheet) delete s.grades[id]; });
+    // (no pointers left to deleted files: a homework's uploaded answer, and 📥 school work still waiting to be read)
+    Object.values(s.tasks).forEach(t => { if (t.answer && fileIds.has(t.answer)) delete t.answer; });
+    Object.keys(s.requests).forEach(id => { if (s.requests[id].kind === "work") delete s.requests[id]; });
+  }
+  // 3) Their 📚 study session results ("date|actId|kid")
+  Object.keys(data.points.sessions).forEach(key => { if (key.split("|").pop() === kid) delete data.points.sessions[key]; });
+  keepNow();
+  toast(`✓ ${name}'s study data was reset.`, 3500);
+  addNews([newsItem("school", `🗑️ ${userById(me).name} reset ${name}'s study data`, "🗑️ reset study data", me)]);
+}
 
 // ---------- Backup: Export and Import ----------
 // Export: turn your data into a text file (JSON) and download it.
