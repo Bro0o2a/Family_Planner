@@ -753,6 +753,28 @@
   }
   /* Routines card: quick-add buttons and the little form */
   .rt-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  /* ✏️ Add activities: three big buttons with counts (accordion), clean rows, the form only when asked for */
+  .add-secs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 90px; }
+  .add-sec { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 12px 18px; border-radius: 22px;
+             font-size: 20px; text-align: left; white-space: normal; }
+  .add-sec .e { font-size: 30px; }
+  .add-sec b { flex: 1; }
+  .add-sec .add-count { color: var(--muted); font-weight: 800; }
+  .add-sec::after { content: "▾"; color: var(--muted); font-size: 18px; transition: transform .15s; }
+  .add-sec.on { border-color: var(--accent); background: var(--accent-soft); }
+  .add-sec.on::after { transform: rotate(180deg); }
+  .add-panel { margin: -6px 0 6px; }
+  .add-panel > .btnrow:first-of-type { margin-top: 0; }
+  .add-form { margin: 12px 0; padding: 14px 16px; border-radius: 20px; background: var(--accent-soft); }
+  .add-form-title { margin: 0 0 8px; font-size: 18px; }
+  .add-new-label { display: block; margin: 2px 0 8px; }
+  .add-list li { padding: 0; }
+  .add-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 8px 4px; border: none; border-radius: 12px;
+             background: none; text-align: left; font: inherit; color: inherit; white-space: normal; }
+  button.add-row:hover { background: var(--accent-soft); }
+  .add-row .what { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .add-row .add-go { flex: none; font-size: 16px; opacity: .7; }
+  .add-list li.editing .add-row { background: var(--accent-soft); font-weight: 800; }
   .rt-btn { border-radius: 999px; font-size: 18px; font-weight: 800; padding: 6px 16px; }
   .rt-btn small { font-size: 14px; font-weight: 600; color: var(--muted); }
   .rt-form { background: var(--accent-soft); border-radius: 22px; padding: 14px 16px; margin-bottom: 6px; }
@@ -1714,6 +1736,14 @@
     .k-block .when { font-size: 14px; white-space: nowrap; letter-spacing: -.01em; }
   }
 
+  /* 👨‍👩‍👧 Which parent are you? · 👤 Signed in as */
+  .wp-card { padding: 0 16px 16px; }
+  .wp-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 10px; margin-top: 10px; }
+  .wp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 110px; border-radius: 22px; background: var(--soft); color: var(--ink); white-space: normal; }
+  .wp-btn .e { font-size: 44px; line-height: 1.1; }
+  .wp-btn b { font-size: 19px; }
+  .me-signed { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0 0 12px; font-size: 15px; color: var(--muted); }
+  .me-signed b { color: var(--text); }
   /* 📜 EVERY pop-up (✨ Spark picker, 🎁 gift, 👋 tour, 🧩 riddle, 🌱 level up, all the boxes): at most the screen height, the
      middle scrolls inside (smooth on phones); the title stays on top and the Save / Cancel / OK buttons stay at the bottom.
      (While one is open, the page behind doesn't scroll: html.popup-open, see the script.) */
@@ -2289,11 +2319,16 @@
   <h1 class="page-title" id="addTitle"></h1>
   <p class="lead" id="addSub"></p>
 
-  <div class="two-col">
+  <!-- ✏️ Closed and simple: three big buttons (📌 Fixed · 🔄 Flexible · 🧺 Routines for parents), each opens its list (accordion).
+       A list's "➕ New …" or a row opens the form (only then); the form has 💾 Save · Cancel · 🗑️ Delete. See ADD PAGE. -->
+  <div class="add-secs">
     <!-- Fixed activities: same time every week -->
-    <div class="card">
-      <h2>📌 Same time every week</h2>
-      <p class="hint">Like school or gym. You choose the days and the time.</p>
+    <button class="add-sec" id="secFxBtn" data-addsec="fx" aria-expanded="false" aria-controls="secFx"><span class="e">📌</span><b>Fixed activities</b><span class="add-count" id="fxCount"></span></button>
+    <div class="card add-panel" id="secFx" hidden>
+      <p class="hint">Same time every week, like school or gym. You choose the days and the time.</p>
+      <div class="btnrow"><button class="primary" data-addnew="fx">➕ New fixed activity</button></div>
+      <div class="add-form" id="fxForm" hidden>
+      <h3 class="add-form-title" id="fxFormTitle">➕ New fixed activity</h3>
       <div class="row"><div><label class="small">Name</label><input type="text" id="fxName" placeholder="School"></div></div>
       <div id="fxWhoWrap"><label class="small">Who?</label><div class="whopick" id="fxWho"></div></div>
       <label class="small">Which days</label>
@@ -2315,17 +2350,22 @@
         <div class="pick-list" id="fxOverlapList"></div>
       </div>
       <div class="btnrow">
-        <button class="primary" id="fxAdd">Add</button>
-        <button id="fxCancel" hidden>Cancel</button>
+        <button class="primary" id="fxAdd">💾 Save</button>
+        <button id="fxCancel">Cancel</button>
+        <button class="danger-text" id="fxDel" hidden>🗑️ Delete</button>
       </div>
       <div class="err" id="fxErr"></div>
-      <ul class="list" id="fxList"></ul>
+      </div>
+      <ul class="list add-list" id="fxList"></ul>
     </div>
 
     <!-- Flexible activities: the plan finds the time -->
-    <div class="card">
-      <h2>🧩 Find a time for me</h2>
+    <button class="add-sec" id="secFlBtn" data-addsec="fl" aria-expanded="false" aria-controls="secFl"><span class="e">🔄</span><b>Flexible activities</b><span class="add-count" id="flCount"></span></button>
+    <div class="card add-panel" id="secFl" hidden>
       <p class="hint">Like a lesson 3 times a week. The plan finds good times.</p>
+      <div class="btnrow"><button class="primary" data-addnew="fl">➕ New flexible activity</button></div>
+      <div class="add-form" id="flForm" hidden>
+      <h3 class="add-form-title" id="flFormTitle">➕ New flexible activity</h3>
       <div class="row"><div><label class="small">Name</label><input type="text" id="flName" placeholder="Math"></div></div>
       <div id="flWhoWrap"><label class="small">Who?</label><div class="whopick" id="flWho"></div></div>
       <div class="row">
@@ -2351,18 +2391,20 @@
         <div class="pick-list" id="flOverlapList"></div>
       </div>
       <div class="btnrow">
-        <button class="primary" id="flAdd">Add</button>
-        <button id="flCancel" hidden>Cancel</button>
+        <button class="primary" id="flAdd">💾 Save</button>
+        <button id="flCancel">Cancel</button>
+        <button class="danger-text" id="flDel" hidden>🗑️ Delete</button>
       </div>
       <div class="err" id="flErr"></div>
-      <ul class="list" id="flList"></ul>
+      </div>
+      <ul class="list add-list" id="flList"></ul>
     </div>
-  </div>
 
-  <!-- Routines (Dad only): daily things like eating and shower -->
-  <div class="card" id="rtCard" style="margin-top:18px">
-    <h2>🧺 Routines</h2>
+  <!-- Routines (parents only): daily things like eating and shower -->
+  <button class="add-sec" id="secRtBtn" data-addsec="rt" aria-expanded="false" aria-controls="rtCard"><span class="e">🧺</span><b>Routines</b><span class="add-count" id="rtCount"></span></button>
+  <div class="card add-panel" id="rtCard" hidden>
     <p class="hint">Daily things like eating, shower and getting ready. Nothing else is planned on top of them. No points.</p>
+    <b class="add-new-label">➕ New routine:</b>
     <div class="rt-quick" id="rtQuick"></div>
     <div class="rt-form" id="rtForm" hidden>
       <div class="rt-title" id="rtTitle"></div>
@@ -2377,12 +2419,14 @@
       <label class="small">Who?</label>
       <div class="whopick" id="rtWho"></div>
       <div class="btnrow">
-        <button class="primary" id="rtAdd">Add</button>
+        <button class="primary" id="rtAdd">💾 Save</button>
         <button id="rtCancel">Cancel</button>
+        <button class="danger-text" id="rtDel" hidden>🗑️ Delete</button>
       </div>
       <div class="err" id="rtErr"></div>
     </div>
-    <ul class="list" id="rtList"></ul>
+    <ul class="list add-list" id="rtList"></ul>
+  </div>
   </div>
   <!-- Save bar: changes on this page are a draft until you tap Save -->
   <div class="savebar">
@@ -2904,6 +2948,14 @@
   </div>
 </div>
 <!-- ✨ What's your Spark's name? (once, right after picking it; changeable in 👤 My profile) -->
+<!-- 👨‍👩‍👧 Which parent are you? (the family's main login on a new device, 2+ parents; saved on this device only, see askWhichParent) -->
+<div class="k-modal" id="whoParentModal" hidden>
+  <div class="k-card wp-card" role="dialog" aria-modal="true" aria-labelledby="wpTitle">
+    <div class="print-title" id="wpTitle">👨‍👩‍👧 Which parent are you?</div>
+    <p class="print-hint">This phone shares the family's main login. Tap yourself (asked only once on this phone).</p>
+    <div class="wp-list" id="whoParentList"></div>
+  </div>
+</div>
 <div class="k-modal" id="sparkNameModal" hidden>
   <div class="k-card sn-card" role="dialog" aria-modal="true" aria-labelledby="snTitle">
     <div class="sn-face" id="snFace" aria-hidden="true"></div>
@@ -2980,6 +3032,13 @@ const APP_NAME = "Hani's Family Plan";
 const CONTACT = "";                              // 🔒 Privacy: who to ask (an email, …). Empty = the "Questions?" line is hidden.
 const PRIVACY_UPDATED = "21 October 2026";       // 🔒 Privacy: change this when the text changes
 const DAD = "dad";                               // Dad's id. Dad can't be removed. (Only the shown name can change.)
+// 👨‍👩‍👧 A parent: the family's first parent (DAD), or another parent (a person with role: "parent", e.g. one who joined with a
+// parent code). Every parent has the same rights; DAD is still the one the week planner means by "needs Dad".
+function isParentId(id) {
+  if (id === DAD) return true;
+  try { return !!id && !!data && Array.isArray(data.users) && data.users.some(u => u.id === id && u.role === "parent"); }
+  catch (e) { return false; }   // (before the family's data is loaded)
+}
 const DAD_NAME = "Bro2a";                        // the name Dad is shown with
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
 // 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
@@ -3234,6 +3293,8 @@ const BUDDIES = {
 Object.values(BUDDIES).forEach(b => { b.label = `${b.stages[0]} ${b.first} → ${b.stages[b.stages.length - 1]} ${b.last}`; });
 // 👨‍👩‍👧 The parents' good habits: their own list, in groups. One tick a day = points (+5, or what's written).
 // id always starts with "ph-" (so a tick's points are known even after the habit is removed). off = the parents who hid it.
+// (⚠️ The parents' habits FEATURE was removed. These stay ONLY so the family's old saved parent-habit data is read and kept
+//  unchanged in the cloud (cleanData). Nothing shows or counts them.)
 const PARENT_HABIT_POINTS = 5;
 const PARENT_HABIT_GROUPS = [["kids", "👨‍👧", "With the kids"], ["faith", "🕌", "Faith"], ["health", "💪", "Health"],
                              ["calm", "🧘", "Calm & organised"], ["family", "❤️", "Family"], ["work", "💼", "Work"], ["other", "⭐", "My own"]];
@@ -3408,6 +3469,8 @@ function cleanData(d) {
       .map(u => ({ id: u.id, name: u.name.trim().slice(0, 30),
                    emoji: typeof u.emoji === "string" && u.emoji.trim() ? u.emoji.trim().slice(0, 8) : "🙂",
                    color: hasOwn(PALETTE, u.color) ? u.color : "purple",
+                   // 👨‍👩‍👧 another parent (the family's first parent is always DAD): same rights as DAD, not a kid
+                   ...(u.role === "parent" && u.id !== DAD ? { role: "parent" } : {}),
                    // 🕌 their own choice (older saved data: not set yet → they're asked once)
                    ...(typeof u.showPrayer === "boolean" ? { showPrayer: u.showPrayer } : {}),
                    ...(typeof u.prayerRemind === "boolean" ? { prayerRemind: u.prayerRemind } : {}),
@@ -4175,7 +4238,7 @@ let screen = "start";
 
 const exists = id => data.users.some(u => u.id === id);
 // Kids can only change activities that are just theirs (not shared ones like School). Dad can change everything.
-const canEdit = act => me === DAD || (act.users.length === 1 && act.users[0] === me);
+const canEdit = act => isParentId(me) || (act.users.length === 1 && act.users[0] === me);
 
 // fromHistory = true when we got here with the phone's/browser's Back button
 function go(name, fromHistory) {
@@ -4186,14 +4249,16 @@ function go(name, fromHistory) {
   }
   // 📅 The old calendar pages ("Everyone's plan", "View all plan") are now 📅 Calendar → Everyone
   if (name === "all" || name === "view") { name = "mine"; calWho = "all"; if (screen === "mine") screen = ""; }
-  if (name === "family" && me !== DAD) name = "home";   // 👨‍👩‍👧 Family: parents only
+  if (name === "family" && !isParentId(me)) name = "home";   // 👨‍👩‍👧 Family: parents only
   if (name === "kidswork" && !isParentDevice()) name = "home";   // 👀 Your kids' work today: parents only
+  // ✏️ Add activities opens CLOSED and simple every time (no list or form open)
+  if (name === "add" && screen !== "add") { addOpen = { fx: false, fl: false, rt: false }; resetFixedForm(); resetFlexForm(); closeRoutineForm(); }
   // 👤 This device is always the person signed in on it (no "Switch user" / "Who are you?"): see deviceMe
   if (!exists(me)) { const dm = deviceMe(); if (dm) me = dm; }
   if (name === "start" && exists(me)) name = "home";
   if (name !== "start" && !exists(me)) name = "start";   // (only while signing in / the family's data is on its way)
   // (Settings: everyone can open it, but the kids only see their own 🕌 Prayer times.)
-  if (name === "school" && me !== DAD) schoolKid = me;   // 🎒 a kid only sees their own School page
+  if (name === "school" && !isParentId(me)) schoolKid = me;   // 🎒 a kid only sees their own School page
   if (name === "school" && name !== screen) { schoolEdit = schoolEditId = null; schoolFresh = true; }
   // Remember each screen in the browser history, so Back goes to the previous screen (not out of the app)
   if (!fromHistory && name !== screen) { try { history.pushState({ screen: name }, ""); } catch (e) {} }
@@ -4212,26 +4277,72 @@ function go(name, fromHistory) {
   window.scrollTo(0, 0);
 }
 // (🔄 "Switch user" was removed: nobody can change who they are on a device)
-// 👤 Who this device is: always the person signed in on it. A kid's code → that kid · a parent's login → that parent
-// (saved on their account: members/{uid}.person, the same on all their devices; the family's first parent = Bro2a,
-//  a 2nd parent who joined with a parent code = the other parent) · no family account (the app opened as a file) → the first parent.
-// null = not known yet (still signing in, or the family's data isn't here yet).
+// 👤 Who this device is: ALWAYS the person signed in on it, never the family's first parent (Bro2a) by mistake.
+//   · a kid's code → that kid
+//   · a parent's OWN account (joined with a parent code: not the family's main login) → their own parent person, linked on their
+//     account (members/{uid}.person, the same on all their devices). Not there yet → it's made for them (see linkOwnParent). Never DAD.
+//   · the family's MAIN login (it may be shared by several parents) → the parent picked on THIS device (cloud meta "devicePerson");
+//     with only 1 parent: that one; with 2+ and no pick yet: "Which parent are you?" (once, see askWhichParent)
+//   · no family account (the app opened as a file) → the first parent
+// null = not known yet (still signing in, the family's people aren't here yet, or waiting for the pick).
+const isMainLogin = meta => !!meta && !!meta.familyId && (meta.uid === meta.familyId || meta.uid === OLD_FAMILY_UID);
+const parentsList = () => data.users.filter(u => isParentId(u.id));
 function deviceMe() {
   if (isKidDevice()) return exists(kidDeviceId()) ? kidDeviceId() : null;
   const meta = cloudMeta().member;
   if (!meta) return cloud.enabled ? null : DAD;   // (file://: no sign-in, the first parent)
-  if (meta.person && exists(meta.person) && isParentId(meta.person)) return meta.person;
-  if (!cloud.ready) return null;   // (wait for the family's people before working out a 2nd parent)
-  let id = DAD;
-  if (meta.familyId && meta.uid !== meta.familyId && meta.uid !== OLD_FAMILY_UID) {
-    const others = data.users.filter(u => isParentId(u.id) && u.id !== DAD);
-    const named = others.find(u => meta.name && u.name.trim().toLowerCase() === meta.name.trim().toLowerCase());
-    id = (named || others[0] || {}).id || DAD;
+  if (isMainLogin(meta)) {
+    const pick = cloudMeta().devicePerson;
+    if (pick && exists(pick) && isParentId(pick)) return pick;
+    if (parentsList().length <= 1) return DAD;   // (only one parent: no question)
+    if (!cloud.ready) return null;                // (wait for the family's people)
+    askWhichParent();
+    return null;
   }
-  setCloudMeta({ member: { ...meta, person: id } });
-  if (cloud.user && cloud.fb) cloud.fb.updateDoc(cloud.fb.doc(cloud.db, "members", cloud.user.uid), { person: id }).catch(() => {});
-  return id;
+  // A parent's own account: their own person (a link to DAD from before this fix doesn't count: that was the mistake)
+  if (meta.person && meta.person !== DAD && exists(meta.person) && isParentId(meta.person)) return meta.person;
+  if (!cloud.ready) return null;   // (wait for the family's people)
+  return linkOwnParent(meta);
 }
+// 🆕 A parent who joined with a parent code: find their own parent person (by the name they typed at sign up), or ADD one
+// (a free emoji and colour, like the other parents), save it in the family's plan for everyone, and link it to their account.
+let linkingParent = false;
+function linkOwnParent(meta) {
+  if (linkingParent || cloud.role !== "parent") return null;
+  const name = (meta.name || "").trim();
+  let u = name && data.users.find(x => x.id !== DAD && isParentId(x.id) && x.name.trim().toLowerCase() === name.toLowerCase());
+  if (!u) {
+    linkingParent = true;
+    const used = new Set(data.users.map(x => x.emoji));
+    const emoji = ["👩", "👨", "🧕", "👩‍🦱", "🧔", "👱‍♀️", "🙂"].find(e => !used.has(e)) || "🙂";
+    u = { id: newId(), name: (name || "Parent").slice(0, 30), emoji, color: freeColor(), role: "parent" };
+    data.users.push(u);
+    writeData();   // (saved normally: everyone's devices see the new parent)
+    linkingParent = false;
+  }
+  setCloudMeta({ member: { ...meta, person: u.id } });
+  if (cloud.user && cloud.fb) cloud.fb.updateDoc(cloud.fb.doc(cloud.db, "members", cloud.user.uid), { person: u.id }).catch(() => {});
+  return u.id;
+}
+// 👨‍👩‍👧 "Which parent are you?" (the family's main login on a new device, 2+ parents): big buttons, saved on THIS device only
+function askWhichParent(again) {
+  const box = $("whoParentModal");
+  if (!box || (!box.hidden && !again)) return;
+  $("whoParentList").innerHTML = parentsList().map(u => { const c = colorsOf(u);
+    return `<button class="wp-btn" data-wpick="${safe(u.id)}" style="--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(u.emoji)}</span><b>${safe(u.name)}</b></button>`; }).join("");
+  box.hidden = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#whoParentModal [data-wpick]");
+  if (!b) return;
+  const id = b.dataset.wpick;
+  if (!exists(id) || !isParentId(id) || !isMainLogin(cloudMeta().member)) return;
+  setCloudMeta({ devicePerson: id });   // (this device only: not on the shared account)
+  $("whoParentModal").hidden = true;
+  me = id;
+  go("home");
+  toast(`👋 Hi ${userById(id).name}!`, 2500, colorsOf(userById(id)).color);
+});
 // (older links to "View all plan": 📅 Calendar → Everyone)
 function openViewAll() { calWho = "all"; go("mine"); }
 
@@ -4378,13 +4489,13 @@ function bonusPoints(id, from, to) { const k = pointKinds(id, from, to, 0); retu
 // The 3 kinds of points (the numbers of each source are unchanged, only grouped):
 //   ✅ Tasks  = activities (acts: their points, worked out by the caller) + 📝 homework & 🤖 worksheets + ✅ duties
 //   ⭐ Habits = good habits & prayers (kids' and parents') + 📔 My day
-//   🧩 Fun    = 🧩 riddles + 🤝 helping (parents' auto points) + 💌 wishes + 🎁 prizes
+//   🧩 Fun    = 🤝 helping (parents' auto points) + 💌 wishes + 🎁 prizes   (🧩 riddles: just for fun, no points)
 // (⚙️ a feature that's off gives no points: 🧩 riddles, 📔 My day, 💌 wishes, 👨‍👩‍👧 a parent's habits / helping / prize)
 function pointKinds(id, from, to, acts) {
   const on = k => feat(k) ? 1 : 0, pp = isParentId(id) ? on("parentPoints") : 1;
   return { tasks: acts + homeworkPoints(id, from, to) + studyPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
            habits: habitPoints(id, from, to) * pp + diaryPoints(id, from, to) * on("diary"),
-           fun: riddlePoints(id, from, to) * on("riddles") + (autoPoints(id, from, to) + prizePoints(id, from, to)) * pp
+           fun: (autoPoints(id, from, to) + prizePoints(id, from, to)) * pp   // (🧩 riddles: no points, just for fun)
               + wishPoints(id, from, to) * on("wishes") + extraFunPoints(id, from, to) };
 }
 const weekKinds = id => pointKinds(id, data.points.week, weekEnd(), activityPointsByUser()[id] || 0);
@@ -4474,17 +4585,10 @@ const prizeKey = (who, week = data.points.week) => `${week}|${who}`;
 function prizePoints(user, from, to) {
   return Object.entries(data.points.prizes).filter(([key, p]) => key.split("|")[1] === user && p.date >= from && p.date < to).length * PRIZE_POINTS;
 }
-// How much of this week's activities and habits a parent did (0–100), or null when there's nothing to do
+// How much of this week's activities a parent did (0–100), or null when there's nothing to do (parents have no habits any more)
 function parentWeekPct(who) {
-  const from = data.points.week, to = weekEnd();
   const acts = plannedCount(who), actsDone = Object.values(data.points.marks).filter(m => m.user === who).length;
-  const habits = parentHabitsFor(who).length * DAYS.length;
-  const habitsDone = Object.entries(data.habitMarks).filter(([key, v]) => {
-    const [date, id, by] = key.split("|");
-    return v === true && by === who && id.startsWith("ph-") && date >= from && date < to;
-  }).length;
-  const all = acts + habits;
-  return all ? Math.min(100, Math.round((actsDone + habitsDone) / all * 100)) : null;
+  return acts ? Math.min(100, Math.round(actsDone / acts * 100)) : null;
 }
 // The day after this week's Sunday (so "this week" = from data.points.week up to, not including, this day)
 function weekEnd() { const dt = fromYmd(data.points.week); dt.setDate(dt.getDate() + 7); return ymd(dt); }
@@ -4501,17 +4605,13 @@ function habitValuePoints(v, date, h) {
     : typeof v === "number" ? (v >= WATER_DROPS ? 1 : 0) : 0;
 }
 // A person's habit points between two dates (from ≤ day < to), e.g. this week
-// (👨‍👩‍👧 a parent's habit: its own points, +5 or +10)
+// (👨‍👩‍👧 Parents have no habits any more: their old "ph-…" ticks stay saved, but give no points.)
 function habitPoints(user, from, to) {
   let total = 0;
   for (const [key, v] of Object.entries(data.habitMarks)) {
     const [date, id, who] = key.split("|");
-    if (who !== user || date < from || date >= to) continue;
-    // (a number = the points of a tick on a habit that was 🗑️ removed later)
-    // (🕌 a parent's 5 prayers: the same points a prayer as the kids')
-    total += id.startsWith("ph-") ? (v === true ? (data.parentHabits.find(h => h.id === id) || { points: PARENT_HABIT_POINTS }).points
-                                     : Array.isArray(v) ? v.filter(Boolean).length * prayerPointsOn(date) : typeof v === "number" ? v : 0)
-                                  : habitValuePoints(v, date, data.habits.find(h => h.id === id));
+    if (who !== user || date < from || date >= to || id.startsWith("ph-")) continue;
+    total += habitValuePoints(v, date, data.habits.find(h => h.id === id));
   }
   return total;
 }
@@ -4522,14 +4622,13 @@ function habitPoints(user, from, to) {
 //              + what they earned from the open things (school work, riddles, My day, duties, wishes, prizes …: no fixed maximum)
 // Raw points are still collected as before: they grow the ✨ Spark and show in the history and in "✅ · ⭐ · 🧩".
 // The ⭐ Shining Star and the leaderboard order use the fair score; a tie: whoever reached it first (data.points.reach).
+// 👨‍👩‍👧 A PARENT's fair score counts ONLY their activities: activities done ÷ their planned activities × 100.
 function possibleHabitPoints(id) {
+  if (isParentId(id)) return 0;   // (parents have no habits)
   let n = 0;
   for (let d = 0; d < 7; d++) {
     const date = ymd(dayDate(d));
-    if (isParentId(id)) {
-      if (!feat("parentPoints")) continue;
-      n += parentHabitsFor(id).reduce((s, h) => s + h.points, 0) + (kidsPrayerHabit() ? PRAYERS.length * prayerPointsOn(date) : 0);
-    } else n += habitsFor(id).reduce((s, h) => s + (h.kind === "prayers" ? PRAYERS.length * prayerPointsOn(date) : h.kind === "water" ? 1 : h.points || 1), 0);
+    n += habitsFor(id).reduce((s, h) => s + (h.kind === "prayers" ? PRAYERS.length * prayerPointsOn(date) : h.kind === "water" ? 1 : h.points || 1), 0);
   }
   return n;
 }
@@ -4537,8 +4636,14 @@ function possibleHabitPoints(id) {
 function fairInfo() {
   const from = data.points.week, to = weekEnd(), acts = activityPointsByUser(), out = {};
   data.users.forEach(u => {
-    const a = acts[u.id] || 0, k = pointKinds(u.id, from, to, a), raw = k.tasks + k.habits + k.fun;
-    const habitsIn = habitPoints(u.id, from, to) * (isParentId(u.id) && !feat("parentPoints") ? 0 : 1);
+    const a = acts[u.id] || 0;
+    if (isParentId(u.id)) {   // 👨‍👩‍👧 activities only
+      const possible = plannedCount(u.id) * POINTS_EACH;
+      out[u.id] = { raw: a, possible, fair: possible > 0 ? Math.min(100, Math.round(a / possible * 100)) : 0 };
+      return;
+    }
+    const k = pointKinds(u.id, from, to, a), raw = k.tasks + k.habits + k.fun;
+    const habitsIn = habitPoints(u.id, from, to);
     const possible = Math.max(raw, plannedCount(u.id) * POINTS_EACH + possibleHabitPoints(u.id) + Math.max(0, raw - a - habitsIn));
     out[u.id] = { raw, possible, fair: possible > 0 ? Math.min(100, Math.round(raw / possible * 100)) : 0 };
   });
@@ -4636,7 +4741,7 @@ function toggleDone(day, actId, user, button) {
     if (pact.by !== user || pact.type === "travel" || !pactStartOn(pact, ymd(dayDate(day)))) return;
     if (user !== me || isKidDevice()) return toast(`Only ${userById(user).name} can tick this. 👀`);
   } else if (!act || !act.users.includes(user)) return;
-  if (!(me === DAD || user === me)) return toast("You can only tick your own activities.");
+  if (!(isParentId(me) || user === me)) return toast("You can only tick your own activities.");
   if (day > todayIndex()) return toast(`Not yet! You can tick it on ${DAYS[day]}.`);
   const owner = userById(user), key = markKey(day, actId, user);
   if (data.points.marks[key]) {
@@ -4687,7 +4792,7 @@ function celebrate(x, y, color, big) {
 let habitDay = todayIndex();   // which day the habits card shows (0 = Monday … today). No future days.
 
 // The habits that are on for this person (kids only; Bro2a can turn them off per kid in Settings)
-function habitsFor(user) { return user === DAD || !exists(user) ? [] : data.habits.filter(h => !h.gone && !h.off.includes(user)); }
+function habitsFor(user) { return isParentId(user) || !exists(user) ? [] : data.habits.filter(h => !h.gone && !h.off.includes(user)); }
 const habitKey = (date, habitId, user) => `${date}|${habitId}|${user}`;
 // Is the habit fully done? (all 5 prayers, all 6 drops)
 function habitDone(h, v) {
@@ -4702,7 +4807,7 @@ function habitsCardHtml(who) {
   const u = userById(who), c = colorsOf(u), today = todayIndex();
   if (habitDay > today) habitDay = today;
   const d = habitDay, date = ymd(dayDate(d)), isToday = d === today;
-  const canTick = me === DAD || who === me;            // same rule as activities
+  const canTick = isParentId(me) || who === me;            // same rule as activities
   const dis = canTick ? "" : "disabled";
   const mark = h => data.habitMarks[habitKey(date, h.id, who)];
   const done = list.filter(h => habitDone(h, mark(h))).length;
@@ -4749,7 +4854,7 @@ function toggleHabit(who, habitId, part, button) {
   if (newWeek()) { keepNow(); return toast("🌅 A new week started! Points are back to zero."); }
   const h = data.habits.find(x => x.id === habitId);
   if (!h || !habitsFor(who).includes(h)) return;
-  if (!(me === DAD || who === me)) return toast("You can only tick your own habits.");
+  if (!(isParentId(me) || who === me)) return toast("You can only tick your own habits.");
   if (habitDay > todayIndex()) return toast("Not yet!");
   const date = ymd(dayDate(habitDay)), key = habitKey(date, habitId, who), old = data.habitMarks[key];
   let now;
@@ -4779,185 +4884,8 @@ function toggleHabit(who, habitId, part, button) {
   else if (habitDone(h, now)) toast(`${h.emoji} Well done, ${owner.name}! +${gained} ⭐`, 2200, color);
 }
 
-// ---------- 👨‍👩‍👧 The parents' good habits: chips in groups, one tap = one tick (+5) ----------
-// Only that parent ticks them (kids and the other parent just look). ✏️ Edit habits (on the parent's home): change, hide, add, remove.
-let phDraft = null;    // ✏️ the habits being edited (a copy), or null
-let phChoose = null;   // ⭐ Choose my habits: the habit ids being picked, or null
-// ⭐ A parent's chosen habits (as many as they like from the full list, at least 1): only these show on their home and count.
-// (Ticks already made stay counted.) u.focus = [habit ids] + u.focusAt, kept on the person in the family data:
-// asked ONE time (the first time their habits show), then only "✏️ Change my habits" changes it. Each parent only their own.
-function parentHabitsFor(who) {
-  if (!isParentId(who) || !exists(who)) return [];
-  const focus = userById(who).focus || [];
-  // (🕌 with the 5 prayers showing, the one-tick "Prayed on time" isn't shown: no double prayer points)
-  return data.parentHabits.filter(h => focus.includes(h.id) && !(h.id === "ph-pray" && kidsPrayerHabit()));
-}
-const habitsChosen = who => { const u = userById(who); return !!u && Array.isArray(u.focus) && u.focus.length > 0; };
-function parentHabitsCardHtml(who, canEdit) {
-  if (!isParentId(who) || !exists(who) || !feat("parentPoints")) return "";
-  const u = userById(who), c = colorsOf(u), today = todayIndex(), canTick = who === me && !isKidDevice();
-  if (phDraft && canEdit && canTick) return parentHabitsEditHtml(c);
-  if (phChoose && canEdit && canTick) return parentFocusHtml(c);
-  // Not chosen yet (the first time): the chooser itself (asked once; saved on the person)
-  if (!habitsChosen(who)) {
-    if (!(canEdit && canTick)) return "";
-    if (!phChoose) phChoose = [];
-    return parentFocusHtml(c);
-  }
-  if (habitDay > today) habitDay = today;
-  const d = habitDay, date = ymd(dayDate(d)), isToday = d === today, list = parentHabitsFor(who);
-  const on = h => data.habitMarks[habitKey(date, h.id, who)] === true;
-  const done = list.filter(on).length;
-  const groups = PARENT_HABIT_GROUPS.map(([g, e, label]) => {
-    const hs = list.filter(h => h.group === g);
-    return hs.length ? `<h3 class="ph-group">${e} ${label}</h3><div class="ph-chips">${hs.map(h => `<button class="ph-chip ${on(h) ? "on" : ""}"
-      data-ph="${safe(who)}|${safe(h.id)}" ${canTick ? "" : "disabled"} aria-pressed="${on(h)}"><span class="e">${safe(h.emoji)}</span><span>${safe(h.name)}</span>${
-      h.points !== PARENT_HABIT_POINTS ? `<small>+${h.points}</small>` : ""}${on(h) ? `<b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`).join("")}</div>` : "";
-  }).join("");
-  return `<div class="card hb-card ph-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-    <div class="hb-top"><h2>${who === me ? "⭐ My good habits" : `⭐ ${safe(u.name)}'s good habits`}${isToday ? " today" : ""}</h2>
-      <span class="hb-progress">${done} / ${list.length} ${list.length && done === list.length ? "🌟" : "💪"}</span></div>
-    <div class="hb-nav">
-      <button data-hbday="-1" ${d === 0 ? "disabled" : ""} aria-label="Day before">◀ Before</button>
-      <b>${isToday ? "Today" : DAYS[d]}, ${dateOfDay(d)}</b>
-      <button data-hbday="1" ${d >= today ? "disabled" : ""} aria-label="Next day">Next ▶</button>
-      ${canTick ? "" : `<span class="hb-look">Just looking 👀</span>`}
-    </div>
-    ${parentPrayersHtml(who, date, canTick)}
-    ${groups || `<p class="sc-empty">No habits to show.</p>`}
-    ${canTick && canEdit ? `<div class="ph-change"><button class="linkbtn" data-phchoose>✏️ Change my habits</button></div>` : ""}</div>`;
-}
-// 🕌 A parent's 5 prayers: the same 5 ticks and the same points as the kids' (+15 a prayer), saved on "date|ph-prayers|parent".
-// (Shown when the kids have the 🕌 prayers habit; the old one-tick "Prayed on time" is then hidden, its ticks keep their points.)
-const PARENT_PRAYERS_ID = "ph-prayers";
-const kidsPrayerHabit = () => data.habits.find(h => h.kind === "prayers" && !h.gone);
-function parentPrayersHtml(who, date, canTick) {
-  if (!kidsPrayerHabit()) return "";
-  const v = data.habitMarks[habitKey(date, PARENT_PRAYERS_ID, who)];
-  return `<h3 class="ph-group">🕌 Prayers <small>+${prayerPointsOn(date)} each</small></h3><div class="ph-chips">${PRAYERS.map((p, i) => {
-    const on = Array.isArray(v) && !!v[i];
-    return `<button class="ph-chip ${on ? "on" : ""}" data-phpray="${safe(who)}|${i}" ${canTick ? "" : "disabled"} aria-pressed="${on}"><span class="e">🕌</span><span>${p}</span>${
-      on ? `<b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; }).join("")}</div>`;
-}
-function toggleParentPrayer(who, part, button) {
-  if (editMode) return toast("Tap ✅ Done first, then you can tick.");
-  if (newWeek()) { keepNow(); return toast("🌅 A new week started! Points are back to zero."); }
-  const owner = userById(who);
-  if (!isParentId(who) || !kidsPrayerHabit() || !(part >= 0 && part < PRAYERS.length)) return;
-  if (who !== me || isKidDevice()) return toast(`Only ${owner.name} can tick these. 👀`);
-  if (habitDay > todayIndex()) return toast("Not yet!");
-  const date = ymd(dayDate(habitDay)), key = habitKey(date, PARENT_PRAYERS_ID, who), old = data.habitMarks[key];
-  const now = Array.isArray(old) ? [...old] : PRAYERS.map(() => 0);
-  now[part] = now[part] ? 0 : 1;
-  if (now.some(Boolean)) data.habitMarks[key] = now; else delete data.habitMarks[key];
-  keepNow();
-  if (!now[part]) return toast(`Unticked. −${prayerPointsOn(date)} points.`);
-  const color = colorsOf(owner).color, r = button.getBoundingClientRect();
-  celebrate(r.left + r.width / 2, r.top + r.height / 2, color, now.every(Boolean));
-  toast(`🕌 ${PRAYERS[part]}: well done, ${owner.name}! +${prayerPointsOn(date)} ⭐`, 2200, color);
-}
-function toggleParentHabit(who, id, button) {
-  if (editMode) return toast("Tap ✅ Done first, then you can tick.");
-  if (newWeek()) { keepNow(); return toast("🌅 A new week started! Points are back to zero."); }
-  const h = data.parentHabits.find(x => x.id === id), owner = userById(who);
-  if (!h || !isParentId(who) || !parentHabitsFor(who).includes(h)) return;   // (only ⭐ focus habits can be ticked)
-  if (who !== me || isKidDevice()) return toast(`Only ${owner.name} can tick these. 👀`);
-  if (habitDay > todayIndex()) return toast("Not yet!");
-  const date = ymd(dayDate(habitDay)), key = habitKey(date, id, who);
-  if (data.habitMarks[key]) { delete data.habitMarks[key]; keepNow(); return toast(`Unticked. −${h.points} points.`); }
-  const wasStar = stars().includes(who);
-  data.habitMarks[key] = true;
-  keepNow();
-  const color = colorsOf(owner).color, allDone = parentHabitsFor(who).every(x => data.habitMarks[habitKey(date, x.id, who)] === true);
-  const nowStar = !wasStar && stars().includes(who), r = button.getBoundingClientRect();
-  celebrate(r.left + r.width / 2, r.top + r.height / 2, color, allDone || nowStar);
-  toast(allDone ? `All good habits done, ${owner.name}! 🌟` : nowStar ? `You're the Shining Star, ${owner.name}! 🌟`
-    : `${h.emoji} Well done, ${owner.name}! +${h.points} ⭐`, allDone || nowStar ? 3200 : 2200, color);
-}
-// ⭐ Choose my habits: the full list as chips in groups (tap to pick, as many as you like), and ✏️ Edit the list
-function parentFocusHtml(c) {
-  const first = !habitsChosen(me);
-  const groups = PARENT_HABIT_GROUPS.map(([g, e, label]) => {
-    const hs = data.parentHabits.filter(h => h.group === g);
-    return hs.length ? `<h3 class="ph-group">${e} ${label}</h3><div class="ph-chips">${hs.map(h => { const on = phChoose.includes(h.id); return `<button class="ph-chip ${on ? "on" : ""}"
-      data-phpick="${safe(h.id)}" aria-pressed="${on}"><span class="e">${safe(h.emoji)}</span><span>${safe(h.name)}</span>${
-      h.points !== PARENT_HABIT_POINTS ? `<small>+${h.points}</small>` : ""}${on ? `<b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; }).join("")}</div>` : "";
-  }).join("");
-  return `<div class="card hb-card ph-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-    <div class="hb-top"><h2>⭐ Choose my habits</h2><span class="hb-progress">${phChoose.length} chosen</span></div>
-    <p class="hint">Pick as many as you like (at least 1). Only these show on your home and count for points.${first ? " You can change them later with ✏️ Change my habits." : ""}</p>
-    ${groups}
-    <div class="btnrow"><button class="primary" data-phfocussave ${phChoose.length ? "" : "disabled"}>💾 Save</button>${first ? "" : `<button data-phfocuscancel>Cancel</button>`}
-      <button data-phedit>✏️ Edit the list</button></div></div>`;
-}
-function parentFocus(what, id) {
-  if (!isParentId(me) || isKidDevice()) return;
-  const u = data.users.find(x => x.id === me);
-  if (what === "start") { phChoose = [...(u.focus || [])].filter(x => data.parentHabits.some(h => h.id === x)); phDraft = null; }
-  else if (!phChoose) return;
-  else if (what === "pick") {
-    if (phChoose.includes(id)) phChoose = phChoose.filter(x => x !== id);
-    else if (data.parentHabits.some(h => h.id === id)) phChoose.push(id);
-  } else if (what === "cancel") phChoose = habitsChosen(me) ? null : [];   // (the first time there's nothing to go back to)
-  else if (what === "save") {
-    const list = phChoose.filter(x => data.parentHabits.some(h => h.id === x));
-    if (!list.length) return toast("Pick at least 1 habit 🙂", 2400);
-    u.focus = list;
-    u.focusAt = new Date().toISOString();
-    phChoose = null;
-    keepNow();
-    return toast(`⭐ Your ${list.length} ${list.length === 1 ? "habit is" : "habits are"} set!`);
-  }
-  render();
-}
-// ✏️ Edit habits: each habit's emoji, name, points, group, 🗑️; ➕ Add a habit
-function parentHabitsEditHtml(c) {
-  const groupOpts = g => PARENT_HABIT_GROUPS.map(([k, e, l]) => `<option value="${k}" ${g === k ? "selected" : ""}>${e} ${l}</option>`).join("");
-  return `<div class="card hb-card ph-card sc-form" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><h2>✏️ My good habits</h2>
-    <p class="hint">The full list to choose from: change, add or remove. Each daily tick = +5 points (or +10).</p>
-    ${phDraft.map(h => { const id = safe(h.id); return `<div class="ph-edit">
-      <input type="text" id="phe-${id}" maxlength="8" value="${safe(h.emoji)}" aria-label="Emoji" class="ph-e">
-      <input type="text" id="phn-${id}" maxlength="40" value="${safe(h.name)}" aria-label="Habit" placeholder="My habit" class="ph-n">
-      <select id="phg-${id}" aria-label="Group">${groupOpts(h.group)}</select>
-      <select id="php-${id}" aria-label="Points"><option value="5" ${h.points === 10 ? "" : "selected"}>+5</option><option value="10" ${h.points === 10 ? "selected" : ""}>+10</option></select>
-      <button class="x" data-phdel="${id}" aria-label="Remove">🗑️ Remove</button></div>`; }).join("")}
-    <div class="btnrow"><button data-phadd>➕ Add a habit</button></div>
-    <div class="btnrow"><button class="primary" data-phsave>💾 Save</button><button data-phcancel>Cancel</button></div></div>`;
-}
-// What's typed in the edit form → phDraft (before adding / removing a row, and on Save)
-function readPhDraft() {
-  phDraft.forEach(h => {
-    const v = id => $(id + h.id);
-    if (!v("phn-")) return;
-    Object.assign(h, { emoji: v("phe-").value.trim().slice(0, 8) || "⭐", name: v("phn-").value.trim().slice(0, 40), group: v("phg-").value,
-                       points: Number(v("php-").value) === 10 ? 10 : PARENT_HABIT_POINTS });
-  });
-}
-function parentHabitEdit(what, id) {
-  if (!isParentId(me) || isKidDevice()) return;
-  if (what === "start") { phDraft = JSON.parse(JSON.stringify(data.parentHabits)); phChoose = null; }
-  else if (!phDraft) return;
-  else if (what === "cancel") { phDraft = null; return parentFocus("start"); }   // (back to ⭐ Choose my habits)
-  else {
-    readPhDraft();
-    if (what === "add") phDraft.push({ id: "ph-" + newId(), group: "other", emoji: "⭐", name: "", points: PARENT_HABIT_POINTS, off: [] });
-    if (what === "del") phDraft = phDraft.filter(h => h.id !== id);
-    if (what === "save") {
-      // 🗑️ A removed habit keeps the points already earned: its ticks keep their points as a number (see habitPoints)
-      const kept = phDraft.filter(h => h.name);
-      data.parentHabits.filter(h => !kept.some(k => k.id === h.id)).forEach(h => Object.keys(data.habitMarks).forEach(key => {
-        if (key.split("|")[1] === h.id && data.habitMarks[key] === true) data.habitMarks[key] = h.points;
-      }));
-      data.parentHabits = kept;
-      phDraft = null;
-      keepNow();
-      toast("✓ Habits saved");
-      return parentFocus("start");   // (back to ⭐ Choose my habits)
-    }
-  }
-  render();
-  if (what === "add") { const last = phDraft[phDraft.length - 1]; if (last && $("phn-" + last.id)) $("phn-" + last.id).focus(); }
-}
+// (👨‍👩‍👧 The PARENTS' habits and prayers were removed: no card, picker, editor or points. Their old data stays saved in the cloud
+//  untouched (data.parentHabits, the "ph-…" ticks in habitMarks, each parent's u.focus), only not shown or counted. Kids' habits are above.)
 
 // 🎁 Sunday evening, on a parent's home: "Did you earn your prize this week?"
 const prizeTime = () => todayIndex() === 6 && new Date().getHours() >= 17;
@@ -4998,10 +4926,10 @@ function prizesListHtml(who) {
 //                           (or { making: who, at } while the first parent's device asks 🤖: the others wait)
 //   data.points.riddleAns = "date|person" (the 1st riddle) or "date|person#n" (n = 1 … 4) → { tries, wrong: [option numbers], hint, solved, pts, ask: helper id }
 //                           … + "|help" → { helper, right, pick, at }   (the helper's one answer)
-//   Only the first 3 each day give points: right first time +10 · after a 💡 hint or a 2nd try +5 · 🆘 a helper who's right: +5 for both.
-//   Riddles 4 and 5 are just for fun. Kept 5 weeks.
+//   🎈 Riddles are JUST FOR FUN: they give NO points (not to the score, the fair score, the leaderboard, reports or summaries).
+//   (Older saved answers may still have a "pts" number: it's kept in the data, never counted.) Kept 5 weeks.
 // =====================================================================
-const RIDDLE_HOUR = 5, RIDDLE_TRIES = 2, RIDDLE_PTS = 10, RIDDLE_HALF = 5, RIDDLE_COUNT = 5, RIDDLE_PAID = 3;
+const RIDDLE_HOUR = 5, RIDDLE_TRIES = 2, RIDDLE_COUNT = 5;
 let riddleBusy = false;   // this device is asking 🤖 for today's riddles
 let riddleAsk = false;    // 🆘 the "Who can help?" chips are open
 const riddleKey = (date, who, n = 0) => `${date}|${who}${n ? "#" + n : ""}`;
@@ -5023,24 +4951,6 @@ const riddleHelp = (who, date = riddleDay(), n = 0) => data.points.riddleAns[rid
 const riddleDone = (who, date, n = 0) => { const s = riddleState(who, date, n), hp = riddleHelp(who, date, n); return s.solved || s.tries >= RIDDLE_TRIES || !!(hp && hp.right); };
 const riddleWaiting = (who, n = 0) => { const s = riddleState(who, undefined, n); return !!s.ask && !riddleHelp(who, undefined, n) && !riddleDone(who, undefined, n); };
 const riddleRight = (who, date, n = 0) => riddleState(who, date, n).solved || !!(riddleHelp(who, date, n) || {}).right;
-// 🧩 points between two dates (from ≤ day < to) (riddles 4 and 5 give none)
-function riddlePoints(user, from, to) {
-  let total = 0;
-  Object.entries(data.points.riddleAns).forEach(([key, v]) => {
-    const { date, who, n, help } = riddleKeyParts(key);
-    if (date < from || date >= to || n >= RIDDLE_PAID) return;
-    if (!help && who === user && v.solved) total += v.pts || 0;
-    if (help && v.right && (v.helper === user || who === user)) total += RIDDLE_HALF;
-  });
-  return total;
-}
-// How many riddles a person solved (by themselves, or with help)
-function riddlesSolved(user, from, to) {
-  return Object.entries(data.points.riddleAns).filter(([key, v]) => {
-    const { date, who, help } = riddleKeyParts(key);
-    return who === user && date >= from && date < to && (help ? v.right : v.solved);
-  }).length;
-}
 
 // ---------- 🤖 Making today's riddles (the first family device after 5:00, a kid's too; never twice the same day) ----------
 // 🧩 What /riddles gets about each person: ONLY name, role, age / year, curriculum, level and school subjects
@@ -5167,11 +5077,11 @@ function drawRiddlePop() {
 }
 function ownRiddlePopHtml(n, r) {
   const who = me, s = riddleState(who, undefined, n), hp = riddleHelp(who, undefined, n), done = riddleDone(who, undefined, n), total = riddlesOf(who).length;
-  const paid = n < RIDDLE_PAID, helper = s.ask && exists(s.ask) ? userById(s.ask).name : "";
-  const top = `<p class="print-hint rd-num">Riddle ${n + 1} of ${total}${paid ? "" : " · Just for fun 🎈"}</p><p class="rd-q">${safe(r.question)}</p>`;
+  const helper = s.ask && exists(s.ask) ? userById(s.ask).name : "";
+  const top = `<p class="print-hint rd-num">Riddle ${n + 1} of ${total}</p><p class="rd-q">${safe(r.question)}</p>`;
   if (rdPop.result || done) {
-    const note = hp && hp.right ? `<p class="rd-yes">${safe(helper)} helped you! 🤝${paid ? ` +${RIDDLE_HALF} ⭐` : ""}</p>`
-      : s.solved ? `<p class="rd-yes">🎉 Right!${s.pts ? ` +${s.pts} ⭐` : " 🎈"}</p>` : `<p class="rd-no">The answer was: <b>${safe(r.answer)}</b></p>`;
+    const note = hp && hp.right ? `<p class="rd-yes">${safe(helper)} helped you! 🤝</p>`
+      : s.solved ? `<p class="rd-yes">🎉 Right! 🎈</p>` : `<p class="rd-no">The answer was: <b>${safe(r.answer)}</b></p>`;
     return `${top}${riddleOptionsHtml(r, "rdpick", { show: true, wrong: s.wrong, lock: true })}${note}
       ${r.fun_fact ? `<p class="rd-fact">🤓 ${safe(r.fun_fact)}</p>` : ""}<button class="k-ok rd-gotit" data-rdgotit>Got it 👍</button>`;
   }
@@ -5187,9 +5097,9 @@ function ownRiddlePopHtml(n, r) {
     <button class="linkbtn rd-later" data-rdlater>Later</button>`;
 }
 function helpRiddlePopHtml(asker, n, r) {
-  const hp = riddleHelp(asker, undefined, n), name = userById(asker).name, paid = n < RIDDLE_PAID;
+  const hp = riddleHelp(asker, undefined, n), name = userById(asker).name;
   const top = `<p class="print-hint rd-num">🤝 ${safe(name)} asked you for help!</p><p class="rd-q">${safe(r.question)}</p>`;
-  if (rdPop.result && hp) return `${top}<p class="${hp.right ? "rd-yes" : "rd-no"}">${hp.right ? `🎉 Right!${paid ? ` You both get +${RIDDLE_HALF} ⭐` : " 🎈"}` : `Not this time. ${safe(name)} can try again.`}</p>
+  if (rdPop.result && hp) return `${top}<p class="${hp.right ? "rd-yes" : "rd-no"}">${hp.right ? `🎉 Right! 🎈` : `Not this time. ${safe(name)} can try again.`}</p>
     ${hp.right && r.fun_fact ? `<p class="rd-fact">🤓 ${safe(r.fun_fact)}</p>` : ""}<button class="k-ok rd-gotit" data-rdgotit>Got it 👍</button>`;
   return `${top}${riddleOptionsHtml(r, "rdhelp", { show: false, wrong: [], lock: false })}<button class="linkbtn rd-later" data-rdlater>Later</button>`;
 }
@@ -5208,15 +5118,14 @@ function pickRiddle(i, button) {
   if (newWeek()) keepNow();
   const s = { ...riddleState(who, undefined, n), wrong: [...riddleState(who, undefined, n).wrong] }, color = colorsOf(userById(who)).color;
   if (r.options[i] === r.answer) {
-    const wasStar = stars().includes(who);
     s.solved = true;
-    s.pts = n >= RIDDLE_PAID ? 0 : s.tries === 0 && !s.hint ? RIDDLE_PTS : RIDDLE_HALF;
+    s.pts = 0;   // (🎈 just for fun: no points)
     saveRiddleState(who, s, n);
     noteWhen(riddleDay(), "rd", String(n), who, true);   // (👀 when it was solved)
     keepNow();
     const rect = button.getBoundingClientRect();
     celebrate(rect.left + rect.width / 2, rect.top + rect.height / 2, color, true);
-    toast(`🧩 Right! ${s.pts ? `+${s.pts} ⭐` : "🎈"}` + (!wasStar && stars().includes(who) ? " You're the Shining Star! 🌟" : ""), 3000, color);
+    toast("🧩 Right! 🎈", 3000, color);
     return riddleAnswered();
   }
   s.tries++;
@@ -5253,14 +5162,14 @@ function askRiddleHelp(helper) {
   addNews([newsItem("school", `🧩 ${userById(me).name} needs help with a riddle! (asked ${userById(helper).name})`, "🧩 needs help with a riddle", me)]);
   toast(`🆘 Asked ${userById(helper).name}! ⏳`, 3000);
 }
-// 🤝 The helper's one answer: right = +5 for both (riddles 1 to 3)
+// 🤝 The helper's one answer (🎈 just for fun: no points)
 function helpRiddle(i, button) {
   const x = popN("help");
   if (!x || rdPop.result) return;
   const asker = x.who, n = x.n, r = riddleOf(asker, n);
   if (!r || riddleState(asker, undefined, n).ask !== me || riddleHelp(asker, undefined, n) || riddleDone(asker, undefined, n)) return;
   if (newWeek()) keepNow();
-  const right = r.options[i] === r.answer, paid = n < RIDDLE_PAID;
+  const right = r.options[i] === r.answer;
   data.points.riddleAns[riddleKey(riddleDay(), asker, n) + "|help"] = { helper: me, right, pick: i, at: new Date().toISOString() };
   keepNow();
   const name = userById(asker).name;
@@ -5269,15 +5178,14 @@ function helpRiddle(i, button) {
   if (!right) return;
   const rect = button.getBoundingClientRect();
   celebrate(rect.left + rect.width / 2, rect.top + rect.height / 2, colorsOf(userById(me)).color, true);
-  toast(paid ? `🤝 Right! You and ${name} get +${RIDDLE_HALF} ⭐` : `🤝 Right! 🎈`, 3200);
+  toast(`🤝 Right! You helped ${name} 🎈`, 3200);
 }
 
 // ---------- 🧩 Family riddle board (under the leaderboard) ----------
 function riddleBoardHtml() {
   if (!feat("riddles")) return "";
-  const list = todaysRiddles(), parent = isParentId(me) && !isKidDevice(), from = data.points.week, to = weekEnd();
-  const week = data.users.map(u => ({ u, n: riddlesSolved(u.id, from, to) }));
-  if (!list.length && !week.some(x => x.n)) return "";
+  const list = todaysRiddles(), parent = isParentId(me) && !isKidDevice();
+  if (!list.length) return "";   // (🎈 just today's fun: no weekly tally, riddles aren't points)
   // One row per person: a mark for each of today's riddles (✅ right · ❌ not · ⏳ to do)
   const rows = data.users.filter(u => list.some(r => r.for === u.id)).map(u => {
     const mine = riddlesOf(u.id);
@@ -5287,10 +5195,8 @@ function riddleBoardHtml() {
     return `<li><span class="rd-b-who">${safe(u.emoji)} ${safe(u.name)}</span><span class="rd-b-mark">${marks}</span>
       ${[...new Set(helped)].map(t => `<small>${safe(t)}</small>`).join("")}${parent ? mine.map(r => `<small class="rd-b-q">${safe(r.question)}</small>`).join("") : ""}</li>`;
   }).join("");
-  return `<div class="card rd-board"><h2>🧩 Family riddle board</h2>
-    ${rows ? `<h3 class="ph-group">Today</h3><ul class="rd-b-list">${rows}</ul>` : ""}
-    <h3 class="ph-group">This week: riddles solved</h3>
-    <p class="rd-b-week">${week.map(x => `${safe(x.u.emoji)} ${safe(x.u.name)} <b>${x.n}</b>`).join(" · ")}</p></div>`;
+  return `<div class="card rd-board"><h2>🧩 Family riddle board <small>· just for fun 🎈</small></h2>
+    ${rows ? `<h3 class="ph-group">Today</h3><ul class="rd-b-list">${rows}</ul>` : ""}</div>`;
 }
 
 // =====================================================================
@@ -5663,7 +5569,7 @@ function reportData(kid, r) {
   const planned = plannedCount(kid), done = (activityPointsByUser()[kid] || 0) / POINTS_EACH;
   return { s, files, sheets: sheets.length, avg: avgPct(sheets), subjects, habits, moods, points,
            tasksPct: planned ? Math.min(100, Math.round(done / planned * 100)) : null, done, planned,
-           riddles: riddlesSolved(kid, r.from, r.to), level: levelOf(lifetimePoints(kid)) };
+           level: levelOf(lifetimePoints(kid)) };   // (🧩 riddles: not in the report, they're just for fun)
 }
 // 🌟 the best thing and 👀 the one that needs help, in plain words
 function reportLines(x, r, name) {
@@ -5685,7 +5591,7 @@ function reportCardsHtml(kid, forPdf) {
     <div class="card rp-card"><h2>✅ Tasks</h2><div class="rp-nums">${x.tasksPct != null ? big(x.tasksPct + "%", `of planned activities done this week (${x.done} of ${x.planned})`) : big("–", "no planned activities this week")}
       ${rpRange === "month" ? big(x.points, "points this month") : ""}</div></div>
     ${x.habits.length ? `<div class="card rp-card"><h2>⭐ Habits</h2><ul class="me-list">${x.habits.map(({ h, days }) => `<li><span>${safe(h.emoji)} ${safe(h.name)}</span><b>${days} of ${r.days} days</b></li>`).join("")}</ul></div>` : ""}
-    <div class="card rp-card"><div class="rp-nums">${feat("riddles") ? big(x.riddles, "🧩 riddles solved") : ""}${feat("buddy") ? big("Lv " + x.level, "✨ Spark level") : ""}</div>
+    <div class="card rp-card"><div class="rp-nums">${feat("buddy") ? big("Lv " + x.level, "✨ Spark level") : ""}</div>
       ${feat("diary") ? `<h2>📔 Moods</h2>${x.moods.length ? `<div class="me-moods">${x.moods.map(m => `<span><b>${m.face}</b><small>${safe(shortDate(m.date).split(" ").slice(1).join(" "))}</small></span>`).join("")}</div>` : `<p class="sc-empty">No moods saved ${rpRange === "week" ? "this week" : "this month"}.</p>`}` : ""}</div>
     ${lines.best || lines.help ? `<div class="card rp-card rp-lines">${lines.best ? `<p>🌟 <b>Best ${rpRange === "week" ? "this week" : "this month"}:</b> ${safe(lines.best)}</p>` : ""}${lines.help ? `<p>👀 <b>Needs help:</b> ${safe(lines.help)}</p>` : ""}</div>` : ""}
     ${briefNow ? `<div class="card rp-card"><h2>🤖 Coach summary</h2><p>${safe(b.summary)}</p>${b.home_tips.length ? `<ul>${b.home_tips.map(t => `<li>${safe(t)}</li>`).join("")}</ul>` : ""}</div>` : ""}`;
@@ -5735,8 +5641,8 @@ function fsPerson(u, wk) {
   const pick = key => [...new Set(sheets.flatMap(w => w.check[key] || []))].slice(0, 3);
   // ⭐ habits and 🕌 prayers
   let ticks = 0, prayed = 0, prayerDays = 0, fajrMissed = 0, leftDays = 0;
-  const kidHabits = kid ? habitsFor(id) : [], parentHabits = !kid && feat("parentPoints") ? parentHabitsFor(id) : [];
-  const prayHabit = kid ? kidHabits.find(h => h.kind === "prayers") : feat("parentPoints") && kidsPrayerHabit() ? { id: PARENT_PRAYERS_ID } : null;
+  const kidHabits = kid ? habitsFor(id) : [], parentHabits = [];   // (👨‍👩‍👧 parents have no habits or prayers any more)
+  const prayHabit = kid ? kidHabits.find(h => h.kind === "prayers") : null;
   days.forEach(date => {
     let left = 0;
     kidHabits.filter(h => h.kind !== "prayers").forEach(h => { if (habitDone(h, data.habitMarks[habitKey(date, h.id, id)])) ticks++; else left++; });
@@ -5753,7 +5659,7 @@ function fsPerson(u, wk) {
   return { u, kid, raw, fair: fi ? fi.fair : null, tasksPct: st ? st.pct : null, tasksDone: st ? st.done : doneLast, tasksPlanned: st ? st.planned : 0,
            sheets: sheets.length, avg: avgPct(sheets), strong: pick("strong_points"), weak: pick("weak_points"),
            ticks, habitCount: kidHabits.filter(h => h.kind !== "prayers").length + parentHabits.length, prayed, prayerMax: prayerDays * PRAYERS.length, fajrMissed,
-           leftDays, days: days.length, riddles: feat("riddles") ? riddlesSolved(id, wk.from, wk.to) : null, moods, L, face: buddyFace(id, L) };
+           leftDays, days: days.length, moods, L, face: buddyFace(id, L) };   // (🧩 riddles: not in the summary, just for fun)
 }
 // 💡 2–3 short, kind tips for next week, from their own numbers
 function fsTips(p) {
@@ -5761,8 +5667,6 @@ function fsTips(p) {
   if (p.weak.length) out.push(`Try 10 minutes of ${p.weak[0]} every day 🎯`);
   if (p.prayerMax && p.fajrMissed >= 2) out.push(`You missed Fajr ${p.fajrMissed} times, set an alarm 🕌`);
   else if (p.prayerMax && p.prayed === p.prayerMax) out.push("Every prayer on time, mashallah! Keep it up 🕌");
-  if (p.riddles != null && p.days && p.riddles >= Math.max(3, p.days - 1)) out.push("Amazing riddles streak, keep it up 🧩");
-  else if (p.riddles === 0 && p.days >= 3) out.push("Try one riddle a day for extra points 🧩");
   if (p.leftDays >= 3) out.push(`${name}: 3 habits left most days, pick an easier time ⏰`);
   if (p.tasksPct != null && p.tasksPlanned && p.tasksPct < 60) out.push("Finish one more activity each day ✅");
   else if (p.tasksPct != null && p.tasksPct >= 90) out.push("Brilliant work on your tasks, keep going ✅");
@@ -5782,7 +5686,6 @@ function fsCardHtml(p) {
     ${p.kid ? row("📚 Worksheets done", `${p.sheets}${p.avg != null ? ` · average ${p.avg}%` : ""}`) : ""}
     ${p.strong.length ? row("💪 Good at", safe(p.strong.join(", "))) : ""}${p.weak.length ? row("🎯 Work on", safe(p.weak.join(", "))) : ""}
     ${p.habitCount ? row("⭐ Habits ticked", p.ticks) : ""}${p.prayerMax ? row("🕌 Prayers", `${p.prayed} of ${p.prayerMax}`) : ""}
-    ${p.riddles != null ? row("🧩 Riddles solved", p.riddles) : ""}
     ${feat("diary") && p.moods.length ? `<div class="fs-row"><span>📔 Moods</span><b class="fs-moods">${p.moods.map(m => m || "·").join(" ")}</b></div>` : ""}
     <div class="fs-tips"><b>💡 Tips for next week</b><ul>${fsTips(p).map(t => `<li>${safe(t)}</li>`).join("")}</ul></div></section>`;
 }
@@ -5875,7 +5778,7 @@ function kidsWorkItems() {
   Object.entries(data.points.riddleAns).forEach(([key, v]) => {
     const p = riddleKeyParts(key);
     if (p.help || p.date !== riddleDay() || !v.solved) return;
-    add(when[`${p.date}|rd|${p.n}|${p.who}`], p.who, `🧩 solved a riddle${v.pts ? ` (+${v.pts})` : ""}`, "go|points", "riddle");
+    add(when[`${p.date}|rd|${p.n}|${p.who}`], p.who, "🧩 solved a riddle 🎈", "go|points", "riddle");   // (no points: just for fun)
   });
   // 📔 My day: the mood only
   kids.forEach(kid => { const e = data.points.diary[`${date}|${kid}`]; if (e && moodFace(e.mood)) add(e.at, kid, `📔 My day: ${moodFace(e.mood)}`, "", "mood"); });
@@ -5920,7 +5823,7 @@ function kwCardHtml(k, items) {
   const acts = todayItems(k.id), done = acts.filter(x => isDone(todayIndex(), x.id, k.id));
   const markAt = id => (data.points.marks[markKey(todayIndex(), id, k.id)] || {}).at;
   const habits = mine.filter(x => x.cat === "habit").length, prayers = mine.filter(x => x.cat === "prayer").length;
-  const riddles = mine.filter(x => x.cat === "riddle").length, duties = mine.filter(x => x.cat === "duty").length;
+  const duties = mine.filter(x => x.cat === "duty").length;   // (🧩 riddles: not counted here, just for fun)
   const mood = (mine.find(x => x.cat === "mood") || {}).text, face = mood ? mood.replace("📔 My day: ", "") : "";
   const hasPrayers = habitsFor(k.id).some(h => h.kind === "prayers");
   return `<button class="card kw-card" data-kwdetail="${safe(k.id)}" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
@@ -5928,7 +5831,7 @@ function kwCardHtml(k, items) {
     <span class="kw-line">📚 <b>School:</b> ${school.length ? school.map(kwShort).join(" · ") : "nothing yet"}</span>
     <span class="kw-line">✅ <b>Activities:</b> ${acts.length ? `${done.length} of ${acts.length} done (${acts.map(x => { const ok = done.includes(x), at = ok && markAt(x.id);
         return `${safe(x.name)} ${ok ? "✅" : "⏳"}${at ? ` <small>${kwTime(at)}</small>` : ""}`; }).join(", ")})` : "none today"}</span>
-    <span class="kw-line kw-counts">⭐ Habits ${habits}${hasPrayers ? ` · 🕌 Prayers ${prayers}/5` : ""}${feat("riddles") ? ` · 🧩 Riddles ${riddles}` : ""}${duties ? ` · 🧹 Duties ${duties}` : ""}${feat("diary") ? ` · 📔 Mood ${face || "–"}` : ""}</span></button>`;
+    <span class="kw-line kw-counts">⭐ Habits ${habits}${hasPrayers ? ` · 🕌 Prayers ${prayers}/5` : ""}${duties ? ` · 🧹 Duties ${duties}` : ""}${feat("diary") ? ` · 📔 Mood ${face || "–"}` : ""}</span></button>`;
 }
 let kwDetail = null;   // the kid whose details are open, or null (the summary)
 function drawKidsWork() {
@@ -5991,12 +5894,12 @@ function birthdayInfo(b) {
   const days = Math.round((next - today) / 86400000), age = next.getFullYear() - y - (days === 0 ? 0 : 1);
   return { days, age: age >= 0 && age < 120 ? age : null, label: `${d} ${MONTHS[m - 1]}` };
 }
-// This week: ✅ tasks done %, ⭐ habit ticks, 🧩 riddles solved, 📔 the mood of each day
+// This week: ✅ tasks done %, ⭐ habit ticks, 📔 the mood of each day (🧩 riddles: not here, just for fun)
 function weekStats(id) {
   const from = data.points.week, to = weekEnd(), planned = plannedCount(id), done = (activityPointsByUser()[id] || 0) / POINTS_EACH;
   const ticks = Object.entries(data.habitMarks).filter(([k, v]) => { const [date, , who] = k.split("|"); return who === id && date >= from && date < to && v; }).length;
   const moods = Array.from({ length: todayIndex() + 1 }, (_, d) => { const e = diaryOf(id, ymd(dayDate(d))); return { day: SHORT[d], face: e ? moodFace(e.mood) : "" }; });
-  return { pct: planned ? Math.min(100, Math.round(done / planned * 100)) : null, done, planned, ticks, riddles: riddlesSolved(id, from, to), moods };
+  return { pct: planned ? Math.min(100, Math.round(done / planned * 100)) : null, done, planned, ticks, moods };
 }
 function drawMe() {
   if (!exists(meWho) || (meWho !== me && !isParentViewer())) meWho = me;
@@ -6023,7 +5926,6 @@ function drawMe() {
           <input type="text" id="mesub-${safe(f.id)}" maxlength="30" value="${safe(f.name)}" aria-label="Subject name">
           <label class="checkline"><input type="checkbox" id="meshow-${safe(f.id)}" ${f.hidden ? "" : "checked"}> 👁️ Show</label></div>`).join("")}
         <label class="small" for="meSubNew">➕ Add a subject</label><input type="text" id="meSubNew" maxlength="30" placeholder="French, Computing…">` : ""}
-      ${!kid && mine ? `<h3 class="ph-group">⭐ My habits</h3><div class="btnrow"><button type="button" class="pill" data-mehabits>⭐ Choose my habits</button></div>` : ""}
       <h3 class="ph-group">❤️ Things ${mine ? "I" : "they"} love</h3>${LOVES.map(([key, e, label]) => `<label class="small" for="meLove-${key}">${e} ${label}</label>
         <input type="text" id="meLove-${key}" maxlength="30" value="${safe((u.loves || {})[key] || "")}">`).join("")}
       ${mine ? `<div class="btnrow"><button type="button" class="pill" data-go="settings">🕌 Prayer times</button></div>` : ""}
@@ -6031,10 +5933,13 @@ function drawMe() {
       <div class="btnrow"><button class="primary" data-mesave>💾 Save</button><button data-mecancel>Cancel</button></div></div>` : "";
   // 👨‍👩‍👧 Family settings (parents only, at the bottom of their own profile): people & codes, features, prayer city, backup
   const famSettings = mine && parent ? `<div class="card me-card me-family"><h2>👨‍👩‍👧 Family settings</h2><div class="me-famlinks">
-      ${me === DAD ? `<button class="pill" data-go="family">👨‍👩‍👧 Add a kid or parent · 🔑 Codes</button>` : ""}
+      ${isParentId(me) ? `<button class="pill" data-go="family">👨‍👩‍👧 Add a kid or parent · 🔑 Codes</button>` : ""}
       <button class="pill" data-setupopen>⚙️ Features on / off</button>
       <button class="pill" data-go="settings">🕌 Prayer city · ⏰ My day · 💾 Backup</button></div></div>` : "";
-  $("meBody").innerHTML = `${chips}
+  // 👤 Who this device is signed in as (a parent on the family's main login can say "Not you?": the picker again; kids never)
+  const meU = userById(me), notYou = !isKidDevice() && isParentId(me) && isMainLogin(cloudMeta().member) && parentsList().length > 1;
+  const signedIn = exists(me) ? `<p class="me-signed">Signed in as: <b>${safe(meU.emoji)} ${safe(meU.name)}</b>${notYou ? `<button class="linkbtn" data-menotyou>Not you?</button>` : ""}</p>` : "";
+  $("meBody").innerHTML = `${signedIn}${chips}
     <div class="card me-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
       <div class="me-face">${safe(u.emoji)}</div>
       <div class="me-name"><h1>${safe(u.name)}</h1><small>${mine ? "👤 My profile" : "👤 Profile"}</small></div>
@@ -6050,9 +5955,8 @@ function drawMe() {
     <div class="card me-card"><h2>❤️ Things I love</h2>${loves ? `<ul class="me-list">${loves}</ul>` : `<p class="sc-empty">${canEdit ? "Fill them in with ⚙️ Settings." : "Nothing yet."}</p>`}</div>
     <div class="card me-card"><h2>📅 This week</h2><ul class="me-list">
       ${st.pct != null ? `<li><span>✅ Tasks done</span><b>${st.pct}% <small>(${st.done} of ${st.planned})</small></b></li>` : ""}
-      <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li>${feat("riddles") ? `<li><span>🧩 Riddles solved</span><b>${st.riddles}</b></li>` : ""}</ul>
+      <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li></ul>
       ${feat("diary") && canSeeMood(u.id) ? `<div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>` : ""}</div>
-    ${!kid ? `<div class="card me-card"><h2>⭐ ${mine ? "My" : "Their"} habits</h2>${parentHabitsFor(u.id).length ? `<p>${parentHabitsFor(u.id).map(h => `${safe(h.emoji)} ${safe(h.name)}`).join(" · ")}</p>` : `<p class="sc-empty">Not chosen yet.</p>`}</div>` : ""}
     ${famSettings}
     <div class="btnrow me-btns">${canEdit && !meEdit ? `<button class="pill primary" data-meedit>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</button>` : ""}
       ${mine && cloud.user ? `<button class="pill danger-text" data-signout>🚪 Sign out</button>` : ""}</div>`;
@@ -6188,12 +6092,11 @@ document.addEventListener("click", e => {
   if (!b) return;
   const ds = b.dataset;
   if (ds.mewho) { meWho = ds.mewho; meEdit = false; return render(); }
+  if ("menotyou" in ds) return askWhichParent(true);   // 👨‍👩‍👧 the family's main login: pick yourself again (this device only)
   if ("meedit" in ds) { meEdit = true; render(); return $("meBody").querySelector(".me-form").scrollIntoView({ behavior: "smooth", block: "start" }); }
   if ("mecancel" in ds) { meEdit = false; return render(); }
   if ("mesave" in ds) return saveMe();
   if (ds.meemoji) { $("meBody").querySelectorAll("[data-meemoji]").forEach(x => x.classList.toggle("on", x === b)); return; }
-  // ⭐ A parent's habits: the chooser on their home
-  if ("mehabits" in ds) { go("home"); parentFocus("start"); const card = document.querySelector("#scr-home .ph-card"); if (card) card.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
   if ("mespark" in ds) { const w = meWho; openBuddyBox(w); if (userById(w).buddy && canChangeBuddy(w)) { buChange = true; drawBuddyBox(); } return; }   // ✨ pick / change the Spark
 });
 
@@ -6253,11 +6156,7 @@ function encMessages() {
   if (starDecided() && stars().includes(me) && !weekItem("want", me)) out.push({ text: "You're the ⭐ Shining Star! Choose your gift 🎁", go: "prize" });
   const left = todayItems(me).filter(x => !isDone(todayIndex(), x.id, me)).length;
   if (left) out.push({ text: `${left} ${left === 1 ? "task" : "tasks"} left today, you can do it 💪`, go: "tasks" });
-  if (isParentDevice()) {
-    const hl = parentHabitsFor(me).filter(h => data.habitMarks[habitKey(todayYmd(), h.id, me)] !== true).length;
-    if (feat("parentPoints") && hl) out.push({ text: `${hl} of your habits left today, you've got this 💪`, go: "home" });
-    if (kidsList().length) out.push({ text: "See how the kids are doing this week 📊", go: "report" });
-  }
+  if (isParentDevice() && kidsList().length) out.push({ text: "See how the kids are doing this week 📊", go: "report" });
   return out;
 }
 function setupEncLines() {
@@ -6443,7 +6342,7 @@ function noteHtml(id, rank, fi, order) {
 }
 // 🔥 / 💪 The kind line on each bar, from this person's real numbers this week (a different one each day; never mean):
 // 1st place before Friday 6 PM: "🔥 You're in the lead!"; everyone else: points behind the one just above, habits / tasks left today,
-// a subject going well, today's riddle, Friday coming. (fi = fairInfo(), order = the leaderboard order)
+// a subject going well, Friday coming. (fi = fairInfo(), order = the leaderboard order) (🧩 riddles: no points, so no riddle line)
 function cheerLine(id, rank, fi, order) {
   const decided = starDecided(), mine = fi[id];
   if (rank === 0 && mine.fair > 0 && !decided)
@@ -6453,8 +6352,7 @@ function cheerLine(id, rank, fi, order) {
     const gap = Math.max(1, Math.ceil((fi[above.id].fair - mine.fair) * mine.possible / 100));
     out.push(`Only ${gap} ${gap === 1 ? "point" : "points"} behind ${userById(above.id).name}! 💪`);
   }
-  const habitsLeft = isParentId(id) ? (feat("parentPoints") ? parentHabitsFor(id).filter(h => data.habitMarks[habitKey(date, h.id, id)] !== true).length : 0)
-    : habitsFor(id).filter(h => !habitDone(h, data.habitMarks[habitKey(date, h.id, id)])).length;
+  const habitsLeft = isParentId(id) ? 0 : habitsFor(id).filter(h => !habitDone(h, data.habitMarks[habitKey(date, h.id, id)])).length;   // (parents: no habits)
   if (habitsLeft) out.push(`${habitsLeft} ${habitsLeft === 1 ? "habit" : "habits"} left today, you can catch up 🌱`);
   const tasksLeft = todayItems(id).filter(x => !isDone(todayIndex(), x.id, id)).length;
   if (tasksLeft) out.push(`${tasksLeft} ${tasksLeft === 1 ? "task" : "tasks"} left today, every tick counts ✅`);
@@ -6465,7 +6363,6 @@ function cheerLine(id, rank, fi, order) {
     const best = Object.entries(bySub).map(([sub, l]) => [sub, l.reduce((a, b) => a + b, 0) / l.length]).sort((a, b) => b[1] - a[1])[0];
     if (best && best[1] >= 70) out.push(`Great ${best[0]} work this week, keep it up 📚`);
   }
-  if (feat("riddles") && riddlesOf(id).some((r, n) => n < RIDDLE_PAID && !riddleDone(id, undefined, n))) out.push(`Solve today's riddle for +${RIDDLE_PTS} 🧩`);
   if (!decided && todayIndex() >= 2) out.push("Friday is close, one more push! 🚀");
   if (decided) out.push("A fresh start on Monday, you've got this 🌱");
   if (!out.length) return "Every tick counts! 🌱";
@@ -6493,16 +6390,13 @@ function heldBackHtml(id, totals, sorted) {
     ids.forEach(a => { if (!isDone(d, a, id)) { if (d < today) notDone++; else left++; } });
   }
   if (notDone) parts.push(`${notDone} ${notDone === 1 ? "activity" : "activities"} not done yet`);
-  // Riddles, My day, habits (only when the feature is on)
-  if (feat("riddles")) {
-    const dates = Object.keys(data.points.riddles).filter(k => k >= from && k < weekEnd()), all = dates.flatMap(k => riddlesOf(id, k).map((r, n) => [k, n]));
-    if (all.length) parts.push(`Riddles: ${all.filter(([k, n]) => riddleRight(id, k, n)).length} of ${all.length}`);
-  }
+  // My day, habits (only when the feature is on; 👨‍👩‍👧 a parent's score is only their activities, so not for parents)
+  // (🧩 riddles: no points, so they never "hold anyone back")
+  const kid = !isParentId(id);
   const dayList = Array.from({ length: today + 1 }, (_, d) => ymd(dayDate(d)));
-  if (feat("diary")) parts.push(`My day: ${dayList.filter(date => diaryOf(id, date)).length} of ${dayList.length} days`);
-  const ticksOn = date => Object.keys(data.habitMarks).some(k => { const [dt, hid, who] = k.split("|"); return dt === date && who === id && (isParentId(id) ? hid.startsWith("ph-") : !hid.startsWith("ph-")); });
-  const hasHabits = isParentId(id) ? feat("parentPoints") && parentHabitsFor(id).length : habitsFor(id).length;
-  if (hasHabits) { const none = dayList.filter(date => !ticksOn(date)).length; if (none) parts.push(`Habits: ${none} ${none === 1 ? "day" : "days"} without ticks`); }
+  if (kid && feat("diary")) parts.push(`My day: ${dayList.filter(date => diaryOf(id, date)).length} of ${dayList.length} days`);
+  const ticksOn = date => Object.keys(data.habitMarks).some(k => { const [dt, hid, who] = k.split("|"); return dt === date && who === id && !hid.startsWith("ph-"); });
+  if (kid && habitsFor(id).length) { const none = dayList.filter(date => !ticksOn(date)).length; if (none) parts.push(`Habits: ${none} ${none === 1 ? "day" : "days"} without ticks`); }
   // One tip: the single thing that gives the most points (to catch up with the person just above)
   // (⚖️ totals = fairInfo(): the gap in fair points, turned back into this person's raw points)
   const above = [...sorted].reverse().find(x => totals[x.id].fair > totals[id].fair);
@@ -6511,10 +6405,8 @@ function heldBackHtml(id, totals, sorted) {
   const todayDate = todayYmd(), opts = [];
   const actsCan = notDone + left;
   if (actsCan) { const k = Math.max(1, Math.min(actsCan, Math.ceil(gap / POINTS_EACH) || 1)); opts.push([k * POINTS_EACH, `Finish ${k} more ${k === 1 ? "activity" : "activities"} = +${k * POINTS_EACH} ✅`]); }
-  if (feat("riddles") && riddlesOf(id).some((r, n) => n < RIDDLE_PAID && !riddleDone(id, undefined, n))) opts.push([RIDDLE_PTS, `Solve today's riddle = +${RIDDLE_PTS} 🧩`]);
-  if (feat("diary") && !diaryOf(id, todayDate)) opts.push([DIARY_POINTS, `Write today's My day = +${DIARY_POINTS} ⭐`]);
-  if (isParentId(id) && feat("parentPoints")) { const n = parentHabitsFor(id).filter(h => data.habitMarks[habitKey(todayDate, h.id, id)] !== true).length; if (n) opts.push([n * PARENT_HABIT_POINTS, `Tick your ${n} habits today = +${n * PARENT_HABIT_POINTS} ⭐`]); }
-  if (!isParentId(id)) { const n = habitsFor(id).filter(h => !habitDone(h, data.habitMarks[habitKey(todayDate, h.id, id)])).length; if (n) opts.push([n, `Tick your good habits today ⭐`]); }
+  if (kid && feat("diary") && !diaryOf(id, todayDate)) opts.push([DIARY_POINTS, `Write today's My day = +${DIARY_POINTS} ⭐`]);
+  if (kid) { const n = habitsFor(id).filter(h => !habitDone(h, data.habitMarks[habitKey(todayDate, h.id, id)])).length; if (n) opts.push([n, `Tick your good habits today ⭐`]); }
   const best = opts.sort((a, b) => b[0] - a[0])[0];
   if (!parts.length && !best) return "";
   return `<details class="pt-held"><summary>🌱 ${mine ? "What held me back" : "What held them back"}</summary>
@@ -6646,7 +6538,7 @@ function hallTap(ds) {
 // ---------- Points screen ----------
 function drawPoints() {
   const totals = pointsByUser(), acts = activityPointsByUser(), star = stars(), from = data.points.week, to = weekEnd();
-  $("ptsWeek").textContent = `${weekLabel(data.points.week)} · ✅ Tasks: activities, school work, duties · ⭐ Habits: good habits, prayers, My day · 🧩 Fun: riddles, helping, wishes, prizes · starts again every Monday`;
+  $("ptsWeek").textContent = `${weekLabel(data.points.week)} · ✅ Tasks: activities, school work, duties · ⭐ Habits: good habits, prayers, My day · 🧩 Fun: helping, wishes, prizes · starts again every Monday`;
   // ⚖️ The order and the bar: the fair score (everyone plays for the same 100); the raw points stay in ✅ · ⭐ · 🧩
   const fi = fairInfo(), fair = Object.fromEntries(Object.entries(fi).map(([id, x]) => [id, x.fair]));
   const sorted = fairOrder(fair);
@@ -6674,9 +6566,8 @@ function drawPoints() {
   $("ptsHall").innerHTML = hallHtml();   // 🏆 every week's ⭐
   $("ptsRiddles").innerHTML = riddleBoardHtml();   // 🧩 the family riddle board
   maybeMakeRiddles();
-  // 👨‍👩‍👧 The parents' habits today (kids: just looking) and 🎁 my prizes
-  const parents = data.users.filter(u => isParentId(u.id));
-  $("ptsParents").innerHTML = parents.map(u => parentHabitsCardHtml(u.id, false)).join("") + (isParentId(me) && !isKidDevice() ? prizesListHtml(me) : "");
+  // 🎁 My prizes (a parent's; parents have no habits card any more)
+  $("ptsParents").innerHTML = isParentId(me) && !isKidDevice() ? prizesListHtml(me) : "";
   const h = data.points.history;
   $("ptsHistory").innerHTML = h.length ? h.map(w => `<div class="hist-row"><span>${weekLabel(w.week)}</span>
       <b>🌟 ${w.winners.map(x => `${safe(x.emoji)} ${safe(x.name)}`).join(" & ")}${w.fair != null ? ` · ⭐ Score ${w.fair}/100` : ""} · ${w.points} points</b>${
@@ -6758,7 +6649,7 @@ function drawHome() {
   const myPoints = pointsByUser()[me], myFair = fairScores()[me];
   $("homePoints").textContent = (stars().includes(me) ? `🌟 Shining Star of the Week · ⭐ Score ${myFair}/100 · ${myPoints} points` : `⭐ Score ${myFair}/100 · ${myPoints} points this week`)
     + ` · ${kindsText(weekKinds(me))}`;
-  const isDad = me === DAD, parent = isParentDevice();
+  const isDad = isParentId(me), parent = isParentDevice();
   $("backupPill").hidden = !isDad;   // 💾 Backup button: only Bro2a sees it
   // 🌱 The hello: my buddy in its level ring (when Buddy levels is on and I picked one)
   const buddy = feat("buddy") && u.buddy;
@@ -6787,15 +6678,15 @@ function drawHome() {
   $("homeNote").textContent = note;
   // 🏠 TODAY: 📋 my next activities · 🧩 my riddle · 📔 My day, then the rest (each card leaves itself out when it's off or empty);
   // parents also get the family rows: kids' moods, ✅ duties check, 💌 wishes, 📅 the family today
-  // 👨‍👩‍👧 A parent's home: my habit chips, the 👨‍👩‍👧 Family tiles, then Today, the family calendar, kids' moods, duties check, wishes (and the rest)
+  // 👨‍👩‍👧 A parent's home: the 👨‍👩‍👧 Family tiles, then Today, the family calendar, kids' moods, duties check, wishes (and the rest; no parent habits)
   $("homeHabits").innerHTML = parent
     ? kidSetupHtml() + `<div class="rp-tiles"><button class="big-btn rp-open" data-report><span class="e">📊</span><b>How are my kids doing?</b><small>School, tasks, habits and moods</small></button>
         <button class="big-btn rp-open" data-go="kidswork"><span class="e">👀</span><b>Your kids' work today</b><small>Live, as they do it</small></button></div>${fsButtonsHtml()}`
-      + parentHabitsCardHtml(me, true) + familyTilesHtml() + todayCardHtml(me) + familyTodayHtml() + kidsMoodHtml() + dutiesCardHtml() + wishesListHtml()
+      + familyTilesHtml() + todayCardHtml(me) + familyTodayHtml() + kidsMoodHtml() + dutiesCardHtml() + wishesListHtml()
       + (u.buddy ? "" : buddyCardHtml(me)) + prizeCardHtml(me) + diaryButtonHtml() + extraHomeHtml(me) + habitsCardHtml(me)
       + `<div class="btnrow su-edit"><button data-setupopen>✏️ Edit my home</button></div>`
     : (u.buddy ? "" : buddyCardHtml(me)) + todayCardHtml(me) + diaryButtonHtml()
-      + dutyNoteHtml(me) + wishCardHtml(me) + prizeCardHtml(me) + extraHomeHtml(me) + habitsCardHtml(me) + parentHabitsCardHtml(me, true);
+      + dutyNoteHtml(me) + wishCardHtml(me) + prizeCardHtml(me) + extraHomeHtml(me) + habitsCardHtml(me);
   $("homeCal").innerHTML = "";
   maybeMakeRiddles();
   maybeShowTour();
@@ -6823,7 +6714,7 @@ function drawKidHome(u) {
   $("homeHabits").innerHTML = (u.buddy || !feat("buddy") ? "" : buddyCardHtml(me))
     + `<div class="card kid-week" style="--c:${colorsOf(u).color}"><h2>📊 My week</h2><p>
       <span>⭐ Score ${fairScores()[u.id]}/100</span> · <span>✅ Tasks ${doneToday} of ${today.length} today</span> · <span>📚 Study ${study}</span>
-      ${feat("riddles") ? ` · <span>🧩 Riddles ${riddlesSolved(u.id, from, to)}</span>` : ""}${feat("buddy") ? ` · <span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p></div>
+${feat("buddy") ? ` · <span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p></div>
     <nav class="kid-bar" aria-label="More">${bar.map(([attr, e, label]) => `<button ${attr} class="${(attr.includes("habits") && kidPanel === "habits") || (attr === "data-homemore" && homeMore) ? "on" : ""}"><span class="e">${e}</span><small>${label}</small></button>`).join("")}</nav>
     ${kidPanel === "habits" ? habitsCardHtml(me) + (feat("chores") ? choresTodayHtml(me) : "") || `<div class="card"><p class="sc-empty">No habits today.</p></div>` : ""}
     ${homeMore ? `<div class="menu kid-more">${moreTilesHtml()}</div>` : ""}`;
@@ -6852,7 +6743,7 @@ const signOutTile = () => cloud.user ? [{ signout: true, emoji: "🚪", label: "
 // 👨‍👩‍👧 Parents: the Family tiles at the top of their home (a tile whose ⚙️ feature is off is hidden)
 function familyTilesHtml() {
   const tiles = [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },
-    ...(me === DAD ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
+    ...(isParentId(me) ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
     ...EXTRA_PAGES.filter(([k]) => feat(k)).map(([k, emoji, label, sub]) => ({ extra: k, emoji, label, sub }))];
   return `<div class="card fam-tiles-card"><h2>👨‍👩‍👧 Family</h2><div class="fam-tiles">${tiles.map(tileHtml).join("")}</div></div>`;
 }
@@ -6863,7 +6754,7 @@ function moreTilesHtml() {
 }
 // 📅 Calendar's small buttons: ✏️ Add activities (everyone) · 🖨️ Schedules to tick (the parent who plans)
 function calToolsHtml() {
-  return `<button class="pill" data-go="add">✏️ Add activities</button>${me === DAD ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}`;
+  return `<button class="pill" data-go="add">✏️ Add activities</button>${isParentId(me) ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}`;
 }
 // 📋 Today: my next activities (not done yet, up to 5) with big ✅ ticks; "See all" opens 📅 Calendar
 function todayItems(who) {
@@ -7155,7 +7046,7 @@ const TOUR_KID = [["✅", "Tick your tasks", "When you finish something, tap its
                   ["✨", "Grow your Spark", "All your points help your Spark grow. Can you reach the next level?"]];
 const TOUR_PARENT = [["📅", "Family calendar", "Everyone's week in one place. ✨ Plan my week fits all the activities together."],
                      ["🎒", "School coach", "Upload today's school work: 🤖 makes worksheets, checks the answers and tells you what to practise."],
-                     ["⭐", "Points & habits", "✅ Tasks, ⭐ Habits and 🧩 Fun: the whole family in one race. Choose your 5 habits too."],
+                     ["⭐", "Points & the kids' habits", "Everyone plays for the same 100 points. Your score is your activities; the kids also earn with ⭐ habits and 🧩 Fun."],
                      ["⚙️", "Settings", "Turn features on or off for your family, and set up the people and the day."]];
 let tourShown = false;   // (once per opening of the app)
 function maybeShowTour() {
@@ -7196,7 +7087,7 @@ function showTour() {
 const FEATURE_INFO = {
   coach: ["🎒", "School coach", "Upload school work: 🤖 makes worksheets and checks them"], newsletter: ["📰", "Newsletter", "Read the school newsletter into the calendar"],
   riddles: ["🧩", "Riddles", "A fun riddle of the day for everyone"], diary: ["📔", "My day", "A mood and a few lines about the day"],
-  buddy: ["✨", "Spark levels", "A Spark that grows with all your points"], parentPoints: ["⭐", "Parent points", "Parents earn points too: habits and helping"],
+  buddy: ["✨", "Spark levels", "A Spark that grows with all your points"], parentPoints: ["⭐", "Parent points", "Parents earn points too: their activities and the weekly prize"],
   wishes: ["💌", "Kids' wishes", "Every Friday the kids tell you their wishes"], prayer: ["🕌", "Prayer times", "Prayer times on the calendar"],
   chores: ["🧹", "Home duties", "Jobs at home, or taking turns"],
   meeting: ["🏡", "Our Community", "A family board: notes, requests, reviews"]
@@ -7298,28 +7189,63 @@ function drawWho(p, selected) {
   if ($(p + "DadLine")) updateDadLine(p);   // (routines have no "Needs Dad")
 }
 // Who the activity is for: Dad picks in "Who?", kids always add their own.
-function pickedWho(p) { return me === DAD ? [...$(p + "Who").querySelectorAll("input:checked")].map(c => c.value) : [me]; }
+function pickedWho(p) { return isParentId(me) ? [...$(p + "Who").querySelectorAll("input:checked")].map(c => c.value) : [me]; }
 // "Needs Dad" only makes sense when Dad isn't one of the people already
 function updateDadLine(p) { $(p + "DadLine").hidden = pickedWho(p).includes(DAD); }
 ["fx", "fl"].forEach(p => $(p + "Who").addEventListener("change", () => updateDadLine(p)));
 
 function drawAdd() {
-  $("addTitle").textContent = me === DAD ? "✏️ Everyone's activities" : "✏️ My activities";
-  $("addSub").textContent = me === DAD ? "Tick “Who?” for each activity. School can be for all the kids at once!"
+  $("addTitle").textContent = isParentId(me) ? "✏️ Everyone's activities" : "✏️ My activities";
+  $("addSub").textContent = isParentId(me) ? "Tick “Who?” for each activity. School can be for all the kids at once!"
                                        : `Shared activities (like School) can only be changed by ${dadName()}.`;
   // Only Dad picks who an activity is for
-  $("fxWhoWrap").hidden = $("flWhoWrap").hidden = me !== DAD;
-  if (me === DAD) { drawWho("fx"); drawWho("fl"); }
+  $("fxWhoWrap").hidden = $("flWhoWrap").hidden = !isParentId(me);
+  if (isParentId(me)) { drawWho("fx"); drawWho("fl"); }
   document.querySelectorAll(".needs-label").forEach(el => el.textContent = `Needs ${dadName()}`);
   document.querySelectorAll(".needs-help").forEach(el => el.textContent = `${dadName()} is busy at this time too.`);
   updateDadLine("fx"); updateDadLine("fl");
   // "Can be done at the same time as" is only for Dad (it changes other people's activities too)
-  $("fxPickWrap").hidden = $("flPickWrap").hidden = me !== DAD;
+  $("fxPickWrap").hidden = $("flPickWrap").hidden = !isParentId(me);
   drawFixedList();
   drawFlexibleList();
-  // Routines: Dad only
-  $("rtCard").hidden = me !== DAD;
-  if (me === DAD) { if (!$("rtForm").hidden) drawWho("rt"); drawRoutineList(); }
+  // Routines: parents only
+  if (isParentId(me)) { if (!$("rtForm").hidden) drawWho("rt"); drawRoutineList(); }
+  drawAddSections();
+}
+// ---------- ✏️ ADD PAGE: closed and simple, three big buttons with counts, each opens its list (accordion) ----------
+// A list's "➕ New …" or a tap on a row opens the form (the forms are hidden otherwise). Opening the page: all closed.
+let addOpen = { fx: false, fl: false, rt: false };
+function drawAddSections() {
+  const parent = isParentId(me);
+  $("fxCount").textContent = `(${listFor(data.fixed).length})`;
+  $("flCount").textContent = `(${listFor(data.flexible).length})`;
+  $("rtCount").textContent = `(${data.routines.length})`;
+  $("secRtBtn").hidden = !parent;
+  if (!parent) addOpen.rt = false;
+  [["fx", "secFxBtn", "secFx"], ["fl", "secFlBtn", "secFl"], ["rt", "secRtBtn", "rtCard"]].forEach(([k, btn, panel]) => {
+    $(panel).hidden = !addOpen[k];
+    $(btn).classList.toggle("on", addOpen[k]);
+    $(btn).setAttribute("aria-expanded", String(addOpen[k]));
+  });
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#scr-add [data-addsec], #scr-add [data-addnew]");
+  if (!b) return;
+  if (b.dataset.addsec) {   // tap = open / close that list
+    const k = b.dataset.addsec;
+    addOpen[k] = !addOpen[k];
+    if (!addOpen[k]) { if (k === "fx") resetFixedForm(); if (k === "fl") resetFlexForm(); if (k === "rt") closeRoutineForm(); }
+    return drawAddSections();
+  }
+  const k = b.dataset.addnew;   // ➕ New …: the empty form
+  if (k === "fx") { resetFixedForm(); $("fxForm").hidden = false; $("fxName").focus(); }
+  if (k === "fl") { resetFlexForm(); $("flForm").hidden = false; $("flName").focus(); }
+});
+// One row of a list: name · who (emojis) · days and time (fixed) or minutes × times a week (flexible). Tap = edit (when allowed).
+function addRowHtml(f, kind, editing, what) {
+  const can = canEdit(f), inner = `<span class="what">${safe(f.name)}<small>${safe(emojisOf(f.users))} · ${what}${f.needsDad ? ` · ${safe(userById(DAD).emoji)} needs ${safe(dadName())}` : ""}</small></span>`;
+  return `<li class="${editing ? "editing" : ""}">${can ? `<button class="add-row" data-edit-${kind}="${f.id}" aria-label="Edit ${safe(f.name)}">${inner}<span class="add-go" aria-hidden="true">✏️</span></button>`
+    : `<div class="add-row look">${inner}<span class="tag">👀 shared</span></div>`}</li>`;
 }
 
 // A checklist of the other activities (anyone's) that this one can share time with. Dad only.
@@ -7349,22 +7275,8 @@ function syncPartners(id, wanted) {
     if (!want && has) o.overlapWith = o.overlapWith.filter(x => x !== id);
   });
 }
-// Small text under an activity in the lists: who it's for, "needs Dad", "together with"
-function extras(f) {
-  return `<br><span class="tag">${safe(usersText(f.users))}</span>`
-    + (f.needsDad ? `<span class="tag">${safe(userById(DAD).emoji)} needs ${safe(dadName())}</span>` : "")
-    + (f.getReady ? `<span class="tag">🎒 get ready ${f.getReady} min before</span>` : "")
-    + (f.breakAfter ? `<span class="tag">☕ break ${f.breakAfter} min after</span>` : "")
-    + (me === DAD && f.overlapWith.length ? `<span class="tag">⇄ together with: ${safe(partnerNames(f))}</span>` : "");
-}
-// Edit and Delete buttons, or a little note when a kid can't change a shared activity
-function editButtons(f, kind) {
-  return canEdit(f) ? `<button class="edit" data-edit-${kind}="${f.id}">Edit</button>
-      <button class="x" title="Delete" aria-label="Delete" data-del-${kind}="${f.id}">× Delete</button>`
-    : `<span class="tag">👀 shared</span>`;
-}
 // Dad sees everyone's activities; a kid sees the ones they're in.
-function listFor(list) { return me === DAD ? list : list.filter(f => f.users.includes(me)); }
+function listFor(list) { return isParentId(me) ? list : list.filter(f => f.users.includes(me)); }
 
 // ---------- Fixed activities ----------
 // Finds other fixed activities that share a day AND overlap in time AND keep the same person busy
@@ -7395,7 +7307,7 @@ $("fxAdd").onclick = () => {
   const old = editingFixed ? data.fixed.find(f => f.id === editingFixed) : null;
   if (old && !canEdit(old)) return;
   // Only Dad changes the "together" list; kids keep what it was.
-  let overlapWith = me === DAD ? [...$("fxOverlapList").querySelectorAll("input:checked")].map(c => c.value) : (old ? old.overlapWith : []);
+  let overlapWith = isParentId(me) ? [...$("fxOverlapList").querySelectorAll("input:checked")].map(c => c.value) : (old ? old.overlapWith : []);
   // School never goes together with lessons
   if (isSchoolName(name)) overlapWith = overlapWith.filter(id => !data.flexible.some(f => f.id === id));
   if (!name) return $("fxErr").textContent = "Please type a name.";
@@ -7408,7 +7320,7 @@ $("fxAdd").onclick = () => {
   if (overlaps.length) {
     const tip = "Please change the time or the days"
       + (needsDad ? `, or untick “Needs ${dadName()}”` : "")
-      + (me === DAD ? ", or tick it in “Can be done at the same time as”." : ".");
+      + (isParentId(me) ? ", or tick it in “Can be done at the same time as”." : ".");
     $("fxErr").innerHTML = `Not saved:<ul>${overlaps.map(o => `<li>${safe(o)}</li>`).join("")}</ul>${safe(tip)}`;
     return;
   }
@@ -7416,7 +7328,7 @@ $("fxAdd").onclick = () => {
   let id = editingFixed;
   if (old) Object.assign(old, { name, days, start, end, overlapWith, users, needsDad, getReady, breakAfter });   // update the existing one
   else { id = newId(); data.fixed.push({ id, name, days, start, end, overlapWith, users, needsDad, getReady, breakAfter }); } // add a new one
-  if (me === DAD) syncPartners(id, overlapWith); // keep it two-way
+  if (isParentId(me)) syncPartners(id, overlapWith); // keep it two-way
   resetFixedForm();
   changed();
   draftToast(old ? "✓ Changed" : "✓ Added");
@@ -7437,9 +7349,11 @@ function startEditFixed(id) {
   $("fxNeedsDad").checked = f.needsDad;
   dadTouched.fx = true;
   drawWho("fx", f.users);
-  $("fxAdd").textContent = "Save changes";
-  $("fxCancel").hidden = false;
+  $("fxFormTitle").textContent = `✏️ Edit: ${f.name}`;
+  $("fxDel").hidden = false; $("fxDel").dataset.delFixed = id;   // (🗑️ goes through the usual delete: same rules as before)
   $("fxErr").textContent = "";
+  addOpen.fx = true; drawAddSections();
+  $("fxForm").hidden = false;
   drawFixedList();
   drawPickList("fxOverlapList", editingFixed, f.overlapWith);
   $("fxName").focus();
@@ -7456,8 +7370,9 @@ function resetFixedForm() {
   $("fxNeedsDad").checked = false;
   dadTouched.fx = false;
   drawWho("fx", [me]);
-  $("fxAdd").textContent = "Add";
-  $("fxCancel").hidden = true;
+  $("fxFormTitle").textContent = "➕ New fixed activity";
+  $("fxDel").hidden = true; delete $("fxDel").dataset.delFixed;
+  $("fxForm").hidden = true;   // (the form shows only after ➕ New or a tap on a row)
   $("fxErr").textContent = "";
   drawFixedList();
   drawPickList("fxOverlapList", null, []);
@@ -7466,12 +7381,11 @@ $("fxCancel").onclick = resetFixedForm;
 
 function drawFixedList() {
   const mine = listFor(data.fixed);
-  $("fxList").innerHTML = mine.length ? mine.map(f => `
-    <li class="${f.id === editingFixed ? "editing" : ""}"><span class="uemoji">📌</span>
-      <span class="what">${safe(f.name)}<small>${f.days.map(d => SHORT[d]).join(", ")} · ${showTime(toMin(f.start))}–${showTime(toMin(f.end))}${extras(f)}</small></span>
-      ${editButtons(f, "fixed")}</li>`).join("")
+  $("fxList").innerHTML = mine.length ? mine.map(f => addRowHtml(f, "fixed", f.id === editingFixed,
+      `${f.days.map(d => SHORT[d]).join(", ")} · ${showTime(toMin(f.start))}–${showTime(toMin(f.end))}`)).join("")
     : `<li class="empty">Nothing here yet.</li>`;
   drawPickList("fxOverlapList", editingFixed); // refresh the checklist too (keeps your current ticks)
+  if ($("fxCount")) $("fxCount").textContent = `(${mine.length})`;
 }
 
 // ---------- Flexible activities ----------
@@ -7485,7 +7399,7 @@ $("flAdd").onclick = () => {
   const old = editingFlex ? data.flexible.find(f => f.id === editingFlex) : null;
   if (old && !canEdit(old)) return;
   // (School never goes together with lessons)
-  const overlapWith = (me === DAD ? [...$("flOverlapList").querySelectorAll("input:checked")].map(c => c.value) : (old ? old.overlapWith : []))
+  const overlapWith = (isParentId(me) ? [...$("flOverlapList").querySelectorAll("input:checked")].map(c => c.value) : (old ? old.overlapWith : []))
     .filter(id => !data.fixed.some(f => f.id === id && isSchoolName(f.name)));
   if (!name) return $("flErr").textContent = "Please type a name.";
   if (!users.length) return $("flErr").textContent = "Tick “Who?” — at least one person.";
@@ -7507,7 +7421,7 @@ $("flAdd").onclick = () => {
     id = newId();
     data.flexible.push({ id, name, duration, times, overlapWith, users, needsDad, getReady, breakAfter, ...(between ? { between } : {}) });
   }
-  if (me === DAD) syncPartners(id, overlapWith); // keep it two-way
+  if (isParentId(me)) syncPartners(id, overlapWith); // keep it two-way
   resetFlexForm();
   changed();
   draftToast(old ? "✓ Changed" : "✓ Added");
@@ -7528,9 +7442,11 @@ function startEditFlex(id) {
   $("flNeedsDad").checked = f.needsDad;
   dadTouched.fl = true;
   drawWho("fl", f.users);
-  $("flAdd").textContent = "Save changes";
-  $("flCancel").hidden = false;
+  $("flFormTitle").textContent = `✏️ Edit: ${f.name}`;
+  $("flDel").hidden = false; $("flDel").dataset.delFlex = id;   // (🗑️ goes through the usual delete: same rules as before)
   $("flErr").textContent = "";
+  addOpen.fl = true; drawAddSections();
+  $("flForm").hidden = false;
   drawFlexibleList();
   drawPickList("flOverlapList", editingFlex, f.overlapWith);
   $("flName").focus();
@@ -7546,8 +7462,9 @@ function resetFlexForm() {
   $("flNeedsDad").checked = false;
   dadTouched.fl = false;
   drawWho("fl", [me]);
-  $("flAdd").textContent = "Add";
-  $("flCancel").hidden = true;
+  $("flFormTitle").textContent = "➕ New flexible activity";
+  $("flDel").hidden = true; delete $("flDel").dataset.delFlex;
+  $("flForm").hidden = true;   // (the form shows only after ➕ New or a tap on a row)
   $("flErr").textContent = "";
   drawFlexibleList();
   drawPickList("flOverlapList", null, []);
@@ -7557,13 +7474,11 @@ $("flAnyTime").onclick = () => { $("flFrom").value = $("flTo").value = ""; };
 
 function drawFlexibleList() {
   const mine = listFor(data.flexible);
-  $("flList").innerHTML = mine.length ? mine.map(f => {
-    const s = findSubject(f.name);
-    return `<li class="${f.id === editingFlex ? "editing" : ""}"><span class="uemoji">${s ? s.emoji : "🧩"}</span>
-      <span class="what">${safe(f.name)}<small>${showDuration(f.duration)} · ${f.times}× per week${f.between ? ` · 🕓 ${betweenText(f.between)}` : ""}${extras(f)}</small></span>
-      ${editButtons(f, "flex")}</li>`;
-  }).join("") : `<li class="empty">Nothing here yet.</li>`;
+  $("flList").innerHTML = mine.length ? mine.map(f => addRowHtml(f, "flex", f.id === editingFlex,
+      `${f.duration} min × ${f.times} a week${f.between ? ` · 🕓 ${betweenText(f.between)}` : ""}`)).join("")
+    : `<li class="empty">Nothing here yet.</li>`;
   drawPickList("flOverlapList", editingFlex);
+  if ($("flCount")) $("flCount").textContent = `(${mine.length})`;
 }
 
 // ---------- Routines (Dad only) ----------
@@ -7590,8 +7505,11 @@ function openRoutineForm(preset, routine) {
   $("rtDays").querySelectorAll("input").forEach(c => c.checked = routine ? routine.days.includes(Number(c.value)) : true);
   drawWho("rt", routine ? routine.users : data.users.map(u => u.id));   // new routines: everyone
   $("rtTitle").textContent = custom ? (routine ? "✏️ Change routine" : "➕ New routine") : `${src.emoji} ${src.name} · ${src.duration} min`;
-  $("rtAdd").textContent = routine ? "Save changes" : "Add";
+  $("rtAdd").textContent = "💾 Save";
+  $("rtDel").hidden = !routine;   // (🗑️ only when changing one: the usual delete)
+  if (routine) $("rtDel").dataset.delRt = routine.id; else delete $("rtDel").dataset.delRt;
   $("rtErr").textContent = "";
+  addOpen.rt = true; drawAddSections();
   $("rtForm").hidden = false;
   drawRoutineList();
   (custom ? $("rtName") : $("rtStart")).focus();
@@ -7604,7 +7522,7 @@ function closeRoutineForm() {
 $("rtCancel").onclick = closeRoutineForm;
 
 $("rtAdd").onclick = () => {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   const custom = !rtPreset;
   const name = custom ? $("rtName").value.trim().slice(0, 30) : rtPreset.name;
   const emoji = custom ? ($("rtEmoji").value.trim().slice(0, 8) || "⏰") : rtPreset.emoji;
@@ -7630,16 +7548,15 @@ function drawRoutineList() {
   const list = [...data.routines].sort((a, b) => toMin(a.start) - toMin(b.start));
   $("rtList").innerHTML = list.length ? list.map(r => {
     const s = toMin(r.start);
-    return `<li class="${r.id === editingRoutine ? "editing" : ""}"><span class="uemoji">${safe(r.emoji)}</span>
-      <span class="what">${safe(r.name)}<small>${daysText(r.days)} · ${showTime(s)}–${showTime(s + r.duration)}
-        <br><span class="tag">${isEveryone(r.users) ? "Everyone" : safe(usersText(r.users))}</span></small></span>
-      <button class="edit" data-edit-rt="${r.id}">Edit</button>
-      <button class="x" title="Delete" aria-label="Delete" data-del-rt="${r.id}">× Delete</button></li>`;
+    return `<li class="${r.id === editingRoutine ? "editing" : ""}"><button class="add-row" data-edit-rt="${r.id}" aria-label="Edit ${safe(r.name)}">
+      <span class="what">${safe(r.emoji)} ${safe(r.name)}<small>${isEveryone(r.users) ? "Everyone" : safe(emojisOf(r.users))} · ${daysText(r.days)} · ${showTime(s)}–${showTime(s + r.duration)}</small></span>
+      <span class="add-go" aria-hidden="true">✏️</span></button></li>`;
   }).join("") : `<li class="empty">No routines yet. Tap a button above to add one.</li>`;
+  if ($("rtCount")) $("rtCount").textContent = `(${data.routines.length})`;
 }
 function deleteRoutine(id) {
   const r = data.routines.find(x => x.id === id);
-  if (!r || me !== DAD || !confirm(`Delete the routine “${r.name}”?`)) return;
+  if (!r || !isParentId(me) || !confirm(`Delete the routine “${r.name}”?`)) return;
   data.routines = data.routines.filter(x => x.id !== id);
   if (editingRoutine === id) closeRoutineForm();
   changed();
@@ -8020,7 +7937,7 @@ function makeAndKeepPlan() {
 }
 // The "Plan my week" button (Dad only)
 function planNow() {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   const p = makeAndKeepPlan();
   writeData();
   go("all");
@@ -8191,10 +8108,10 @@ function weekHtml(days, opts) {
       // View only (opts.readOnly): no checkboxes, just "Done!" when it's finished.
       const checks = opts.readOnly ? "" : b.acts.map(a => {
         const on = isDone(d, a.actId, a.user), owner = userById(a.user);
-        const allowed = (me === DAD || a.user === me) && d <= today;
+        const allowed = (isParentId(me) || a.user === me) && d <= today;
         // ⏰ Everyone: locked (grey 🔒) until the start time; a tap says when (see tickTimeLock). Future days: locked too.
         const timeLock = !on && (d > today || tickTimeLock(d, b.start) != null);
-        if (timeLock && (me === DAD || a.user === me)) return `<button class="k-check time-lock" data-check="${d}|${safe(a.actId)}|${safe(a.user)}" style="--c:${colorsOf(owner).color}"
+        if (timeLock && (isParentId(me) || a.user === me)) return `<button class="k-check time-lock" data-check="${d}|${safe(a.actId)}|${safe(a.user)}" style="--c:${colorsOf(owner).color}"
                   aria-label="${safe(`Locked until ${d > today ? DAYS[d] : clock(b.start, true)}: ${b.name}`)}" title="${safe(d > today ? `On ${DAYS[d]}` : `At ${clock(b.start, true)}`)}">🔒</button>`;
         const label = `${on ? "Done! Tap to untick" : d > today ? "Not yet" : "Tap when done"}: ${owner.name}, ${b.name}`;
         // 🔒 A kid's device: someone else's tick is only a picture (look-only, no button)
@@ -8367,7 +8284,7 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek, bars = []) {
     html += `<div class="k-time ${used ? "" : "not-sel"}" style="grid-row:${r + 2 + B}">${t === null ? "" : rowTime(t)}</div>`;
   });
   return html + `</div></div>`;
-}const noPlanHtml = () => `<div class="k-empty"><span>🗓️</span>No plan yet!<br>${me === DAD
+}const noPlanHtml = () => `<div class="k-empty"><span>🗓️</span>No plan yet!<br>${isParentId(me)
   ? "Press ✨ Plan my week on the home screen." : `Ask ${safe(dadName())} to make one.`}</div>`;
 
 // The big card: who, what, day, start and end
@@ -8410,7 +8327,7 @@ let drag = null;            // the drag in progress
 let suppressClick = false;  // after a drag, don't open the big card
 
 function startEdit() {
-  if (me !== DAD) return toast(`Ask ${dadName()} 🙂`);
+  if (!isParentId(me)) return toast(`Ask ${dadName()} 🙂`);
   editMode = true;
   editUndo = [];
   if (screen === "all") allView = "cards";   // editing works on the cards
@@ -8432,7 +8349,7 @@ function undoEdit() {
 }
 // The bar at the top of the calendar while editing
 function editBarHtml() {
-  if (!editMode || me !== DAD) return "";
+  if (!editMode || !isParentId(me)) return "";
   return `<div class="edit-bar"><span>✏️ Edit mode: drag activities to change their day or time</span>
     <span class="edit-btns"><button data-editundo ${editUndo.length ? "" : "disabled"}>↩️ Undo</button>
     <button class="save-btn" data-editdone>✅ Done</button></span></div>`;
@@ -8468,7 +8385,7 @@ function moveCheck(actId, fromDay, toDay, start) {
 
 document.addEventListener("pointerdown", e => {
   const el = e.target.closest("[data-drag]");
-  if (!el || !editMode || me !== DAD || e.button > 0 || e.target.closest(".k-pin, .k-same")) return;
+  if (!el || !editMode || !isParentId(me) || e.button > 0 || e.target.closest(".k-pin, .k-same")) return;
   const [d, actId] = el.dataset.drag.split("|");
   const it = data.plan && data.plan !== "redo" && data.plan.days[Number(d)].items.find(x => !x.fixed && x.actId === actId);
   if (!it) return;
@@ -8551,7 +8468,7 @@ function moveActivity(actId, fromDay, toDay, start) {
 }
 // Tap 📌 (edit mode): unpin it (then "Plan my week" may move it again)
 function unpin(day, actId) {
-  if (me !== DAD || !editMode) return;
+  if (!isParentId(me) || !editMode) return;
   const it = data.plan.days[day].items.find(x => !x.fixed && x.actId === actId);
   if (!it) return;
   editUndo.push(JSON.stringify(data.plan));
@@ -8566,7 +8483,7 @@ function hasPinned() {
 // (📌 "Unpin all" was removed from the app: pinned activities stay as they are. This is no longer called.)
 // Fixed activities are not touched.
 function unpinAll() {
-  if (me !== DAD || !hasPinned()) return;
+  if (!isParentId(me) || !hasPinned()) return;
   if (!confirm("Unpin all moved activities and let the app plan the week again?")) return;
   editUndo.push(JSON.stringify(data.plan));
   data.plan.days.forEach(day => day.items.forEach(it => { if (!it.fixed) delete it.pinned; }));
@@ -8652,22 +8569,22 @@ function drawMine() {
     : isParentId(who) ? "Your activities, plus the kids' lessons that need you." : "Tap a block to see more!";
   document.querySelector("#scr-mine .bar .cal-btn").classList.toggle("here", calWho === (parent ? "all" : me));
   const real = planDays(), days = real || DAYS.map((_, i) => ({ window: dayWindow(i), items: [], routines: routinesOn(i) }));
-  const editing = editMode && me === DAD && !!real;
+  const editing = editMode && isParentId(me) && !!real;
   // Buttons: ✏️ Add / edit activities (everyone: kids change only their own), and for parents ✏️ Edit calendar · ✨ Plan my week · ➕ My activity
   $("mineActions").innerHTML = `<button class="pill" data-go="add">✏️ Add / edit activities</button>
-    ${me === DAD && real && !editMode ? `<button class="pill edit-cal-btn" data-editcal>✏️ Edit calendar</button>` : ""}
-    ${me === DAD && (!real || planIsOld()) ? `<button class="pill primary" data-plan>✨ Plan my week</button>` : ""}
+    ${isParentId(me) && real && !editMode ? `<button class="pill edit-cal-btn" data-editcal>✏️ Edit calendar</button>` : ""}
+    ${isParentId(me) && (!real || planIsOld()) ? `<button class="pill primary" data-plan>✨ Plan my week</button>` : ""}
     ${parent ? `<button class="pill" data-pactnew>➕ My activity</button>` : ""}`;
   // ⚠ The plan's notes (parents, on Everyone) / "not in the plan yet" (kids)
   let top = "";
-  if (me === DAD && all && real) {
+  if (isParentId(me) && all && real) {
     const w = data.plan.warnings;
     if (planIsOld()) top += `<div class="msg warn"><b>⚠ Things changed since this plan was made.</b> Tap ✨ Plan my week.</div>`;
     if (w.length) top += `<div class="msg warn"><b>⚠ Some things need your attention:</b><ul>${w.map(x => `<li>${safe(x)}</li>`).join("")}</ul></div>`;
   }
   $("calTop").innerHTML = top;
-  const note = !real ? (me === DAD ? "🗓️ No plan yet. Add activities, then tap ✨ Plan my week." : `🗓️ No plan yet. ${dadName()} will plan the week soon.`)
-    : me !== DAD && planIsOld() ? `🕐 Some changes aren't in the plan yet. ${dadName()} will update it soon.` : "";
+  const note = !real ? (isParentId(me) ? "🗓️ No plan yet. Add activities, then tap ✨ Plan my week." : `🗓️ No plan yet. ${dadName()} will plan the week soon.`)
+    : !isParentId(me) && planIsOld() ? `🕐 Some changes aren't in the plan yet. ${dadName()} will update it soon.` : "";
   $("mineNote").hidden = !note;
   $("mineNote").textContent = note;
   $("mineBrief").innerHTML = who ? briefHtml(who, real) : "";
@@ -8675,7 +8592,7 @@ function drawMine() {
   if (who) $("mineBrief").style.cssText = `--c:${colorsOf(u).color}`;
   // Ticks: always drawn; each one only works for its owner and the parents. In edit mode (Bro2a): moving, no ticking.
   $("mineWeek").innerHTML = editBarHtml() + weekHtml(days, { only: who, readOnly: editing, drag: editing });
-  $("mineHabits").innerHTML = who && !kidLockedOut(who) ? habitsCardHtml(who) + parentHabitsCardHtml(who, false) : "";   // ⭐ good habits (one person; 🔒 a kid's device: only their own)
+  $("mineHabits").innerHTML = who && !kidLockedOut(who) ? habitsCardHtml(who) : "";   // ⭐ good habits (a kid; 🔒 a kid's device: only their own; parents have none)
 }
 
 // The week in short, e.g. "📅 This week: 12 activities · 7 done ✓ · 5 left" / "⏱️ 8h 30m of activities · ⭐ 35 points"
@@ -8963,7 +8880,7 @@ function weekRange() {
 
 // "Who should I print?" (Dad only)
 function openPrintMenu() {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   if (!planDays()) return toast("Press ✨ Plan my week first, then you can print it.", 3500);
   const btn = (id, emoji, name, c) => `<button class="who-btn" data-print="${safe(id)}" style="--soft:${c.soft};--ink:${c.ink}">
       <span class="face">${safe(emoji)}</span><span class="nm">${safe(name)}</span></button>`;
@@ -9205,7 +9122,7 @@ let schoolDoc = null;      // 🤖 the open worksheet / explanation (view "works
 let wsAnswers = false;     // 🔑 the open worksheet shows its answers
 let wsFix = false;         // ✏️ Bro2a's "Change score" form is open
 
-const kidsList = () => data.users.filter(u => u.id !== DAD);
+const kidsList = () => data.users.filter(u => !isParentId(u.id));   // (every parent is left out, not only DAD)
 const schoolOf = kid => data.school[kid] || emptySchool();
 // The kid's school data (made the first time something is added)
 function schoolFor(kid) { if (!data.school[kid]) data.school[kid] = emptySchool(); return data.school[kid]; }
@@ -9228,9 +9145,9 @@ function arrowHtml(now, before) {
 function starsHtml(n) { return `<span class="sc-stars" aria-label="${n} of 5 stars">${"★".repeat(n)}<span class="off">${"★".repeat(5 - n)}</span></span>`; }
 const GRADE_LABEL = { quiz: "✏️ Quiz", exam: "📝 Exam", homework: "📚 Homework", worksheet: "🤖 Worksheet" };
 const SEESAW_LABEL = { homework: "📚 Homework", comment: "💬 Teacher comment", grade: "🏅 Grade" };
-const isDadNow = () => me === DAD;
+const isDadNow = () => isParentId(me);
 // Can the person using the app change / delete this? (Bro2a always; a kid only what they added themselves)
-const canChange = x => me === DAD || (!!x && x.by === me);
+const canChange = x => isParentId(me) || (!!x && x.by === me);
 // A label + input in its own row
 const scField = (id, label, input) => `<div class="row"><div><label class="small" for="${id}">${label}</label>${input}</div></div>`;
 const scButtons = (what, editing) => `<div class="btnrow"><button class="primary" data-scsave="${what}">${editing ? "💾 Save" : "➕ Add"}</button>
@@ -9276,7 +9193,7 @@ function homeworkPoints(user, from, to) {
 // Open a kid's binder (a kid always gets their own)
 function openSchool(kid) {
   if (kidLockedOut(kid)) return lockedToast(kid);
-  schoolKid = me === DAD ? kid : me;
+  schoolKid = isParentId(me) ? kid : me;
   schoolView = "home"; schoolSubject = null; schoolReport = false;
   schoolEdit = schoolEditId = null;
   schoolFresh = true;
@@ -9755,7 +9672,7 @@ function briefProfile(kid) {
            }), other: p.other || "" };
 }
 async function makeBrief(kid, auto) {
-  if (me !== DAD || isKidDevice() || !exists(kid)) return;
+  if (!isParentId(me) || isKidDevice() || !exists(kid)) return;
   const u = userById(kid);
   const r = await callAi("brief", { ...kidInfo(kid), profile: briefProfile(kid), results: briefResults(kid) }, "brief");
   if (!r) return;
@@ -10529,7 +10446,7 @@ function deleteSchoolItem(what, id) {
 // Homework done ✓ (the kid on their own binder, or Bro2a): +10 points this week
 function tickSchoolTask(id, box) {
   const s = data.school[schoolKid];
-  if (!s || !s.tasks[id] || (me !== DAD && me !== schoolKid)) { box.checked = !box.checked; return; }
+  if (!s || !s.tasks[id] || (!isParentId(me) && me !== schoolKid)) { box.checked = !box.checked; return; }
   if (newWeek()) keepNow();
   const t = s.tasks[id];
   t.done = box.checked;
@@ -10676,7 +10593,7 @@ function examTagsHtml(d, who) {
 function eventsOn(d, who) {
   const date = ymd(dayDate(d));
   if (date < todayYmd()) return [];
-  return Object.entries(data.school).filter(([kid]) => exists(kid) && (!who || who === kid || who === DAD))
+  return Object.entries(data.school).filter(([kid]) => exists(kid) && (!who || who === kid || isParentId(who)))
     .flatMap(([kid, s]) => Object.entries(s.events || {}).filter(([, e]) => e.date === date).map(([id, e]) => ({ id, kid, ...e })))
     .sort((a, b) => a.time.localeCompare(b.time) || a.title.localeCompare(b.title));
 }
@@ -10690,7 +10607,7 @@ function showEvent(kid, id) {
   const s = data.school[kid], e = s && s.events[id];
   if (!e) return;
   const text = `📌 ${e.title}\n${shortDate(e.date)} · ${e.time ? clock(toMin(e.time), true) : "All day"} · ${userById(kid).name}${e.note ? "\n" + e.note : ""}`;
-  if (me !== DAD) return toast(text.replace(/\n/g, " · "), 5000);
+  if (!isParentId(me)) return toast(text.replace(/\n/g, " · "), 5000);
   if (!confirm(`${text}\n\nDelete this school date?`)) return;
   delete s.events[id];
   writeData();
@@ -10711,7 +10628,7 @@ document.addEventListener("click", e => {
 // One date (or a date range for travel), a time or all day, and maybe every week. Travel = ONE bar across its days.
 const PACT_TYPES = [["work", "💼", "Work"], ["travel", "✈️", "Travel"], ["other", "📌", "Other"]];
 const pactType = a => PACT_TYPES.find(t => t[0] === a.type) || PACT_TYPES[2];
-const isParentId = id => id === DAD;
+// (isParentId is near DAD at the top: DAD, or a person with role "parent")
 const addDaysYmd = (s, n) => { const dt = fromYmd(s); dt.setDate(dt.getDate() + n); return ymd(dt); };
 const daysBetween = (a, b) => Math.round((fromYmd(b) - fromYmd(a)) / 86400000);
 const weekdayOf = s => (fromYmd(s).getDay() + 6) % 7;
@@ -10782,7 +10699,7 @@ function openPactCard(b) {
     ["📅 When", to !== from ? `${shortDate(from)} – ${shortDate(to)}` : shortDate(from)],
     ["⏰ Time", a.from ? `${clock(toMin(a.from), true)} – ${clock(toMin(a.to), true)}` : "All day"],
     a.weekly ? ["🔁 Repeats", "Every week"] : null].filter(Boolean);
-  const canEdit = me === DAD && !isKidDevice();
+  const canEdit = isParentId(me) && !isKidDevice();
   $("kCard").style.cssText = pactStyle(a);
   $("kCard").innerHTML = `
     <div class="k-card-top"><div class="big">${safe(emoji)}</div><div class="nm">${safe(a.title)}</div></div>
@@ -10798,7 +10715,7 @@ function openPactCard(b) {
 // ➕ My activity (a parent): the small form
 let pa = null;   // the open form: { id (null = new), title, type, start, end, from, to, weekly }
 function openPactForm(id) {
-  if (me !== DAD || isKidDevice()) return;
+  if (!isParentId(me) || isKidDevice()) return;
   const a = id && data.parentActs.find(x => x.id === id);
   pa = a ? { ...a } : { id: null, title: "", type: "work", start: todayYmd(), end: todayYmd(), from: "09:00", to: "17:00", weekly: false };
   closeCard();
@@ -10830,7 +10747,7 @@ function drawPactForm() {
       ${pa.id ? `<button class="danger-text" data-padel>🗑️ Delete</button>` : ""}<button data-pacancel>Cancel</button></div>`;
 }
 function savePact() {
-  if (!pa || me !== DAD) return;
+  if (!pa || !isParentId(me)) return;
   const type = (document.querySelector('input[name="paType"]:checked') || {}).value || "other", travel = type === "travel";
   const start = $("paStart").value, end = travel ? $("paEnd").value : start, weekly = $("paWeekly").checked;
   const allDay = travel || $("paAllDay").checked, from = $("paFrom").value, to = $("paTo").value;
@@ -10852,7 +10769,7 @@ function savePact() {
 }
 function deletePact(id) {
   const a = data.parentActs.find(x => x.id === id);
-  if (!a || me !== DAD || !confirm(`Delete “${a.title}”?`)) return;
+  if (!a || !isParentId(me) || !confirm(`Delete “${a.title}”?`)) return;
   data.parentActs = data.parentActs.filter(x => x.id !== id);
   closeCard();
   closePactForm();
@@ -10911,7 +10828,7 @@ document.addEventListener("click", e => {
 let ssKid = null;     // which kid it's for
 let ssPhoto = null;   // the photo, already made smaller (a JPEG data URL), or null
 function openSeesaw() {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   const kids = kidsList();
   if (!kids.length) return toast("Add a kid first (☰ More → 👨‍👩‍👧 Family).");
   ssKid = kids.some(k => k.id === schoolKid) ? schoolKid : kids[0].id;
@@ -10947,7 +10864,7 @@ async function addSeesawPhoto(file) {
   showSeesawPhoto();
 }
 function saveSeesaw() {
-  if (me !== DAD || !exists(ssKid)) return;
+  if (!isParentId(me) || !exists(ssKid)) return;
   const text = $("ssText").value.trim(), date = $("ssDate").value;
   if (!text && !ssPhoto) return $("ssErr").textContent = "Paste some text or add a photo first.";
   if (!isYmd(date)) return $("ssErr").textContent = "Please pick the date.";
@@ -11821,7 +11738,7 @@ $("aiWorkModal").addEventListener("click", e => {
   if (b.id === "awClose") return closeWork();
   if (b.id === "awPick") { aiPick = "work"; $("aiFile").value = ""; return $("aiFile").click(); }
   // 📥 From Seesaw: a parent adds a Seesaw post; a kid saves the photo / PDF from Seesaw first, then adds it here
-  if (b.id === "awSeesaw") { if (me === DAD) { closeWork(); return openSeesaw(); } return toast("📥 In Seesaw, save the photo or PDF to your phone, then tap 📷 Add photos or PDF here.", 5000); }
+  if (b.id === "awSeesaw") { if (isParentId(me)) { closeWork(); return openSeesaw(); } return toast("📥 In Seesaw, save the photo or PDF to your phone, then tap 📷 Add photos or PDF here.", 5000); }
   if (b.id === "awRead") return readWork();
   if (b.dataset.awdel !== undefined) return removeWorkFile(Number(b.dataset.awdel));
 });
@@ -11849,7 +11766,7 @@ function openNewsletter() {
 function closeNewsletter() { $("nlModal").hidden = true; nl = null; }
 function drawNewsletter() {
   if (!nl) return;
-  const res = nl.result, kids = me === DAD ? kidsList() : [];
+  const res = nl.result, kids = isParentId(me) ? kidsList() : [];
   const body = res
     // The review: week label, each school date with a tick (ticked), what's in This week, the reminders
     ? [h("p", { class: "print-hint" }, `For ${kidNameOf(nl.kid)}${res.week_label ? " · " + res.week_label : ""}. Untick what you don't want.`),
@@ -12024,7 +11941,7 @@ function exListNode(list) {
 function openAiDoc(view, id) {
   const d = (view === "worksheet" ? aiDocs.worksheets : aiDocs.explanations)[id];
   if (!d || (view !== "worksheet" && view !== "explain")) return;
-  const parent = me === DAD || isParentDevice();
+  const parent = isParentId(me) || isParentDevice();
   if (!parent && d.kid !== me) return;   // a kid only opens their own (a parent: any kid's)
   if (parent && exists(d.kid)) schoolKid = d.kid;
   const f = folderOf(schoolOf(d.kid), d.subject);
@@ -12509,7 +12426,7 @@ function exAction(act) {
 // =====================================================================
 function drawSettings() {
   // A kid: only the cards that are for everyone (🕌 Prayer times)
-  $("scr-settings").classList.toggle("kid-view", me !== DAD);
+  $("scr-settings").classList.toggle("kid-view", !isParentId(me));
   drawFeatures();   // ⚙️ Features (parents)
   fillMyDay();
   drawFreeTime();
@@ -12612,7 +12529,7 @@ function fillPrayer() {
     <button type="button" class="${on ? "" : "on"}" data-prmine="off" aria-pressed="${!on}">Off</button>`;
   $("prRemind").checked = on && u.prayerRemind !== false;
   $("prRemind").disabled = !on;
-  $("prPlace").hidden = me !== DAD;
+  $("prPlace").hidden = !isParentId(me);
   if (document.activeElement !== $("prCity")) $("prCity").value = p.city;
   if (document.activeElement !== $("prLat")) $("prLat").value = p.lat;
   if (document.activeElement !== $("prLng")) $("prLng").value = p.lng;
@@ -12635,7 +12552,7 @@ $("prMine").addEventListener("click", e => {
 });
 $("prRemind").addEventListener("change", () => setMyPrayer({ prayerRemind: $("prRemind").checked }));
 ["prCity", "prLat", "prLng"].forEach(id => $(id).addEventListener("change", () => {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   const lat = Number($("prLat").value), lng = Number($("prLng").value);
   $("prErr").textContent = "";
   if ($("prLat").value === "" || $("prLng").value === "" || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180)
@@ -12644,7 +12561,7 @@ $("prRemind").addEventListener("change", () => setMyPrayer({ prayerRemind: $("pr
   changed();
 }));
 $("prDefault").addEventListener("click", () => {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   data.prayer = { ...data.prayer, city: PRAYER_DEFAULT.city, lat: PRAYER_DEFAULT.lat, lng: PRAYER_DEFAULT.lng };
   $("prErr").textContent = "";
   ["prCity", "prLat", "prLng"].forEach(id => $(id).blur());
@@ -12685,7 +12602,7 @@ let editingHabit = null;   // which habit is being changed (null = adding a new 
 const HABIT_PTS = [1, 2, 3, 5, 10];
 const canEditKidHabits = () => isParentPhone();
 function drawHabitList() {
-  const kids = data.users.filter(u => u.id !== DAD), list = data.habits.filter(h => !h.gone);
+  const kids = data.users.filter(u => !isParentId(u.id)), list = data.habits.filter(h => !h.gone);
   $("hbList").innerHTML = list.length ? list.map((h, i) => `
     <li class="${h.id === editingHabit ? "editing" : ""}"><span class="uemoji">${safe(h.emoji)}</span>
       <span class="what">${safe(h.name)}<small>${h.kind === "prayers" ? `5 ticks: ${PRAYERS.join(", ")}` : h.kind === "water" ? `${WATER_DROPS} drops a day` : `1 tick a day · +${h.points || 1}`}</small>
@@ -12790,7 +12707,7 @@ function startEditUser(id) {
   $("uName").focus();
 }
 $("uAdd").onclick = () => {
-  if (me !== DAD || !editingUser) return;   // (only changes: new people are added in 👨‍👩‍👧 Family)
+  if (!isParentId(me) || !editingUser) return;   // (only changes: new people are added in 👨‍👩‍👧 Family)
   const name = $("uName").value.trim().slice(0, 30);
   const emoji = $("uEmoji").value.trim().slice(0, 8) || "🙂";
   const color = pickedColor() || freeColor();
@@ -12806,7 +12723,7 @@ $("uAdd").onclick = () => {
 };
 function removeUser(id) {
   const u = data.users.find(x => x.id === id);
-  if (!u || id === DAD || me !== DAD) return;
+  if (!u || id === DAD || !isParentId(me)) return;
   const acts = allActs().filter(a => a.users.includes(id));
   const alone = acts.filter(a => a.users.length === 1).length;
   const msg = `Remove ${u.name}?` + (alone ? `\n\n${alone} ${alone === 1 ? "activity that was only theirs goes" : "activities that were only theirs go"} to ${dadName()}.` : "");
@@ -12880,7 +12797,7 @@ function familyFormHtml(u) {
     <div class="err" id="famErr"></div></div>`;
 }
 async function saveFamilyKid() {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   const name = $("famName").value.trim().slice(0, 30), emoji = $("famEmoji").value.trim().slice(0, 8) || "🙂";
   const color = (document.querySelector('input[name="famColor"]:checked') || {}).value || freeColor();
   if (!name) return $("famErr").textContent = "Please type a name.";
@@ -12898,7 +12815,7 @@ async function saveFamilyKid() {
 }
 // 🔑 A new code (a kid's, or "parent"): unique, saved in codes/{CODE}; a kid's old code stops working for new phones
 async function makeCode(kidId) {
-  if (me !== DAD) return;
+  if (!isParentId(me)) return;
   if (!cloud.user || !cloud.familyId || !navigator.onLine) return toast("🔌 Codes need the internet and the family sign-in.", 4000);
   const fb = cloud.fb, u = kidId === "parent" ? null : data.users.find(x => x.id === kidId);
   if (kidId !== "parent" && !u) return;
@@ -12943,7 +12860,7 @@ function removeFamilyKid(id) {
 }
 $("scr-family").addEventListener("click", e => {
   const b = e.target.closest("button");
-  if (!b || me !== DAD) return;
+  if (!b || !isParentId(me)) return;
   const ds = b.dataset;
   if (ds.famedit) { famEdit = ds.famedit; render(); const n = $("famName"); if (n) n.focus(); return; }
   if ("famcancel" in ds) { famEdit = null; return render(); }
@@ -13009,7 +12926,7 @@ $("importFile").onchange = () => {
 
 // 💾 Backup box on the home page (Bro2a only): Export, or Import after "Are you sure?"
 function openBackupBox() {
-  if (me !== DAD) return toast(`Ask ${dadName()} 🙂`);
+  if (!isParentId(me)) return toast(`Ask ${dadName()} 🙂`);
   $("backupPick").hidden = false;
   $("backupAsk").hidden = true;
   $("backupModal").hidden = false;
@@ -13121,18 +13038,7 @@ document.addEventListener("click", e => {
   // ⭐ Good habits: a tick, and ◀ ▶ for earlier days this week
   if (ds.hb) { const [who, id, part] = ds.hb.split("|"); toggleHabit(who, id, Number(part), t); return popButton(`[data-hb="${ds.hb}"]`); }
   if (ds.hbday) { habitDay = Math.max(0, Math.min(todayIndex(), habitDay + Number(ds.hbday))); return render(); }
-  // 👨‍👩‍👧 A parent's habits: a chip, ✏️ Edit habits, and 🎁 the weekly prize
-  if (ds.ph) { const [who, id] = ds.ph.split("|"); return toggleParentHabit(who, id, t); }
-  if (ds.phpray) { const [who, i] = ds.phpray.split("|"); return toggleParentPrayer(who, Number(i), t); }   // 🕌
-  if ("phedit" in ds) return parentHabitEdit("start");
-  if ("phchoose" in ds) return parentFocus("start");
-  if (ds.phpick) return parentFocus("pick", ds.phpick);
-  if ("phfocussave" in ds) return parentFocus("save");
-  if ("phfocuscancel" in ds) return parentFocus("cancel");
-  if ("phadd" in ds) return parentHabitEdit("add");
-  if (ds.phdel) return parentHabitEdit("del", ds.phdel);
-  if ("phsave" in ds) return parentHabitEdit("save");
-  if ("phcancel" in ds) return parentHabitEdit("cancel");
+  // 🎁 A parent's weekly prize
   if ("pzgive" in ds) return givePrize();
   // 🏠 Today: ☰ More, 👋 the tour, 📅 the family calendar; ☰ More pages (🗣️ 📱 📗 🧹)
   if ("homemore" in ds) { homeMore = !homeMore; return render(); }
@@ -13609,6 +13515,7 @@ function applyRole() {
 }
 function cloudSignedOut() {
   me = null;   // (👤 signed out: the next sign-in decides who this device is)
+  setCloudMeta({ devicePerson: null });   // (the "Which parent are you?" pick on this device is forgotten too)
   cloud.turn = (cloud.turn || 0) + 1;
   cloud.unsub.forEach(stop => stop());
   cloud.unsub = [];
@@ -13990,7 +13897,7 @@ function habitNews(before, now) {
                         : h.kind === "water" ? (v || 0) : (v === true ? 1 : 0);
   new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
     if (key.slice(0, 10) < ymd(recent) || sameText(was[key]) === sameText(is[key])) return;
-    const [, habitId, user] = key.split("|"), h = data.habits.find(x => x.id === habitId) || data.parentHabits.find(x => x.id === habitId);
+    const [, habitId, user] = key.split("|"), h = data.habits.find(x => x.id === habitId);   // (a parent's old "ph-" habit: no news)
     if (!h) return;
     const old = was[key], v = is[key], name = `${h.emoji} ${h.name}`;
     const forWho = me !== user ? ` for ${whoText(user)}` : "";
@@ -14083,7 +13990,7 @@ function newsWhat(it) {
 }
 const newsLine = it => `${newsWho(it)} ${newsWhat(it)}`;
 // 🦉 School results ("school": a 🤖 check, its what = the whole line) are only for the parents (Bro2a's devices)
-const newsForMe = it => it.kind === "cm" ? cmFor(it.to) : it.kind !== "school" || me === DAD;   // (🏡 a post: only who it's for)
+const newsForMe = it => it.kind === "cm" ? cmFor(it.to) : it.kind !== "school" || isParentId(me);   // (🏡 a post: only who it's for)
 // Pop-ups: one for each plan change / school result, and one for all the ticks of the same minute (it's updated, not repeated)
 function announce(list) {
   if (!newsPrefs().on) return;
