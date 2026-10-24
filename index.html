@@ -383,6 +383,42 @@
   .score-sub-bar i { display: block; height: 100%; border-radius: 999px; background: var(--c, #f5a623); }
   /* 📚 Study sessions: the steps card (🎒), ⭐ the helper's rating card (home) */
   .sess-card h2 { margin-bottom: 2px; }
+  /* 📚 STUDY TOPICS: the big buttons, the topics (☐ tick · 🚦 dot · title), the filters, ⬆️ Upload's choices, 🌍 the benchmark */
+  .st-big { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; margin: 0 0 14px; }
+  .st-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 84px; padding: 10px 6px;
+            border-radius: 20px; font-size: 17px; position: relative; }
+  .st-btn .e { font-size: 30px; line-height: 1; }
+  .st-btn.go { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .st-btn.on { background: var(--accent-soft); border-color: var(--accent); }
+  .st-btn .sc-badge { position: absolute; top: 6px; right: 8px; }
+  .st-up { margin: 0 0 14px; }
+  .st-list { list-style: none; margin: 0; padding: 0; }
+  .st-topic { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 2px dashed #f0e9dc; }
+  .st-topic.on { background: var(--accent-soft); border-radius: 14px; }
+  .st-tick input { width: 26px; height: 26px; margin: 0; }
+  .st-dot { font-size: 20px; line-height: 1; }
+  .st-name { display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-width: 0; padding: 0; border: none; background: none;
+             box-shadow: none; font-size: 17px; overflow-wrap: anywhere; }
+  .st-name:hover { background: none; }
+  .st-name small { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .st-hist { grid-column: 1 / -1; background: #fffaf0; border-radius: 14px; padding: 8px 12px; }
+  .st-hist ul { margin: 0; padding-left: 18px; }
+  .st-hist li { margin: 4px 0; }
+  .st-hist small { display: block; color: var(--muted); }
+  .st-legend { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .st-filters { margin-bottom: 8px; }
+  .st-make.off, .primary.off { opacity: .45; }
+  .st-bench { font-size: 16px; margin: 8px 0 4px; }
+  .st-blist { margin: 4px 0 8px; padding-left: 20px; }
+  .st-sum + .st-sum { border-top: 2px dashed #f0e9dc; margin-top: 10px; padding-top: 10px; }
+  .st-sum small { color: var(--muted); font-weight: 700; }
+  .aw-kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+  .aw-kind { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px; border-radius: 20px; min-height: 120px; text-align: center; }
+  .aw-kind .e { font-size: 34px; line-height: 1; }
+  .aw-kind small { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .aw-topics small, .aw-same small { display: block; color: var(--muted); }
+  .aw-same { opacity: .6; }
+  .ws-sec { list-style: none; font-weight: 800; font-size: 18px; margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 2px solid #e5dccb; }
   .sess-res { font-size: 16px; color: #22a35a; white-space: nowrap; }
   .sess-steps { margin: 8px 0 0; padding-left: 22px; line-height: 1.5; font-weight: 600; }
   .sess-steps li { margin-bottom: 8px; }
@@ -2729,23 +2765,11 @@
 </section>
 
 <!-- ⬆️ Upload today's work: pick the files, they're kept in the subject's Files, then 🤖 reads them (a new topic gets a level check) -->
+<!-- ⬆️ Upload (see STUDY TOPICS): in a subject 📚 Add to curriculum or ⚡ Instant worksheet; from the School home 📚 for all subjects (filled by drawUpload) -->
 <div class="k-modal" id="aiWorkModal" hidden>
   <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="awTitle">
-    <div class="print-title" id="awTitle">⬆️ Upload today's work</div>
-    <p class="print-hint">Add the photos, PDF, PowerPoint or Word (from Seesaw, a worksheet, a test …). They're kept in the subject's Files, then 🤖 reads them. A new topic gets a short level check.</p>
-    <label class="small" for="awSubject">Subject</label>
-    <select id="awSubject"></select>
-    <div class="sc-photo-row" style="margin:12px 0 4px">
-      <button type="button" class="pill" id="awPick">📷 Add photos or PDF</button>
-      <span class="ai-size" id="awSize"></span>
-    </div>
-    <button type="button" class="linkbtn aw-seesaw" id="awSeesaw">📥 From Seesaw</button>
-    <ul class="list" id="awList"></ul>
-    <div class="err" id="awErr"></div>
-    <div class="btnrow">
-      <button class="primary" id="awRead" data-aiwait="analyze">🤖 Read it</button>
-      <button id="awClose">Close</button>
-    </div>
+    <div class="print-title" id="awTitle">⬆️ Upload</div>
+    <div id="awBody"></div>
   </div>
 </div>
 
@@ -3937,7 +3961,8 @@ function cleanData(d) {
     each(pts.study, (k, v) => { if (dayKey(k, 3) && hasOwn(STUDY_POINTS, k.split("|")[2])) clean.points.study[k] = { at: s(v.at, 40) }; });   // 🎒
     // 📚 Study sessions: the result (0–100 %) of one session, and each past week's study per subject (newer: older data has none)
     each(pts.sessions, (k, v) => { const p = Math.round(Number(v.pct)); if (dayKey(k, 2) && p >= 0 && p <= 100)
-      clean.points.sessions[k] = { pct: p, by: s(v.by, 40), at: s(v.at, 40), ...(s(v.ws, 40) ? { ws: s(v.ws, 40) } : {}), ...(s(v.note, 80) ? { note: s(v.note, 80) } : {}) }; });
+      clean.points.sessions[k] = { pct: p, by: s(v.by, 40), at: s(v.at, 40), ...(s(v.ws, 40) ? { ws: s(v.ws, 40) } : {}), ...(s(v.note, 80) ? { note: s(v.note, 80) } : {}),
+                                   ...(s(v.swap, 30) ? { swap: s(v.swap, 30) } : {}) }; });   // (🔁 another subject done in the session)
     const part = x => { const n = k => Math.max(0, Math.round(Number(x && x[k]) || 0));
       return { planned: n("planned"), done: n("done"), hours: Math.min(50, n("hours")), eff: Math.min(50, n("eff")), study: Math.min(100, n("study")) }; };
     each(pts.studyWeeks, (k, v) => { if (dayKey(k, 1)) clean.points.studyWeeks[k] = { all: part(v.all),
@@ -4043,7 +4068,8 @@ function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
            subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
            profile: { asked: false, subjects: {}, other: "", skip: [] }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {},
-           learn: {} };   // (🧠 the learning profile per subject: see LEARNING PROFILE)
+           learn: {},   // (🧠 the learning profile per subject: see LEARNING PROFILE)
+           curr: {}, map: {}, bench: {} };   // (📚 the school topics, 🌍 the official curriculum, 📏 the benchmark: see STUDY TOPICS)
 }
 const isHm = x => typeof x === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);   // "08:30"
 function cleanSchool(s) {
@@ -4118,16 +4144,29 @@ function cleanSchool(s) {
     // 🧠 Learning profile per subject (newer: older data has none): subject id → { level 1–10, skills: { name: { mastery 0–100, tries, right, last } },
     //    history: [{ date, ws, pct, level, hand? }] (the last 30; hand = a parent set the level) }
     const lnum = (y, hi) => Math.max(0, Math.min(hi, Math.round(Number(y)) || 0));
-    c.learn = list(k.learn, x => {
-      const lv = Math.round(Number(x.level)), skills = {};
-      if (x.skills && typeof x.skills === "object" && !Array.isArray(x.skills)) Object.entries(x.skills).slice(0, 60).forEach(([n, v]) => {
+    const skillsIn = m => {
+      const skills = {};
+      if (m && typeof m === "object" && !Array.isArray(m)) Object.entries(m).slice(0, 60).forEach(([n, v]) => {
         const name = txt(n, 60);
         if (name && v && typeof v === "object") skills[name] = { mastery: lnum(v.mastery, 100), tries: lnum(v.tries, 99999),
                                                                    right: Math.min(lnum(v.right, 99999), lnum(v.tries, 99999)), last: isDate(v.last) ? v.last : "" };
       });
+      return skills;
+    };
+    c.learn = list(k.learn, x => {
+      const lv = Math.round(Number(x.level)), skills = skillsIn(x.skills);
       const history = (Array.isArray(x.history) ? x.history : []).filter(h => h && isDate(h.date)).slice(-30)
         .map(h => ({ date: h.date, ws: okKey(String(h.ws || "")) ? h.ws : "", pct: lnum(h.pct, 100), level: Math.max(1, lnum(h.level, 10)), ...(h.hand === true ? { hand: true } : {}) }));
-      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history };
+      // 🔗 per topic (newer): topic key → { title, src: "school" | "instant" | "igcse", results: [{ date, ws, pct }] (last 12), skills }
+      const topics = {};
+      if (x.topics && typeof x.topics === "object" && !Array.isArray(x.topics)) Object.entries(x.topics).slice(0, 100).forEach(([key, t]) => {
+        if (!okKey(key) || !t || typeof t !== "object" || !txt(t.title, 80)) return;
+        topics[key] = { title: txt(t.title, 80), src: ["instant", "igcse"].includes(t.src) ? t.src : "school",
+                        results: (Array.isArray(t.results) ? t.results : []).filter(r => r && isDate(r.date)).slice(-12)
+                          .map(r => ({ date: r.date, ws: okKey(String(r.ws || "")) ? r.ws : "", pct: lnum(r.pct, 100) })),
+                        skills: skillsIn(t.skills) };
+      });
+      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics };
     });
     // 📄 Syllabus and 📋 Brief for parents (newer: older data has none)
     const sy = k.syllabus;
@@ -4165,6 +4204,23 @@ function cleanSchool(s) {
       : null;
     c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
       ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
+    // 📚 School topics (see STUDY TOPICS): topic id → { sub: subject id, title, note, added: date, files: [file ids], by? }.
+    //    Older data has none: made once from the 📥 school work cards and 📰 this week's topics (fixed ids: every phone makes the same).
+    c.curr = k.curr && typeof k.curr === "object" && !Array.isArray(k.curr)
+      ? list(k.curr, t => !txt(t.title, 80) || !okKey(String(t.sub || "")) ? null
+          : { sub: t.sub, title: txt(t.title, 80), note: txt(t.note, 200), added: isDate(t.added) ? t.added : "",
+              files: (Array.isArray(t.files) ? t.files : []).filter(x => okKey(String(x || ""))).slice(0, 30), ...(okKey(String(t.by || "")) ? { by: t.by } : {}) })
+      : currFromOld(c);
+    // 🌍 The official curriculum per subject (parents only, never mixed with the school topics): subject id → { at, list: [{ title, term, now }] }
+    //    (older data: the 🤖 /topics lists kept by subject name)
+    c.map = {};
+    if (k.map && typeof k.map === "object" && !Array.isArray(k.map)) Object.entries(k.map).forEach(([sid, x]) => {
+      if (okKey(sid) && x && Array.isArray(x.list)) c.map[sid] = { at: txt(x.at, 40), list: x.list.filter(t => t && txt(t.title, 80)).slice(0, 30).map(t => ({ title: txt(t.title, 80), term: txt(t.term, 20), now: t.now === true })) };
+    });
+    else Object.entries(c.topics).forEach(([name, x]) => { const sid = subjectIdIn(c, name); if (sid && !c.map[sid]) c.map[sid] = { at: x.at, list: x.list }; });
+    // 📏 The benchmark per subject (parents): subject id → { at, covered, not_yet, ahead, note }
+    const titles = x => (Array.isArray(x) ? x : []).map(t => txt(t, 80)).filter(Boolean).slice(0, 40);
+    c.bench = list(k.bench, x => ({ at: txt(x.at, 40), covered: titles(x.covered), not_yet: titles(x.not_yet), ahead: titles(x.ahead), note: txt(x.note, 400) }));
     c.reviews = list(k.reviews, (r, week) => !isDate(week) ? null
       : { note: txt(r.note, 600), effort: stars(r.effort), behaviour: stars(r.behaviour), focus: stars(r.focus) });
     c.seesaw = list(k.seesaw, x => {
@@ -4841,35 +4897,11 @@ function saveSession(key, pct, extra = {}) {
 }
 // On a card: "✅ 85%" (its result) · "⏳ 👩 Mum rates it" (🤝, ended, no rating yet)
 function sessionTagText(x) {
-  if (x.result) return `✅ ${x.result.pct}%`;
+  if (x.result) return `✅ ${x.result.pct}%${x.result.swap ? ` · 🔁 swapped to ${x.result.swap}` : ""}`;   // (🔁 another subject done in the session)
   const h = userById(x.helper);
   return x.mode === "assisted" && x.ended ? `⏳ ${h ? `${h.emoji} ${h.name}` : "A parent"} rates it` : "";
 }
-// 📚 Start session → that subject in 🎒 School (upload today's files, ✏️ make the session's worksheet, solve, upload, ✅ check)
-function startSession(key) {
-  const x = sessionByKey(key);
-  if (!x) return toast("This session isn't in this week's plan any more.", 3000);
-  if (kidLockedOut(x.person)) return lockedToast(x.person);
-  const s = schoolOf(x.person), f = (x.subjectId && s.subjects[x.subjectId] && { id: x.subjectId }) || folderOf(s, x.subject);
-  if (!f) return toast(`📘 Pick a subject for “${x.act.name}” in ✏️ Add activities first.`, 4000);
-  openSchool(x.person);
-  goSchool("subject", f.id, "files");
-}
-// ✏️ Make my worksheet for this session: the worksheet AI with minutes = the session's minutes, on today's uploaded topics
-async function sessionWorksheet(key) {
-  const x = sessionByKey(key);
-  if (!x || aiWait) return;
-  if (!aiReady()) return toast("🔌 " + AI_OFF, 4500);
-  const s = schoolOf(x.person), today = todayYmd(), f = (x.subjectId && s.subjects[x.subjectId] && { id: x.subjectId, ...s.subjects[x.subjectId] }) || folderOf(s, x.subject);
-  const works = Object.values(s.work).filter(w => sameSubject(w.subject, f ? f.name : x.subject) && w.date === today);
-  let topics = [...new Set(works.flatMap(w => w.topics.length ? w.topics : [w.title]))].slice(0, 8);
-  if (!topics.length && f) topics = subjectTopics(s, f).map(t => t.title).filter(Boolean).slice(0, 4);   // (nothing uploaded today: the subject's topics now)
-  if (!topics.length) topics = [f ? f.name : x.subject];
-  const name = f ? f.name : x.subject;
-  await newWorksheet(x.person, name, topics, 10, pickMode(x.person, name), "session|" + key,
-                     { session: key, minutes: x.minutes, part: works.length ? works[0].title : "" }, true);
-  render();
-}
+// (📚 Start session and ➕ More questions: see STUDY TOPICS)
 // ⭐ The helper rates a 🤝 session (its % = the result)
 function rateSession(key, pct) {
   const x = sessionByKey(key);
@@ -4905,18 +4937,23 @@ function studyTableHtml(kid, only) {
     <div class="st-wrap"><table class="st-table st-hist"><thead><tr><th>Subject</th>${weeks.map(w => { const a = fromYmd(w.wk); return `<th title="Week of ${safe(hallWeekRange(w.wk))}">${a.getDate()} ${MONTHS[a.getMonth()]}</th>`; }).join("")}</tr></thead>
     <tbody>${names.map(n => `<tr><th>${safe(n)}</th>${weeks.map(w => cell(w, n)).join("")}</tr>`).join("")}${!only && names.length > 1 ? `<tr><th>All subjects</th>${weeks.map(w => cell(w, null)).join("")}</tr>` : ""}</tbody></table></div>`;
 }
-// 📚 On the 🎒 subject page (and 🎒 My school): today's sessions of this subject (and earlier ones without a result) with their steps
+// 📚 On the 🎒 subject page (and 🎒 My school / 📚 STUDY): today's sessions (and earlier ones without a result):
+// 📚 Start session · 📝 Open my worksheet · 🙋 I'm done · ➕ More questions (while it lasts) · ✅ its result · 🔁 swapped
 function sessionCardsHtml(kid, f) {
   const today = todayIndex(), list = studySessions(kid).filter(x => x.mode === "sole" && x.d <= today && (!x.result || x.d === today)
-    && (!f || x.subjectId === f.id || sameSubject(x.subject, f.name)));
-  return list.map(x => { const wsId = sessionWs(x.key), w = wsId && aiDocs.worksheets[wsId];
-    return `<div class="card sess-card"><h2>📚 ${f ? "Study session" : safe(x.subject)} · ${x.minutes} min${x.result ? ` <span class="sess-res">✅ ${x.result.pct}%</span>` : ""}</h2>
-      <p class="hint">${x.d === today ? "Today" : DAYS[x.d]} · ${clock(x.start, true)}–${clock(x.end, true)}</p>
-      ${!f ? `<div class="btnrow"><button class="primary" data-sessstart="${safe(x.key)}">📚 Start session</button></div>`
-        : `<ol class="sess-steps"><li>⬆️ Upload today's files (📂 below)</li>
-        <li>${w ? `<button class="linkbtn" data-aiopen="worksheet|${safe(wsId)}">📝 ${safe(w.title)}</button> · ${safe(w.status)}`
-          : `<button class="primary" data-sessws="${safe(x.key)}" data-aiwait="session|${safe(x.key)}">✏️ Make my worksheet for this session</button>`}</li>
-        <li>✍️ Solve it, ⬆️ upload the answers, then ✅ Check: its % is the session's result</li></ol>`}</div>`; }).join("");
+    && (!f || x.subjectId === f.id || sameSubject(x.subject, f.name))
+    && !(f && x.d === today && !x.ended && !sessionWsIds(x.key).length));   // (the subject page: today's 📚 Start session is the big button)
+  return list.map(x => {
+    const ids = sessionWsIds(x.key), wsId = ids[ids.length - 1], w = wsId && aiDocs.worksheets[wsId], tag = sessionTagText(x);
+    const swap = !x.result && ids.map(id => aiDocs.worksheets[id].swap).find(Boolean), live = x.d === today && !x.ended;
+    const more = w && live && (w.answers.length || w.check || w.done);
+    return `<div class="card sess-card"><h2>📚 ${f ? "Study session" : safe(x.subject)} · ${x.minutes} min${tag ? ` <span class="sess-res">${safe(tag)}</span>` : ""}</h2>
+      <p class="hint">${x.d === today ? "Today" : DAYS[x.d]} · ${clock(x.start, true)}–${clock(x.end, true)}${swap ? ` · 🔁 swapped to ${safe(swap)}` : ""}</p>
+      <div class="btnrow">${!w ? `<button class="primary" data-sessstart="${safe(x.key)}" data-aiwait="session|${safe(x.key)}">📚 Start session</button>`
+        : `<button class="${more ? "" : "primary"}" data-aiopen="worksheet|${safe(wsId)}">📝 Open my worksheet</button>${
+          more ? `<button class="primary" data-sessmore="${safe(x.key)}" data-aiwait="more|${safe(x.key)}">➕ More questions</button>`
+          : live && !w.check ? `<button data-sessdone="${safe(wsId)}">🙋 I'm done</button>` : ""}`}</div></div>`;
+  }).join("");
 }
 // ⚽ ACTIVITY sub-score (0–100). FOR NOW: % of this week's planned activity items (so far) that are ticked. (These rules will change later.)
 function activityScore(id) { return tallyPct(typeTally(id, "activity")); }
@@ -5892,6 +5929,7 @@ function reportCardsHtml(kid, forPdf) {
   const sc = rpRange === "week" ? scoreOf(kid) : null;   // (⭐ the score is for this week only)
   return `${sc ? `<div class="card rp-card"><h2>⭐ Score this week</h2>${scoreBlockHtml(sc)}</div>` : ""}
     <div class="card rp-card"><h2>📚 Study per subject</h2>${studyTableHtml(kid, null)}</div>
+    <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(kid)}</div>
     <div class="card rp-card"><h2>🧠 Learning profile</h2>${learnReportHtml(kid)}</div><div class="card rp-card"><h2>🎒 School</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>
       ${x.subjects.length ? `<ul class="rp-subs">${x.subjects.map(f => `<li>${forPdf ? `<div class="rp-sub">` : `<button class="rp-sub" data-rpsub="${safe(f.id)}">`}
         <span class="rp-subname">${safe(f.emoji)} ${safe(f.name)}</span><span class="rp-stars" aria-label="${f.level ? `Level ${f.level} of 3` : "No level yet"}">${stars5(f.level) || "–"}</span>
@@ -9742,8 +9780,8 @@ const pctBarNode = p => h("div", { class: "bd-bar", role: "img", "aria-label": p
 const weekNow = s => s.week && s.week.end >= todayYmd() ? s.week : null;
 // 👨‍👩‍👧 A parent's phone: ⚙️ For parents (📰 Newsletter, 👤 Profile, 🏫 School info, 📄 Reports, 📥 From Seesaw, 📊 Marks …) · ✏️ Edit subjects
 let scParents = false, scSubEdit = false;
-const PARENT_LINKS = [["profile", "👤 Profile / About"], ["info", "🏫 School info"], ["reports", "📄 Reports"], ["seesaw", "📥 From Seesaw"],
-                      ["marks", "📊 Marks"], ["homework", "📝 Homework"], ["reviews", "⭐ Reviews"]];
+const PARENT_LINKS = [["profile", "👤 Profile / About"], ["info", "🏫 School info"], ["reports", "📄 Reports"],
+                      ["marks", "📊 Marks"], ["homework", "📝 Homework"], ["reviews", "⭐ Reviews"]];   // (📥 From Seesaw / 📰 Newsletter: now ⬆️ Upload)
 // Has the subject anything in it? (then 🗑️ hides it instead, and everything is kept)
 function subjectHasWork(s, f) {
   const same = x => sameSubject(x.subject || "", f.name);
@@ -9789,7 +9827,13 @@ function schoolHomeHtml(s, isDad) {
   if (look && isDad && scSubEdit) return subjectsEditHtml(s);
   const edit = look && isDad ? `<div class="btnrow"><button class="pill" data-scsubedit>✏️ Edit subjects</button></div>` : "";
   const sess = sessionCardsHtml(schoolKid, null);   // (📚 STUDY: today's study sessions, each with 📚 Start session)
-  return sess + (list.length ? `<div class="sc-tiles sc-tiles-big">${list.map(x => subjectTileHtml(s, x)).join("")}</div>${edit}`
+  // ⬆️ Upload a school file (a newsletter, a school review …): its topics go into every subject (see STUDY TOPICS)
+  const up = feat("coach") && list.length ? `<button class="sc-addbig st-up" data-stup="">⬆️ Upload<small>A newsletter, a school review or school work: I find the topics for every subject</small></button>` : "";
+  // 👨‍👩‍👧 the kid's files that aren't in a subject (newsletters, reviews …)
+  const loose = isParentDevice() ? Object.entries(s.files).map(([id, x]) => ({ id, ...x })).filter(x => !x.subject && !x.worksheet && x.kind !== "link")
+    .sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 10) : [];
+  const looseHtml = loose.length ? `<div class="card bd-card"><h2>📂 School files</h2><ul class="list">${loose.map(x => fileRowHtml(x, s, true)).join("")}</ul></div>` : "";
+  return sess + up + (list.length ? `<div class="sc-tiles sc-tiles-big">${list.map(x => subjectTileHtml(s, x)).join("")}</div>${looseHtml}${edit}`
     : edit ? `<div class="card"><p class="sc-empty">No subjects yet.</p>${edit}</div>` : `<div class="card"><p class="sc-empty">No subjects yet. ${look ? `Add them in ${safe(userById(schoolKid).name)}'s 👤 profile → ⚙️ Settings.` : "Add them in 👤 My profile → ⚙️ My settings."}</p>
       <div class="btnrow"><button class="pill" data-scprof="${safe(schoolKid)}">👤 Open the profile</button></div></div>`);
 }
@@ -10260,73 +10304,46 @@ function videoLinksHtml(f, u) {
   return `<div class="sc-videos">${list.map(t => `<a class="pill sc-video" target="_blank" rel="noopener"
     href="https://www.youtube.com/results?search_query=${encodeURIComponent(`${f.name} ${t} ${year} for kids`.replace(/\s+/g, " ").trim())}">▶️ ${safe(t)}</a>`).join("")}</div>`;
 }
+// 🎒 A subject (see STUDY TOPICS). The kid: ⬆️ Upload · 📚 Start session · ✏️ My worksheets · 📚 the topics with coloured dots
+// (+ the friendly 🧠 line). Parents also: the filters and each topic's history, 📊 Study, 🧠 Learning profile, 🌍 Official curriculum,
+// 📂 Files, 📖 explanations and the older parts (📊 Marks, 📝 Homework, ⭐ Reviews, 📄 Reports, 🏫 School info, 👤 Profile).
 function schoolSubjectHtml(s, isDad, u) {
-  const f = { id: schoolSubject, ...s.subjects[schoolSubject] }, c = subjectColors(f), name = u.name;
+  const f = { id: schoolSubject, ...s.subjects[schoolSubject] }, c = subjectColors(f), parent = isParentDevice();
   const editing = isDad && schoolEdit === "subject" && schoolEditId === schoolSubject;
-  if (schoolTab in TAB_ALIAS) schoolTab = TAB_ALIAS[schoolTab];
   let html = `<div class="bd-folder-head" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(f.emoji)}</span>
       <h2>${safe(f.name)}</h2>${isDad && !editing ? `<span class="bd-head-btns">${itemBtns("subject", schoolSubject)}</span>` : ""}</div>`;
   if (editing) html += subjectFormHtml(f);
-  html += levelBannerHtml();
   // ⚙️ School coach off: just the files and the older records (no 🤖 worksheets, %, strong / weak points)
-  if (!feat("coach")) return html + subjectFilesHtml(s, f, `📁 ${name}'s uploaded files`) + subjectOlderHtml(s, f, c, isDad);
-  html += sessionCardsHtml(schoolKid, f);   // 📚 this subject's study sessions: upload · ✏️ the session's worksheet · ✅ check
-  if (isParentDevice()) html += `<div class="card bd-card"><h2>📊 Study this week</h2>${studyTableHtml(schoolKid, f.name)}</div>`;   // (parents)
-  html += isParentDevice() ? `<div class="card bd-card"><h2>🧠 Learning profile</h2>${learnCardHtml(schoolKid, f)}</div>`   // 🧠 parents: all of it
-    : learnKidLine(schoolKid, f);   // 🧒 the kid: a friendly line
-  const checked = checkedOf(schoolKid, f.name), last = checked[0], look = isParentPhone(), mine = schoolKid === me;
-  const strong = last ? last.check.strong_points || [] : [], weak = last ? last.check.weak_points || [] : [];
-  const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check);
-  scTopics = subjectTopics(s, f);
-  const whose = mine ? "My" : `${name}'s`;
-  // Two big tabs: 📂 My files · ✏️ Worksheets
-  const btns = [["files", "📂", `${whose} files`, 0], ["worksheets", "✏️", "Worksheets", todo.length]];
-  html += `<div class="sc-kbtns sc-kbtns2">${btns.map(([tab, e, label, n]) => `<button class="sc-kbtn${tab === "worksheets" && n ? " hot" : ""}${schoolTab === tab ? " on" : ""}"
-    data-sctab="${tab}" aria-expanded="${schoolTab === tab}"><span class="e">${e}</span><b>${safe(label)}</b>${n ? `<span class="sc-badge">${n}</span>` : ""}</button>`).join("")}</div>`;
-  // 📂 Every file of the subject, newest first (date, ✅ / ⏳), ⬆️ I want to study this · each read file: ✏️ Make a worksheet · 🤖 Explain it
-  if (schoolTab === "files") {
-    const files = filesOf(s, f.name), seen = new Set();
-    const rows = files.map(x => {
-      const w = x.work && s.work[x.work], first = w && !seen.has(x.work);
-      if (w) seen.add(x.work);
-      const btns = first ? `<div class="ai-btns sc-filebtns"><button data-aiws="${safe(x.work)}">✏️ Make a worksheet</button><button data-aiex="${safe(x.work)}" data-aiwait="ex|${safe(x.work)}">🤖 Explain it</button></div>` : "";
-      return fileRowHtml(x, s, true).replace(/<\/li>\s*$/, btns + "</li>");
-    });
-    html += `${look ? "" : `<button class="sc-addbig sc-study" data-aiadd="${safe(f.id)}">⬆️ I want to study this<small>Photo, PDF, PowerPoint or Word · 📥 From Seesaw too</small></button>`}
-      <div class="card bd-card"><h2>📂 ${whose} ${safe(f.name)} files</h2>${rows.length ? `<ul class="list">${rows.join("")}</ul>`
-        : `<p class="sc-empty">${look ? "Nothing uploaded yet." : "No files yet. Tap ⬆️ I want to study this."}</p>`}</div>`;
-  }
-  // ✏️ The subject's worksheets, under the file they came from (to do first, then done with the mark), explanations, homework
-  if (schoolTab === "worksheets") {
-    // (➕ for the kid, or a parent for that kid: "👨‍👩‍👧 from Bro2a" on it, and the kid gets the points when they finish it)
-    html += `<div class="btnrow sc-makerow"><button class="primary" data-mkopen="${safe(f.name)}">➕ Make a new worksheet${look ? ` for ${safe(name)}` : ""}</button>
-      ${scTopics.length ? `<button data-scmake aria-expanded="${scMakeOpen}">🤖 Explain a topic</button>` : ""}</div>
-      ${scMakeOpen && scTopics.length ? `<div class="card bd-card"><p class="hint">🤖 Tap a topic to explain it${look ? ` for ${safe(name)}` : ""}:</p>${topicChipsHtml("sctopicex")}</div>` : ""}`;
-    html += aiMount(() => waitingNode(s, f.name));
-    const groups = new Map();
-    all.forEach(w => { const key = w.work && s.work[w.work] ? w.work : ""; if (!groups.has(key)) groups.set(key, []); groups.get(key).push(w); });
-    const order = w => (w.check ? 1 : 0);
-    if (!all.length) html += `<div class="card"><p class="sc-empty">No worksheets yet. ${look ? "Tap ➕ to make one, or wait for the kid's uploads." : "Upload a file in 📂, then tap ✏️ Make a worksheet."}</p></div>`;
-    [...groups.entries()].sort((a, b) => (a[0] ? 0 : 1) - (b[0] ? 0 : 1)).forEach(([key, list]) => {
-      const w0 = key && s.work[key];
-      html += aiMount(() => aiListCard(w0 ? `📄 ${w0.title}` : "📝 Other worksheets", h("ul", { class: "list" }, [...list].sort((a, b) => order(a) - order(b)).map(w => wsRowNode(s, w))), ""));
-    });
-    const ex = exOf(schoolKid, f.name);
-    if (ex.length) html += aiMount(() => aiListCard("📖 Explanations", exListNode(ex), ""));
-    const tasks = Object.entries(s.tasks).map(([id, t]) => ({ id, ...t })).filter(t => sameSubject(t.subject, f.name));
-    if (tasks.length) html += `<div class="card bd-card"><h2>📝 Homework</h2>${tasksListHtml(s, tasks)}</div>`;
-  }
-  // The small note: 💪 good at · 🎯 work on
-  if (strong.length || weak.length) html += `<div class="sc-goodnote">${strong.length ? `<p>💪 Good at: ${safe(strong.slice(0, 4).join(", "))}</p>` : ""}${
-    weak.length ? `<p>🎯 Work on: ${safe(weak.slice(0, 4).join(", "))}</p>` : ""}</div>`;
-  // This subject's other parts (each opens only this subject's part; 📰 📄 parents only, never on a kid's device)
-  const parent = isParentDevice(), fid = safe(f.id);
-  html += `<div class="sc-subrow">${[["marks", "📊 Marks"], ["homework", "📝 Homework"], ["reviews", "⭐ Reviews"], ...(parent ? [["reports", "📄 Reports"]] : []), ["seesaw", "📥 From Seesaw"]]
+  if (!feat("coach")) return html + subjectFilesHtml(s, f, `📁 ${u.name}'s uploaded files`) + subjectOlderHtml(s, f, c, isDad);
+  if (stSub !== f.id) { stSub = f.id; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; }
+  html += levelBannerHtml();
+  // The big buttons: ⬆️ Upload · 📚 Start session (this subject's session today, not made yet) · ✏️ My worksheets
+  const now = studySessions(schoolKid).find(x => x.mode === "sole" && x.d === todayIndex() && !x.ended && !sessionWsIds(x.key).length
+    && (x.subjectId === f.id || sameSubject(x.subject, f.name)));
+  const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check).length;
+  html += `<div class="st-big">
+      <button class="st-btn" data-stup="${safe(f.id)}"><span class="e">⬆️</span><b>Upload</b></button>
+      ${now ? `<button class="st-btn go" data-sessstart="${safe(now.key)}" data-aiwait="session|${safe(now.key)}"><span class="e">📚</span><b>Start session</b></button>` : ""}
+      <button class="st-btn ${stWs ? "on" : ""}" data-stws aria-expanded="${stWs}"><span class="e">✏️</span><b>My worksheets</b>${todo ? `<span class="sc-badge">${todo}</span>` : ""}</button></div>`;
+  html += sessionCardsHtml(schoolKid, f);
+  if (stWs) html += all.length ? aiMount(() => aiListCard("✏️ My worksheets", h("ul", { class: "list" }, [...all].sort((a, b) => (a.check ? 1 : 0) - (b.check ? 1 : 0)).map(w => wsRowNode(s, w))), ""))
+    : `<div class="card"><p class="sc-empty">No worksheets yet. Tick a topic, then ✏️ Make a worksheet.</p></div>`;
+  html += topicsCardHtml(s, f, parent);
+  if (!parent) return html + learnKidLine(schoolKid, f);   // 🧒 the kid: that's all
+  // 👨‍👩‍👧 Parents only
+  html += `<div class="card bd-card"><h2>📊 Study this week</h2>${studyTableHtml(schoolKid, f.name)}</div>
+    <div class="card bd-card"><h2>🧠 Learning profile</h2>${learnCardHtml(schoolKid, f)}</div>
+    <div class="card bd-card"><h2>🌍 Official curriculum</h2>${mapCardHtml(schoolKid, f)}</div>`;
+  const files = filesOf(s, f.name);
+  html += `<div class="card bd-card"><div class="sc-head"><h2>📂 Files</h2><button class="linkbtn" data-stfiles aria-expanded="${stFiles}">${stFiles ? "Hide" : `Show (${files.length})`}</button></div>
+    ${stFiles ? files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s, true)).join("")}</ul>` : `<p class="sc-empty">Nothing uploaded yet.</p>` : ""}</div>`;
+  const ex = exOf(schoolKid, f.name);
+  if (ex.length) html += aiMount(() => aiListCard("📖 Explanations", exListNode(ex), ""));
+  const fid = safe(f.id), checked = checkedOf(schoolKid, f.name);
+  html += `<div class="sc-subrow">${[["marks", "📊 Marks"], ["homework", "📝 Homework"], ["reviews", "⭐ Reviews"], ["reports", "📄 Reports"]]
       .map(([v, label]) => `<button class="pill" data-scgo="${v}|${fid}">${label}</button>`).join("")}
-    ${parent ? `<button class="pill" data-nlopen>📰 Newsletter</button>` : ""}
     <button class="pill" data-scprof="${safe(schoolKid)}|info">🏫 School info</button><button class="pill" data-scprof="${safe(schoolKid)}">👤 Profile</button></div>`;
-  // 🦉 Coach's tip and "By part": parents only
-  if (isDad && !isKidDevice() && checked.length) html += aiMount(() => parentExtrasNode(s, checked));
+  if (isDad && !isKidDevice() && checked.length) html += aiMount(() => parentExtrasNode(s, checked));   // (🦉 the coach's tip, "By part")
   return html + subjectOlderHtml(s, f, c, isDad);
 }
 // ---------- 📌 A topic chip → the small sheet: 🤖 Explain it to me · ✏️ Make a worksheet (the kid, or a parent for that kid) ----------
@@ -10966,7 +10983,7 @@ $("scr-school").addEventListener("click", e => {
   if (ds.scupload !== undefined) return startUpload(ds.scupload);
   if (ds.scprompt) { const [kind, id] = ds.scprompt.split("|"); return showPrompt(kind, id); }
   // 🤖 AI help
-  if (ds.aiadd !== undefined) return openWork(ds.aiadd);
+  if (ds.aiadd !== undefined) return openUpload(ds.aiadd);   // (⬆️ Upload: see STUDY TOPICS)
   if (ds.aiws) return wsFromWork(ds.aiws);
   if (ds.aiex) return exFromWork(ds.aiex);
   if (ds.aiopen) { const [view, id] = ds.aiopen.split("|"); return openAiDoc(view, id); }
@@ -11832,7 +11849,8 @@ function cleanWorksheet(d) {
     if (!options.length && !lines) lines = 1;   // always somewhere to write
     return { number: aiInt(q.number, 1, 99, i + 1), kind, prompt: aiTxt(q.prompt, 1000), options, answer_lines: lines,
              points: aiInt(q.points, 0, 100, 1), answer: aiTxt(q.answer, 1000),
-             // 🧠 its skill and difficulty 1–10 (newer worksheets)
+             // 🧠 its topic, skill and difficulty 1–10 (newer worksheets)
+             ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
              ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}), ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}) };
   }).filter(q => q.prompt);
   if (!questions.length) return null;
@@ -11845,7 +11863,13 @@ function cleanWorksheet(d) {
            ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}),
            // 📚 made for a study session: its key "date|actId|person", its minutes and the AI's estimate
            ...(/^\d{4}-\d{2}-\d{2}\|[^|]+\|[^|]+$/.test(aiTxt(d.session, 100)) ? { session: aiTxt(d.session, 100) } : {}),
-           ...(d.minutes != null ? { minutes: aiInt(d.minutes, 5, 240, 30) } : {}), ...(d.estimated_minutes != null ? { estimated_minutes: aiInt(d.estimated_minutes, 1, 600, 30) } : {}) };
+           ...(d.minutes != null ? { minutes: aiInt(d.minutes, 5, 240, 30) } : {}), ...(d.estimated_minutes != null ? { estimated_minutes: aiInt(d.estimated_minutes, 1, 600, 30) } : {}),
+           // 📚 its parts, where it came from (⚡ instant from a file / 🌍 IGCSE extra), the topic found in the file, 🔁 a swapped session, 🙋 "I'm done"
+           ...(aiObjs(d.sections, 8).length ? { sections: aiObjs(d.sections, 8).map(x => ({ title: aiTxt(x.title, 80), topic: aiTxt(x.topic, 80),
+                 from: aiInt(x.from_question != null ? x.from_question : x.from, 1, 99, 1), to: aiInt(x.to_question != null ? x.to_question : x.to, 1, 99, 99) })).filter(x => x.title || x.topic) } : {}),
+           ...(["instant", "igcse"].includes(d.src) ? { src: d.src } : {}),
+           ...(aiTxt(d.detected_topic, 80) ? { detected_topic: aiTxt(d.detected_topic, 80) } : {}), ...(aiTxt(d.detected_subject, 30) ? { detected_subject: aiTxt(d.detected_subject, 30) } : {}),
+           ...(aiTxt(d.swap, 30) ? { swap: aiTxt(d.swap, 30) } : {}), ...(d.done === true ? { done: true } : {}) };
 }
 // The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote?,
 //              strong_points?, weak_points?: ["Adding fractions", …], coach_tip?: for the parents }   (older checks have none of the last 3)
@@ -11857,6 +11881,7 @@ function cleanCheck(c, fallbackMax) {
   const out = { score: aiNum(c.score, 0, max, 0), max_score: max, overall_note: aiTxt(c.overall_note, 800),
                 questions: aiObjs(c.questions, 40).map(q => ({ number: aiInt(q.number, 0, 99, 0), correct: q.correct === true,
                                                                points: aiNum(q.points, 0, 100, 0), note: aiTxt(q.note, 400),
+                                                               ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
                                                                ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}),
                                                                ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}) })),
                 at: isYmd(c.at) ? c.at : todayYmd() };
@@ -11916,32 +11941,7 @@ const wsOf = (kid, subject) => Object.entries(aiDocs.worksheets).map(([id, w]) =
 const exOf = (kid, subject) => Object.entries(aiDocs.explanations).map(([id, x]) => ({ id, ...x }))
   .filter(x => x.kid === kid && (!subject || sameSubject(x.subject, subject))).sort(byNewest);
 
-// ---------- 📥 Add school work ----------
-let aw = null;   // the open box: { kid, items: [{ id (the saved file, or null), name, kind, url, size }] }
-function openWork(folderId) {
-  if (!schoolKid || !exists(me)) return;
-  const s = schoolOf(schoolKid);
-  aw = { kid: schoolKid, items: [] };
-  $("awSubject").replaceChildren(h("option", { value: "" }, "🤖 Let the AI find the subject"),
-    ...subjectList(s).map(x => h("option", { value: x.id }, `${x.emoji} ${x.name}`)));
-  $("awSubject").value = folderId && s.subjects[folderId] ? folderId : "";
-  $("awErr").textContent = aiReady() ? "" : `🔌 ${AI_OFF}. You can still add the files now.`;
-  $("awRead").textContent = "🤖 Read it";   // (🧒 a kid's phone reads it right away too)
-  delete $("awRead").dataset.label;
-  drawWorkList();
-  $("aiWorkModal").hidden = false;
-  $("awPick").focus();
-}
-function closeWork() { $("aiWorkModal").hidden = true; aw = null; }
-function drawWorkList() {
-  if (!aw) return;
-  const total = aw.items.reduce((n, x) => n + bytesOf(x.url), 0);
-  $("awSize").textContent = aw.items.length ? `${aw.items.length} ${aw.items.length === 1 ? "file" : "files"} · ${sizeText(total)}` : "";
-  $("awList").replaceChildren(...aw.items.map((x, i) => h("li", null,
-    h("span", { class: "uemoji" }, FILE_EMOJI[x.kind]),
-    h("div", { class: "what" }, x.name, h("small", null, sizeText(x.size) + (x.id ? " · kept in the School files" : " · too big to keep (700 KB at most): 🤖 only reads it now"))),
-    h("button", { type: "button", class: "x", "aria-label": "Remove " + x.name, data: { awdel: i } }, "✕"))));
-}
+// ---------- 📥 Files for the AI (⬆️ Upload: see STUDY TOPICS) ----------
 // A chosen file, ready for the AI (photos: 1600px JPEG) → { r: { kind, name, size, url }, keep } or { problem: "…" }
 // (keep = small enough to be kept in the School files)
 async function readForAi(file) {
@@ -11965,43 +11965,6 @@ async function readForAi(file) {
       : err.message === "big" ? `“${file.name}” is too big (4 MB at most).` : `Couldn't read “${file.name}”.` };
   }
 }
-// The chosen files: kept in the School files (like ⬆ Upload), and ready for the AI
-async function addWorkFiles(files) {
-  const box = aw;
-  if (!box) return;
-  const s = schoolFor(box.kid), problems = [];
-  $("awErr").textContent = "⏳ Getting the files ready…";
-  let kept = 0;
-  for (const file of files) {
-    const { r, keep, problem } = await readForAi(file);
-    if (problem) problems.push(problem);
-    if (!r) continue;
-    let id = null;
-    if (keep) {
-      const folder = s.subjects[$("awSubject").value];
-      id = newId();
-      s.files[id] = { subject: folder ? folder.name : "", name: r.name, kind: r.kind, size: r.size, date: todayYmd(), by: me };
-      storeFileData(id, box.kid, r.url);
-      kept++;
-    }
-    box.items.push({ id, name: r.name, kind: r.kind, url: r.url, size: r.size });
-  }
-  if (kept) { writeData(); render(); }
-  if (aw !== box) return;   // the box was closed meanwhile
-  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
-  $("awErr").textContent = problems.length ? problems.join(" ") : total > AI_MAX ? tooBigText(total) : "";
-  drawWorkList();
-}
-// ✕ in the box: the file is taken out again (it was only just added)
-function removeWorkFile(i) {
-  const x = aw && aw.items[i];
-  if (!x) return;
-  const s = schoolFor(aw.kid), f = x.id && s.files[x.id];
-  if (f && canChange(f)) { deleteFileData(x.id); delete s.files[x.id]; writeData(); render(); }
-  aw.items.splice(i, 1);
-  $("awErr").textContent = "";
-  drawWorkList();
-}
 // The folder for the subject the AI found (same name, one name inside the other, or the same known subject)
 function folderIdFor(s, name) {
   if (!name) return null;
@@ -12018,23 +11981,6 @@ function ensureFolder(s, subject) {
   const known = findSubject(name), colors = Object.keys(PALETTE), id = "s" + newId(), n = subjectList(s, true).length;
   s.subjects[id] = { name, emoji: known ? known.emoji : "📘", color: colors[n % colors.length] || "blue", order: n };
   return id;
-}
-// 🤖 Read it → { subject, title, topics[], what_to_do } → a "School work" card in that subject
-async function readWork() {
-  const box = aw;
-  if (!box) return;
-  if (!box.items.length) return $("awErr").textContent = "Add the PDF or photos first (📷 Add photos or PDF).";
-  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
-  if (total > AI_MAX) return $("awErr").textContent = tooBigText(total);
-  const chosen = $("awSubject").value, items = [...box.items];
-  $("awErr").textContent = "";
-  let files;
-  try { files = await aiFilesFor(items); }
-  catch (err) { if (aw === box) $("awErr").textContent = aiFileError(err); return; }
-  const r = await callAi("analyze", { files, ...kidInfo(box.kid) }, "analyze");
-  if (!r) return;
-  if (aw === box) closeWork();
-  afterAnalyze(box.kid, r, items.map(x => x.id), chosen);
 }
 // 🤖 What the AI read → a "School work" card in its subject (+ a 🧭 level check when the topic is new)
 function afterAnalyze(kid, r, ids, chosen) {
@@ -12213,24 +12159,44 @@ function learnAfterCheck(w, c, wsId) {
   const L = learnFor(w.kid, w.subject);
   if (!L || !(c.max_score > 0)) return;
   const today = todayYmd(), pct = Math.round(c.score / c.max_score * 100), seen = L.history.find(h => h.ws === wsId);
-  if (seen) { seen.pct = pct; return; }
-  const by = {};
+  // 🔗 Per topic (each question's topic; older / ⚡ instant: the worksheet's part, the topic found in the file): its % and its skills
+  const src = w.src === "instant" || w.src === "igcse" ? w.src : "school", fallback = String(w.part || w.topics[0] || w.title || "").trim().slice(0, 80);
+  const byTopic = {};
   c.questions.forEach(q => {
-    const wq = w.questions.find(x => x.number === q.number) || {}, name = String(q.skill || wq.skill || "").trim().slice(0, 60);
-    if (!name) return;
-    const x = by[name] || (by[name] = { n: 0, sum: 0, right: 0 });
-    x.n++; x.sum += q.correct ? 1 : Math.min(1, (q.points || 0) / (wq.points || 1)); x.right += q.correct ? 1 : 0;
+    const wq = w.questions.find(x => x.number === q.number) || {}, title = String(q.topic || wq.topic || fallback).trim().slice(0, 80);
+    if (!title) return;
+    const t = byTopic[lowerT(title)] || (byTopic[lowerT(title)] = { title, got: 0, most: 0, qs: [] }), most = wq.points || 1;
+    t.got += Math.min(most, q.points || 0); t.most += most; t.qs.push(q);
   });
-  Object.entries(by).forEach(([name, x]) => {
-    const old = L.skills[name], now = Math.round(x.sum / x.n * 100);
-    L.skills[name] = { mastery: old ? Math.round(0.4 * now + 0.6 * old.mastery) : now, tries: (old ? old.tries : 0) + x.n, right: (old ? old.right : 0) + x.right, last: today };
+  if (!c.questions.length && fallback) byTopic[lowerT(fallback)] = { title: fallback, got: c.score, most: c.max_score, qs: [] };
+  if (!L.topics) L.topics = {};
+  Object.values(byTopic).forEach(t => {
+    const key = topicKey(t.title), T = L.topics[key] || (L.topics[key] = { title: t.title, src, results: [], skills: {} });
+    T.results = [...T.results.filter(r => r.ws !== wsId), { date: today, ws: wsId, pct: t.most ? Math.round(t.got / t.most * 100) : pct }].slice(-12);
+    if (!seen) addSkills(T.skills, w, t.qs, today);
   });
+  if (seen) { seen.pct = pct; return; }   // (checked again: only its %)
+  addSkills(L.skills, w, c.questions, today);
   const prev = [...L.history].reverse().find(h => !h.hand);
   let level = c.suggested_level ? Math.max(L.level - 1, Math.min(L.level + 1, c.suggested_level)) : L.level;
   if (prev && prev.pct >= 85 && pct >= 85) level = L.level + 1;
   else if (prev && prev.pct < 50 && pct < 50) level = L.level - 1;
   L.level = Math.max(1, Math.min(10, level));
   L.history = [...L.history, { date: today, ws: wsId, pct, level: L.level }].slice(-30);
+}
+// Each skill from some marked questions: mastery = 40 % the new answers + 60 % the old, tries and right counted
+function addSkills(skills, w, qs, today) {
+  const by = {};
+  qs.forEach(q => {
+    const wq = w.questions.find(x => x.number === q.number) || {}, name = String(q.skill || wq.skill || "").trim().slice(0, 60);
+    if (!name) return;
+    const x = by[name] || (by[name] = { n: 0, sum: 0, right: 0 });
+    x.n++; x.sum += q.correct ? 1 : Math.min(1, (q.points || 0) / (wq.points || 1)); x.right += q.correct ? 1 : 0;
+  });
+  Object.entries(by).forEach(([name, x]) => {
+    const old = skills[name], now = Math.round(x.sum / x.n * 100);
+    skills[name] = { mastery: old ? Math.round(0.4 * now + 0.6 * old.mastery) : now, tries: (old ? old.tries : 0) + x.n, right: (old ? old.right : 0) + x.right, last: today };
+  });
 }
 // 👨‍👩‍👧 A parent sets the level by hand (− / +)
 function learnSetLevel(kid, fid, step) {
@@ -12260,49 +12226,85 @@ function learnChartSvg(L) {
     <line x1="0" x2="${W}" y1="${Math.round(H - 6 - 4 * (H - 12) / 9)}" y2="${Math.round(H - 6 - 4 * (H - 12) / 9)}" class="learn-mid"/>
     <polyline points="${xy.join(" ")}" class="learn-line"/>${xy.map(p => { const [x, y] = p.split(","); return `<circle cx="${x}" cy="${y}" r="3" class="learn-dot"/>`; }).join("")}</svg>`;
 }
-// 🧠 Parents: level x/10 (− / +) with the chart, 💪 strong skills, 🎯 skills to work on (each ✏️ Practise this)
+// 🔗 The profile's topics with results: the school topics (see STUDY TOPICS), plus ⚡ instant and 🌍 extra ones (only in the profile)
+// → [{ title, src, st, pct (the last 3 average), weak: [weak skills] }]
+function learnTopicRows(kid, f) {
+  const s = schoolOf(kid), L = (s.learn || {})[f.id], out = [], school = topicRows(kid, s, f);
+  school.filter(t => t.info.results.length).forEach(t => out.push({ title: t.title, src: "school", st: t.st, pct: meanPct(t.info.results.slice(-3).map(x => x.pct)), weak: topicWeak(t.info) }));
+  Object.values((L && L.topics) || {}).filter(T => T.results.length && !school.some(t => lowerT(t.title) === lowerT(T.title))).forEach(T => {
+    const info = { results: T.results, list: [{}], skills: T.skills };
+    out.push({ title: T.title, src: T.src, st: topicStatus(info), pct: meanPct(T.results.slice(-3).map(x => x.pct)), weak: topicWeak(info) });
+  });
+  return out;
+}
+// 🧠 Parents: level x/10 (− / +) with the chart, 💪 strong topics, 🎯 weaknesses by topic ("🔴 Fractions (52%): weak at …", ✏️ Practise this topic)
 function learnCardHtml(kid, f) {
   const L = learnRead(kid, f.name);
   if (!L) return "";
-  const enc = x => safe(encodeURIComponent(x)), strong = strongSkills(L).slice(0, 6), weak = weakSkills(L).slice(0, 6);
+  const enc = x => safe(encodeURIComponent(x)), rows = learnTopicRows(kid, f);
+  const tag = r => r.src === "instant" ? " <small>⚡ instant</small>" : r.src === "igcse" ? ` <small>🌍 ${safe(mapLabel(kid))} extra</small>` : "";
+  const strong = rows.filter(r => r.st === "mastered" || r.pct >= 85).sort((a, b) => b.pct - a.pct), weak = rows.filter(r => !strong.includes(r)).sort((a, b) => a.pct - b.pct);
+  const skillsPart = () => { const sk = weakSkills(L).slice(0, 6);   // (older profiles: skills only)
+    return sk.length ? `<ul class="learn-weak">${sk.map(x => `<li><span>${safe(x.skill)} <small>${x.mastery}% · ${x.right}/${x.tries} right</small></span>
+        <button class="pill" data-learnpr="${safe(kid)}|${safe(f.id)}|${enc(x.skill)}" data-aiwait="learn|${safe(kid)}|${safe(x.skill)}">✏️ Practise this</button></li>`).join("")}</ul>`
+      : `<p class="hint">Nothing to work on right now.</p>`; };
   return `<div class="learn-box"><div class="learn-top"><span class="learn-sub">${safe(f.emoji)} ${safe(f.name)}</span>
       <span class="learn-lv"><button class="pill" data-learnlv="${safe(kid)}|${safe(f.id)}|-1" aria-label="Level down" ${L.level <= 1 ? "disabled" : ""}>−</button>
       <b>Level ${L.level}/10</b><button class="pill" data-learnlv="${safe(kid)}|${safe(f.id)}|1" aria-label="Level up" ${L.level >= 10 ? "disabled" : ""}>+</button></span></div>
     ${learnChartSvg(L)}
-    <p class="learn-h">💪 Strong skills</p>${strong.length ? `<div class="learn-chips">${strong.map(x => `<span class="learn-chip good">${safe(x.skill)} <small>${x.mastery}%</small></span>`).join("")}</div>`
-      : `<p class="hint">None yet (mastery 80% or more).</p>`}
-    <p class="learn-h">🎯 Skills to work on</p>${weak.length ? `<ul class="learn-weak">${weak.map(x => `<li><span>${safe(x.skill)} <small>${x.mastery}% · ${x.right}/${x.tries} right</small></span>
-        <button class="pill" data-learnpr="${safe(kid)}|${safe(f.id)}|${enc(x.skill)}" data-aiwait="learn|${safe(kid)}|${safe(x.skill)}">✏️ Practise this</button></li>`).join("")}</ul>`
-      : `<p class="hint">None right now (mastery under 60%).</p>`}</div>`;
+    <p class="learn-h">💪 Strong</p>${strong.length ? `<div class="learn-chips">${strong.map(r => `<span class="learn-chip good">${safe(r.title)} <small>${r.pct}%</small></span>`).join("")}</div>`
+      : `<p class="hint">None yet (85% or more).</p>`}
+    <p class="learn-h">🎯 To work on</p>${weak.length ? `<ul class="learn-weak">${weak.map(r => `<li><span>${ST[r.st][0]} ${safe(r.title)} (${r.pct}%)${tag(r)}${r.weak.length ? `<small>weak at ${safe(r.weak.join(", "))}</small>` : ""}</span>
+        <button class="pill" data-learntp="${safe(kid)}|${safe(f.id)}|${enc(r.title)}|${r.src}" data-aiwait="ltp|${safe(kid)}|${safe(r.title)}">✏️ Practise this topic</button></li>`).join("")}</ul>`
+      : rows.length ? `<p class="hint">Nothing to work on right now.</p>` : skillsPart()}</div>`;
 }
 // 🧒 The kid's friendly line: "🧠 Level 6 in Math · 💪 You're great at fractions · 🎯 Let's practise times tables"
 function learnKidLine(kid, f) {
-  const L = learnRead(kid, f.name);
-  if (!L || !L.history.length) return "";
-  const s = strongSkills(L)[0], w = weakSkills(L)[0];
-  return `<p class="learn-kid">🧠 Level ${L.level} in ${safe(f.name)}${s ? ` · 💪 You're great at ${safe(s.skill)}` : ""}${w ? ` · 🎯 Let's practise ${safe(w.skill)}` : ""}</p>`;
+  const L = learnRead(kid, f.name), rows = L ? learnTopicRows(kid, f) : [];
+  if (!L || (!L.history.length && !rows.length)) return "";
+  const best = rows.filter(r => r.pct >= 80).sort((a, b) => b.pct - a.pct)[0], low = rows.filter(r => r.pct < 60).sort((a, b) => a.pct - b.pct)[0];
+  const great = best ? best.title : (strongSkills(L)[0] || {}).skill, practise = low ? low.title : (weakSkills(L)[0] || {}).skill;
+  return `<p class="learn-kid">🧠 Level ${L.level} in ${safe(f.name)}${great ? ` · 💪 You're great at ${safe(great)}` : ""}${practise ? ` · 🎯 Let's practise ${safe(practise)}` : ""}</p>`;
 }
 // 📊 How are my kids doing?: every subject with a learning profile (or a checked worksheet)
 function learnReportHtml(kid) {
   const s = schoolOf(kid), list = subjectList(s).filter(f => (s.learn || {})[f.id]);
   return list.length ? list.map(f => learnCardHtml(kid, f)).join("") : `<p class="sc-empty">No checked worksheets yet: the profile starts with the first one.</p>`;
 }
+// ✏️ Practise this topic: a worksheet on it, focused on its weak skills (a 🌍 extra topic stays "extra")
+async function learnPractiseTopic(kid, fid, title, src) {
+  if (!isParentDevice()) return;
+  const f = schoolOf(kid).subjects[fid];
+  if (!f || !title) return;
+  const row = learnTopicRows(kid, { id: fid, ...f }).find(r => lowerT(r.title) === lowerT(title)), focus = row ? row.weak : [];
+  const id = await newWorksheet(kid, f.name, [title], 10, "practice", "ltp|" + kid + "|" + title,
+    { part: title, ...(focus.length ? { focus } : {}), ...(src === "igcse" ? { src: "igcse" } : {}),
+      sections: [{ topic: title, minutes: 20, focus, kind: row && row.st === "needs" ? "needs_work" : "practising" }] });
+  if (id) toast(`📝 A ${f.name} worksheet on “${title}” is ready${screen === "school" ? "" : ` in ${kidNameOf(kid)}'s 🎒 School`}!`, 3500);
+}
 document.addEventListener("click", e => {
-  const b = e.target.closest && e.target.closest("[data-learnlv], [data-learnpr]");
+  const b = e.target.closest && e.target.closest("[data-learnlv], [data-learnpr], [data-learntp]");
   if (!b || !isParentDevice()) return;
   if (b.dataset.learnlv) { const [kid, fid, step] = b.dataset.learnlv.split("|"); return learnSetLevel(kid, fid, Number(step)); }
+  if (b.dataset.learntp) { const [kid, fid, title, src] = b.dataset.learntp.split("|"); return learnPractiseTopic(kid, fid, decodeURIComponent(title || ""), src); }
   const [kid, fid, skill] = b.dataset.learnpr.split("|");
   learnPractise(kid, fid, decodeURIComponent(skill || ""));
 });
 // A new worksheet from the AI, saved (and opened when open = true). extra = { part, work?, title? }. → its id, or null.
 async function newWorksheet(kid, subject, topics, count, mode, key, extra, open = true) {
-  // (📚 a study session's worksheet: extra.minutes = the session's minutes → the AI decides how many questions fit)
-  const minutes = extra && extra.minutes >= 5 && extra.minutes <= 240 ? Math.round(extra.minutes) : 0;
+  // (📚 a study session's worksheet: extra.minutes = the session's minutes → the AI fills them; sections = its parts in order;
+  //  ⚡ instant + files = only about the file (never kept); avoid = questions already given; focus = the skills to practise.
+  //  Those go to the AI only: the rest of extra is saved with the worksheet.)
+  const { files, instant, sections, avoid, focus, ...keep } = extra || {};
+  const minutes = keep.minutes >= 5 && keep.minutes <= 240 ? Math.round(keep.minutes) : 0;
   const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: MODE_NOTES[mode],
                                         mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
-                                        ...learnBody(kid, subject, extra && extra.focus) }, key);   // (🧠 level, skills, focus)
+                                        ...(sections && sections.length ? { sections } : {}), ...(instant ? { instant: true, files } : {}),
+                                        ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus) }, key);   // (🧠 level, skills, focus)
   if (!r) return null;
-  const ws = cleanWorksheet({ ...r, kid, subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), answers: [], purpose: mode, ...extra });
+  const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
+  const ws = cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me,
+                              at: new Date().toISOString(), answers: [], purpose: mode, ...(instant && found ? { part: found } : {}), ...keep });
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
   delete ws.check;
   const id = newId();
@@ -12330,26 +12332,502 @@ async function makePractice(i) {
   const ok = await newWorksheet(kid, f.name, [point], PRACTICE_COUNT, "practice", "practice|" + i, { part: partOf(last, s) });
   if (ok) toast("🔁 Your practice worksheet is ready!", 2500);
 }
-$("aiWorkModal").addEventListener("click", e => {
-  if (e.target === $("aiWorkModal")) return closeWork();
-  const b = e.target.closest("button");
-  if (!b) return;
-  if (b.id === "awClose") return closeWork();
-  if (b.id === "awPick") { aiPick = "work"; $("aiFile").value = ""; return $("aiFile").click(); }
-  // 📥 From Seesaw: a parent adds a Seesaw post; a kid saves the photo / PDF from Seesaw first, then adds it here
-  if (b.id === "awSeesaw") { if (isParentId(me)) { closeWork(); return openSeesaw(); } return toast("📥 In Seesaw, save the photo or PDF to your phone, then tap 📷 Add photos or PDF here.", 5000); }
-  if (b.id === "awRead") return readWork();
-  if (b.dataset.awdel !== undefined) return removeWorkFile(Number(b.dataset.awdel));
-});
 $("aiFile").addEventListener("change", e => {
   const files = [...e.target.files], target = aiPick;
   aiPick = null;
   e.target.value = "";
   if (!files.length || !target) return;
-  if (target === "work") return addWorkFiles(files);
+  if (target === "work") return addUploadFiles(files);   // (⬆️ Upload: see STUDY TOPICS)
   if (target === "newsletter") return addNewsletterFiles(files);
   if (target === "syllabus") return addSyllabus(files);
   if (target.ws) return addAnswerFiles(target.ws, files);
+});
+
+// =====================================================================
+//  📚 STUDY TOPICS (the 🎒 School study): each subject's topics from the school files, 🚦 their status from the worksheets,
+//  ⬆️ Upload (📚 Add to curriculum · ⚡ Instant worksheet), 📚 Start session (sections) + ➕ More questions,
+//  🔗 weaknesses per topic, 🌍 the official curriculum + 📏 benchmark (parents), 📊 the parents' summary.
+//  The kid only sees ⬆️ Upload · 📚 Start session · ✏️ My worksheets · the topics with coloured dots; all the detail is for parents.
+//  Data (in data.school[kid]): curr (topic id → { sub, title, note, added, files }), map (subject id → the official list),
+//  bench (subject id → the benchmark), learn[subject].topics (topic key → { title, src, results, skills }: see LEARNING PROFILE).
+// =====================================================================
+// (function declarations: cleanSchool uses these while loading)
+function hash36(text) { let n = 5381; for (const ch of String(text)) n = ((n * 33) ^ ch.codePointAt(0)) >>> 0; return n.toString(36); }
+function subjectIdIn(s, name) {
+  const n = String(name || "").trim().toLowerCase(), hit = n && Object.entries(s.subjects || {}).find(([, x]) => x.name.trim().toLowerCase() === n);
+  return hit ? hit[0] : "";
+}
+function topicIdOf(sub, title) { return "t" + hash36(sub + "|" + String(title).trim().toLowerCase()); }
+function topicKey(title) { return "k" + hash36(String(title).trim().toLowerCase()); }
+// Older data: the topics of the 📥 school work cards and 📰 this week (the newest date kept, files joined)
+function currFromOld(c) {
+  const out = {};
+  const add = (sub, title, added, files) => {
+    const t = String(title || "").trim().slice(0, 80);
+    if (!sub || !t) return;
+    const id = topicIdOf(sub, t), x = out[id];
+    if (x) { if ((added || "") > x.added) x.added = added; x.files = [...new Set([...x.files, ...files])].slice(0, 30); }
+    else out[id] = { sub, title: t, note: "", added: added || "", files: files.slice(0, 30) };
+  };
+  Object.values(c.work || {}).forEach(w => (w.topics.length ? w.topics : [w.title]).forEach(t => add(subjectIdIn(c, w.subject), t, w.date, w.files)));
+  if (c.week) c.week.subjects.forEach(x => x.topics.forEach(t => add(subjectIdIn(c, x.subject), t, c.week.start, [])));
+  return out;
+}
+// 🚦 ⚪ New (no worksheet) · 🟡 Practising (a worksheet but < 2 results, or 60–84 %) · 🔴 Needs work (2+ results, the last 3 average < 60 %)
+//    · 🟢 Mastered (≥ 85 % twice in a row)
+const ST = { new: ["⚪", "New"], practising: ["🟡", "Practising"], needs: ["🔴", "Needs work"], mastered: ["🟢", "Mastered"] };
+const ST_FILTERS = [["all", "All"], ["new", "⚪ Not practised"], ["needs", "🔴 Needs work"], ["mastered", "🟢 Mastered"]];
+const KIND_OF = { needs: "needs_work", new: "new", practising: "practising", mastered: "review" };
+const lowerT = t => String(t || "").trim().toLowerCase();
+const meanPct = list => list.length ? Math.round(list.reduce((n, x) => n + x, 0) / list.length) : null;   // (the average of some %)
+const dayMon = d => { const x = fromYmd(String(d).slice(0, 10)); return `${x.getDate()} ${MONTHS[x.getMonth()]}`; };
+let stSub = null, stPick = [], stFilter = "all", stOpen = null, stWs = false, stFiles = false, stMapPick = [];   // (the subject page)
+// A subject's school topics, newest first: [{ id, sub, title, note, added, files }]
+function topicsOf(s, sid) {
+  return Object.entries(s.curr || {}).filter(([, t]) => t.sub === sid).map(([id, t]) => ({ id, ...t }))
+    .sort((a, b) => (b.added || "").localeCompare(a.added || "") || a.title.localeCompare(b.title));
+}
+// Does a worksheet practise this topic? (its questions' topics; older ones: its part or topics)
+function wsHasTopic(w, title) {
+  const t = lowerT(title);
+  if (w.questions.some(q => q.topic)) return w.questions.some(q => lowerT(q.topic) === t);
+  return lowerT(w.part) === t || w.topics.some(x => lowerT(x) === t);
+}
+// The topic's % in a checked worksheet (only its own questions, when they're marked by topic)
+function topicPctIn(w, title) {
+  const qs = w.questions.filter(q => lowerT(q.topic) === lowerT(title));
+  if (!qs.length || !w.check.questions.length) return wsPct(w);
+  const nums = new Set(qs.map(q => q.number)), max = qs.reduce((n, q) => n + (q.points || 1), 0);
+  const got = w.check.questions.filter(q => nums.has(q.number)).reduce((n, q) => n + (q.points || 0), 0);
+  return max ? Math.round(Math.min(1, got / max) * 100) : wsPct(w);
+}
+// A school topic's worksheets (newest first), results (oldest first: [{ date, ws, pct }]) and 🔗 its skills
+// (⚡ instant and 🌍 extra worksheets don't count here: they're only in the learning profile)
+function topicInfo(kid, f, title) {
+  const list = wsOf(kid, f.name).filter(w => !w.src && wsHasTopic(w, title));
+  const L = (schoolOf(kid).learn || {})[f.id], lt = L && L.topics ? L.topics[topicKey(title)] : null;
+  const fromWs = list.filter(w => w.check).map(w => ({ date: String(w.check.at || w.date).slice(0, 10), ws: w.id, pct: topicPctIn(w, title) }));
+  const results = [...fromWs, ...(lt && lt.src === "school" ? lt.results.filter(r => !fromWs.some(x => x.ws === r.ws) && !aiDocs.worksheets[r.ws]) : [])]
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return { list, results, skills: lt ? lt.skills : {} };
+}
+function topicStatus(info) {
+  const r = info.results.map(x => x.pct), n = r.length;
+  if (n >= 2 && r[n - 1] >= 85 && r[n - 2] >= 85) return "mastered";
+  if (n >= 2 && meanPct(r.slice(-3)) < 60) return "needs";
+  return info.list.length || n ? "practising" : "new";
+}
+const statusDot = st => `<span class="st-dot" role="img" aria-label="${ST[st][1]}" title="${ST[st][1]}">${ST[st][0]}</span>`;
+// 🔗 The topic's weak skills (mastery < 60, weakest first); older: the last check's 🎯 points
+function topicWeak(info) {
+  const sk = Object.entries(info.skills || {}).filter(([, v]) => v.mastery < 60).sort((a, b) => a[1].mastery - b[1].mastery).map(([n]) => n);
+  if (sk.length) return sk.slice(0, 3);
+  const last = (info.list || []).find(w => w.check);
+  return last ? (last.check.weak_points || []).slice(0, 2) : [];
+}
+// Every school topic of a subject with its status (newest first)
+const topicRows = (kid, s, f) => topicsOf(s, f.id).map(t => { const info = topicInfo(kid, f, t.title); return { ...t, info, st: topicStatus(info) }; });
+
+// ---------- 📚 The topics card: ☐ tick · 🚦 dot · the title (parents: date · worksheets · last score; tap → its history) ----------
+function topicsCardHtml(s, f, parent) {
+  const all = topicRows(schoolKid, s, f);
+  stPick = stPick.filter(id => all.some(t => t.id === id));
+  const shown = parent && stFilter !== "all" ? all.filter(t => t.st === stFilter) : all;
+  const count = k => all.filter(t => t.st === k).length;
+  const rows = shown.map(t => {
+    const on = stPick.includes(t.id), n = t.info.list.length, last = t.info.results[t.info.results.length - 1];
+    const meta = [t.added ? `Added ${dayMon(t.added)}` : "", n ? `${n} ${n === 1 ? "worksheet" : "worksheets"}` : "", last ? `last ${last.pct}%` : ""].filter(Boolean).join(" · ");
+    return `<li class="st-topic ${on ? "on" : ""}"><label class="st-tick"><input type="checkbox" data-sttick="${safe(t.id)}" ${on ? "checked" : ""} aria-label="Pick ${safe(t.title)}"></label>
+      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}</button>`
+        : `<span class="st-name"><b>${safe(t.title)}</b></span>`}
+      ${parent && stOpen === t.id ? topicHistoryHtml(t) : ""}</li>`;
+  }).join("");
+  return `<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
+    ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
+    ${all.length ? `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>
+      <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
+      <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
+      : `<p class="sc-empty">📂 No topics yet. Tap ⬆️ Upload and add a school file (a photo or PDF).</p>`}</div>`;
+}
+// 👨‍👩‍👧 A topic's history: each worksheet, its date, score and 🎯 weak points
+function topicHistoryHtml(t) {
+  const list = t.info.list;
+  return `<div class="st-hist">${list.length ? `<ul>${list.map(w => { const pct = w.check ? topicPctIn(w, t.title) : null, weak = w.check ? w.check.weak_points || [] : [];
+      return `<li><button class="linkbtn" data-aiopen="worksheet|${safe(w.id)}">📝 ${safe(w.title)}</button>
+        <small>${dayMon(w.date)} · ${pct != null ? `${pct}%` : safe(w.status)}</small>${weak.length ? `<small class="st-weak">🎯 ${safe(weak.join(", "))}</small>` : ""}</li>`; }).join("")}</ul>`
+    : `<p class="hint">No worksheets on this topic yet.</p>`}${t.note ? `<p class="hint">${safe(t.note)}</p>` : ""}${t.files.length ? `<p class="hint">📂 ${t.files.length} school ${t.files.length === 1 ? "file" : "files"}</p>` : ""}</div>`;
+}
+// ✏️ Make a worksheet on the ticked topics (one section a topic; focus = their weak skills)
+async function makeFromTopics() {
+  const s = schoolOf(schoolKid), f = s.subjects[schoolSubject] && { id: schoolSubject, ...s.subjects[schoolSubject] };
+  if (!f) return;
+  if (!stPick.length) return toast("📌 Select at least one topic first.", 2500);
+  const items = topicRows(schoolKid, s, f).filter(t => stPick.includes(t.id));
+  const sections = items.length > 1 ? items.map(t => ({ topic: t.title, minutes: Math.max(5, Math.round(30 / items.length)), focus: topicWeak(t.info), kind: KIND_OF[t.st] })) : [];
+  const focus = [...new Set(items.flatMap(t => topicWeak(t.info)))].slice(0, 3);
+  const id = await newWorksheet(schoolKid, f.name, items.map(t => t.title), 10, pickMode(schoolKid, f.name), "stmake",
+                                { part: items[0].title, ...(focus.length ? { focus } : {}), ...(sections.length ? { sections } : {}) }, true);
+  if (id) { stPick = []; toast("✨ Your worksheet is ready! 🖨️ Print or 📄 PDF.", 3500); }
+}
+
+// ---------- 📚 Study sessions: the sections (📚 Start session, ➕ More questions) ----------
+// The worksheets made for a session, oldest first
+const sessionWsIds = key => Object.entries(aiDocs.worksheets).filter(([, w]) => w.session === key)
+  .sort((a, b) => String(a[1].at || "").localeCompare(String(b[1].at || ""))).map(([id]) => id);
+// The session's sections for `minutes`: 🔴 needs work ≈ 50 % (weakest first, their weak skills as focus) → ⚪ never practised ≈ 25 %
+// (newest first) → 🟡 practising ≈ 20 % → 🟢 a quick review ≈ 7 % (only every 3rd session of the subject). Empty groups share their time.
+// All 🟢: the newest topics + a small 🚀 challenge. Only 1 topic: the whole session on it, mixed difficulty.
+function sessionSections(kid, s, f, minutes) {
+  const rows = topicRows(kid, s, f);
+  const avg = t => { const r = t.info.results.slice(-3).map(x => x.pct); return r.length ? meanPct(r) : 100; };
+  if (rows.length === 1) return [{ topic: rows[0].title, minutes, focus: topicWeak(rows[0].info), kind: rows[0].st === "needs" ? "needs_work" : "practising" }];
+  const g = { needs: rows.filter(t => t.st === "needs").sort((a, b) => avg(a) - avg(b)), new: rows.filter(t => t.st === "new"),
+              practising: rows.filter(t => t.st === "practising").sort((a, b) => avg(a) - avg(b)), mastered: rows.filter(t => t.st === "mastered") };
+  if (!g.needs.length && !g.new.length && !g.practising.length) {   // all 🟢
+    const a = g.mastered[0], b = g.mastered[1] || a, main = Math.max(5, Math.round(minutes * 0.75));
+    return [{ topic: a.title, minutes: main, focus: [], kind: "practising" }, { topic: b.title, minutes: Math.max(5, minutes - main), focus: [], kind: "challenge" }];
+  }
+  const review = wsOf(kid, f.name).filter(w => w.session).length % 3 === 2;   // (every 3rd session of this subject)
+  const plan = [["needs", 0.5, 2], ["new", 0.25, 2], ["practising", 0.2, 2], ...(review ? [["mastered", 0.07, 1]] : [])].filter(([k]) => g[k].length);
+  const total = plan.reduce((n, p) => n + p[1], 0), out = [];
+  plan.forEach(([k, w, most]) => {
+    const gm = Math.round(minutes * w / total), n = Math.max(1, Math.min(most, g[k].length, Math.floor(gm / 5)));
+    g[k].slice(0, n).forEach(t => out.push({ topic: t.title, minutes: Math.max(5, Math.round(gm / n)), focus: k === "needs" ? topicWeak(t.info) : [], kind: KIND_OF[k] }));
+  });
+  return out.slice(0, 6);
+}
+// 📚 Start session (calendar or 📚 STUDY; no upload): a worksheet that fills the session (or the minutes left), in sections
+async function startSession(key) {
+  const x = sessionByKey(key);
+  if (!x) return toast("This session isn't in this week's plan any more.", 3000);
+  if (kidLockedOut(x.person)) return lockedToast(x.person);
+  const s = schoolOf(x.person), sid = x.subjectId && s.subjects[x.subjectId] ? x.subjectId : folderIdFor(s, x.subject);
+  if (!sid) return toast(`📘 Pick a subject for “${x.act.name}” in ✏️ Add activities first.`, 4000);
+  const f = { id: sid, ...s.subjects[sid] };
+  openSchool(x.person);
+  goSchool("subject", sid, "");
+  const made = sessionWsIds(key);
+  if (made.length) return openAiDoc("worksheet", made[made.length - 1]);   // (made already: open it)
+  if (!topicsOf(s, sid).length) {
+    if (confirm(`📂 Upload a file for ${f.name} first, so I know what you're learning.\n\nUpload now?`)) openUpload(sid);
+    return;
+  }
+  const now = dubaiMinutes(), live = x.d === todayIndex() && x.start <= now && now < x.end, minutes = Math.max(5, live ? x.end - now : x.minutes);
+  const sections = sessionSections(x.person, s, f, minutes);
+  await newWorksheet(x.person, f.name, [...new Set(sections.map(y => y.topic))], 10, pickMode(x.person, f.name), "session|" + key,
+                     { session: key, minutes, sections, part: sections[0].topic }, true);
+}
+// ➕ More questions (the session hasn't ended; after the answers are uploaded or 🙋 I'm done): the minutes left, nothing repeated
+async function moreQuestions(key) {
+  const x = sessionByKey(key);
+  if (!x || x.ended) return toast("⏰ This session has ended. Well done! 🌟", 3000);
+  const s = schoolOf(x.person), sid = x.subjectId && s.subjects[x.subjectId] ? x.subjectId : folderIdFor(s, x.subject);
+  if (!sid) return;
+  const f = { id: sid, ...s.subjects[sid] }, now = dubaiMinutes(), minutes = Math.max(5, x.d === todayIndex() && x.start <= now ? x.end - now : x.minutes);
+  const ids = sessionWsIds(key), avoid = ids.flatMap(id => aiDocs.worksheets[id].questions.map(q => q.prompt)).slice(-80);
+  const sections = topicsOf(s, sid).length ? sessionSections(x.person, s, f, minutes) : [];
+  const last = aiDocs.worksheets[ids[ids.length - 1]] || {};
+  await newWorksheet(x.person, f.name, sections.length ? [...new Set(sections.map(y => y.topic))] : last.topics || [f.name], 10, pickMode(x.person, f.name),
+                     "more|" + key, { session: key, minutes, avoid, ...(sections.length ? { sections, part: sections[0].topic } : { part: last.part || f.name }) }, true);
+}
+// 🙋 I'm done (then ➕ More questions shows while the session lasts)
+function sessionDone(wsId) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w || (isKidDevice() && w.kid !== kidDeviceId())) return;
+  aiSave("worksheets", wsId, { ...w, done: true });
+  render();
+}
+
+// ---------- ⬆️ Upload: 📚 Add to curriculum (kept in 📂 Files → 🤖 its topics, ticked) · ⚡ Instant worksheet (the file isn't kept) ----------
+// From a subject: both; from the School home: 📚 for all the kid's subjects (a newsletter, a school review …)
+let aw = null;   // { kid, sid ("" = all subjects), kind: "curr" | "instant" | null, items: [{ id (kept file) or null, name, kind, url, size }], result, err }
+function openUpload(sid) {
+  if (!schoolKid || !exists(me)) return;
+  const s = schoolOf(schoolKid), home = !sid || !s.subjects[sid];
+  aw = { kid: schoolKid, sid: home ? "" : sid, kind: home ? "curr" : null, items: [], result: null, err: aiReady() ? "" : `🔌 ${AI_OFF}.` };
+  $("aiWorkModal").hidden = false;
+  drawUpload();
+}
+function closeWork() { $("aiWorkModal").hidden = true; aw = null; }   // (📚 files kept already stay in 📂 Files)
+function drawUpload() {
+  if (!aw) return;
+  const s = schoolOf(aw.kid), f = aw.sid && s.subjects[aw.sid], body = [];
+  $("awTitle").textContent = f ? `⬆️ Upload · ${f.emoji} ${f.name}` : "⬆️ Upload a school file";
+  if (!aw.kind) body.push(h("p", { class: "print-hint" }, "What is this file for?"),
+    h("div", { class: "aw-kinds" },
+      h("button", { type: "button", class: "aw-kind", data: { awkind: "curr" } }, h("span", { class: "e" }, "📚"), h("b", null, "Add to curriculum"), h("small", null, "Keep it in 📂 Files and add its topics")),
+      h("button", { type: "button", class: "aw-kind", data: { awkind: "instant" } }, h("span", { class: "e" }, "⚡"), h("b", null, "Instant worksheet"), h("small", null, "A worksheet on it right now. The file isn't kept."))),
+    h("div", { class: "btnrow" }, h("button", { type: "button", data: { awclose: "" } }, "Close")));
+  else if (aw.result) body.push(...curriculumReviewNodes(s));
+  else {
+    const total = aw.items.reduce((n, x) => n + bytesOf(x.url), 0);
+    body.push(h("p", { class: "print-hint" }, aw.kind === "instant" ? "⚡ Add a photo or PDF of what you're learning. I make a worksheet only about it."
+        : f ? `📚 Add the school file (photo, PDF, PowerPoint or Word). I find its ${f.name} topics.`
+        : "📚 Add a newsletter, a school review or school work. I find the topics for every subject, and the school dates."),
+      h("div", { class: "sc-photo-row", style: "margin:12px 0 4px" }, h("button", { type: "button", class: "pill", data: { awpick: "" } }, "📷 Add photos or PDF"),
+        h("span", { class: "ai-size" }, aw.items.length ? `${aw.items.length} ${aw.items.length === 1 ? "file" : "files"} · ${sizeText(total)}` : "")),
+      aw.items.length ? h("ul", { class: "list" }, aw.items.map((x, i) => h("li", null, h("span", { class: "uemoji" }, FILE_EMOJI[x.kind]),
+        h("div", { class: "what" }, x.name, h("small", null, sizeText(x.size) + (aw.kind === "instant" ? " · not kept" : x.id ? " · kept in 📂 Files" : " · too big to keep: only read now"))),
+        h("button", { type: "button", class: "x", "aria-label": "Remove " + x.name, data: { awdel: i } }, "✕")))) : null,
+      h("div", { class: "err" }, aw.err),
+      h("div", { class: "btnrow" }, aw.kind === "instant"
+        ? h("button", { type: "button", class: "primary", data: { awgo: "", aiwait: "instant" } }, "⚡ Make my worksheet")
+        : h("button", { type: "button", class: "primary", data: { awgo: "", aiwait: "curriculum" } }, "🤖 Find the topics"),
+        h("button", { type: "button", data: { awclose: "" } }, "Close")));
+  }
+  $("awBody").replaceChildren(...body.filter(Boolean));
+  showAiWait();
+}
+// The chosen files: 📚 kept in 📂 Files (the subject's, or the kid's from the School home); ⚡ only read, never kept
+async function addUploadFiles(files) {
+  const box = aw;
+  if (!box || !box.kind) return;
+  const s = schoolFor(box.kid), f = box.sid && s.subjects[box.sid], problems = [];
+  box.err = "⏳ Getting the files ready…";
+  drawUpload();
+  let kept = 0;
+  for (const file of files) {
+    const { r, keep, problem } = await readForAi(file);
+    if (problem) problems.push(problem);
+    if (!r) continue;
+    let id = null;
+    if (keep && box.kind === "curr") {
+      id = newId();
+      s.files[id] = { subject: f ? f.name : "", name: r.name, kind: r.kind, size: r.size, date: todayYmd(), by: me };
+      storeFileData(id, box.kid, r.url);
+      kept++;
+    }
+    box.items.push({ id, name: r.name, kind: r.kind, url: r.url, size: r.size });
+  }
+  if (kept) { writeData(); render(); }
+  if (aw !== box) return;
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  box.err = problems.length ? problems.join(" ") : total > AI_MAX ? tooBigText(total) : "";
+  drawUpload();
+}
+function removeUploadFile(i) {
+  const x = aw && aw.items[i];
+  if (!x) return;
+  const s = schoolFor(aw.kid), f = x.id && s.files[x.id];
+  if (f && canChange(f)) { deleteFileData(x.id); delete s.files[x.id]; writeData(); render(); }
+  aw.items.splice(i, 1);
+  aw.err = "";
+  drawUpload();
+}
+async function uploadFilesForAi(box) {
+  const total = box.items.reduce((n, x) => n + bytesOf(x.url), 0);
+  box.err = !box.items.length ? "Add the photos or PDF first (📷 Add photos or PDF)." : total > AI_MAX ? tooBigText(total) : "";
+  if (box.err) { drawUpload(); return null; }
+  try { return await aiFilesFor(box.items); } catch (err) { box.err = aiFileError(err); drawUpload(); return null; }
+}
+// 📚 🤖 /curriculum: the topics of this subject (or of all the kid's subjects), matched to the ones we have, and the school dates
+async function findCurriculum() {
+  const box = aw;
+  if (!box) return;
+  const s = schoolOf(box.kid), subs = box.sid ? [{ id: box.sid, ...s.subjects[box.sid] }] : subjectList(s);
+  if (!subs.length) { box.err = "Add the subjects first (👤 Profile → ⚙️ Settings)."; return drawUpload(); }
+  const files = await uploadFilesForAi(box);
+  if (!files) return;
+  const r = await callAi("curriculum", { files, ...kidInfo(box.kid), today: todayYmd(),
+    subjects: subs.map(x => ({ id: x.id, name: x.name, existing: topicsOf(s, x.id).map(t => t.title).slice(0, 80) })), ...(box.sid ? { only: box.sid } : {}) }, "curriculum");
+  if (!r || aw !== box) return;
+  box.result = cleanCurriculum(s, subs, r);
+  box.err = "";
+  drawUpload();
+}
+// → { groups: [{ sid, topics: [{ title, note, same (the existing topic's id, or ""), on }] }], events: [{ date, time, title, on }] }
+// (only the kid's own subjects; a topic the AI says is the same as one we have: greyed and unticked)
+function cleanCurriculum(s, subs, r) {
+  const groups = [];
+  aiObjs(r.subjects, 20).forEach(x => {
+    const sid = subs.some(y => y.id === x.subjectId) ? x.subjectId : "";
+    if (!sid) return;
+    const have = topicsOf(s, sid);
+    let g = groups.find(y => y.sid === sid);
+    if (!g) groups.push(g = { sid, topics: [] });
+    aiObjs(x.topics, 30).forEach(t => {
+      const title = aiTxt(t.title, 80), sameAs = aiTxt(t.same_as, 80);
+      if (!title || g.topics.some(y => lowerT(y.title) === lowerT(title))) return;
+      const hit = (sameAs && have.find(y => lowerT(y.title) === lowerT(sameAs))) || have.find(y => lowerT(y.title) === lowerT(title));
+      g.topics.push({ title, note: aiTxt(t.note, 200), same: hit ? hit.id : "", on: !hit });
+    });
+  });
+  const events = aiObjs(r.events, 30).map(e => ({ date: isYmd(e.date) ? e.date : "", time: hmOf(e.time), title: aiTxt(e.title, 80), on: true })).filter(e => e.date && e.title);
+  return { groups: groups.filter(g => g.topics.length), events };
+}
+// One screen grouped by subject: ☑ each topic (greyed "Already in Math as …", unticked) · 📅 the school dates · ✅ Add
+function curriculumReviewNodes(s) {
+  const res = aw.result, out = [];
+  if (!res.groups.length && !res.events.length) out.push(h("p", { class: "sc-empty" }, "🤖 I couldn't find any topics for these subjects in this file."));
+  else if (res.groups.length) out.push(h("p", { class: "print-hint" }, "Untick what you don't want, then tap ✅ Add."));
+  res.groups.forEach((g, gi) => {
+    const f = s.subjects[g.sid];
+    out.push(h("h3", { class: "ph-group" }, `${f.emoji} ${f.name}`),
+      h("ul", { class: "list aw-topics" }, g.topics.map((t, ti) => { const old = t.same && s.curr[t.same];
+        return h("li", { class: old ? "aw-same" : null }, h("label", { class: "checkline" },
+          h("input", { type: "checkbox", checked: t.on, data: { awt: gi + "|" + ti } }),
+          h("span", null, h("b", null, t.title), old ? h("small", null, `Already in ${f.name} as “${old.title}”`) : t.note ? h("small", null, t.note) : null))); })));
+  });
+  if (res.events.length) out.push(h("h3", { class: "ph-group" }, "📅 Add to calendar"),
+    h("ul", { class: "list" }, res.events.map((e, i) => h("li", null, h("label", { class: "checkline" }, h("input", { type: "checkbox", checked: e.on, data: { awe: i } }),
+      h("span", null, h("b", null, `📌 ${shortDate(e.date)}${e.time ? " · " + clock(toMin(e.time), true) : ""}`), " " + e.title))))));
+  out.push(h("div", { class: "err" }, aw.err),
+    h("div", { class: "btnrow" }, res.groups.length || res.events.length ? h("button", { type: "button", class: "primary", data: { awadd: "" } }, "✅ Add") : null,
+      h("button", { type: "button", data: { awclose: "" } }, "Close")));
+  return out;
+}
+// ✅ Add: the ticked topics go into their OWN subjects; an unticked "already there" one gets the file and moves to the top (today);
+// the ticked 📅 dates go on the calendar (no doubles)
+function addCurriculum() {
+  const box = aw;
+  if (!box || !box.result) return;
+  const s = schoolFor(box.kid), files = box.items.map(x => x.id).filter(id => id && s.files[id]), today = todayYmd();
+  const touch = x => { x.added = today; x.files = [...new Set([...x.files, ...files])].slice(0, 30); };
+  let added = 0, linked = 0, dates = 0;
+  box.result.groups.forEach(g => g.topics.forEach(t => {
+    if (t.on) {
+      const id = topicIdOf(g.sid, t.title);
+      if (s.curr[id]) { touch(s.curr[id]); linked++; }   // (the very same title)
+      else { s.curr[id] = { sub: g.sid, title: t.title, note: t.note, added: today, files: files.slice(0, 30), by: me }; added++; }
+    } else if (t.same && s.curr[t.same]) { touch(s.curr[t.same]); linked++; }
+  }));
+  box.result.events.filter(e => e.on).forEach(e => {
+    if (Object.values(s.events).some(x => x.date === e.date && lowerT(x.title) === lowerT(e.title))) return;
+    s.events[newId()] = { date: e.date, time: e.time, title: e.title, note: "", by: me };
+    dates++;
+  });
+  writeData();
+  closeWork();
+  render();
+  toast(`📚 ${added} new ${added === 1 ? "topic" : "topics"}${linked ? ` · ${linked} already there (moved to the top)` : ""}${dates ? ` · 📅 ${dates} school ${dates === 1 ? "date" : "dates"}` : ""}`, 4000);
+}
+// ⚡ Instant worksheet: only about the file (nothing about the file is kept; its results go to the 🧠 profile under the topic found)
+// During a 📚 study session now: 🤖 finds the file's subject first. The same subject → the minutes left, it's the session's result.
+// Another subject → "Continue anyway?" Yes → it still counts for the session, "🔁 swapped to …", and the parents are told.
+async function instantWorksheet() {
+  const box = aw;
+  if (!box) return;
+  const files = await uploadFilesForAi(box);
+  if (!files) return;
+  const kid = box.kid, s = schoolOf(kid), page = s.subjects[box.sid], now = dubaiMinutes();
+  const sess = studySessions(kid).find(x => x.d === todayIndex() && x.start <= now && now < x.end);
+  const extra = { src: "instant", instant: true, files };
+  let subject = page ? page.name : "";
+  if (sess) {
+    const r = await callAi("analyze", { files, ...kidInfo(kid) }, "instant");
+    if (!r || aw !== box) return;
+    const found = aiTxt(r.subject, 30), fid = folderIdFor(s, found), name = fid ? s.subjects[fid].name : found;
+    const same = !found || (fid && fid === sess.subjectId) || sameSubject(name, sess.subject);
+    if (!same && !confirm(`⚠️ This looks like ${name}, but now is your ${sess.subject} time. Continue anyway?`)) return closeWork();
+    subject = same ? sess.subject : name;
+    Object.assign(extra, { session: sess.key, minutes: Math.max(5, sess.end - now), ...(same ? {} : { swap: name }) });
+    if (!same) addNews([newsItem("school", `🔁 ${kidNameOf(kid)} swapped ${sess.subject} with ${name} (${clock(sess.start, true)}–${clock(sess.end, true)})`, "", kid)]);
+  }
+  const id = await newWorksheet(kid, subject, [], 10, "practice", "instant", extra, true);
+  if (aw === box) closeWork();
+  if (id) toast("⚡ Your worksheet is ready!", 3000);
+}
+$("aiWorkModal").addEventListener("click", e => {
+  if (e.target === $("aiWorkModal")) return closeWork();
+  const b = e.target.closest("button");
+  if (!b || !aw) return;
+  const ds = b.dataset;
+  if ("awclose" in ds) return closeWork();
+  if (ds.awkind) { aw.kind = ds.awkind; return drawUpload(); }
+  if ("awpick" in ds) { aiPick = "work"; $("aiFile").value = ""; return $("aiFile").click(); }
+  if (ds.awdel !== undefined) return removeUploadFile(Number(ds.awdel));
+  if ("awgo" in ds) return aw.kind === "instant" ? instantWorksheet() : findCurriculum();
+  if ("awadd" in ds) return addCurriculum();
+});
+$("aiWorkModal").addEventListener("change", e => {
+  const ds = e.target.dataset || {};
+  if (!aw || !aw.result) return;
+  if (ds.awt) { const [g, t] = ds.awt.split("|").map(Number); aw.result.groups[g].topics[t].on = e.target.checked; }
+  if (ds.awe) aw.result.events[Number(ds.awe)].on = e.target.checked;
+});
+
+// ---------- 🌍 The official curriculum (parents only, never mixed with the school topics): the 🤖 /topics list for the kid's school
+// system and year, 📊 Benchmark (🤖 /benchmark: covered · not yet · ahead), 🌍 extra practice (its results: the 🧠 profile only) ----------
+const mapLabel = kid => /igcse|british/i.test(curriculumOf(kid) || "") || !curriculumOf(kid) ? "IGCSE" : curriculumOf(kid);
+async function loadMap(kid, sid) {
+  const s = schoolOf(kid), f = s.subjects[sid];
+  if (!f || !isParentDevice()) return;
+  const syl = s.syllabus;
+  const r = await callAi("topics", { ...kidInfo(kid), subject: f.name, today: todayYmd(), ...(syl && syl.text ? { syllabus: syl.text } : {}) }, "map|" + sid);
+  const list = (r && Array.isArray(r.topics) ? r.topics : []).map(t => ({ title: aiTxt(t.title, 80), term: aiTxt(t.term, 20), now: t.now === true })).filter(t => t.title).slice(0, 30);
+  if (!list.length) return;
+  schoolFor(kid).map[sid] = { at: new Date().toISOString(), list };
+  writeData();
+  render();
+}
+async function benchmark(kid, sid) {
+  const s = schoolOf(kid), f = s.subjects[sid], m = s.map[sid];
+  if (!f || !m || !isParentDevice()) return;
+  const r = await callAi("benchmark", { ...kidInfo(kid), subject: f.name, school_topics: topicsOf(s, sid).map(t => t.title), map: m.list.map(t => t.title) }, "bench|" + sid);
+  if (!r) return;
+  const list = x => aiArr(x, 40).map(t => aiTxt(t, 80)).filter(Boolean);
+  schoolFor(kid).bench[sid] = { at: new Date().toISOString(), covered: list(r.covered), not_yet: list(r.not_yet), ahead: list(r.ahead), note: aiTxt(r.note, 400) };
+  writeData();
+  render();
+}
+async function mapPractice(kid, sid) {
+  const f = schoolOf(kid).subjects[sid];
+  if (!f || !isParentDevice()) return;
+  if (!stMapPick.length) return toast("📌 Select at least one topic first.", 2500);
+  const id = await newWorksheet(kid, f.name, [...stMapPick], 10, "practice", "mapmake", { part: `🌍 ${mapLabel(kid)} extra`, src: "igcse" }, true);
+  if (id) { stMapPick = []; toast(`🌍 ${mapLabel(kid)} practice is ready!`, 3000); }
+}
+function mapCardHtml(kid, f) {
+  const s = schoolOf(kid), m = s.map[f.id], b = s.bench[f.id], sys = curriculumOf(kid) || "the school's", year = gradeOf(kid) || "", label = mapLabel(kid);
+  if (!m) return `<p class="hint">The official ${safe(sys)} ${safe(f.name)} topics${year ? ` for ${safe(year)}` : ""}. Kept apart from the school topics.</p>
+    <div class="btnrow"><button class="pill" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🌍 Get the official topics</button></div>`;
+  const chip = t => { const on = stMapPick.includes(t); return `<button class="ph-chip ${on ? "on" : ""}" data-stmappick="${safe(encodeURIComponent(t))}" aria-pressed="${on}">${safe(t)}${on ? ` <b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; };
+  const ul = list => list.length ? `<ul class="st-blist">${list.map(t => `<li>${safe(t)}</li>`).join("")}</ul>` : `<p class="hint">None.</p>`;
+  return `<p class="hint">${safe(sys)}${year ? ` · ${safe(year)}` : ""} · ${m.list.length} topics</p>
+    <div class="btnrow"><button class="pill" data-stbench="${safe(f.id)}" data-aiwait="bench|${safe(f.id)}">📊 Benchmark</button>
+      <button class="linkbtn" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🔄 Again</button></div>
+    ${b ? `<p class="st-bench"><b>✅ Covered ${b.covered.length}</b> · <b>⏳ Not yet ${b.not_yet.length}</b> · <b>🚀 Ahead ${b.ahead.length}</b></p>
+      ${b.note ? `<p class="hint">${safe(b.note)}</p>` : ""}
+      <details><summary>✅ Covered</summary>${ul(b.covered)}</details><details><summary>⏳ Not yet</summary>${ul(b.not_yet)}</details><details><summary>🚀 Ahead</summary>${ul(b.ahead)}</details>` : ""}
+    <h3 class="ph-group">🌍 Extra ${safe(label)} practice</h3>
+    <p class="hint">Pick topics. The results go to the 🧠 profile as “${safe(label)} extra”, never into the school topics.</p>
+    ${b && b.not_yet.length ? `<div class="btnrow"><button class="linkbtn" data-stmapnotyet="${safe(f.id)}">⏳ Pick the “Not yet” ones</button></div>` : ""}
+    <div class="ph-chips">${m.list.map(t => chip(t.title)).join("")}</div>
+    <div class="btnrow"><button class="primary ${stMapPick.length ? "" : "off"}" data-stmapmake="${safe(f.id)}" data-aiwait="mapmake" aria-disabled="${!stMapPick.length}">✏️ Make ${safe(label)} practice${stMapPick.length ? ` (${stMapPick.length})` : ""}</button></div>`;
+}
+
+// ---------- 📊 The parents' summary (📊 How are my kids doing?): per subject ⚪ · 🔴 · 🟢, the 🔴 topics first with ✏️ Practise ----------
+function topicsSummaryHtml(kid) {
+  const s = schoolOf(kid), subs = subjectList(s).filter(f => topicsOf(s, f.id).length);
+  if (!subs.length) return `<p class="sc-empty">No school topics yet. They come from ⬆️ Upload in 🎒 School.</p>`;
+  return subs.map(f => { const rows = topicRows(kid, s, f), n = k => rows.filter(t => t.st === k).length, red = rows.filter(t => t.st === "needs");
+    return `<div class="st-sum"><p><b>${safe(f.emoji)} ${safe(f.name)}</b> <small>⚪ ${n("new")} not practised · 🔴 ${n("needs")} needs work · 🟢 ${n("mastered")} mastered</small></p>
+      ${red.length ? `<ul class="learn-weak">${red.map(t => `<li><span>🔴 ${safe(t.title)} <small>${meanPct(t.info.results.slice(-3).map(x => x.pct))}%</small></span>
+        <button class="pill" data-learntp="${safe(kid)}|${safe(f.id)}|${safe(encodeURIComponent(t.title))}|school" data-aiwait="ltp|${safe(kid)}|${safe(t.title)}">✏️ Practise</button></li>`).join("")}</ul>` : ""}</div>`; }).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#scr-school button");
+  if (!b) return;
+  const ds = b.dataset;
+  if (ds.stup !== undefined) return openUpload(ds.stup);
+  if ("stws" in ds) { stWs = !stWs; schoolFresh = true; return render(); }
+  if ("stfiles" in ds) { stFiles = !stFiles; schoolFresh = true; return render(); }
+  if (ds.stfilter) { stFilter = ds.stfilter; stOpen = null; return render(); }
+  if (ds.sthist) { stOpen = stOpen === ds.sthist ? null : ds.sthist; return render(); }
+  if ("stmake" in ds) return makeFromTopics();
+  if (ds.sessmore) return moreQuestions(ds.sessmore);
+  if (ds.sessdone) return sessionDone(ds.sessdone);
+  if (ds.stmapload) return loadMap(schoolKid, ds.stmapload);
+  if (ds.stbench) return benchmark(schoolKid, ds.stbench);
+  if (ds.stmappick) { const t = decodeURIComponent(ds.stmappick); stMapPick = stMapPick.includes(t) ? stMapPick.filter(x => x !== t) : [...stMapPick, t].slice(0, 8); return render(); }
+  if (ds.stmapnotyet) { const bn = schoolOf(schoolKid).bench[ds.stmapnotyet]; stMapPick = bn ? bn.not_yet.slice(0, 8) : []; return render(); }
+  if (ds.stmapmake) return mapPractice(schoolKid, ds.stmapmake);
+});
+$("scr-school").addEventListener("change", e => {
+  const id = e.target.dataset && e.target.dataset.sttick;
+  if (!id) return;
+  stPick = e.target.checked ? [...new Set([...stPick, id])] : stPick.filter(x => x !== id);
+  render();
 });
 
 // ---------- 📰 School newsletter → 📌 school dates, 📰 This week (+ a week review per subject), 🔔 reminders ----------
@@ -12744,7 +13222,8 @@ function wsSheetNode(w, showAns) {
     h("div", { class: "ws-title" }, w.title),
     h("div", { class: "ws-sub" }, [w.subject, w.topics.join(", ")].filter(Boolean).join(" · ")),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
-    h("ol", { class: "ws-qs" }, w.questions.map(q => h("li", { class: "ws-q" },
+    h("ol", { class: "ws-qs" }, w.questions.flatMap(q => [   // (📚 each part's title above its first question)
+      ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)), h("li", { class: "ws-q" },
       h("span", { class: "ws-num" }, String(q.number)),
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
@@ -12752,7 +13231,7 @@ function wsSheetNode(w, showAns) {
           h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null,
         Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
-      h("span", { class: "ws-pts" }, ptsText(q.points))))),
+      h("span", { class: "ws-pts" }, ptsText(q.points)))])),
     h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // 🔑 The answer key: only the answers, on its own page
@@ -12794,7 +13273,18 @@ function wsViewNode(w, id, s, isDad) {
         canAct && files.length ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "✅ Check now") : null,
         isDad ? h("button", { data: { wsact: "fix" } }, done ? "✏️ Change score" : "✏️ Add score") : null),
       isDad && wsFix ? fixFormNode(w) : null),
+    sessionBarNode(w, id),
     aiLinksNode(w));
+}
+// 📚 A study session's worksheet while the session lasts: 🙋 I'm done, then ➕ More questions (the minutes left, nothing repeated)
+function sessionBarNode(w, id) {
+  const x = w.session && sessionByKey(w.session);
+  if (!x || x.ended || x.d !== todayIndex()) return null;
+  return h("div", { class: "card bd-card ai-narrow sess-bar" },
+    h("p", { class: "hint" }, `📚 ${x.subject} session · until ${clock(x.end, true)}`),
+    h("div", { class: "btnrow" }, w.answers.length || w.check || w.done
+      ? h("button", { class: "primary", data: { sessmore: w.session, aiwait: "more|" + w.session } }, "➕ More questions")
+      : h("button", { data: { sessdone: id } }, "🙋 I'm done")));
 }
 // The score big, ✓ / ✗ for each question with its note, and the overall note
 function resultNode(w) {
@@ -12908,7 +13398,11 @@ async function checkWorksheet(wsId) {
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;
   aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });   // (with its subject and part, and 💪 🎯 🦉)
-  if (now.session) saveSession(now.session, c.score / c.max_score * 100, { ws: wsId });   // 📚 its % = the study session's result
+  if (now.session) {   // 📚 the study session's result: all its worksheets together (weighted by their points), 🔁 a swapped subject too
+    const all = sessionWsIds(now.session).map(id => id === wsId ? { ...now, check: c } : aiDocs.worksheets[id]).filter(x => x && x.check);
+    const got = all.reduce((n, x) => n + x.check.score, 0), most = all.reduce((n, x) => n + x.check.max_score, 0), swap = all.map(x => x.swap).find(Boolean);
+    saveSession(now.session, most ? got / most * 100 : c.score / c.max_score * 100, { ws: wsId, ...(swap ? { swap } : {}) });
+  }
   learnAfterCheck(now, c, wsId);   // 🧠 skills, level and history (saved with the mark just below)
   const first = saveWsMark(now.kid, wsId, now, c);
   // (👨‍👩‍👧 no school points for a parent who checks it: the kid earns them)
@@ -13684,9 +14178,8 @@ document.addEventListener("click", e => {
   if (ds.encgo) return encGo(ds.encgo);
   if ("encx" in ds) { try { localStorage.setItem(ENC_HIDE, todayYmd()); } catch (e) {} return updateEncLines(); }
   if ("signout" in ds) return signOutDevice();   // 🚪 (My profile, ☰ More)
-  // 📚 Study sessions: 📚 Start session · ✏️ Make my worksheet for this session · ⭐ the helper's rating
+  // 📚 Study sessions: 📚 Start session (it makes the session's worksheet) · ⭐ the helper's rating
   if (ds.sessstart) return leaveDraft(() => startSession(ds.sessstart));
-  if (ds.sessws) return sessionWorksheet(ds.sessws);
   if (ds.sessrate) { const i = ds.sessrate.lastIndexOf("|"); return rateSession(ds.sessrate.slice(0, i), Number(ds.sessrate.slice(i + 1))); }
   if ("buclose" in ds) return closeBuddyBox();
   if ("buchange" in ds) { buChange = true; return drawBuddyBox(); }
