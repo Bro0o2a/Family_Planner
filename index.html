@@ -3563,6 +3563,7 @@ function emptyData() {
               want: {}, notes: {},   // (🎁 the prize I want, 💬 notes: see LEADERBOARD ROWS)
               study: {},   // (🎒 school points: 🤖 explanation read, 📤 answers uploaded: see SCHOOL POINTS)
               sessions: {},     // (📚 study session results: "date|actId|person" → { pct, by, at, ws?, note? }: see STUDY SCORE. Kept 180 days)
+              free: {},         // (⭐ free study: "date|wsId|kid" → { make, up, bonus, at, sub }: see FREE STUDY. Kept 180 days)
               studyWeeks: {},   // (📚 each past week's study per subject: "monday|kid" → { all, subjects }: see STUDY SCORE. Kept 8 weeks)
               prizeMsg: {},   // (⭐ the star, decided Friday 6 PM, and 🎁 the Saturday reminder: see maybeDecideStar)
               community: {}, cmReact: {}, cmDone: {},   // (🏡 Our Community: posts, reactions, ✅ done: see OUR COMMUNITY. Kept 180 days)
@@ -4018,6 +4019,10 @@ function cleanData(d) {
     each(pts.sessions, (k, v) => { const p = Math.round(Number(v.pct)); if (dayKey(k, 2) && p >= 0 && p <= 100)
       clean.points.sessions[k] = { pct: p, by: s(v.by, 40), at: s(v.at, 40), ...(s(v.ws, 40) ? { ws: s(v.ws, 40) } : {}), ...(s(v.note, 80) ? { note: s(v.note, 80) } : {}),
                                    ...(s(v.swap, 30) ? { swap: s(v.swap, 30) } : {}) }; });   // (🔁 another subject done in the session)
+    // ⭐ Free study: a worksheet outside a planned session (newer: older data has none)
+    const fp = (x, max) => Math.max(0, Math.min(max, Math.round(Number(x) || 0)));
+    each(pts.free, (k, v) => { if (dayKey(k, 2)) clean.points.free[k] = { make: fp(v.make, FREE_POINTS.make), up: fp(v.up, FREE_POINTS.up), bonus: fp(v.bonus, FREE_POINTS.top),
+      at: s(v.at, 40), sub: s(v.sub, 30), ...(v.capped === true ? { capped: true } : {}), ...(v.checked === true ? { checked: true } : {}) }; });
     const part = x => { const n = k => Math.max(0, Math.round(Number(x && x[k]) || 0));
       return { planned: n("planned"), done: n("done"), hours: Math.min(50, n("hours")), eff: Math.min(50, n("eff")), study: Math.min(100, n("study")) }; };
     each(pts.studyWeeks, (k, v) => { if (dayKey(k, 1)) clean.points.studyWeeks[k] = { all: part(v.all),
@@ -4113,6 +4118,9 @@ function defaultActType(a) {
 }
 // 🎒 School points (✅ Tasks, see SCHOOL POINTS): 🤖 an explanation read · 📤 answers uploaded
 const STUDY_POINTS = { ex: 5, up: 5 };
+// ⭐ Free study (a worksheet outside a planned study session): +2 made (given with the answers) · +15 answers · +10 (≥ 80 %) / +5 (50–79 %) after the check
+// Only the first 3 a day for each subject earn points (Dubai date, counted when the answers go up). See FREE STUDY.
+const FREE_POINTS = { make: 2, up: 15, top: 10, mid: 5 }, FREE_CAP = 3;
 // 🏡 Our Community: the kinds of post [emoji, name, what it's for, an example] and the reactions (see OUR COMMUNITY)
 const CM_TYPES = { note: ["📝", "Note", "Something about our family", "We had fun at the park!"],
                    need: ["🙏", "I need", "Ask Mum and Dad", "I need new school shoes"],
@@ -4775,7 +4783,7 @@ function bonusPoints(id, from, to) { const k = pointKinds(id, from, to, 0); retu
 function pointKinds(id, from, to, acts) {
   if (isParentId(id)) return { tasks: 0, habits: 0, fun: 0 };   // (👨‍👩‍👧 parents aren't scored: no auto points, prize or habits either)
   const on = k => feat(k) ? 1 : 0;
-  return { tasks: acts + homeworkPoints(id, from, to) + studyPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
+  return { tasks: acts + homeworkPoints(id, from, to) + studyPoints(id, from, to) + freeStudyPoints(id, from, to) + dutyPoints(id, from, to) + extraTaskPoints(id, from, to),
            habits: habitPoints(id, from, to) + diaryPoints(id, from, to) * on("diary"),
            fun: wishPoints(id, from, to) * on("wishes") + extraFunPoints(id, from, to) };   // (🧩 riddles: no points, just for fun)
 }
@@ -4797,6 +4805,7 @@ const giveAuto = () => {};
 // ---------- 🎒 SCHOOL POINTS (✅ Tasks): one full round on a topic = 20 ----------
 //   ✏️ a worksheet finished: +10 when it's first checked (its "Worksheet" mark, see homeworkPoints)
 //   🤖 an explanation read ("I got it 👍" at its end): +5, once a topic a day · 📤 answers uploaded: +5, once a worksheet
+//   (📤 only for a planned study session's worksheet: any other worksheet is ⭐ FREE STUDY, see below)
 // Only a kid earns them, on their own device (👨‍👩‍👧 parents' devices only watch).
 // data.points.study = "date|kid|kind|ref" → { at }   (kind: "ex" | "up"; ref: the topic, or the worksheet's id. Kept 180 days.)
 function studyPoints(user, from, to) {
@@ -4825,6 +4834,41 @@ function studyEarned(kid, kind, ref) {
   const r = studyRef(ref);
   return kind === "up" ? Object.keys(data.points.study).some(k => { const [, who, kd, x] = k.split("|"); return who === kid && kd === "up" && x === r; })
     : hasOwn(data.points.study, `${todayYmd()}|${kid}|${kind}|${r}`);
+}
+// ---------- ⭐ FREE STUDY: a worksheet a kid makes OUTSIDE a planned study session (no session key) ----------
+//   Any day, any way: a subject page, ⚡ instant, ➕ more questions, 🔁 practice, 🚀 challenge … It earns (instead of "📤 +5" above):
+//   +2 for making it and +15 for the answers, both when the answers go up (an unsolved worksheet earns nothing),
+//   then after its check +10 (≥ 80 %) / +5 (50–79 %) / 0. Each step once a worksheet (uploading or checking again gives nothing).
+//   Only the first 3 a day for each SUBJECT earn points (the Dubai date the answers went up). Worksheets in a planned session: as before.
+//   data.points.free["date|wsId|kid"] = { make, up, bonus, at, sub, capped?, checked? }   (kept 180 days)
+//   → the kid's ⭐ points (✅ Tasks, see pointKinds) and the 📚 Study score (+ this week's free points ÷ 2, see scoreOf).
+const isFreeStudy = w => !!w && !w.session && exists(w.kid) && !isParentId(w.kid);
+const freeKeyOf = (wsId, kid) => Object.keys(data.points.free).find(k => { const [, id, who] = k.split("|"); return id === wsId && who === kid; }) || null;
+// A kid's free study between two dates: { count (worksheets that earned points), points }
+function freeStudy(kid, from = data.points.week, to = weekEnd()) {
+  const list = Object.entries(data.points.free).filter(([k, x]) => { const [date, , who] = k.split("|"); return who === kid && !x.capped && date >= from && date < to; }).map(([, x]) => x);
+  return { count: list.length, points: list.reduce((n, x) => n + x.make + x.up + x.bonus, 0) };
+}
+const freeStudyPoints = (kid, from, to) => freeStudy(kid, from, to).points;
+const freeLine = f => `⭐ Free study: ${f.count} ${f.count === 1 ? "worksheet" : "worksheets"}, ${f.points} points`;
+// 📤 The answers went up (the kid, on their own device) → +2 +15, or the day's limit for that subject. → the points (0: none, -1: the limit)
+function giveFreeUp(w, wsId) {
+  if (!isFreeStudy(w) || !canEarnStudy(w.kid) || freeKeyOf(wsId, w.kid)) return 0;
+  if (newWeek()) keepNow();
+  const date = dubaiNow().date, sub = String(w.subject || "").slice(0, 30), at = new Date().toISOString();
+  const today = Object.entries(data.points.free).filter(([k, x]) => { const [d, , who] = k.split("|"); return d === date && who === w.kid && !x.capped && sameSubject(x.sub, sub); }).length;
+  const capped = today >= FREE_CAP;
+  data.points.free[`${date}|${wsId}|${w.kid}`] = capped ? { make: 0, up: 0, bonus: 0, at, sub, capped: true } : { make: FREE_POINTS.make, up: FREE_POINTS.up, bonus: 0, at, sub };
+  return capped ? -1 : FREE_POINTS.make + FREE_POINTS.up;
+}
+const freeCapText = sub => `🌟 Great work! You've earned today's free study points for ${sub || "this subject"} (${FREE_CAP} of ${FREE_CAP}). Try another subject, or keep practising! More worksheets are still good practice!`;
+// ✅ Its first check → +10 (≥ 80 %) / +5 (50–79 %) / 0 (any device may do the check; a kid's device only for itself). → { bonus, pct } or null
+function giveFreeBonus(w, wsId, c) {
+  const k = isFreeStudy(w) && freeKeyOf(wsId, w.kid), x = k && data.points.free[k];
+  if (!x || x.capped || x.checked || (isKidDevice() && w.kid !== kidDeviceId()) || !(c.max_score > 0)) return null;
+  const pct = Math.round(c.score / c.max_score * 100), bonus = pct >= 80 ? FREE_POINTS.top : pct >= 50 ? FREE_POINTS.mid : 0;
+  data.points.free[k] = { ...x, bonus, checked: true };
+  return { bonus, pct };
 }
 // The small "+10 ⭐" pop (where the last tap was, else the middle of the screen)
 let lastTap = null;
@@ -4950,6 +4994,7 @@ function studyWeekOf(list) {
   return { all: studyParts(list), subjects: names.map(name => ({ name, ...studyParts(list.filter(x => x.subject === name)) })) };
 }
 // 📚 STUDY sub-score (0–100) = ⏱️ Hours (0–50) + 🎯 Efficiency (0–50), all subjects together (see STUDY SCORE above).
+// (the planned sessions only: the score's 📚 Study adds ⭐ free study, see scoreOf)
 function studyScore(id) { return studyParts(studySessions(id)).study; }
 
 // ---------- 📚 Study sessions: 📚 Start session (📖 sole) · ⭐ the helper's rating (🤝 with assistance) ----------
@@ -5035,13 +5080,17 @@ function activityScore(id) { return tallyPct(typeTally(id, "activity")); }
 // 🌱 HABIT sub-score (0–100). FOR NOW: % of this week's planned habit items (so far) that are ticked. (These rules will change later.)
 function habitScore(id) { return tallyPct(typeTally(id, "habit")); }
 // Everything for one person: the 3 sub-scores, which types they have items of, the OVERALL and their MAX
+// 📚 Study = min(100, the planned sessions' score + ⭐ the free-study bonus), the bonus = this week's free-study points ÷ 2.
+// No planned sessions but free study: Study = min(100, the bonus), and its weight counts in the max.
 function scoreOf(id) {
   const sessions = studySessions(id), sp = studyParts(sessions);   // (📚 = ⏱️ + 🎯, shown as two parts)
-  const subs = { study: studyScore(id), activity: activityScore(id), habit: habitScore(id) };
-  const has = Object.fromEntries(Object.keys(SCORE_WEIGHTS).map(k => [k, k === "study" ? sessions.length > 0 : typeTally(id, k).planned > 0]));
+  const fs = freeStudy(id), free = { ...fs, bonus: Math.round(fs.points / 2) };
+  const study = Math.min(100, (sessions.length ? sp.study : 0) + free.bonus);
+  const subs = { study, activity: activityScore(id), habit: habitScore(id) };
+  const has = Object.fromEntries(Object.keys(SCORE_WEIGHTS).map(k => [k, k === "study" ? sessions.length > 0 || fs.points > 0 : typeTally(id, k).planned > 0]));
   const overall = Math.round(Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + SCORE_WEIGHTS[k] * subs[k], 0));
   const max = Math.round(100 * Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + (has[k] ? SCORE_WEIGHTS[k] : 0), 0));
-  return { ...subs, has, overall, max, sp };
+  return { ...subs, has, overall, max, sp: sessions.length ? sp : null, free };
 }
 // "37 / 90"
 const scoreText = s => `${s.overall} / ${s.max}`;
@@ -5049,7 +5098,8 @@ const scoreText = s => `${s.overall} / ${s.max}`;
 function subBarsHtml(s) {
   return `<div class="score-subs">${Object.keys(SCORE_WEIGHTS).map(k => { const [, e, w] = actTypeInfo(k), on = s.has[k];
     return `<div class="score-sub ${on ? "" : "none"}"><span class="score-sub-l">${e} ${w}</span><span class="score-sub-bar"><i style="width:${on ? s[k] : 0}%"></i></span><b>${on ? s[k] + "%" : "–"}</b></div>${
-      k === "study" && on && s.sp ? `<div class="score-parts">📚 Study ${s.study} = ⏱️ Hours ${s.sp.hours}/50 + 🎯 Efficiency ${s.sp.eff}/50</div>` : ""}`; }).join("")}</div>`;
+      k === "study" && on && (s.sp || (s.free && s.free.bonus)) ? `<div class="score-parts">📚 Study ${s.study} = ${[s.sp ? `⏱️ Hours ${s.sp.hours}/50 + 🎯 Efficiency ${s.sp.eff}/50` : "",
+        s.free && s.free.bonus ? `⭐ Free study +${s.free.bonus}` : ""].filter(Boolean).join(" + ")}${s.sp && s.sp.study + (s.free ? s.free.bonus : 0) > 100 ? " (100 at most)" : ""}</div>` : ""}`; }).join("")}</div>`;
 }
 // The overall, big ("⭐ Score 37 / 90"), with the 3 bars under it
 const scoreBlockHtml = s => `<div class="score-total"><small>⭐ Score</small><b>${s.overall}</b><small>/ ${s.max}</small></div>${subBarsHtml(s)}`;
@@ -5125,6 +5175,7 @@ function newWeek() {
   Object.keys(data.points.wishes).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.wishes[key]; });   // 💌 too
   Object.keys(data.points.study).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.study[key]; });   // 🎒 too
   Object.keys(data.points.sessions).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.sessions[key]; });   // 📚 too
+  Object.keys(data.points.free).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.free[key]; });   // ⭐ free study too
   const eightW = new Date(); eightW.setDate(eightW.getDate() - 56);   // 📚 the study history: 8 weeks
   Object.keys(data.points.studyWeeks).forEach(key => { if (key.slice(0, 10) < ymd(eightW)) delete data.points.studyWeeks[key]; });
   Object.entries(data.points.community).forEach(([id, p]) => { if ((p.at || "").slice(0, 10) < ymd(half)) {   // 🏡 too (with its reactions and ✅)
@@ -5984,7 +6035,8 @@ function reportCardsHtml(kid, forPdf) {
   const big = (n, label) => `<div class="rp-num"><b>${n}</b><small>${label}</small></div>`;
   const sc = rpRange === "week" ? scoreOf(kid) : null;   // (⭐ the score is for this week only)
   return `${sc ? `<div class="card rp-card"><h2>⭐ Score this week</h2>${scoreBlockHtml(sc)}</div>` : ""}
-    <div class="card rp-card"><h2>📚 Study per subject</h2>${studyTableHtml(kid, null)}</div>
+    <div class="card rp-card"><h2>📚 Study per subject</h2>${sc ? `<p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · ⭐ Free study: +${sc.free.bonus}${
+      sc.free.count ? ` <small>(${sc.free.count} ${sc.free.count === 1 ? "worksheet" : "worksheets"}, ${sc.free.points} points)</small>` : ""}</p>` : ""}${studyTableHtml(kid, null)}</div>
     <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(kid)}</div>
     <div class="card rp-card"><h2>🧠 Learning profile</h2>${learnReportHtml(kid)}</div><div class="card rp-card"><h2>🎒 School</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>
       ${x.subjects.length ? `<ul class="rp-subs">${x.subjects.map(f => `<li>${forPdf ? `<div class="rp-sub">` : `<button class="rp-sub" data-rpsub="${safe(f.id)}">`}
@@ -6358,7 +6410,8 @@ function drawMe() {
     <div class="card me-card"><h2>❤️ Things I love</h2>${loves ? `<ul class="me-list">${loves}</ul>` : `<p class="sc-empty">${canEdit ? "Fill them in with ⚙️ Settings." : "Nothing yet."}</p>`}</div>
     ${kid ? `<div class="card me-card"><h2>📅 This week</h2>${scoreBlockHtml(scoreOf(u.id))}<ul class="me-list">
       ${st.pct != null ? `<li><span>✅ Tasks done</span><b>${st.pct}% <small>(${st.done} of ${st.planned})</small></b></li>` : ""}
-      <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li></ul>
+      <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li>
+      ${(f => f.count ? `<li><span>⭐ Free study</span><b>${f.count} ${f.count === 1 ? "worksheet" : "worksheets"}, ${f.points} points</b></li>` : "")(freeStudy(u.id))}</ul>
       ${feat("diary") && canSeeMood(u.id) ? `<div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>` : ""}</div>` : ""}
     ${famSettings}
     <div class="btnrow me-btns">${canEdit && !meEdit ? `<button class="pill primary" data-meedit>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</button>` : ""}</div>`;   // (🚪 Sign out: top right of every screen)
@@ -7116,7 +7169,7 @@ let kidPanel = null;   // the part opened from the bottom bar on the home: "habi
 function drawKidHome(u) {
   const p = lifetimePoints(u.id), L = levelOf(p), pct = levelPct(p), from = data.points.week, to = weekEnd();
   const today = todayItems(u.id), doneToday = today.filter(x => isDone(todayYmd(), x.id, u.id)).length;
-  const study = homeworkPoints(u.id, from, to) + studyPoints(u.id, from, to);
+  const free = freeStudy(u.id), study = homeworkPoints(u.id, from, to) + studyPoints(u.id, from, to) + free.points;   // (⭐ free study in 📚 Study too)
   $("homeNote").hidden = true;
   $("homeBig").hidden = false;
   $("homeBig").className = "kid-big";
@@ -7128,7 +7181,7 @@ function drawKidHome(u) {
   $("homeHabits").innerHTML = (u.buddy || !feat("buddy") ? "" : buddyCardHtml(me))
     + `<div class="card kid-week" style="--c:${colorsOf(u).color}"><h2>📊 My week</h2><p>
       <span>⭐ Score ${scoreText(scoreOf(u.id))}</span> · <span>✅ Tasks ${doneToday} of ${today.length} today</span> · <span>📚 Study ${study}</span>
-${feat("buddy") ? ` · <span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p></div>
+${feat("buddy") ? ` · <span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p>${free.count ? `<p class="kid-free">${freeLine(free)}</p>` : ""}</div>
     <nav class="kid-bar" aria-label="More">${bar.map(([attr, e, label]) => `<button ${attr} class="${(attr.includes("habits") && kidPanel === "habits") || (attr === "data-homemore" && homeMore) ? "on" : ""}"><span class="e">${e}</span><small>${label}</small></button>`).join("")}</nav>
     ${kidPanel === "habits" ? habitsCardHtml(me) + (feat("chores") ? choresTodayHtml(me) : "") || `<div class="card"><p class="sc-empty">No habits today.</p></div>` : ""}
     ${homeMore ? `<div class="menu kid-more">${moreTilesHtml()}</div>` : ""}`;
@@ -10110,8 +10163,8 @@ const LEVEL_WORDS = { 1: "needs help", 2: "doing OK", 3: "strong" };
 const testOf = x => x && x.test && aiDocs.worksheets[x.test] ? { id: x.test, w: aiDocs.worksheets[x.test] } : null;
 function testStatusText(x) {
   const t = testOf(x);
-  if (!t) return "A short 10-question test is made when you tap 💾 Save. Print it from 📝 Worksheets.";
-  if (!t.w.check) return "🧪 Test pending: print it from 📝 Worksheets, then ⬆ upload the answers.";
+  if (!t) return "A short 10-question test is made when you tap 💾 Save. Get its 📄 PDF from 📝 Worksheets.";
+  if (!t.w.check) return "🧪 Test pending: get its 📄 PDF from 📝 Worksheets, then ⬆ upload the answers.";
   return `✅ Checked: ${num(t.w.check.score)}/${num(t.w.check.max_score)} → Level ${"⭐".repeat(x.level || 1)}`;
 }
 // 🏫 The kid's school basics in one card (👤 My profile, and look-only in School): school, curriculum, year, syllabus, subjects + levels.
@@ -10679,8 +10732,7 @@ function wsRowNode(s, w) {
     note ? h("p", { class: "sc-wsnote" }, note.length > 140 ? note.slice(0, 137) + "…" : note) : null,
     h("div", { class: "ai-btns sc-wsbtns" },
       h("button", { data: { aiopen: "worksheet|" + w.id } }, "📂 Open"),
-      h("button", { data: { wsrow: "print|" + w.id } }, "🖨️ Print"),
-      h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"),
+      h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"),   // (📄 worksheets are PDF only: never with the answers)
       canAct ? h("button", { data: { wsrow: "upload|" + w.id } }, "📸 Upload my answers") : null,
       canAct && files.length ? h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, done ? "🤖 Check again" : "✅ Check now") : null,
       h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Show answers" : "🔒 Show answers")));
@@ -10688,8 +10740,7 @@ function wsRowNode(s, w) {
 function wsRowAction(v) {
   const [act, id] = v.split("|"), w = aiDocs.worksheets[id];
   if (!w) return;
-  if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
-  if (act === "pdf") return worksheetPdf(w);                     // (never with the answers either)
+  if (act === "pdf") return worksheetPdf(w);                     // (never with the answers)
   if (act === "answers" && !answersOpen(w)) return answersLocked(id);   // 🔒 a kid before the check
   if (act === "answers") { openAiDoc("worksheet", id); wsAnswers = true; return render(); }
   if (act === "upload") {
@@ -12547,7 +12598,7 @@ async function makeLevelCheck(kid, workId) {
   if (screen === "school") render();
   const ok = await newWorksheet(kid, w.subject, w.topics.length ? w.topics : [w.title], LEVEL_COUNT, "level_check", "level", { work: workId, part: w.title });
   schoolLevel = ok ? null : { ...schoolLevel, state: "failed" };
-  if (ok) toast("🧭 The level check is ready! 🖨️ Print it, then ⬆ upload the answers.", 4500);
+  if (ok) toast("🧭 The level check is ready! Get its 📄 PDF, then ⬆ upload the answers.", 4500);
   else if (screen === "school") render();
 }
 // 🔁 Make practice for this: one 🎯 weak point of the subject's last check
@@ -13330,7 +13381,7 @@ function aiLinksNode(d) {
       pr.map(x => link("https://www.google.com/search?q=" + encodeURIComponent(x.query + " printable worksheet pdf"), "🖨️ " + x.label, "")))] : null);
 }
 
-// ---------- 🖨️ Printing a worksheet / answer key / explanation: A4 portrait, only that sheet ----------
+// ---------- 🖨️ Printing an explanation / a brief: A4 portrait, only that sheet (📄 worksheets and answer keys: PDF only) ----------
 // (The app's print style already hides everything but #printArea. A4 portrait is added just for this print.)
 // ---------- 📄 PDF: a real A4 PDF made on the phone (jsPDF + html2canvas, loaded the first time it's needed; offline after that) ----------
 // The sheet is drawn off-screen, each part (the title, each question, the total) becomes a picture, and the pictures go on A4 pages
@@ -13389,7 +13440,7 @@ async function makePdf(node, fileName, opts = {}) {
     $("toast").hidden = true;
     if (opts.ask) pdfReadyBar(file); else await sharePdf(file);
   } catch (e) {
-    toast("😕 Couldn't make the PDF. Try again, or use 🖨️ Print.", 5000);
+    toast("😕 Couldn't make the PDF. Please try again (the first time it needs the internet).", 5000);
   } finally {
     stage.remove();
     pdfBusy = false;
@@ -13426,6 +13477,7 @@ function pdfReadyBar(file) {
 }
 // 📄 A worksheet (never the answers) and 📋 the parents' brief
 const worksheetPdf = w => makePdf(wsSheetNode(w, false), pdfName(kidNameOf(w.kid), w.subject, w.title));
+const answerKeyPdf = w => makePdf(wsKeyNode(w), pdfName(kidNameOf(w.kid), w.subject, `${w.title} answer key`));   // 🔑 (only the answers)
 const briefPdf = kid => { const b = schoolOf(kid).brief; if (b) makePdf(briefNode(kid, b), pdfName(kidNameOf(kid), "Brief for parents", b.date)); };
 
 function printAi(node) {
@@ -13521,7 +13573,7 @@ function wsSheetNode(w, showAns) {
 }
 // 🔑 May the answers be seen? A parent's device: always. A kid (a kid's device, or a kid using the app): once the worksheet has a
 // check result, even if the answers file isn't in their Files any more (a parent typed the score, or the file was deleted).
-// (Everywhere: 🔑 Show answers, 🖨️ Print answer key, the rows in every list.)
+// (Everywhere: 🔑 Show answers, 📄 Answer key PDF, the rows in every list.)
 function answersOpen(w) {
   return isParentPhone() || !!w.check;
 }
@@ -13561,9 +13613,9 @@ function wsViewNode(w, id, s, isDad) {
     h("div", { class: "ai-toolbar" },
       // (🔒 a kid before the check: the button is there, a tap says why)
       h("button", { class: show ? "primary" : null, "aria-pressed": String(show), data: { wsact: "answers" } }, show ? "🔑 Hide answers" : open ? "🔑 Show answers" : "🔒 Show answers"),
-      h("button", { data: { wsact: "print" } }, "🖨️ Print worksheet"),
-      h("button", { data: { wsact: "pdf" } }, "📄 PDF"),
-      h("button", { data: { wsact: "key" } }, open ? "🖨️ Print answer key" : "🔒 Print answer key"),
+      // (📄 worksheets are PDF only, no printing from the app)
+      h("button", { data: { wsact: "pdf" } }, "📄 Download PDF"),
+      h("button", { data: { wsact: "key" } }, open ? "📄 Answer key PDF" : "🔒 Answer key PDF"),
       h("button", { data: { wsact: "again" } }, "🔁 Make another"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
     wsSheetNode(w, show),
@@ -13627,9 +13679,8 @@ function wsAction(act) {
   if (!w) return;
   if ((act === "answers" || act === "key") && !answersOpen(w)) { wsAnswers = false; return answersLocked(id); }   // 🔒 a kid before the check
   if (act === "answers") { wsAnswers = !wsAnswers; return render(); }
-  if (act === "print") return printAi(wsSheetNode(w, false));   // never with the answers
   if (act === "pdf") return worksheetPdf(w);                     // (never with the answers, even when 🔑 is open)
-  if (act === "key") return printAi(wsKeyNode(w));
+  if (act === "key") return answerKeyPdf(w);                     // (🔒 a kid: only after the check, see above)
   if (act === "again") return openWsOpts(w.kid, w.subject, w.topics, w.count, w.work, w.part);
   if (act === "upload") {
     if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
@@ -13667,6 +13718,15 @@ async function addAnswerFiles(wsId, files) {
   writeData();
   const now = aiDocs.worksheets[wsId] || w;
   aiSave("worksheets", wsId, { ...now, answers: [...now.answers, ...ids].slice(0, 20), status: now.check ? "Checked ✓" : "Answers uploaded" });
+  // ⭐ Free study (outside a planned session): +2 +15 instead of 📤 +5 (once a worksheet; the first 3 a day for each subject)
+  if (isFreeStudy(now)) {
+    const free = giveFreeUp(now, wsId);
+    if (free) writeData();
+    render();
+    if (free > 0) { pointPop(free, colorsOf(userById(w.kid)).color); return toast(`⭐ +${free} for your answers! Now tap ✅ Check now.`, 3500, colorsOf(userById(w.kid)).color); }
+    if (free < 0) return toast(freeCapText(now.subject), 6000);
+    return toast("📎 The answers are uploaded! Now tap ✅ Check now.", 3500);
+  }
   const got = giveStudy(w.kid, "up", wsId);   // 📤 +5 ⭐ (once a worksheet)
   render();
   toast(`📎 The answers are uploaded!${got ? ` +${STUDY_POINTS.up} ⭐` : ""} Now tap ✅ Check now.`, 3500);
@@ -13738,7 +13798,9 @@ function saveWsMark(kid, wsId, w, c) {
   const s = schoolFor(kid), key = "w" + wsId, old = s.grades[key];
   s.grades[key] = { subject: w.subject, date: old ? old.date : todayYmd(), type: "worksheet", score: c.score, max: c.max_score, worksheet: wsId };
   keepWsScore(s, wsId, w, c);   // 📝 (the score stays in 📝 All my worksheets, even if the worksheet's document goes)
+  const free = giveFreeBonus(w, wsId, c);   // ⭐ free study: +10 / +5 after its first check
   writeData();
+  if (free && free.bonus) setTimeout(() => toast(`⭐ +${free.bonus} bonus for ${free.pct}%!`, 3200, colorsOf(userById(kid)).color), 2600);   // (after the check's own message)
   return !old;
 }
 function saveWsFix(wsId) {
@@ -14356,6 +14418,7 @@ async function resetStudyData(kid) {
   }
   // 3) Their 📚 study session results ("date|actId|kid")
   Object.keys(data.points.sessions).forEach(key => { if (key.split("|").pop() === kid) delete data.points.sessions[key]; });
+  Object.keys(data.points.free).forEach(key => { if (key.split("|").pop() === kid) delete data.points.free[key]; });   // ⭐ their free study entries too
   keepNow();
   toast(`✓ ${name}'s study data was reset.`, 3500);
   addNews([newsItem("school", `🗑️ ${userById(me).name} reset ${name}'s study data`, "🗑️ reset study data", me)]);
@@ -15119,10 +15182,13 @@ function keepEarlyChanges(remote, base, local) {
     });
   });
   // 📚 Study session results made here in those first seconds win too (🧒 a kid's device: only their own)
-  const bs = b.points.sessions || {}, ls = l.points.sessions || {}, rs = r.points.sessions = r.points.sessions || {};
-  new Set([...Object.keys(bs), ...Object.keys(ls)]).forEach(key => {
-    if (sameText(bs[key]) === sameText(ls[key]) || (kid && key.split("|").pop() !== kid)) return;
-    if (hasOwn(ls, key)) rs[key] = ls[key]; else delete rs[key];
+  // (⭐ free study points too)
+  ["sessions", "free"].forEach(part => {
+    const bs = b.points[part] || {}, ls = l.points[part] || {}, rs = r.points[part] = r.points[part] || {};
+    new Set([...Object.keys(bs), ...Object.keys(ls)]).forEach(key => {
+      if (sameText(bs[key]) === sameText(ls[key]) || (kid && key.split("|").pop() !== kid)) return;
+      if (hasOwn(ls, key)) rs[key] = ls[key]; else delete rs[key];
+    });
   });
   // 🎒 School changes made here in those first seconds win (🧒 a kid's device: only that kid's own school data)
   if (sameText(b.habits.school) !== sameText(l.habits.school)) {
@@ -15220,7 +15286,7 @@ function cloudUpdateFields(name, now) {
   // Ticks, 👨‍👩‍👧 auto points, 🎁 prizes, 🧩 riddles and answers: one field per item (so two phones don't overwrite each other)
   const BY_ITEM = ["marks", "auto", "prizes", "riddles", "riddleAns", "diary", "lifetime", "levels", "duties", "wishes",
                    "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes", "study", "prizeMsg", "reach", "when", "hall", "community", "cmReact", "cmDone",
-                   "sessions", "studyWeeks"];   // (📚 study session results, each past week's study)
+                   "sessions", "studyWeeks", "free"];   // (📚 study session results, each past week's study, ⭐ free study)
   const kid = isKidDevice() ? kidDeviceId() : null;   // (🧒 a kid's device: only their own ticks, 📚 sessions and their own school data go up)
   BY_ITEM.filter(k => now[k] && typeof now[k] === "object").forEach(k => {
     let was = before[k] && typeof before[k] === "object" ? before[k] : {};
@@ -15235,7 +15301,7 @@ function cloudUpdateFields(name, now) {
       was = w;
     }
     new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
-      if (kid && ["marks", "sessions", "studyWeeks"].includes(k) && key.split("|").pop() !== kid) return;
+      if (kid && ["marks", "sessions", "studyWeeks", "free"].includes(k) && key.split("|").pop() !== kid) return;
       if (!hasOwn(is, key)) changes.push(new fb.FieldPath(k, cloudKey[key] || key), fb.deleteField());   // unticked
       else if (sameText(was[key]) !== sameText(is[key])) changes.push(new fb.FieldPath(k, key), is[key]);
     });
