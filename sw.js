@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v128";
+const CACHE = "family-planner-v133";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
