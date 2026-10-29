@@ -1,0 +1,2471 @@
+  :root {
+    --bg: #fff6e5;          /* soft cream background */
+    --card: #ffffff;
+    --text: #2e2a5a;        /* dark purple-blue text */
+    --muted: #7a6f9b;
+    --line: #efe3cc;        /* soft borders */
+    --accent: #5b5bd6;
+    --accent-dark: #4646c0;
+    --accent-soft: #eeeefc;
+    --fixed: #8b93a7;
+    --free: rgba(16, 185, 129, 0.10);
+    --warn-bg: #fff3dc;
+    --warn: #a14d06;
+    --ok-bg: #e9fbef;
+    --ok: #15803d;
+    --danger: #dc2626;
+    --shadow: 0 6px 18px rgba(80, 60, 20, .08);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    /* Keeps content away from the phone's notch and rounded corners when opened as an app */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  [hidden] { display: none !important; }
+
+  /* ---- One screen at a time ---- */
+  .screen { max-width: 1440px; margin: 0 auto; padding: 18px 20px 48px; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+  .pill { font-family: inherit; font-size: 17px; font-weight: 700; border-radius: 999px; padding: 8px 18px;
+          background: #fff; border: 2px solid var(--line); color: var(--text); min-height: 48px; cursor: pointer; }
+  .pill:hover { background: #fffaf0; }
+  /* "📅 My calendar": same place on every page (next to Home), in the app's purple so kids can spot it */
+  .bar .cal-btn { margin-right: auto; }
+  .bar > [data-switch] { margin-left: auto; }   /* Switch user stays on the right */
+  .cal-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .cal-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .cal-btn.here, .cal-btn.here:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); cursor: default; }
+
+  /* ⭐ Good habits card: big rows to tap, small round ticks in the kid's color */
+  .hb-card { margin-top: 18px; border-top: 8px solid var(--c); }
+  .hb-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+  .hb-progress { font-size: 22px; font-weight: 800; color: var(--ink); }
+  .hb-nav { display: flex; align-items: center; gap: 10px; margin: 8px 0 14px; font-size: 18px; flex-wrap: wrap; }
+  .hb-nav button { width: 44px; min-height: 44px; padding: 0; border-radius: 50%; font-size: 18px; }
+  .hb-nav button:disabled { opacity: .35; cursor: default; }
+  .hb-look { color: var(--muted); font-weight: 700; font-size: 16px; }
+  .hb-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr)); gap: 8px; }
+  .hb-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 58px; padding: 8px 12px; text-align: left;
+            background: #fffdf8; border: 2px solid var(--line); border-radius: 18px; font-size: 17px; font-weight: 700; color: var(--text); }
+  button.hb-row:hover { background: var(--soft); }
+  button.hb-row:disabled { cursor: default; }
+  .hb-row.done { background: var(--soft); border-color: var(--c); }
+  .hb-row.multi { flex-wrap: wrap; }
+  .hb-emoji { font-size: 26px; line-height: 1; flex: none; }
+  .hb-name { flex: 1; min-width: 0; }
+  .k-check.hb-check { width: 32px; height: 32px; font-size: 16px; }
+  .k-check.hb-check .e { font-size: 15px; }
+  .hb-row.multi .hb-name { min-width: 120px; }
+  .hb-parts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hb-part { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .hb-part small { font-size: 12px; font-weight: 700; color: var(--muted); }
+  /* 👨‍👩‍👧 A parent's habits: chips in groups (one tap = one tick) */
+  .ph-group { margin: 12px 0 6px; font-size: 16px; font-weight: 800; color: var(--muted); }
+  .ph-group:first-of-type { margin-top: 0; }
+  .ph-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ph-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; max-width: 100%; padding: 6px 12px; border-radius: 999px;
+             border: 2px solid var(--line); background: #fffdf8; color: var(--text); font-size: 15px; font-weight: 700; text-align: left; line-height: 1.2; }
+  .ph-chip span:not(.e) { min-width: 0; overflow-wrap: anywhere; }
+  .ph-chip .e { font-size: 20px; line-height: 1; flex: none; }
+  .ph-chip small { flex: none; color: var(--muted); font-size: 13px; font-weight: 800; }
+  .ph-chip:hover { background: var(--soft); }
+  .ph-chip:disabled { cursor: default; }
+  .ph-chip.on { border-color: var(--c); background: var(--soft); color: var(--ink); }
+  .ph-tick { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--c); color: #fff; font-size: 13px; }
+  .ph-editbtn { margin-left: auto; min-height: 40px; font-size: 15px; }
+  .ph-edit { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0; border-bottom: 2px solid var(--line); }
+  .ph-edit .ph-e { flex: 0 0 56px; width: 56px; text-align: center; }
+  .ph-edit .ph-n { flex: 1 1 180px; min-width: 0; }
+  .ph-edit select { flex: 1 1 120px; min-width: 0; width: auto; }
+  .ph-edit select[id^="php-"] { flex: 0 0 74px; }
+  .ph-edit .checkline { margin: 0; }
+  /* 🎁 The weekly prize (parents, Sunday evening) and My prizes */
+  .pz-card { margin-top: 18px; background: #fff8e6; border: 3px solid #f6c453; }
+  .pz-big { margin: 6px 0; font-size: 20px; font-weight: 800; overflow-wrap: anywhere; }
+  .pz-big small { color: var(--muted); font-size: 15px; }
+  .pz-card input { width: 100%; margin: 4px 0 8px; }
+  .pz-list { margin-top: 18px; }
+  .pz-list li { flex-wrap: wrap; gap: 4px 10px; }
+  .pz-list .what { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .pz-list small { color: var(--muted); }
+  /* 📔 My day: the big home button, 6 faces, the 14-day strip */
+  .big-btn.diary { background: linear-gradient(135deg, #f472b6, #db2777); color: #fff; }
+  .big-btn.diary:hover { background: linear-gradient(135deg, #ec4899, #be185d); }
+  .home-big .big-btn:last-child:nth-child(odd) { grid-column: 1 / -1; min-height: 110px; }
+  .dy-who { margin: 0 0 14px; }
+  .dy-strip-card { margin-bottom: 16px; }
+  .dy-strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scroll-snap-type: x proximity; }
+  .dy-day { flex: 0 0 48px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 0; padding: 6px 2px; border-radius: 14px;
+            border: 2px solid var(--line); background: #fffdf8; scroll-snap-align: end; }
+  .dy-day .e { font-size: 22px; line-height: 1.1; }
+  .dy-day small { font-size: 12px; font-weight: 700; color: var(--muted); }
+  .dy-day.on { border-color: var(--accent); background: var(--accent-soft); }
+  .dy-moods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 6px 0 12px; }
+  .dy-mood { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; min-height: 84px; border-radius: 20px;
+             border: 3px solid var(--line); background: #fffdf8; }
+  .dy-mood .e { font-size: 38px; line-height: 1.1; }
+  .dy-mood small { font-size: 15px; font-weight: 800; }
+  .dy-mood.on { border-color: var(--accent); background: var(--accent-soft); }
+  .dy-form input[type="text"] { width: 100%; margin-bottom: 8px; }
+  .dy-read p { margin: 8px 0; overflow-wrap: anywhere; }
+  .dy-kids { margin-top: 18px; }
+  .dy-kids-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .dy-kid { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 72px; padding: 8px 10px; border-radius: 18px; }
+  .dy-kid .e { font-size: 32px; line-height: 1.1; }
+  .dy-kid small { font-size: 14px; font-weight: 800; max-width: 90px; overflow-wrap: anywhere; }
+  /* ✅ Duties on time (parents, evening) and the kid's note */
+  .du-card { margin-top: 18px; background: #f0fdf4; border: 3px solid #86efac; }
+  .du-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 0; border-bottom: 2px solid var(--line); }
+  .du-row:last-child { border-bottom: none; }
+  .du-kid { flex: 1 1 100px; min-width: 0; font-size: 18px; font-weight: 800; color: var(--ink); overflow-wrap: anywhere; }
+  .du-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .du-btns button { min-height: 44px; padding: 4px 10px; font-size: 15px; }
+  .du-btns small { color: var(--muted); font-weight: 800; }
+  .du-done { font-size: 16px; font-weight: 800; }
+  .du-done small { color: var(--muted); font-weight: 600; }
+  .du-note { margin-top: 18px; background: #f0fdf4; font-size: 18px; }
+  .du-note p { margin: 6px 0 0; }
+  /* 💌 Wishes */
+  .wi-card { margin-top: 18px; background: #fff1f7; border-top: 8px solid var(--c); }
+  .wi-card p { margin: 6px 0; font-size: 17px; overflow-wrap: anywhere; }
+  .wi-card input { width: 100%; margin-bottom: 8px; }
+  .wi-list { margin-top: 18px; }
+  .wi-list li { flex-wrap: wrap; gap: 6px 10px; }
+  .wi-list .what { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+  .wi-list small { color: var(--muted); }
+  .wi-list button { min-height: 42px; }
+  .wi-done { font-weight: 800; color: #be185d; }
+  /* 🌱 Buddy: a round ring with "Lv 4" in the middle */
+  .bu-card { margin-top: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; border-top: 8px solid var(--c); }
+  .bu-card h2, .bu-card > .hint { flex-basis: 100%; margin: 0; }
+  .bu-ring { position: relative; display: inline-grid; place-items: center; flex: none; padding: 0; border: none; background: none; }
+  .bu-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .bu-trk { fill: none; stroke: #f3ead9; stroke-width: 9; }
+  .bu-bar { fill: none; stroke: var(--c, #e8a020); stroke-width: 9; stroke-linecap: round; }
+  .bu-in { position: relative; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .bu-big { width: 120px; height: 120px; }
+  .bu-big .e { font-size: 44px; }
+  .bu-big b { margin-top: 4px; font-size: 16px; font-weight: 800; color: var(--ink); }
+  .bu-text { flex: 1 1 160px; min-width: 0; }
+  .bu-text b { display: block; font-size: 22px; font-weight: 800; }
+  .bu-text small { display: block; color: var(--muted); font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+  .bu-pick { flex-basis: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .bu-pick button { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 92px; padding: 8px; border-radius: 18px;
+                    font-size: 14px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .bu-pick .e { font-size: 34px; }
+  /* ✨ The Spark pick cards: big first stage, the 4 stages small, "grows into …" */
+  .sp-card { min-height: 150px; gap: 3px; border: 3px solid var(--line); background: #fffdf8; }
+  .sp-card .sp-first { font-size: 46px; line-height: 1.1; }
+  .sp-card b { font-size: 16px; }
+  .sp-stages { font-size: 15px; letter-spacing: -1px; white-space: normal; overflow-wrap: anywhere; }
+  .sp-card small { color: var(--muted); font-size: 12px; font-weight: 800; line-height: 1.2; }
+  /* The small buddy on the leaderboard: the ring and "Lv 2" side by side, on the name's line */
+  .bu-minirow { display: inline-flex; align-items: center; gap: 4px; flex: none; min-height: 0; padding: 0; border: none; background: none; box-shadow: none; vertical-align: middle; }
+  button.bu-minirow { cursor: pointer; }
+  button.bu-minirow:hover { background: none; }
+  .bu-mini { width: 34px; height: 34px; }   /* (the ring takes the row's colour) */
+  .bu-mini .e { font-size: 17px; }
+  .bu-mini .bu-trk, .bu-mini .bu-bar { stroke-width: 11; }
+  .bu-lv { padding: 0 6px; border-radius: 999px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 800; line-height: 18px; white-space: nowrap;
+           box-shadow: 0 0 0 1px var(--line); }
+  /* 🌱 The buddy badge in the top bar (in the bar's row, so it never covers a button: on a small phone the row wraps) */
+  .bar-end { display: flex; align-items: center; gap: 8px; }
+  .bu-badge { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; flex: none;
+              width: 48px; min-height: 48px; padding: 0; border: none; background: none; box-shadow: none; cursor: pointer; }
+  .bu-badge:hover { background: none; }
+  .bu-tiny { width: 38px; height: 38px; }
+  .bu-tiny .e { font-size: 19px; }
+  .bu-tiny .bu-trk, .bu-tiny .bu-bar { stroke-width: 11; }
+  .bu-badge .bu-bar { transition: stroke-dasharray .8s ease-out; }
+  .bu-badge-lv { font-size: 10px; font-weight: 800; line-height: 1; color: var(--ink); white-space: nowrap; }
+  .bu-badge.bu-grow .bu-tiny { animation: bu-bounce .6s ease-out; }
+  @keyframes bu-bounce { 0% { transform: scale(1); } 35% { transform: scale(1.22); } 65% { transform: scale(.94); } 100% { transform: scale(1); } }
+  .bu-badge.bu-sparkle { position: relative; }
+  .bu-badge.bu-sparkle .bu-tiny { animation: bu-glow 1s ease-in-out 3; border-radius: 50%; }
+  .bu-badge.bu-sparkle::before, .bu-badge.bu-sparkle::after { content: "✨"; position: absolute; font-size: 14px; pointer-events: none; animation: bu-twinkle 1s ease-in-out 3; }
+  .bu-badge.bu-sparkle::before { top: -4px; left: -4px; }
+  .bu-badge.bu-sparkle::after { bottom: 10px; right: -4px; animation-delay: .5s; }
+  @keyframes bu-glow { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 12px 4px var(--c); } }
+  @keyframes bu-twinkle { 0%, 100% { opacity: 0; transform: scale(.5); } 50% { opacity: 1; transform: scale(1.2); } }
+  @media (prefers-reduced-motion: reduce) { .bu-badge .bu-bar { transition: none; } .bu-badge.bu-grow .bu-tiny, .bu-badge.bu-sparkle .bu-tiny { animation: none; } }
+  @media print { .bu-badge { display: none !important; } }
+  /* 🌱 The buddy page */
+  .bu-box { max-width: 480px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; }
+  #buddyBody { padding: 0 20px; }
+  /* ✨ The encouraging line under the top bar */
+  .enc-line { display: flex; align-items: center; gap: 6px; margin: -8px 0 14px; padding: 4px 6px 4px 12px; border-radius: 999px; background: var(--accent-soft); }
+  .enc-line[hidden] { display: none; }
+  .enc-go { flex: 1; min-width: 0; min-height: 40px; padding: 4px 2px; border: none; background: none; box-shadow: none; text-align: left;
+            color: var(--accent-dark, var(--text)); font-size: 15px; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+  .enc-go:hover { background: none; text-decoration: underline; }
+  .enc-x { flex: none; width: 36px; min-width: 36px; min-height: 36px; padding: 0; border: none; border-radius: 50%; background: none; color: var(--muted); font-size: 16px; }
+  @media print { .enc-line { display: none !important; } }
+  /* 📊 How are my kids doing? */
+  .big-btn.rp-open { width: 100%; margin: 0 0 14px; min-height: 96px; }
+  /* 📊 + 👀: two tiles of the same size, side by side on wide screens, one under the other on phones */
+  .rp-tiles { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
+  /* 🧒 Kids' home: two BIG buttons side by side, 📊 My week, the small bottom bar */
+  .kid-big { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 14px; }
+  .kb { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 170px; padding: 12px 6px;
+        border-radius: 28px; border: 3px solid transparent; color: #fff; text-align: center; box-shadow: 0 8px 20px rgba(0, 0, 0, .12); }
+  .kb .e { font-size: 58px; line-height: 1.1; }
+  .kb b { font-size: 24px; letter-spacing: .5px; }
+  .kb small { font-size: 14px; font-weight: 700; opacity: .9; }
+  .kb-study { background: linear-gradient(160deg, #8167d2, #5b5bd6); }
+  .kb-cal { background: linear-gradient(160deg, #3e9f68, #2f9a92); }
+  .kb:hover { filter: brightness(1.05); }
+  .kid-week { border-top: 6px solid var(--c); }
+  .kid-week h2 { margin: 0 0 4px; font-size: 19px; }
+  .kid-week p { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; }
+  .kid-week span { white-space: nowrap; }
+  .kid-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 14px 0; }
+  .kid-bar { gap: 4px; }
+  .kid-bar button { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 0; flex: 1 1 44px; min-height: 58px; padding: 4px 1px; border-radius: 14px; }
+  .kid-bar .e { font-size: 22px; line-height: 1.1; }
+  .kid-bar small { font-size: 11px; font-weight: 800; white-space: nowrap; }
+  #scr-home.kid-home .bar .cal-btn { display: none; }   /* (📅 is the big CALENDAR button on a kid's home) */
+  .kid-bar button.on { background: var(--text); color: #fff; border-color: var(--text); }
+  .kid-more { margin-bottom: 14px; }
+  @media (min-width: 600px) { .rp-tiles { grid-template-columns: 1fr 1fr; } }
+  /* 📅 Today's day and date on top of the home */
+  .home-date { margin: -4px 0 12px; line-height: 1.15; }
+  .home-date b { display: block; font-size: 38px; font-weight: 900; letter-spacing: -.5px; }
+  .home-date span { display: block; font-size: 19px; font-weight: 700; color: var(--muted); }
+  .home-date.kid b { font-size: 28px; }
+  .home-date.kid span { font-size: 16px; }
+  /* 👀 Your kids' work today: one short card per kid (wraps on a 360px phone), the details folded */
+  .kw-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+  .kw-card { display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 100%; margin: 0; text-align: left; white-space: normal;
+             background: var(--soft); border: 2px solid var(--c); border-left-width: 8px; color: var(--text); font: inherit; font-weight: 500; }
+  .kw-name { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 19px; }
+  .kw-name .e { font-size: 26px; }
+  .kw-name small { margin-left: auto; font-size: 13px; font-weight: 800; }
+  .kw-line { font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+  .kw-line small { color: var(--muted); font-weight: 700; white-space: nowrap; }
+  .kw-counts { font-weight: 700; color: var(--ink); }
+  .kw-all { margin-top: 12px; }
+  .kw-all summary { cursor: pointer; font-weight: 800; min-height: 44px; display: flex; align-items: center; }
+  /* (the older list rows, now inside the details) */
+  .kw-list { list-style: none; margin: 0; padding: 0; }
+  .kw-list li + li { border-top: 1px solid var(--line); }
+  .kw-item { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: baseline; width: 100%; padding: 12px 4px; border: none; background: none;
+             text-align: left; font: inherit; color: inherit; min-height: 44px; }
+  button.kw-item { cursor: pointer; }
+  button.kw-item:hover { background: var(--soft, #f6f7fb); }
+  .kw-time { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .kw-what { overflow-wrap: anywhere; }
+  .kw-what b { color: var(--ink, inherit); }
+  .rp-kids { margin-bottom: 10px; }
+  .rp-range { margin-bottom: 12px; }
+  .rp-card { margin-top: 12px; }
+  .rp-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; }
+  .rp-num { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 4px; border-radius: 16px; background: #f6f7fb; min-width: 0; }
+  .rp-num b { font-size: 30px; line-height: 1.1; }
+  .rp-num small { color: var(--muted); font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+  .rp-subs { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+  .rp-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; width: 100%; min-height: 52px; padding: 8px 12px; border: 2px solid var(--line);
+            border-radius: 16px; background: #fffdf8; text-align: left; color: var(--text); }
+  .rp-subname { flex: 1 1 120px; min-width: 0; font-weight: 800; overflow-wrap: anywhere; }
+  .rp-stars { color: #e8a020; font-size: 18px; letter-spacing: 1px; white-space: nowrap; }
+  .rp-sub small { flex-basis: 100%; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  .rp-lines p { margin: 4px 0; font-size: 17px; overflow-wrap: anywhere; }
+  .rp-btns { justify-content: center; margin-top: 16px; }
+  /* 👤 My profile */
+  .me-chips { margin-bottom: 12px; }
+  .me-top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; border-top: 8px solid var(--c); }
+  .me-face { flex: none; width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-size: 44px; background: var(--soft); }
+  .me-name { flex: 1 1 140px; min-width: 0; }
+  .me-name h1 { margin: 0; font-size: 30px; line-height: 1.1; overflow-wrap: anywhere; }
+  .me-name small { color: var(--muted); font-weight: 700; }
+  .me-spark { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 8px; border: 2px solid var(--line); border-radius: 22px;
+              background: #fffdf8; text-align: left; min-width: 0; }
+  .me-kinds { flex-basis: 100%; margin: 0; font-weight: 800; color: var(--ink); }
+  .me-card { margin-top: 14px; }
+  .me-big { margin: 0; font-size: 24px; font-weight: 800; }
+  .me-list { list-style: none; margin: 0; padding: 0; }
+  .me-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 2px dashed var(--line); font-size: 17px; }
+  .me-list li:last-child { border-bottom: none; }
+  .me-list span { color: var(--muted); font-weight: 700; }
+  .me-list b { overflow-wrap: anywhere; text-align: right; }
+  .me-moods { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .me-moods span { display: flex; flex-direction: column; align-items: center; min-width: 38px; }
+  .me-moods b { font-size: 24px; line-height: 1.2; }
+  .me-moods small { color: var(--muted); font-size: 12px; font-weight: 800; }
+  .me-form input[type="text"], .me-form input[type="date"] { width: 100%; margin-bottom: 8px; }
+  .me-emojis button.on { outline: 3px solid var(--accent); border-radius: 12px; }
+  .me-btns { justify-content: center; margin-top: 16px; }
+  /* ✨ What's your Spark's name? */
+  .sn-card { max-width: 400px; padding: 0 20px 20px; text-align: center; }
+  .sn-face { font-size: 64px; line-height: 1; margin-top: 18px; }
+  #snInput { width: 100%; margin-top: 12px; text-align: center; font-size: 22px; font-weight: 800; }
+  .sn-btns { justify-content: center; margin-top: 12px; }
+  #buddyBody .bu-pick { margin-top: 12px; }
+  .bu-pick button[aria-current] { border-color: var(--c); }
+  .bu-page-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 18px; margin: 16px 0 6px; }
+  .bu-cancel, .bu-change { display: flex; justify-content: center; margin: 10px auto 0; }
+  /* 🏆 Leaderboard rows: name line, 🎁 prize chip, 💬 note, 🌱 what held me back (soft colours, never red) */
+  .pt-nameline { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
+  .pt-name .star-label { margin-top: 4px; }
+  .pt-want { min-height: 34px; max-width: 100%; padding: 2px 10px; border-radius: 999px; border: 2px dashed var(--line); background: #fff; color: var(--text);
+             font-size: 14px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; text-align: left; }
+  .pt-want.add { color: var(--muted); }
+  /* 🎁 Choose my prize: big option buttons (2 a row) */
+  .pz-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
+  .pz-opts button { min-width: 0; min-height: 56px; padding: 6px 8px; border-radius: 16px; font-size: 15px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .pz-opts button.on { border-color: #e8b400; background: #fff3c4; }
+  .pt-want.ok { border: 2px solid #e8b400; background: linear-gradient(135deg, #fff3c4, #ffe08a); color: #6b4f00; }
+  .pt-want small { font-size: 12px; }
+  /* 📅 Calendar's small buttons · ☰ More's big profile tile · 👤 ⚙️ My settings · 👨‍👩‍👧 Family settings · 🧒 kid setup */
+  .cal-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+  .cal-tools:empty { display: none; }
+  .tile.more-profile { grid-column: 1 / -1; }
+  .me-subrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 6px 0; }
+  .me-subrow input[type="text"] { flex: 1 1 140px; min-width: 0; }
+  .me-subrow .checkline { margin: 0; white-space: nowrap; }
+  .me-famlinks { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+  .me-famlinks .pill { justify-content: flex-start; text-align: left; white-space: normal; }
+  .ks-subs { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+  .ks-sub { position: relative; }
+  .ks-sub input { position: absolute; opacity: 0; }
+  .ks-sub span { display: inline-block; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--line); background: #fff; cursor: pointer; }
+  .ks-sub input:checked + span { border-color: var(--accent, #5b5bd6); background: #eef0ff; font-weight: 700; }
+  .ks-sub input:focus-visible + span { outline: 3px solid #93c5fd; }
+  /* 🏆 Hall of Stars: one short line a week (wraps on a 360px phone) */
+  .hall-card h2 { margin-top: 0; }
+  .hall-list { list-style: none; margin: 0; padding: 0; }
+  .hall-list li + li { border-top: 1px solid var(--line); }
+  .hall-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; padding: 8px 0; }
+  .hall-week { color: var(--muted); font-size: 14px; white-space: nowrap; }
+  .hall-who { flex: 1 1 140px; font-weight: 700; overflow-wrap: anywhere; }
+  .hall-edit { margin-left: auto; white-space: nowrap; }
+  .hall-form select { width: 100%; }
+  .hall-most { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+  /* ⚖️ Fair leaderboard: the note under the title and the big "78 / 100" */
+  .pt-fairnote { margin: -6px 0 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .pt-num.pt-fair { font-size: 26px; font-weight: 800; white-space: nowrap; }
+  .pt-num.pt-fair small { font-size: 14px; font-weight: 600; color: var(--muted); }
+  /* ⭐ The 3 sub-scores: 📚 Study · ⚽ Activity · 🌱 Habit, as small bars (and the big overall on 📅 This week) */
+  .score-subs { display: grid; gap: 4px; margin: 6px 0; }
+  .score-sub { display: grid; grid-template-columns: 7.5em 1fr 3em; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; }
+  .score-sub b { text-align: right; }
+  .score-sub.none { color: var(--muted); }
+  .score-sub-l { white-space: nowrap; }
+  .score-sub-bar { height: 8px; border-radius: 999px; background: #eee; overflow: hidden; min-width: 0; }
+  .score-sub-bar i { display: block; height: 100%; border-radius: 999px; background: var(--c, #f5a623); }
+  /* 📚 Study sessions: the steps card (🎒), ⭐ the helper's rating card (home) */
+  .sess-card h2 { margin-bottom: 2px; }
+  /* 📚 STUDY TOPICS: the big buttons, the topics (☐ tick · 🚦 dot · title), the filters, ⬆️ Upload's choices, 🌍 the benchmark */
+  .st-big { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; margin: 0 0 14px; }
+  .st-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 84px; padding: 10px 6px;
+            border-radius: 20px; font-size: 17px; position: relative; }
+  .st-btn .e { font-size: 30px; line-height: 1; }
+  .st-btn.go { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .st-btn.on { background: var(--accent-soft); border-color: var(--accent); }
+  .st-btn .sc-badge { position: absolute; top: 6px; right: 8px; }
+  .st-up { margin: 0 0 14px; }
+  .st-list { list-style: none; margin: 0; padding: 0; }
+  .st-topic { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 2px dashed #f0e9dc; }
+  .st-topic.on { background: var(--accent-soft); border-radius: 14px; }
+  .st-tick input { width: 26px; height: 26px; margin: 0; }
+  .st-dot { font-size: 20px; line-height: 1; }
+  .st-name { display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-width: 0; padding: 0; border: none; background: none;
+             box-shadow: none; font-size: 17px; overflow-wrap: anywhere; }
+  .st-name:hover { background: none; }
+  .st-name small { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .st-hist { grid-column: 1 / -1; background: #fffaf0; border-radius: 14px; padding: 8px 12px; }
+  .st-hist ul { margin: 0; padding-left: 18px; }
+  .st-hist li { margin: 4px 0; }
+  .st-hist small { display: block; color: var(--muted); }
+  .st-legend { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .st-filters { margin-bottom: 8px; }
+  .st-make.off, .primary.off { opacity: .45; }
+  .st-bench { font-size: 16px; margin: 8px 0 4px; }
+  .st-blist { margin: 4px 0 8px; padding-left: 20px; }
+  .st-sum + .st-sum { border-top: 2px dashed #f0e9dc; margin-top: 10px; padding-top: 10px; }
+  .st-sum small { color: var(--muted); font-weight: 700; }
+  .aw-kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+  .aw-kind { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px; border-radius: 20px; min-height: 120px; text-align: center; }
+  .aw-kind .e { font-size: 34px; line-height: 1; }
+  .aw-kind small { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .aw-topics small, .aw-same small { display: block; color: var(--muted); }
+  .aw-same { opacity: .6; }
+  .ws-sec { list-style: none; font-weight: 800; font-size: 18px; margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 2px solid #e5dccb; }
+  .sess-res { font-size: 16px; color: #22a35a; white-space: nowrap; }
+  .sess-steps { margin: 8px 0 0; padding-left: 22px; line-height: 1.5; font-weight: 600; }
+  .sess-steps li { margin-bottom: 8px; }
+  .rate-card { border-left: 6px solid var(--c); }
+  .rate-btns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+  .rate-btns button { display: flex; flex-direction: column; align-items: center; padding: 8px 0; min-height: 64px; border-radius: 16px; }
+  .rate-btns .e { font-size: 26px; line-height: 1.1; }
+  .rate-card input { width: 100%; }
+  .k-sess { display: inline-flex; margin-top: 4px; font-size: 13px; padding: 3px 10px; min-height: 30px; border-radius: 999px; white-space: nowrap; }
+  .k-sesstag { font-weight: 800; font-size: 13px; white-space: nowrap; }
+  .k-sessrow { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  /* 📊 Study per subject (parents): this week + the last 4 weeks; scrolls sideways inside its card on a small phone */
+  .st-wrap { overflow-x: auto; max-width: 100%; }
+  .st-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .st-table th, .st-table td { padding: 6px 6px; border-bottom: 1px solid #f0e9dc; text-align: center; white-space: nowrap; }
+  .st-table thead th { font-size: 12px; color: var(--muted); white-space: normal; vertical-align: bottom; }
+  .st-table tbody th { text-align: left; font-weight: 800; }
+  /* 🧠 Learning profile (parents: level − / +, chart, strong / to work on · the kid: one friendly line) */
+  .learn-box + .learn-box { border-top: 2px dashed #f0e9dc; margin-top: 12px; padding-top: 12px; }
+  .learn-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .learn-sub { font-weight: 800; font-size: 17px; }
+  .learn-lv { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .learn-lv .pill { min-width: 40px; justify-content: center; font-size: 18px; padding: 4px 10px; }
+  .learn-chart { display: block; width: 100%; max-width: 320px; height: 64px; margin: 6px 0; }
+  .learn-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+  .learn-dot { fill: var(--accent); }
+  .learn-mid { stroke: #e5dccb; stroke-dasharray: 4 4; }
+  .learn-h { margin: 8px 0 4px; font-weight: 800; }
+  .learn-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .learn-chip { background: #e7f6ec; color: #1f6b3a; border-radius: 999px; padding: 4px 10px; font-weight: 700; font-size: 14px; }
+  .learn-weak { list-style: none; margin: 0; padding: 0; }
+  .learn-weak li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 0; border-bottom: 1px solid #f0e9dc; }
+  .learn-weak li span { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+  .learn-kid { background: var(--accent-soft); border-radius: 16px; padding: 10px 14px; font-weight: 700; margin: 10px 0; }
+  .st-hist-title { margin: 12px 0 4px; font-weight: 800; font-size: 14px; color: var(--muted); }
+  .score-parts { font-size: 13px; font-weight: 700; color: var(--muted); margin: -2px 0 2px; overflow-wrap: anywhere; }   /* 📚 = ⏱️ + 🎯 */
+  .score-total { display: flex; align-items: baseline; gap: 6px; }
+  .score-total b { font-size: 34px; font-weight: 800; line-height: 1.1; }
+  .score-total small { font-size: 15px; font-weight: 700; color: var(--muted); }
+  /* 🎁 Only the ⭐ star chooses: their row shines, everyone else's chip is small and grey */
+  .pt-want.add.star { border: 2px solid #e8b400; background: linear-gradient(135deg, #fff3c4, #ffe08a); color: #6b4f00; font-weight: 700; }
+  .pt-want.locked, .pt-want.old { border-style: solid; background: #f2f3f6; color: #6b7280; font-size: 13px; }
+  .pt-row.is-star { border-radius: 16px; background: linear-gradient(135deg, #fffbea, #fff3c4); box-shadow: 0 0 0 2px #f5d565, 0 0 18px rgba(245, 213, 101, .45); }
+  span.pt-want { display: inline-flex; align-items: center; }
+  .pt-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+  .pt-note small { color: var(--muted); font-weight: 700; }
+  .pt-note .linkbtn { min-height: 30px; font-size: 13px; }
+  .pt-form { margin: 8px 0; padding: 10px; border-radius: 16px; background: #f6f7fb; }
+  .pt-form input { width: 100%; margin: 4px 0 8px; }
+  .pt-held { margin-top: 8px; padding: 6px 12px; border-radius: 14px; background: #f1f8f1; color: #3f5d45; font-size: 15px; }
+  .pt-held summary { cursor: pointer; font-weight: 800; min-height: 32px; display: flex; align-items: center; }
+  .pt-held ul { margin: 4px 0 6px; padding-left: 20px; }
+  .pt-held li { margin: 2px 0; }
+  .pt-tip { margin: 6px 0 4px; padding: 6px 10px; border-radius: 12px; background: #fff; font-weight: 800; color: #2f6b3a; overflow-wrap: anywhere; }
+  .bu-hist { margin: 8px 0 0; padding: 8px 12px; border-radius: 14px; background: #f6f7fb; font-size: 15px; }
+  .bu-hist ul { margin: 4px 0 0; padding-left: 20px; }
+  /* 🎉 Level up! */
+  .lvl-up { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 16px; background: rgba(30, 20, 60, .55); }
+  .lvl-box { width: min(100%, 380px); padding: 24px 18px; border-radius: 28px; background: #fff; border-top: 10px solid var(--c); text-align: center; box-shadow: var(--shadow); }
+  .lvl-e { font-size: 96px; line-height: 1.1; animation: lvlPop .6s ease-out; }
+  .lvl-box h2 { margin: 8px 0 4px; font-size: 24px; overflow-wrap: anywhere; }
+  .lvl-box p { margin: 0 0 16px; font-size: 18px; }
+  @keyframes lvlPop { 0% { transform: scale(.3); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .lvl-e { animation: none; } }
+  /* 🧩 Riddle of the day: 4 big answer buttons (2 per row), soft shake when wrong */
+  .rd-card { margin-top: 18px; border-top: 8px solid var(--c); }
+  .rd-q { margin: 6px 0 12px; font-size: 19px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+  .rd-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .rd-opt { min-width: 0; min-height: 60px; padding: 8px; border-radius: 18px; border: 3px solid var(--line); background: #fffdf8;
+            color: var(--text); font-size: 16px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .rd-opt:hover { background: var(--soft); }
+  .rd-opt:disabled { cursor: default; }
+  .rd-opt.right { border-color: #22a35a; background: #dcfce7; color: #14532d; }
+  .rd-opt.wrong { border-color: #fca5a5; background: #fee2e2; color: #991b1b; opacity: .8; }
+  .rd-opt.shake { animation: rdShake .45s ease-in-out; }
+  @keyframes rdShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+  @media (prefers-reduced-motion: reduce) { .rd-opt.shake { animation: none; } }
+  .rd-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .rd-tools button { min-height: 44px; }
+  .rd-hint { margin: 10px 0 0; padding: 8px 12px; border-radius: 14px; background: #fff8e6; font-size: 16px; overflow-wrap: anywhere; }
+  .rd-yes, .rd-no, .rd-wait { margin: 10px 0 0; font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
+  .rd-yes { color: #15803d; } .rd-no { color: #b45309; } .rd-wait { color: var(--muted); }
+  .rd-fact { margin: 10px 0 0; padding: 8px 12px; border-radius: 14px; background: #eef6ff; font-size: 16px; overflow-wrap: anywhere; }
+  .rd-ask { margin-top: 10px; }
+  .rd-who { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .rd-help { margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--line); }
+  .rd-help:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  /* 🧩 The riddle pop-up */
+  .rd-pop { max-width: 480px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; border-top: 8px solid var(--c, var(--accent)); }
+  #riddleBody { padding: 0 20px 20px; }
+  #riddleBody .print-title { margin-left: 0; margin-right: 0; }
+  .rd-num { margin: 2px 0 8px; font-weight: 700; }
+  .rd-later { display: block; margin: 14px auto 0; min-height: 44px; }
+  .rd-gotit { width: 100%; margin: 14px 0 0; }
+  .rd-board { margin-top: 18px; }
+  .rd-b-list { list-style: none; margin: 0; padding: 0; }
+  .rd-b-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; padding: 6px 0; border-bottom: 2px solid var(--line); }
+  .rd-b-list li:last-child { border-bottom: none; }
+  .rd-b-who { flex: 1; min-width: 0; font-weight: 800; overflow-wrap: anywhere; }
+  .rd-b-mark { font-size: 20px; }
+  .rd-b-list small { flex-basis: 100%; color: var(--muted); overflow-wrap: anywhere; }
+  .rd-b-week { margin: 0; font-size: 16px; line-height: 1.6; }
+  /* 🏠 Today: the buddy hello, the small button row, 📋 Today, 📅 the family today */
+  .hello-face.has-buddy { width: auto; height: auto; background: none !important; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: inherit; }
+  .bu-hello { width: 104px; height: 104px; }
+  .bu-hello .e { font-size: 42px; }
+  .bu-hello b { margin-top: 3px; font-size: 15px; font-weight: 800; color: var(--ink, var(--text)); }
+  .bu-hello .star-badge { position: absolute; top: -6px; right: -6px; font-size: 28px; }
+  .bu-under { font-size: 13px; font-weight: 800; color: var(--muted); white-space: nowrap; }
+  .home-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+  .home-row button { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; min-height: 64px; padding: 6px 4px; border-radius: 18px;
+                     font-size: 14px; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+  .home-row .e { font-size: 24px; line-height: 1; }
+  #homeMenu { margin-bottom: 14px; }
+  .td-card { margin-top: 18px; border-top: 8px solid var(--c); }
+  .td-count { font-size: 18px; font-weight: 800; color: var(--muted); }
+  .td-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 2px solid var(--line); }
+  .td-row:last-of-type { border-bottom: none; }
+  .k-check.td-check { width: 44px; height: 44px; border-width: 4px; font-size: 22px; }
+  /* ⏰ A kid's tick before the start time: grey with a small 🔒 (a tap says when) */
+  .k-check.time-lock, .k-check.time-lock:hover { background: #eceef2; border-color: #c9ccd4; color: #8a8f99; font-size: 12px; filter: grayscale(1); }
+  .k-check.td-check.time-lock { font-size: 16px; }
+  .td-what { min-width: 0; display: flex; flex-direction: column; }
+  .td-what b { font-size: 18px; overflow-wrap: anywhere; }
+  .td-what small { color: var(--muted); font-size: 14px; font-weight: 700; }
+  .td-more { text-align: right; margin-top: 6px; }
+  .big-btn.dy-home { width: 100%; margin-top: 18px; min-height: 110px; }
+  .fam-today { margin-top: 18px; }
+  .fam-list-today { list-style: none; margin: 0; padding: 0; }
+  .fam-list-today li { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+  .ft-time { flex: 0 0 66px; color: var(--muted); font-weight: 800; font-size: 14px; }
+  .ft-who { flex: none; margin-left: auto; font-size: 18px; letter-spacing: 1px; text-align: right; max-width: 45%; overflow-wrap: anywhere; }
+  .ft-what { flex: 1 1 auto; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  /* 👨‍👩‍👧 A parent's Family tiles: the same tiles, smaller (3 a row on a phone, 5 on a computer) */
+  .fam-tiles-card { margin-top: 18px; }
+  .fam-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  /* (".fam-tiles .tile …": stronger than the big ".tile …" rules further down, so they always win) */
+  .fam-tiles .tile { min-height: 104px; padding: 10px 6px; border-radius: 20px; gap: 2px; overflow-wrap: normal; word-break: normal; }
+  .fam-tiles .tile .t-emoji { font-size: 30px; }
+  .fam-tiles .tile .t-label { font-size: 15px; line-height: 1.15; }
+  .fam-tiles .tile .t-sub { display: none; }
+  /* ⭐ ✏️ Change my habits: a small link under the parent's habits */
+  .ph-change { display: flex; justify-content: center; margin-top: 12px; }
+  .ph-change .linkbtn { min-height: 40px; font-size: 14px; }
+  /* (a normal pill, not one of the round ◀ ▶ buttons) */
+  .hb-nav .ph-editbtn { width: auto; min-height: 40px; padding: 0 12px; border-radius: 999px; font-size: 15px; white-space: nowrap; }
+  @media (max-width: 699px) {
+    .fam-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .fam-tiles .tile { min-height: 84px; padding: 8px 4px; border-radius: 18px; }
+    .fam-tiles .tile .t-emoji { font-size: 26px; }
+    .fam-tiles .tile .t-label { font-size: 13px; }
+  }
+  /* ✨ Make the app yours: a big card per feature with a switch (on = coloured, off = grey) */
+  .su-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; font-weight: 800; color: var(--muted); }
+  .su-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+  .su-card { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 76px; padding: 10px 12px; border-radius: 20px; text-align: left;
+             border: 3px solid var(--line); background: #f4f4f6; color: var(--muted); filter: grayscale(.7); transition: background .2s, border-color .2s; }
+  .su-card.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); filter: none; }
+  .su-card .e { flex: none; font-size: 34px; line-height: 1; }
+  .su-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .su-text b { font-size: 17px; overflow-wrap: anywhere; }
+  .su-text small { font-size: 13px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+  .su-switch { flex: none; position: relative; width: 46px; height: 26px; border-radius: 999px; background: #cfd2da; transition: background .2s; }
+  .su-switch i { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; }
+  .su-card.on .su-switch { background: var(--accent); }
+  .su-card.on .su-switch i { left: 23px; }
+  .su-save { position: sticky; bottom: 10px; justify-content: center; }
+  /* 📘 Setup step 2: each kid's subjects */
+  .su-subs h2 { margin: 0 0 8px; }
+  .su-have, .su-sugg { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .su-sub { display: inline-flex; align-items: center; gap: 6px; background: var(--accent-soft); border-radius: 999px; padding: 4px 6px 4px 12px; font-weight: 700; }
+  .su-addrow { display: flex; gap: 8px; }
+  .su-addrow input { flex: 1; min-width: 0; }
+  .su-save .primary { min-width: 200px; min-height: 52px; font-size: 19px; }
+  .su-edit { justify-content: center; margin-top: 18px; }
+  /* ✏️ Make a worksheet */
+  .mk-card h3.ph-group { margin-top: 16px; }
+  .mk-subjects { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 10px; margin-bottom: 14px; }
+  .mk-sub { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 96px; padding: 10px 6px; border-radius: 20px;
+            border: 3px solid var(--c); background: #fff; overflow-wrap: anywhere; }
+  .mk-sub .e { font-size: 34px; line-height: 1.1; }
+  .mk-sub b { font-size: 16px; }
+  .mk-aihead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; }
+  .mk-label { display: block; margin: 12px 0 6px; }
+  .mk-topic small { flex: none; color: var(--muted); font-size: 12px; font-weight: 800; }
+  .mk-topic .mk-now { color: #b45309; }
+  .mk-type, .mk-other { margin: 12px 0 0; }
+  .mk-type input, .mk-other input { width: 100%; }
+  .mk-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .mk-counts button { min-height: 52px; font-size: 20px; font-weight: 800; border-radius: 16px; }
+  .mk-counts button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .mk-go { justify-content: center; margin-top: 16px; }
+  .mk-go .primary { min-width: 200px; min-height: 54px; font-size: 19px; }
+  .mk-subbtn { margin: 12px 0 0; }
+  /* 📄 PDF: the sheet is drawn off-screen at A4 width (186 mm ≈ 703 px), then turned into pictures */
+  .pdf-stage { position: fixed; left: -10000px; top: 0; width: 703px; background: #fff; color: #111; pointer-events: none; }
+  /* 📄 Family summary PDF: rounded pastel cards, big emojis, Baloo 2; dark text and borders so it reads in black & white too */
+  .fs-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; font-weight: 800; }
+  .fs-sheet { font-family: "Baloo 2", system-ui, sans-serif; color: #1f1d3a; }
+  .fs-sheet > section { margin: 0 0 6px; border-radius: 22px; padding: 16px 18px; break-inside: avoid; }
+  .fs-head { font-family: "Baloo 2", system-ui, sans-serif; font-size: 13px; font-weight: 800; color: #3b3870; padding: 4px 12px; border-radius: 999px; background: #f1efff; border: 1.5px solid #c9c4f2; }
+  .fs-cover { text-align: center; background: linear-gradient(160deg, #fff7d6, #fde2ef 55%, #e4edfb); border: 2px solid #e9c46a; }
+  .fs-cover h1 { margin: 2px 0 0; font-size: 34px; line-height: 1.1; }
+  .fs-week { margin: 2px 0; font-size: 20px; font-weight: 800; }
+  .fs-dates { margin: 0 0 10px; font-size: 15px; font-weight: 700; color: #4b4870; }
+  .fs-deco { font-size: 18px; letter-spacing: 6px; }
+  .fs-star { display: inline-flex; align-items: center; gap: 14px; margin: 4px auto 12px; padding: 10px 20px; border-radius: 20px; background: #fff; border: 2.5px solid #e9b400; text-align: left; }
+  .fs-star h2 { margin: 0; font-size: 26px; }
+  .fs-star small { font-size: 14px; font-weight: 700; }
+  .fs-big { font-size: 44px; line-height: 1; }
+  .fs-family { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .fs-family span { display: flex; flex-direction: column; align-items: center; min-width: 80px; padding: 6px 8px; border-radius: 16px; background: var(--soft); border: 1.5px solid var(--ink); color: var(--ink); }
+  .fs-family b { font-size: 30px; line-height: 1.1; }
+  .fs-family i { font-style: normal; font-size: 18px; }
+  .fs-family small { font-size: 13px; font-weight: 800; }
+  .fs-card { background: var(--soft); border: 2px solid var(--ink); }
+  .fs-cardtop { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .fs-cardtop h2 { margin: 0; font-size: 24px; color: var(--ink); }
+  .fs-cardtop small { font-size: 13px; font-weight: 700; }
+  .fs-score { margin-left: auto; text-align: right; line-height: 1; color: var(--ink); }
+  .fs-score b { font-size: 34px; } .fs-score small { font-size: 14px; font-weight: 800; } .fs-score span { display: block; font-size: 12px; font-weight: 800; }
+  .fs-bar { height: 12px; margin: 2px 0 8px; border-radius: 999px; background: #fff; border: 1.5px solid var(--ink); overflow: hidden; }
+  .fs-bar i { display: block; height: 100%; border-radius: 999px; }
+  .fs-row { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1.5px dashed rgba(0, 0, 0, .18); font-size: 15px; }
+  .fs-row b { text-align: right; }
+  .fs-moods { letter-spacing: 3px; font-size: 18px; }
+  .fs-tips { margin-top: 8px; padding: 8px 12px; border-radius: 14px; background: #fff; border: 1.5px solid var(--ink); font-size: 14px; }
+  .fs-tips ul { margin: 2px 0 0; padding-left: 20px; }
+  .fs-end { background: #f4f1ff; border: 2px solid #8a83d8; }
+  .fs-end h2 { margin: 0 0 4px; font-size: 21px; }
+  .fs-end ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; }
+  .fs-close { margin: 6px 0 2px; text-align: center; font-size: 20px; font-weight: 800; }
+  .pdf-stage .ai-print { width: 703px; }
+  .pdf-ready { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+               max-width: 480px; margin: 0 auto; padding: 10px 14px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); font-weight: 800; }
+  .pdf-ready span { flex: 1 1 140px; }
+  /* 👨‍👩‍👧 Family ID and 🤖 this month's AI use */
+  .fam-id { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 18px; font-weight: 700; }
+  .fam-id code { font-size: 14px; overflow-wrap: anywhere; word-break: break-all; }
+  .fam-id .ai-usage { flex-basis: 100%; }
+  .ai-usage { margin: 0 0 12px; font-size: 15px; color: var(--muted); font-weight: 700; }
+  /* 👋 The tour: swipe cards */
+  .tour { position: fixed; inset: 0; z-index: 9100; display: grid; place-items: center; padding: 16px; background: rgba(30, 20, 60, .55); }
+  .tour-box { width: min(100%, 400px); padding: 18px 16px; border-radius: 28px; background: #fff; border-top: 10px solid var(--c); box-shadow: var(--shadow); }
+  .tour-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .tour-track::-webkit-scrollbar { display: none; }
+  .tour-card { flex: 0 0 100%; scroll-snap-align: start; text-align: center; padding: 4px 6px; }
+  .tour-e { font-size: 72px; line-height: 1.1; }
+  .tour-card h2 { margin: 8px 0 6px; font-size: 24px; }
+  .tour-card p { margin: 0 0 6px; font-size: 17px; line-height: 1.4; }
+  .tour-card small { color: var(--muted); font-weight: 700; }
+  .tour-dots { display: flex; justify-content: center; gap: 6px; margin: 8px 0 12px; }
+  .tour-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .tour-dots i.on { background: var(--c); }
+  .tour .btnrow { justify-content: space-between; }
+  /* ⚙️ Features */
+  .feat-card { margin-bottom: 18px; }
+  .feat-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 6px 18px; }
+  .feat-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 17px; font-weight: 700; }
+  .feat-row input { width: 24px; height: 24px; flex: none; }
+  /* ☰ More pages */
+  /* 🏡 Our Community: the home button, ➕ Write (4 big type buttons), the posts with reactions */
+  .cm-home { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; width: 100%; margin-top: 18px;
+             text-align: left; font-size: 18px; background: #eef7ee; }
+  .cm-home small { padding: 2px 10px; border-radius: 999px; background: #fff; color: var(--muted); font-size: 14px; font-weight: 800; }
+  .cm-types { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 10px; margin-bottom: 8px; }
+  .cm-type { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 110px; padding: 10px; border-radius: 20px; text-align: center; white-space: normal; }
+  .cm-type .e { font-size: 38px; line-height: 1.1; }
+  .cm-type small { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .cm-stars { display: flex; gap: 4px; margin-bottom: 8px; }
+  .cm-stars button { min-width: 44px; min-height: 44px; padding: 0; border-radius: 50%; font-size: 22px; filter: grayscale(1) opacity(.45); }
+  .cm-stars button.on { filter: none; border-color: #facc15; background: #fff7d6; }
+  .cm-kids { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .cm-list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .cm-post { margin: 0; border-left: 8px solid var(--c); }
+  .cm-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .cm-who { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-size: 17px; }
+  .cm-who .e { font-size: 24px; }
+  .cm-kind { padding: 1px 10px; border-radius: 999px; background: var(--soft); color: var(--ink); font-size: 13px; font-weight: 800; }
+  .cm-time { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; }
+  .cm-text { margin: 8px 0; font-size: 18px; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .cm-starsline { margin: 6px 0 0; font-size: 20px; }
+  .cm-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .cm-react { min-height: 38px; padding: 2px 12px; border-radius: 999px; font-size: 15px; white-space: nowrap; }
+  .cm-react.on { border-color: var(--c); background: var(--soft); font-weight: 800; }
+  .cm-done { padding: 4px 10px; border-radius: 999px; background: #e2f3e8; color: #1d6340; font-size: 14px; font-weight: 800; }
+  /* ⭐ Good habits: round picture buttons */
+  .pic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 10px 6px; margin-top: 12px; }
+  .pic-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 0; padding: 2px; border: none; background: none; box-shadow: none; }
+  .pic-btn:hover { background: none; }
+  .pic-btn:disabled { cursor: default; }
+  .pic-dot { position: relative; display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; background: #fff;
+             border: 3px solid var(--line); transition: background .2s, border-color .2s; }
+  .pic-dot .e { font-size: 30px; line-height: 1; }
+  .pic-btn.on .pic-dot { background: var(--c); border-color: var(--c); }
+  .pic-ok { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+            background: #fff; color: var(--c); border: 2px solid var(--c); font-size: 13px; font-weight: 800; }
+  .pic-btn small { max-width: 100%; font-size: 12px; font-weight: 800; line-height: 1.15; text-align: center; color: var(--text); overflow-wrap: anywhere; }
+  .pic-btn.pop .pic-dot { animation: picBounce .35s ease-out; }
+  .pic-btn.pop .pic-ok { animation: picPop .35s ease-out; }
+  @keyframes picBounce { 0% { transform: scale(.85); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes picPop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .pic-btn.pop .pic-dot, .pic-btn.pop .pic-ok { animation: none; } }
+  .qr-list li { align-items: center; gap: 10px; }
+  .qr-state { flex: none; width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; border: 3px solid var(--line); background: #fff; font-size: 16px; font-weight: 800; }
+  .qr-state.done { border-color: #22a35a; background: #dcfce7; color: #15803d; }
+  .qr-state.revising { border-color: #e8a020; background: #fff3cd; }
+  .qr-list .what, .qr-list + * .what { flex: 1; min-width: 0; }
+  /* ✅ ⭐ 🧩 the 3 kinds of points */
+  .pt-kinds { font-size: 16px; font-weight: 800; color: var(--ink); }
+  .ach-kinds { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .hist-kinds { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  /* 🏆 "🎉 Jawad beat Bro2a this week!" */
+  .pt-fun { margin: 12px 0 0; padding: 8px 12px; border-radius: 14px; background: #fff3cd; color: #7a5a00; font-size: 16px; font-weight: 800; text-align: center; }
+  /* Settings: habits list (on/off chip per kid, ▲ ▼ order) */
+  .hb-kids { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .hb-kids .chip { font-size: 14px; padding: 2px 10px 2px 4px; border-width: 2px; }
+  .hb-kids .chip .e { font-size: 16px; }
+  .hb-kids .chip.off { opacity: .45; text-decoration: line-through; }
+  .hb-order { display: flex; flex-direction: column; gap: 2px; }
+  .hb-order .edit { min-height: 26px; padding: 0 10px; font-size: 13px; }
+  .hb-order .edit:disabled { opacity: .3; cursor: default; }
+
+  /* My calendar page: "Add / edit activities" + "Back to my calendar", and the week in short */
+  .mine-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+  .brief { background: #fff; border-radius: 22px; border-left: 8px solid var(--c, var(--accent)); box-shadow: var(--shadow);
+           padding: 12px 18px; margin-bottom: 18px; font-size: 20px; font-weight: 600; line-height: 1.45; }
+  .brief b { font-weight: 800; }
+  .brief-past { font-size: 16px; color: var(--muted); margin-top: 4px; padding-top: 6px; border-top: 2px dashed var(--line); }
+
+  /* "Saved! ✓" box after Save, with "See my calendar" under it */
+  /* Taps go THROUGH the box to the buttons under it (only its own "See my calendar" button catches taps).
+     --bar-h = how tall the Save bar is on screen (set by liftAboveSaveBar), so the box sits above it. */
+  .saved-pop { position: fixed; left: 50%; transform: translateX(-50%); z-index: 60; pointer-events: none;
+               bottom: max(calc(100px + env(safe-area-inset-bottom)), calc(var(--bar-h, 0px) + 12px));
+               width: max-content; max-width: calc(100% - 32px); background: #fff; border: 3px solid #16a34a; border-radius: 26px;
+               padding: 14px 20px; box-shadow: 0 12px 34px rgba(0, 0, 0, .2); text-align: center; animation: pop .18s ease-out; }
+  .saved-msg { font-size: 26px; font-weight: 800; color: #15803d; line-height: 1.15; margin-bottom: 10px; }
+  .saved-msg small { display: block; font-size: 15px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+  .saved-pop .cal-btn { width: 100%; min-height: 54px; font-size: 20px; pointer-events: auto; }
+  .big-title { font-size: 46px; font-weight: 800; margin: 0; line-height: 1.1; }
+  .page-title { font-size: 38px; font-weight: 800; margin: 0 0 6px; line-height: 1.15; }
+  .lead { font-size: 20px; color: var(--muted); margin: 0 0 16px; }
+  .note { background: #fff; border: 3px dashed #f3c969; border-radius: 22px; padding: 14px 18px; font-size: 19px;
+          font-weight: 600; margin: 0 0 18px; }
+
+  /* ---- Start page: "Who are you?" ---- */
+  .start { text-align: center; padding-top: 2vh; }
+  .who-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 26px; margin-top: 26px; }
+  .who-btn, .tile, .chip, .seg button, .k-kid { font-family: inherit; cursor: pointer; }
+  .who-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none; padding: 6px; }
+  .who-btn .face { width: 140px; height: 140px; border-radius: 50%; display: grid; place-items: center; font-size: 76px;
+                   background: var(--soft); border: 6px solid #fff; box-shadow: 0 8px 22px rgba(80, 60, 20, .14);
+                   transition: transform .15s; }
+  .who-btn:hover .face { transform: scale(1.06); }
+  .who-btn:active .face { transform: scale(.95); }
+  .who-btn .nm { font-size: 30px; font-weight: 800; color: var(--ink); }
+  .start-section { max-width: 980px; margin: 40px auto 0; }
+  .sec-title { font-size: 32px; font-weight: 800; margin: 0; text-align: center; line-height: 1.2; }
+  .start-section .hint { text-align: center; font-size: 17px; }
+
+  /* The big "View all plan" button */
+  .viewall-btn { display: flex; align-items: center; justify-content: center; gap: 18px; width: 100%; min-height: 120px;
+                 padding: 18px 28px; border-radius: 999px; border: none; text-align: left; color: #fff;
+                 background: linear-gradient(135deg, #7c6cf0, #5b5bd6); box-shadow: 0 10px 26px rgba(91, 91, 214, .35);
+                 transition: transform .15s; }
+  .viewall-btn:hover { background: linear-gradient(135deg, #8b7cf5, #5b5bd6); transform: translateY(-3px); }
+  .viewall-btn:active { transform: scale(.97); }
+  .viewall-btn .t-emoji { font-size: 60px; line-height: 1; }
+  .viewall-btn .t-label { display: block; font-size: 36px; font-weight: 800; line-height: 1.1; }
+  .viewall-btn .t-sub { display: block; font-size: 18px; font-weight: 600; opacity: .9; }
+
+  /* Last week's achievements: one small card per person */
+  .ach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  .ach { background: #fff; border-radius: 26px; padding: 18px 12px 14px; text-align: center; box-shadow: var(--shadow);
+         border-top: 8px solid var(--c); }
+  .ach .face { width: 76px; height: 76px; margin: 0 auto 4px; border-radius: 50%; display: grid; place-items: center;
+               font-size: 42px; background: var(--soft); border: 4px solid #fff; box-shadow: var(--shadow); }
+  .ach .star-badge { font-size: 32px; top: -10px; right: -12px; }
+  .ach-name { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.15; }
+  .ach-pts { font-size: 28px; font-weight: 800; line-height: 1.2; }
+  .ach-pts small { font-size: 16px; color: var(--muted); font-weight: 600; }
+  .ach-done { font-size: 17px; font-weight: 700; color: var(--muted); }
+  .ach .star-label { margin-top: 4px; }
+  .ach-empty { background: #fff; border: 3px dashed #f3c969; border-radius: 26px; padding: 26px 18px; text-align: center;
+               font-size: 24px; font-weight: 800; }
+
+  /* Logo at the top of the home page: a house in a soft rounded square + the app name, and today's date under it */
+  .brand { display: flex; align-items: center; justify-content: center; gap: 14px; padding-top: 2vh; }
+  .brand-icon { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; font-size: 32px;
+                background: var(--accent-soft); border: 2px solid #dcdcf7; }
+  .brand-name { font-size: 34px; font-weight: 800; letter-spacing: -.01em; }
+  .brand-date { text-align: center; font-size: 22px; font-weight: 700; color: var(--muted); margin: 6px 0 4px; }
+  .print-week { text-align: center; margin-top: 14px; }
+
+  /* ---- Home screen: hello + big buttons ---- */
+  .hello { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+  .hello-face { position: relative; width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 54px; flex: none;
+                background: var(--soft); border: 5px solid #fff; box-shadow: var(--shadow); }
+  .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;
+          min-height: 170px; padding: 18px; border-radius: 30px; background: #fff; border: 3px solid var(--line);
+          color: var(--text); box-shadow: var(--shadow); transition: transform .15s; }
+  .tile:hover { transform: translateY(-3px); }
+  .tile:active { transform: scale(.97); }
+  .tile { min-width: 0; overflow: hidden; overflow-wrap: anywhere; }   /* never wider than its column (no overlapping) */
+  .tile > * { max-width: 100%; }
+  .tile .t-emoji { font-size: 56px; line-height: 1.1; }
+  .tile .t-label { font-size: 28px; font-weight: 800; }
+  .tile .t-sub { font-size: 17px; color: var(--muted); }
+  .tile.primary { background: linear-gradient(135deg, #7c6cf0, #5b5bd6); border-color: #5b5bd6; color: #fff; }
+  .tile.primary .t-sub { color: rgba(255, 255, 255, .85); }
+
+  /* ---- Cards and forms ---- */
+  .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+  .card { background: var(--card); border-radius: 28px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+  .card h2 { font-size: 26px; margin: 0 0 2px; line-height: 1.2; }
+  .hint { color: var(--muted); font-size: 16px; margin: 0 0 14px; }
+  label.small { font-size: 16px; font-weight: 700; display: block; margin-bottom: 4px; }
+  input[type=text], input[type=number], input[type=time], input[type=email], input[type=password], select {
+    width: 100%; padding: 10px 14px; border: 2px solid var(--line); border-radius: 16px; min-height: 52px;
+    font: inherit; font-size: 18px; background: #fffdf8; color: var(--text);
+  }
+  /* Routines card: quick-add buttons and the little form */
+  .rt-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  /* ✏️ Add activities: three big buttons with counts (accordion), clean rows, the form only when asked for */
+  .add-secs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 90px; }
+  .add-sec { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 12px 18px; border-radius: 22px;
+             font-size: 20px; text-align: left; white-space: normal; }
+  .add-sec .e { font-size: 30px; }
+  .add-sec b { flex: 1; }
+  .add-sec .add-count { color: var(--muted); font-weight: 800; }
+  .add-sec::after { content: "▾"; color: var(--muted); font-size: 18px; transition: transform .15s; }
+  .add-sec.on { border-color: var(--accent); background: var(--accent-soft); }
+  .add-sec.on::after { transform: rotate(180deg); }
+  .add-panel { margin: -6px 0 6px; }
+  .add-panel > .btnrow:first-of-type { margin-top: 0; }
+  .add-form { margin: 12px 0; padding: 14px 16px; border-radius: 20px; background: var(--accent-soft); }
+  .add-form-title { margin: 0 0 8px; font-size: 18px; }
+  .add-new-label { display: block; margin: 2px 0 8px; }
+  .add-list li { padding: 0; }
+  .add-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 8px 4px; border: none; border-radius: 12px;
+             background: none; text-align: left; font: inherit; color: inherit; white-space: normal; }
+  button.add-row:hover { background: var(--accent-soft); }
+  .add-row .what { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .add-row .add-go { flex: none; font-size: 16px; opacity: .7; }
+  .add-list li.editing .add-row { background: var(--accent-soft); font-weight: 800; }
+  .rt-btn { border-radius: 999px; font-size: 18px; font-weight: 800; padding: 6px 16px; }
+  .rt-btn small { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .rt-form { background: var(--accent-soft); border-radius: 22px; padding: 14px 16px; margin-bottom: 6px; }
+  .rt-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+  #rtCustomRow { flex-wrap: wrap; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+  .row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .row > div { flex: 1; min-width: 0; }
+  /* "Only between": the hint under the two times, with a small "✕ Any time" to empty them */
+  .between-hint { margin-top: -6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .linkbtn { min-height: 0; padding: 2px 12px; border-radius: 999px; font-size: 15px; font-weight: 700; }
+
+  /* Pill pickers (days) */
+  .daypick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .daypick label { cursor: pointer; }
+  .daypick input { display: none; }
+  .daypick span { display: inline-block; padding: 8px 14px; border: 2px solid var(--line); border-radius: 999px;
+                  font-size: 17px; font-weight: 700; user-select: none; background: #fff; }
+  .daypick input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  /* "Who?" checklist: each person in their color, ✓ when ticked */
+  .whopick { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .whopick label { cursor: pointer; }
+  .whopick input { display: none; }
+  .whopick .chip { user-select: none; }
+  .whopick input:checked + .chip { border-color: var(--ink); background: var(--soft); }
+  .whopick input:checked + .chip::after { content: "✓"; margin-left: 2px; }
+  .checkline { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px; font-size: 17px; }
+  .checkline input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); }
+
+  /* "Needs Dad" box */
+  .needs-line { background: var(--accent-soft); border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; }
+  .needs-line .checkline { margin: 0; font-weight: 800; font-size: 19px; }
+  .needs-line small { display: block; color: var(--muted); font-size: 15px; margin-left: 30px; }
+  /* 🤝 The helper line (a dropdown of the parents) and 📚 the Study details (Subject · How) */
+  .needs-line select { width: 100%; margin: 4px 0 2px; }
+  .needs-line small.needs-help { margin-left: 0; }
+  .study-box { background: #eef4ff; border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; }
+  .study-box .row { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 4px; }   /* (one under the other: fits a phone) */
+  .study-box select { width: 100%; }
+  .study-box .hint { margin: 6px 0 0; }
+
+  /* Buttons */
+  button { font: inherit; font-size: 17px; font-weight: 700; border-radius: 16px; border: 2px solid var(--line);
+           background: #fff; color: var(--text); padding: 8px 16px; cursor: pointer; min-height: 48px; }
+  button:hover { background: #fffaf0; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  button.danger-text { color: var(--danger); }
+  button.danger-text:hover { background: #fef2f2; border-color: #fecaca; }
+  button.x { border: none; background: none; color: var(--muted); font-size: 26px; padding: 0 8px; min-width: 44px; }
+  button.x:hover { color: var(--danger); background: none; }
+  button.edit { padding: 4px 14px; font-size: 16px; min-height: 42px; }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btnrow .primary { flex: 1; }
+  .err { color: var(--danger); font-size: 16px; min-height: 20px; margin-top: 6px; }
+  .err ul { margin: 4px 0 0; padding-left: 20px; }
+
+  /* "Can be done at the same time as" checklist (Dad only) */
+  .pick-list { border: 2px solid var(--line); border-radius: 16px; padding: 8px 12px 0; margin-bottom: 14px;
+               max-height: 190px; overflow-y: auto; background: #fffdf8; }
+  .pick-list .empty { padding: 0 0 8px; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; background: var(--accent-soft); color: var(--accent);
+         border-radius: 999px; padding: 0 9px; margin: 2px 4px 0 0; }
+
+  /* Lists of activities / people */
+  ul.list { list-style: none; padding: 0; margin: 14px 0 0; border-top: 2px solid var(--line); }
+  ul.list li { display: flex; align-items: center; gap: 8px; padding: 10px 4px; border-bottom: 2px solid var(--line); font-size: 18px; }
+  ul.list li .what { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  ul.list li .what small { display: block; color: var(--muted); font-weight: 500; font-size: 15px; }
+  ul.list li.editing { background: var(--accent-soft); border-radius: 14px; padding-left: 10px; padding-right: 10px; }
+  .uemoji { font-size: 26px; width: 34px; text-align: center; flex: none; }
+  .empty { color: var(--muted); font-size: 16px; padding: 10px 0; }
+
+  /* Chips: "Whose activities?" / "Show: Everyone, Dad …" */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { border-radius: 999px; padding: 6px 16px 6px 8px; font-size: 18px; font-weight: 800; background: #fff;
+          border: 3px solid var(--line); color: var(--ink, var(--text)); display: inline-flex; align-items: center; gap: 6px; }
+  .chip .e { font-size: 24px; }
+  .chip.on { border-color: var(--ink, var(--text)); background: var(--soft, #fff); }
+  .view-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .seg { display: inline-flex; background: #f3e9d6; border-radius: 999px; padding: 4px; margin-bottom: 16px; }
+  .seg button { border: none; background: none; border-radius: 999px; padding: 6px 16px; min-height: 42px; }
+  .seg button.on { background: #fff; box-shadow: 0 2px 6px rgba(80, 60, 20, .12); }
+
+  /* People: emoji suggestions and color circles */
+  .emoji-pick { display: flex; flex-wrap: wrap; gap: 2px; margin: -4px 0 12px; }
+  .emoji-pick button { border: none; background: none; padding: 2px 6px; font-size: 26px; min-height: 44px; }
+  .emoji-pick button:hover { background: var(--accent-soft); }
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .swatches label { cursor: pointer; }
+  .swatches input { display: none; }
+  .swatches span { display: block; width: 38px; height: 38px; border-radius: 50%; border: 4px solid #fff;
+                   box-shadow: 0 0 0 2px var(--line); }
+  .swatches input:checked + span { box-shadow: 0 0 0 3px var(--text); }
+
+  /* My day: calculated free time rows */
+  .free-title { font-size: 18px; font-weight: 800; margin: 16px 0 2px; padding-top: 12px; border-top: 2px dashed var(--line); }
+  .free-row { display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; align-items: baseline;
+              padding: 7px 0; border-bottom: 2px solid var(--line); font-size: 17px; }
+  .free-row:last-child { border-bottom: none; }
+  .free-row small { color: var(--muted); font-size: 15px; }
+  .free-row .total { font-weight: 800; color: var(--ok); }
+  .free-row .total.none { color: var(--muted); font-weight: 500; }
+  /* What's planned inside the free time (from the saved plan), and the free time left */
+  .free-who { margin: 8px 0 4px; }
+  .free-who .chip { font-size: 16px; padding: 4px 12px 4px 6px; }
+  .free-who .chip .e { font-size: 20px; }
+  .free-plan { grid-column: 1 / -1; font-size: 15px; color: var(--muted); margin-left: 60px; }
+  .free-plan .sum b { color: var(--text); }
+  .free-plan .sum .left { color: var(--ok); font-weight: 800; }
+  .free-plan ul { list-style: none; margin: 4px 0 0; padding: 0; }
+  .free-plan li { padding: 2px 0; color: var(--text); }
+  .free-plan li .t { color: var(--muted); display: inline-block; min-width: 9.5em; }
+  @media (max-width: 600px) { .free-plan { margin-left: 0; } .free-plan li .t { min-width: 0; margin-right: 6px; } }
+  .setting { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 18px; font-weight: 700; }
+  .setting input { width: 90px; }
+
+  /* Messages, summary tiles */
+  .msg { border-radius: 20px; padding: 12px 18px; margin-bottom: 16px; font-size: 17px; }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); border: 2px solid #fed7aa; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); border: 2px solid #bbf7d0; }
+  .msg ul { margin: 6px 0 0; padding-left: 22px; }
+  .msg button { margin-left: 8px; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat { background: var(--card); border-radius: 22px; padding: 12px 16px; box-shadow: var(--shadow); border-top: 6px solid var(--c); }
+  .stat small { display: block; font-size: 19px; font-weight: 800; }
+  .stat b { display: block; font-size: 26px; line-height: 1.2; }
+  .stat span { display: block; font-size: 15px; color: var(--muted); }
+  .stat .good { color: var(--ok); font-weight: 700; }
+  .stat .bad { color: var(--danger); font-weight: 700; }
+
+  /* Toast: short messages at the bottom ("Backup downloaded"). pointer-events: none = taps go through it,
+     so it never blocks the 💾 Save button. */
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+           background: var(--text); color: #fff; padding: 12px 22px; border-radius: 999px; font-size: 18px; font-weight: 700;
+           z-index: 60; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); max-width: calc(100% - 32px); text-align: center;
+           pointer-events: none; }
+  /* Phone: show the toast ABOVE the Save bar, not on top of it */
+  @media (max-width: 699px) {
+    .toast { bottom: max(calc(20px + env(safe-area-inset-bottom)), calc(var(--bar-h, 0px) + 12px)); }
+  }
+
+  /* =============================================================
+     THE COLORFUL WEEK (my plan / everyone's plan)
+     ============================================================= */
+  /* Day / Week switch + ‹ day buttons ›: on the computer too (the phone's look: see "Phone: one day, big and clear") */
+  .k-nav { display: none; }   /* (shown below on the computer, and in the PHONE part on the phone) */
+  @media (min-width: 700px) {
+    .k-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .k-navrow { order: 2; margin-left: auto; }
+    .k-mode { margin: 0; }
+    .k-days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .k-arrow { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--line);
+               background: #fff; font-size: 22px; font-weight: 800; line-height: 1; }
+    .k-dbtn { min-height: 42px; padding: 4px 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff;
+              font-size: 15px; font-weight: 800; white-space: nowrap; }
+    .k-days .k-dbtn small { display: inline; font-size: 15px; margin-left: 4px; }
+    .k-dbtn.istoday { border-color: #facc15; background: #fffbea; }
+    .k-dbtn.sel { background: var(--text); border-color: var(--text); color: #fff; }
+    .k-dbtn.sel.istoday { border-color: #facc15; box-shadow: 0 0 0 2px #facc15; }   /* (today keeps its yellow ring when it's picked) */
+    /* One day on the computer: only that day's column (and its times), a bit bigger */
+    .k-week.rows.one-day { grid-template-columns: var(--cols-day); }
+    .k-week.rows.one-day .k-cell:not(.sel), .k-week.rows.one-day .k-time.not-sel { display: none; }
+    .k-week.rows.one-day .k-dayname { font-size: 17px; }
+    .k-week.rows.one-day .k-block .who, .k-week.rows.one-day .k-block.fixed .who { font-size: 17px; }
+    .k-week.rows.one-day .k-block .k-sub, .k-week.rows.one-day .k-block .when, .k-week.rows.one-day .k-block .what { font-size: 14px; }
+    .k-week.rows.one-day .k-time { font-size: 13px; }
+  }
+  .k-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
+  .k-day { background: #fff; border-radius: 26px; padding: 14px 10px 16px; border: 4px solid transparent;
+           box-shadow: var(--shadow); min-height: 260px; }
+  .k-day.today { border-color: #f1dc9a; }
+  /* Day header: "Mon 6 Oct" on one line — same font, size and height for all 7 days. Today: a soft highlight. */
+  .k-dayname { text-align: center; font-size: 20px; font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden;
+               text-overflow: ellipsis; padding: 6px 4px; margin: -4px 0 10px; border-radius: 14px; }
+  .k-day.today .k-dayname, .k-head.today .k-dayname { background: #fdf3d3; color: #6b4f05; }
+  /* 📅 Past days (the 5 before today): look-only history, a little greyed */
+  .k-day.past { background: #f6f7f9; box-shadow: none; }
+  .k-head.past .k-dayname { color: var(--muted); }
+  .k-dbtn.past { color: var(--muted); }
+  /* Activity blocks: light background of the person's color, a darker left border of the same color, dark text */
+  .k-block { display: block; width: 100%; text-align: left; font-family: inherit; color: var(--text); cursor: pointer;
+             background: var(--soft); border: 1px solid rgba(0, 0, 0, .06); border-left: 6px solid var(--line-c); border-radius: 14px; min-height: 0;
+             padding: 10px 12px; margin: 0 0 10px; transition: opacity .2s, transform .15s; }
+  .k-dots { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: 1px; }
+  .k-dots i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .k-block:hover { background: var(--soft); transform: translateY(-2px); }
+  .k-block:active { transform: scale(.97); }
+  .k-block .who { display: block; font-size: 24px; font-weight: 800; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+  .k-block .when { display: block; font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .k-block .what { display: block; font-size: 15px; font-weight: 500; color: #625b80; line-height: 1.25; margin-top: 2px; }
+  .k-block.fixed .who { font-size: 19px; }
+  .k-block.faded { opacity: .18; }
+  .k-block:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .k-daydate { display: block; font-size: 14px; font-weight: 600; color: var(--muted); line-height: 1; }
+  /* Routines: a thin, soft grey strip (emoji + name only) */
+  .k-routine { display: flex; align-items: center; gap: 6px; background: #f2f2f5; color: #777c89; border-radius: 999px;
+               padding: 2px 12px; margin: 0 0 8px; font-size: 15px; font-weight: 700; line-height: 1.5; cursor: pointer; }
+  .k-routine:hover { background: #e9e9ef; }
+  .k-routine .r-nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-routine .r-who { flex: none; font-size: 13px; opacity: .85; }
+  .k-routine.faded { opacity: .25; }
+  /* 🕌 Prayer times: a thin soft green line with the time (on its own, or inside the activity happening then) */
+  .k-pray { display: block; margin: 0 0 4px; padding: 0 8px; border-top: 2px solid #34a56f; color: #1f6b47; background: #effaf4;
+            font-size: 12px; font-weight: 800; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .k-pray.in { margin: 5px -4px 0; border-radius: 0 0 6px 6px; background: rgba(239, 250, 244, .9); }
+  .k-block .k-pray.in { font-size: 11px; line-height: 15px; }
+  /* Time grid: a line across the day at the exact time */
+  .ev-pray { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid #34a56f; z-index: 6; pointer-events: none; }
+  .ev-pray span { position: absolute; right: 2px; top: -1px; background: #effaf4; color: #1f6b47; font-size: 10px; font-weight: 800;
+                  padding: 0 4px; border-radius: 0 0 4px 4px; white-space: nowrap; }
+  /* "Show prayer times on your calendar?" box */
+  .pray-card { max-width: 420px; text-align: center; padding: 0 22px 22px; }
+  .pray-card .leave-emoji { margin-top: 22px; }
+  /* Settings: On / Off */
+  .pray-seg { margin: 4px 0 12px; }
+  /* Settings for a kid: only the cards that are for everyone */
+  #scr-settings.kid-view .card:not(.for-all) { display: none; }
+  #scr-settings.kid-view .for-all { margin-top: 0 !important; }
+  #scr-settings.kid-view .two-col { grid-template-columns: minmax(0, 560px); }
+  /* Get ready / break around an activity: an even thinner, light striped strip with small text */
+  .k-routine.pad { background: repeating-linear-gradient(135deg, #f3f3f7 0 6px, #e6e6ee 6px 12px); color: #6f7486;
+                   border: 1px dashed #d6d8e2; font-size: 12px; line-height: 1.5; padding: 0 10px; margin: -2px 0 6px; }
+  .k-routine.pad:hover { background: repeating-linear-gradient(135deg, #efeff4 0 6px, #e4e4ec 6px 12px); }
+  .k-routine:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  /* Rows by time of day: a small time label on the left, one row per start time, the same cards as before.
+     Each day's white card (.k-day) is drawn behind its column; the cells sit on top of it. */
+  .k-week.rows { grid-template-columns: var(--cols); gap: 0; }   /* columns: time labels + each day's lanes (set by the app) */
+  .k-week.rows .k-day { min-height: 0; padding: 0; }
+  .k-cell { position: relative; min-width: 0; padding: 0 14px; }
+  .k-cell.k-head { padding-top: 18px; }
+  .k-time { grid-column: 1; position: relative; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap;
+            text-align: right; padding: 4px 2px 0 0; }
+  .k-corner { grid-column: 1; grid-row: 1; }
+
+  /* ✋ Drag and drop (Bro2a): grab a flexible block; green = free, red = busy */
+  .k-block { position: relative; }
+  .k-block.draggable { cursor: grab; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .k-block.dragging { z-index: 45; cursor: grabbing; transition: none; box-shadow: 0 16px 34px rgba(0, 0, 0, .28); opacity: .96; }
+  .k-block.dragging.drop-ok { border-color: #16a34a; background: #dcfce7; }
+  .k-block.dragging.drop-bad { border-color: #dc2626; background: #fee2e2; }
+  .k-block.dragging .when { font-weight: 800; }
+  .k-day.drop-target { outline: 3px dashed var(--accent); outline-offset: -3px; }
+  .k-dbtn.drop-target { background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important; }
+  .k-dbtn small { display: block; font-size: 11px; font-weight: 700; line-height: 1; opacity: .8; }
+  body.drag-on { -webkit-user-select: none; user-select: none; }
+  /* Phone: while dragging, the day buttons stay at the top of the screen, so you can drop onto another day */
+  body.drag-on .k-nav { position: sticky; top: 0; z-index: 44; background: var(--bg); padding: 6px 0 8px;
+                        box-shadow: 0 6px 12px -8px rgba(0, 0, 0, .3); }
+  .k-pin { position: absolute; top: 4px; right: 6px; min-height: 0; padding: 0 2px; border: none; background: none;
+           font-size: 14px; line-height: 1; cursor: pointer; }
+  span.k-pin { cursor: default; }
+  button.k-pin:hover { background: none; transform: scale(1.2); }
+  /* ✏️ Edit calendar: the bar at the top, movable blocks (✥ + dashed border), locked ones (🔒) */
+  .edit-cal-btn { border-color: #f1d27a; background: #fff7e0; }
+  .edit-cal-btn:hover { background: #fdeec2; }
+  .edit-bar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 8px 12px;
+              flex-wrap: wrap; background: #fff7e0; border: 2px solid #f1d27a; border-radius: 18px; padding: 10px 14px; margin: 0 0 14px;
+              font-size: 17px; font-weight: 800; box-shadow: var(--shadow); }
+  .edit-btns { display: flex; gap: 8px; }
+  .edit-btns button { border-radius: 999px; min-height: 48px; }
+  .edit-btns button:disabled { opacity: .4; cursor: default; }
+  .edit-bar .save-btn { min-height: 48px; font-size: 18px; padding: 6px 24px; background: #16a34a; border-color: #16a34a; color: #fff; }
+  .edit-bar .save-btn:hover { background: #15803d; border-color: #15803d; }
+  .k-block.editable { border: 2px dashed var(--line-c); border-left: 6px solid var(--line-c); touch-action: pinch-zoom; }
+  .k-handle, .k-lock { position: absolute; top: 4px; right: 8px; font-size: 16px; line-height: 1; color: var(--ink); opacity: .75; }
+  .k-lock { font-size: 13px; opacity: .6; }
+  .k-block.editable .k-pin { right: 28px; }
+  .k-block.locked { cursor: not-allowed; opacity: .75; }
+  .k-block.locked:hover { transform: none; }
+  /* The small "Move" box: day buttons + start time + green/red check */
+  .move-card { max-width: 460px; padding-bottom: 22px; }
+  .move-card .save-btn { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .move-body { padding: 14px 24px 0; }
+  .move-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 12px; }
+  .move-days button { min-height: 50px; padding: 2px 0; border-radius: 12px; font-size: 15px; line-height: 1.1; }
+  .move-days button small { display: block; font-size: 11px; opacity: .8; }
+  .move-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .move-check { margin-top: 10px; min-height: 24px; font-size: 16px; font-weight: 800; }
+  .move-check.ok { color: #15803d; }
+  .move-check.bad { color: var(--danger); }
+
+  /* The big round "done" checkbox */
+  .k-checks { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .k-check { width: 24px; height: 24px; min-height: 0; padding: 0; border-radius: 50%; flex: none;
+             border: 4px solid var(--c); background: #fff; color: #fff; font-size: 13px; font-weight: 800; line-height: 1;
+             display: grid; place-items: center; transition: transform .15s, background .15s; }
+  .k-check:hover { background: #fff; transform: scale(1.08); }
+  .k-check:active { transform: scale(.9); }
+  .k-check .e { font-size: 13px; }
+  .k-check.on { background: var(--c); }
+  .k-check.on:hover { background: var(--c); }
+  .k-check:disabled { border-style: dashed; opacity: .4; cursor: default; transform: none; }
+  /* Done: a big checkmark, and the rest a little faded */
+  .k-block.done { background: #f7f7f7; border-style: dashed; }
+  .k-block.done .who, .k-block.done .when, .k-block.done .what { opacity: .5; }
+  .k-block.done .when { text-decoration: line-through; }
+  .k-donetag { display: inline-block; font-size: 14px; font-weight: 800; color: var(--ok); margin-left: 6px; align-self: center; }
+
+  /* Confetti and the happy message */
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }
+  /* 🎒 The small "+5 ⭐" pop when school points are earned */
+  .pt-pop { position: fixed; z-index: 75; pointer-events: none; transform: translate(-50%, -50%); padding: 6px 12px; border-radius: 999px;
+            background: var(--c, #c79a22); color: #fff; font-weight: 800; font-size: 17px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+            animation: ptpop 1.4s ease-out forwards; }
+  @keyframes ptpop {
+    0%   { transform: translate(-50%, -50%) scale(.6); opacity: 0; }
+    15%  { transform: translate(-50%, -70%) scale(1.1); opacity: 1; }
+    70%  { transform: translate(-50%, -130%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -170%) scale(1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pt-pop { animation: ptfade 1.4s linear forwards; } @keyframes ptfade { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }
+  .confetti span { position: absolute; left: var(--x); top: var(--y); font-size: var(--s); line-height: 1;
+                   animation: burst 1.3s cubic-bezier(.15, .7, .4, 1) forwards; }
+  .confetti i { position: absolute; left: var(--x); top: var(--y); width: 10px; height: 14px; border-radius: 3px;
+                background: var(--c); animation: burst 1.3s cubic-bezier(.15, .7, .4, 1) forwards; }
+  @keyframes burst {
+    0%   { transform: translate(-50%, -50%) scale(.3) rotate(0); opacity: 1; }
+    75%  { opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); opacity: 0; }
+  }
+  .toast.cheer { font-size: 24px; padding: 14px 28px; background: var(--c, var(--text));
+                 animation: bounce .5s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes bounce { from { transform: translateX(-50%) scale(.6); } to { transform: translateX(-50%) scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .toast.cheer, .star-badge, .savebar .save-btn { animation: none !important; } }
+
+  /* Save bar: stays at the bottom of the page. Grey when there's nothing to save, bright green and pulsing when there is. */
+  .savebar { position: sticky; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: flex-end;
+             gap: 10px; flex-wrap: wrap; margin-top: 24px; padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+             background: rgba(255, 246, 229, .95); border-top: 2px solid var(--line); }
+  .save-note { margin-right: auto; font-size: 18px; font-weight: 800; color: var(--warn); }
+  .save-btn { min-height: 60px; padding: 8px 36px; border-radius: 999px; font-size: 24px; font-weight: 800; }
+  .savebar .save-btn { background: #e9e6df; border-color: #e9e6df; color: #a39f96; }
+  .savebar.dirty .save-btn, .leave-card .save-btn { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .savebar.dirty .save-btn { animation: pulse 1.6s ease-in-out infinite; }
+  .savebar.dirty .save-btn:hover, .leave-card .save-btn:hover { background: #15803d; border-color: #15803d; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, .5); } 50% { box-shadow: 0 0 0 12px rgba(22, 163, 74, 0); } }
+  .cancel-btn { border-radius: 999px; min-height: 52px; }
+  .savebar button:disabled { cursor: default; }
+  .savebar .cancel-btn:disabled { opacity: .45; }
+  /* =============================================================
+     🎒 SCHOOL page (info + timetable, grades, homework & exams, weekly review, Seesaw)
+     ============================================================= */
+  input[type=date], textarea { width: 100%; padding: 10px 14px; border: 2px solid var(--line); border-radius: 16px; min-height: 52px;
+                               font: inherit; font-size: 18px; background: #fffdf8; color: var(--text); }
+  textarea { resize: vertical; min-height: 90px; margin-bottom: 12px; }
+  input[type=date]:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: #fff; }
+  .sc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+  .sc-grid > .card { margin: 0; }
+  .sc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .sc-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+  .sc-form { background: var(--accent-soft); border-radius: 22px; padding: 14px 16px; margin: 10px 0 6px; }
+  .sc-info { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 18px; margin: 6px 0 10px; }
+  .sc-info span { color: var(--muted); font-weight: 700; }
+  .sc-info b { overflow-wrap: anywhere; }
+  .sc-tt { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .sc-tt th { text-align: left; width: 56px; padding: 6px 8px 6px 0; vertical-align: top; }
+  .sc-tt td { padding: 4px 0; border-bottom: 2px solid var(--line); }
+  .sc-tt tr:last-child td { border-bottom: none; }
+  .sc-tt th.today { color: #6b4f05; }
+  .sc-sub { display: inline-block; background: #f3e9d6; border-radius: 999px; padding: 2px 10px; margin: 2px 4px 2px 0; font-weight: 700; font-size: 15px; }
+  .sc-ttrow { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .sc-ttrow input { min-height: 44px; font-size: 16px; }
+  /* Grades: averages per subject (▲ better than the last mark, ▼ worse) */
+  .sc-avgs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .sc-avg { background: #fff; border: 2px solid var(--line); border-radius: 18px; padding: 8px 14px; min-width: 120px; }
+  .sc-avg b { display: block; font-size: 16px; }
+  .sc-avg .pct { font-size: 26px; font-weight: 800; }
+  .sc-avg small { color: var(--muted); font-size: 13px; display: block; }
+  .sc-up { color: var(--ok); font-weight: 800; }
+  .sc-down { color: var(--danger); font-weight: 800; }
+  .sc-same { color: var(--muted); font-weight: 800; }
+  .sc-score { font-weight: 800; white-space: nowrap; }
+  .sc-tag { display: inline-block; border-radius: 999px; padding: 0 8px; font-size: 13px; font-weight: 800; background: #eef2ff; color: #4338ca; margin-right: 4px; }
+  .sc-tag.exam { background: #fee2e2; color: #b91c1c; }
+  .sc-tag.late { background: #fff7ed; color: #c2410c; }
+  .sc-tag.soon { background: #fef9c3; color: #854d0e; }
+  ul.list li.sc-done .what { text-decoration: line-through; opacity: .6; }
+  .sc-tick { width: 28px; height: 28px; flex: none; accent-color: var(--ok); cursor: pointer; }
+  .sc-tick:disabled { cursor: default; }
+  /* Weekly review: stars */
+  .sc-stars { letter-spacing: 1px; color: #f59e0b; white-space: nowrap; }
+  .sc-stars .off { color: #e5e7eb; }
+  .sc-review { padding: 10px 4px; border-bottom: 2px solid var(--line); }
+  .sc-review:last-child { border-bottom: none; }
+  .sc-review .sc-rates { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 15px; margin: 4px 0; }
+  .sc-review p { margin: 4px 0 0; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sc-starpick { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .sc-starpick > span { min-width: 120px; font-weight: 700; }
+  .sc-starpick button { min-height: 40px; min-width: 40px; padding: 0; border-radius: 12px; font-size: 22px; color: #e5e7eb; }
+  .sc-starpick button.on { color: #f59e0b; border-color: #fcd34d; background: #fffbeb; }
+  /* Seesaw */
+  .sc-ss { padding: 12px 4px; border-bottom: 2px solid var(--line); }
+  .sc-ss:last-child { border-bottom: none; }
+  .sc-ss p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 17px; }
+  .sc-photo { display: block; max-width: 100%; max-height: 520px; border-radius: 14px; margin-top: 8px; border: 2px solid var(--line); background: #f8f5ee; }
+  img.sc-photo:not([src]) { min-height: 80px; width: 100%; }
+  .sc-photo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sc-file { display: inline-flex; align-items: center; cursor: pointer; }
+  .sc-seesaw-card { max-width: 540px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 0 22px 22px; }
+  .sc-seesaw-card .print-title, .sc-seesaw-card .print-hint { margin-left: 0; margin-right: 0; }
+  .sc-seesaw-card .print-hint { margin-bottom: 14px; }
+  .sc-empty { color: var(--muted); font-size: 17px; margin: 8px 0; }
+  .sc-h3 { font-size: 19px; margin: 14px 0 4px; }
+  .sc-info b { white-space: pre-wrap; }
+  @media (max-width: 800px) { .sc-grid { grid-template-columns: 1fr; } }
+  /* =============================================================
+     🎒 SCHOOL — "Binder": tiles, colored subject folders with a tab, a crumb on top
+     ============================================================= */
+  .home-big { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 18px; }
+  .big-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 170px;
+             border-radius: 30px; border: 3px solid transparent; box-shadow: var(--shadow); text-align: center; transition: transform .15s;
+             min-width: 0; overflow: hidden; overflow-wrap: anywhere; padding: 14px 10px; }   /* never wider than its column: the text wraps */
+  .big-btn > * { max-width: 100%; line-height: 1.15; }
+  .big-btn:hover { transform: translateY(-3px); }
+  .big-btn:active { transform: scale(.97); }
+  .big-btn .e { font-size: 64px; line-height: 1.1; }
+  .big-btn b { font-size: 32px; font-weight: 800; }
+  .big-btn small { font-size: 17px; font-weight: 600; opacity: .85; }
+  /* (not "cal": that's the calendar grid, 840px wide, which pushed this button over the School one) */
+  .big-btn.big-cal { background: linear-gradient(135deg, #7c6cf0, #5b5bd6); color: #fff; }
+  .big-btn.big-cal:hover { background: linear-gradient(135deg, #7366ea, #5252cc); }
+  .big-btn.school { background: linear-gradient(135deg, #ffb347, #f0892b); color: #fff; }
+  .big-btn.school:hover { background: linear-gradient(135deg, #f7a93c, #e67f22); }
+  .bd-crumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 0 0 14px; font-size: 17px; }
+  .bd-crumb button { min-height: 38px; padding: 2px 12px; border-radius: 999px; font-size: 16px; background: #fff; }
+  .bd-crumb .sep { color: var(--muted); font-weight: 800; }
+  .bd-crumb b { padding: 2px 6px; }
+  .bd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; }
+  .bd-head h2 { font-size: 28px; margin: 0; }
+  .bd-card h2 { font-size: 22px; }
+  /* School home: 6 tiles, 2 columns, each like a binder tab */
+  .bd-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .bd-tile { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; text-align: left;
+             min-height: 96px; padding: 14px 16px; border-radius: 24px; background: #fff; border: 3px solid var(--line);
+             border-left: 12px solid var(--tab, var(--accent)); box-shadow: var(--shadow); }
+  .bd-tile .e { grid-row: 1 / 3; font-size: 40px; }
+  .bd-tile b { font-size: 22px; font-weight: 800; }
+  .bd-tile small { color: var(--muted); font-size: 15px; font-weight: 600; }
+  .bd-subjects { --tab: #4a7fd4; } .bd-homework { --tab: #df8238; } .bd-marks { --tab: #3e9f68; }
+  .bd-reviews { --tab: #c79a22; } .bd-info { --tab: #8167d2; } .bd-reports { --tab: #2f9a92; }
+  /* Subject folders */
+  .bd-folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .bd-folder { position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; text-align: left;
+               padding: 22px 16px 14px; border-radius: 6px 22px 22px 22px; background: var(--soft); border: 3px solid var(--c); color: var(--ink);
+               min-height: 110px; box-shadow: var(--shadow); margin-top: 14px; }
+  .bd-folder::before { content: ""; position: absolute; left: -3px; top: -17px; width: 42%; height: 16px; background: var(--c);
+                       border-radius: 10px 10px 0 0; }
+  .bd-folder .e { font-size: 40px; grid-row: 1 / 3; }
+  .bd-folder .nm { font-size: 24px; font-weight: 800; }
+  .bd-stats { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; font-weight: 600; color: var(--ink); opacity: .9; }
+  .bd-stats b { font-size: 16px; }
+  .bd-stats .todo b { color: #c2410c; }
+  .bd-folder-head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 12px; border-radius: 6px 22px 22px 22px;
+                    background: var(--soft); color: var(--ink); border: 3px solid var(--c); border-top-width: 10px; }
+  .bd-folder-head .e { font-size: 40px; }
+  .bd-folder-head h2 { flex: 1; margin: 0; font-size: 28px; }
+  .bd-head-btns { display: flex; gap: 4px; }
+  .bd-actions .pill { min-height: 46px; }
+  .bd-bar { height: 14px; border-radius: 999px; background: #f0ebe0; overflow: hidden; margin: 6px 0 10px; }
+  .bd-bar i { display: block; height: 100%; border-radius: 999px; }
+  .bd-avg { color: var(--ink, var(--text)); font-weight: 800; }
+  .bd-avgrow { padding: 8px 0 2px; border-bottom: 2px solid var(--line); }
+  .bd-avgrow:last-child { border-bottom: none; }
+  .bd-avgtop { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 18px; }
+  .bd-avgtop small { color: var(--muted); }
+  .bd-avgrow .bd-bar { margin: 6px 0 8px; }
+  /* Files */
+  .bd-file { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 0; padding: 4px 2px; border: none; background: none; text-align: left; }
+  .bd-file:hover { background: none; }
+  .bd-file .e { font-size: 28px; }
+  .bd-file .what { flex: 1; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .bd-file .what small { display: block; color: var(--muted); font-weight: 500; font-size: 14px; }
+  .bd-file-card { max-width: 760px; }
+  .bd-file-body { margin: 6px 0 14px; }
+  .bd-preview-img { display: block; max-width: 100%; max-height: 65vh; margin: 0 auto; border-radius: 12px; border: 2px solid var(--line); }
+  .bd-preview-pdf { display: block; width: 100%; height: 65vh; border: 2px solid var(--line); border-radius: 12px; background: #f8f5ee; }
+  .bd-linktext { font-size: 15px; overflow-wrap: anywhere; background: #f8f5ee; border-radius: 12px; padding: 10px 12px; }
+  /* Homework */
+  ul.list li.bd-task { align-items: flex-start; }
+  .bd-task .sc-tick { margin-top: 4px; }
+  .bd-task-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .bd-task-btns .linkbtn { min-height: 34px; font-size: 14px; }
+  .bd-status { font-weight: 800; }
+  .bd-status.answers { color: #1d4ed8; }
+  .bd-status.checked { color: var(--ok); }
+  .bd-task .sc-form { margin-top: 8px; }
+  /* Reviews: points this week */
+  .bd-points { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; text-align: center; }
+  .bd-points div { background: #f8f5ee; border-radius: 16px; padding: 10px 4px; }
+  .bd-points b { display: block; font-size: 28px; font-weight: 800; }
+  .bd-points small { color: var(--muted); font-size: 13px; font-weight: 700; }
+  .bd-points .total { background: #fff7e0; }
+  /* Timetable */
+  .bd-tt-scroll { overflow-x: auto; }
+  .bd-tt { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 460px; }
+  .bd-tt th { padding: 6px 4px; color: var(--muted); font-size: 14px; }
+  .bd-tt thead th.today { color: #6b4f05; background: #fdf3d3; border-radius: 10px 10px 0 0; }
+  .bd-tt td { padding: 3px; border-top: 2px solid var(--line); text-align: center; }
+  .bd-tt td.today { background: #fffbea; }
+  .bd-lesson { display: inline-block; border-radius: 10px; padding: 2px 8px; font-weight: 700; font-size: 14px; background: var(--soft, #f3e9d6); color: var(--ink, var(--text)); }
+  .bd-tt-edit { display: grid; grid-template-columns: 26px repeat(5, minmax(0, 1fr)); gap: 4px; align-items: center; overflow-x: auto; }
+  .bd-tt-edit b { text-align: center; font-size: 14px; }
+  .bd-tt-edit .n { color: var(--muted); font-weight: 800; text-align: center; }
+  .bd-tt-edit input { min-height: 40px; padding: 4px 6px; font-size: 14px; border-radius: 10px; min-width: 70px; }
+  /* 📄 The report (on screen and on paper) */
+  .bd-report-preview { margin-top: 18px; background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 22px; font-size: 16px; overflow-x: auto; }
+  .bd-report-page { font-size: var(--fs, 13pt); }
+  .bd-report { display: flex; flex-direction: column; gap: 1em; min-width: 0; }
+  .rp-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1em; border-bottom: .15em solid #333; padding-bottom: .5em; }
+  .rp-title { font-size: 1.8em; font-weight: 800; line-height: 1.1; }
+  .rp-sub, .rp-date { font-size: .85em; color: #555; margin-top: .2em; }
+  .rp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+  .rp-box { border: .1em solid #ccc; border-radius: .6em; padding: .6em .8em; break-inside: avoid; }
+  .rp-wide { grid-column: 1 / -1; }
+  .rp-box h3 { margin: 0 0 .4em; font-size: 1.05em; }
+  .rp-box p { margin: .2em 0 .6em; }
+  .rp-table { width: 100%; border-collapse: collapse; }
+  .rp-table td { padding: .2em .3em; border-bottom: .05em solid #eee; white-space: nowrap; }
+  .rp-bar { width: 40%; }
+  .rp-bar i { display: block; height: .7em; border-radius: 1em; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .rp-pct { font-weight: 800; text-align: right; }
+  .rp-n { color: #666; font-size: .85em; }
+  .rp-stars { display: flex; flex-wrap: wrap; gap: .3em 1.2em; }
+  .rp-note { font-style: italic; }
+  .rp-foot { margin-top: auto; text-align: right; }
+  .rp-foot .line { display: inline-block; width: 14em; border-bottom: .1em solid #333; margin-left: .5em; }
+  /* 🎒 School home (like a tutor): one big 📥 button, then a tile per subject with its success % */
+  .sc-addbig { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 100%; min-height: 84px;
+               margin: 0 0 20px; padding: 12px 16px; border-radius: 26px; border: none; font-size: 22px; font-weight: 800; color: #fff;
+               background: linear-gradient(135deg, #ffb347, #f0892b); box-shadow: var(--shadow); overflow-wrap: anywhere; line-height: 1.2; }
+  .sc-addbig:hover { background: linear-gradient(135deg, #f7a93c, #e67f22); }
+  .sc-addbig small { font-size: 15px; font-weight: 600; opacity: .9; }
+  .sc-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .sc-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 130px;
+             padding: 12px 8px; border-radius: 22px; background: #fff; border: 3px solid var(--line); border-top: 10px solid var(--c);
+             box-shadow: var(--shadow); text-align: center; }
+  .sc-tile .e { font-size: 38px; line-height: 1.1; }
+  .sc-tile b { max-width: 100%; font-size: 19px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  /* Success %: green ≥ 80, amber 60–79, red < 60 */
+  .lv-good { color: #15803d; } .lv-mid { color: #b45309; } .lv-low { color: #b91c1c; }
+  .sc-pct { border-radius: 999px; padding: 2px 12px; font-size: 16px; font-weight: 800; }
+  .sc-pct.lv-good { background: #dcfce7; } .sc-pct.lv-mid { background: #fef3c7; } .sc-pct.lv-low { background: #fee2e2; }
+  /* 📝 All my worksheets: the score as a coloured badge (🟢 ≥ 80 · 🟡 50–79 · 🔴 < 50) */
+  /* 👨‍👩‍👧 THE PARENT'S HOME: 🔔 Needs you · a card per kid · the Family row (simple, big touch targets, fits a phone for 3 kids) */
+  .p-home { display: grid; gap: 8px; margin-top: 4px; font-family: "Baloo 2", inherit; }
+  #scr-home:not(.kid-home) .enc-line { display: none !important; }   /* (📊 is on each kid's card and in ☰ More) */
+  /* (a parent's home: the hello and the date a little smaller; 📅 is in the Family row, so no big Calendar bar here) */
+  #scr-home:not(.kid-home) .bar .cal-btn { display: none; }
+  #scr-home:not(.kid-home) .home-date { margin: 0 0 6px; }
+  #scr-home:not(.kid-home) .home-date b { font-size: 26px; }
+  #scr-home:not(.kid-home) .home-date span { font-size: 15px; }
+  #scr-home:not(.kid-home) .hello { gap: 12px; margin-bottom: 8px; }
+  #scr-home:not(.kid-home) .hello-face { width: 60px; height: 60px; font-size: 34px; }
+  #scr-home:not(.kid-home) .big-title { font-size: 30px; }
+  .needs-line { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 4px 14px;
+                border-radius: 16px; border: 2px solid #f59e0b; background: #fffbea; font-size: 16px; font-weight: 800; text-align: left; }
+  .needs-line.on { border-radius: 16px 16px 0 0; }
+  .needs-list { display: grid; gap: 6px; padding: 8px; background: #fffbea; border: 2px solid #f59e0b; border-top: 0; border-radius: 0 0 16px 16px; }
+  .needs-list button { min-height: 44px; text-align: left; font-weight: 700; }
+  .needs-panel > .card { margin: 8px 0 0; }
+  .kid-cards { display: grid; gap: 8px; margin: 0; }
+  .p-home > *, .p-home .kid-card { margin-top: 0 !important; margin-bottom: 0 !important; }
+  .kid-card { margin: 0; padding: 8px 10px; border-left: 8px solid var(--c); background: var(--soft); color: var(--ink); }
+  .kc-open { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 0; background: none; border: 0; text-align: left; color: inherit; }
+  .kc-ring { position: relative; flex: none; width: 50px; height: 50px; display: grid; place-items: center; }
+  .kc-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .kc-ring .kc-bar { fill: none; stroke: var(--c); stroke-width: 10; stroke-linecap: round; }
+  .kc-ring b { position: relative; font-size: 18px; }
+  .kc-text { flex: 1; min-width: 0; display: grid; }
+  .kc-text b { font-size: 19px; line-height: 1.15; }
+  .kc-text small { font-size: 13px; font-weight: 700; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kc-go { font-size: 26px; font-weight: 800; opacity: .6; }
+  .kc-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .kc-btns button { min-height: 38px; padding: 2px 4px; border-radius: 12px; background: #fff; font-size: 13px; font-weight: 800; }
+  .fam-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .fam-row button { display: grid; place-items: center; gap: 0; aspect-ratio: 1 / 1; max-height: 74px; width: 100%; min-height: 60px; padding: 4px; border-radius: 18px; background: #fff; }
+  .fam-row button.on { background: var(--text); color: #fff; }
+  .fam-row .e { font-size: 28px; line-height: 1; }
+  .fam-row small { font-size: 12px; font-weight: 800; line-height: 1.15; text-align: center; }
+  .fr-new { display: block; color: var(--danger); }
+  /* 👧 THE KID PAGE */
+  .kp-top { border-top: 8px solid var(--c); }
+  .kp-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .kp-head h1 { margin: 0; font-size: 26px; }
+  .kp-head .kc-ring { width: 72px; height: 72px; }
+  .kp-h { margin: 16px 4px 6px; font-size: 20px; }
+  .td-row.done .td-what { opacity: .6; }
+  /* 📰 The weekly newsletter reminder (a parent's home) */
+  .nl-nudge { border-left: 6px solid var(--c); background: #fffbea; }
+  .nl-nudge p { margin: 0 0 8px; font-weight: 700; }
+  /* ❌ Didn't happen (on the rating cards) */
+  .rate-btns .miss-btn { border-color: #fecaca; }
+  .rate-btns .miss-btn b { font-size: 12px; }
+  /* 🔗 Matching: two columns, clear borders, the same row heights, room to write a letter (phone: still side by side, smaller) */
+  .ws-match { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  .ws-match td { width: 50%; height: 48px; padding: 8px; border: 1.5px solid #6b7280; vertical-align: middle; overflow-wrap: anywhere; }
+  .wm-box { display: inline-block; width: 32px; height: 32px; margin-inline-end: 8px; border: 2px solid #111827; border-radius: 4px;
+            text-align: center; line-height: 28px; font-weight: 800; vertical-align: middle; color: #15803d; }
+  @media (max-width: 520px) {
+    .ws-match { font-size: 13px; }
+    .ws-match td { height: 42px; padding: 5px 4px; }
+    .wm-box { width: 26px; height: 26px; line-height: 22px; margin-inline-end: 5px; }
+  }
+  /* 🖼️ A parent's photo instead of their emoji (any size: it follows the emoji's size) */
+  .face-img { display: inline-block; width: 1.15em; height: 1.15em; border-radius: 50%; object-fit: cover; vertical-align: -0.2em; }
+  .me-face .face-img, #homeFace .face-img { width: 1em; height: 1em; }
+  .me-pic { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 4px 0; }
+  .me-pic-now { font-size: 56px; line-height: 1; }
+  .me-pic-img { width: 72px; height: 72px; }
+  /* 🇦🇪 Arabic worksheets (right-to-left) · 🌐 the Arabic translation under a question · the header */
+  .ws-rtl { direction: rtl; text-align: right; }
+  .ws-ar { margin: 3px 0 2px; font-size: .85em; color: #6b7280; direction: rtl; text-align: right; }
+  .ws-head { flex-wrap: wrap; gap: 4px 18px; }
+  .tr-toggle { margin: 8px 0 4px; }
+  /* 📸 answer photos before the check: thumbnails with 🗑 */
+  .ans-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .ans-thumb { position: relative; width: 110px; }
+  .ans-open { display: grid; gap: 4px; width: 100%; min-height: 0; padding: 4px; border-radius: 12px; background: #fff; border: 2px solid var(--line); }
+  .ans-open img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
+  .ans-open .e { font-size: 40px; height: 110px; display: grid; place-items: center; }
+  .ans-open small { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ans-del { position: absolute; top: -8px; right: -8px; width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; background: #fff; border: 2px solid var(--danger); font-size: 17px; }
+  /* ❌ mistakes one by one */
+  .mist-card { margin: 12px 0 0; border-left: 6px solid var(--danger); }
+  .mist-card.ws-rtl { border-left: 0; border-right: 6px solid var(--danger); }
+  .mist-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .mist-q { font-weight: 700; margin: 8px 0; }
+  .mist-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 10px; margin: 6px 0; }
+  .mist-row.bad { background: #fee2e2; } .mist-row.ok { background: #dcfce7; }
+  .mist-why { margin: 8px 0; }
+  /* 📚 Which subject today? · the subject filter under the calendar · 🎯 worksheet goals */
+  .k-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+  .k-pick .chip { min-height: 34px; padding: 2px 10px; font-size: 14px; }
+  .pick-row { justify-content: center; margin: 10px 16px; flex-wrap: wrap; }
+  .subj-filter { margin-top: 14px; }
+  .subj-sum { margin: 10px 0 0; border-left: 6px solid var(--c); line-height: 1.5; }
+  .goal-line { margin: 4px 0; font-weight: 700; }
+  .goal-line.ok { color: #15803d; }
+  .goal-warn { margin: 6px 0 0; color: var(--danger); font-weight: 700; }
+  .goal-set select { max-width: 200px; }
+  /* ⏱️ Enough time: the live line on ✏️ Add activities, and the "Not saved" box */
+  .add-time { margin: -4px 0 14px; font-weight: 700; color: var(--muted); }
+  .add-time .over { color: var(--danger); }
+  .time-short { margin: 8px 18px; text-align: left; }
+  .time-short ul { margin: 6px 0 0; padding-left: 20px; }
+  /* 📌 One-day event on the calendar */
+  .k-block.k-oneday { --soft: #fef3c7; --ink: #6b4f05; --line-c: #f59e0b; border-left-style: dashed; }
+  /* 🕗 My day: "Day starts at" / "Day ends at" for each day */
+  .day-hours { display: grid; gap: 8px; margin: 8px 0 10px; }
+  .day-hrow { display: grid; grid-template-columns: minmax(84px, auto) 1fr 1fr; gap: 8px; align-items: end; }
+  .day-hrow label { display: grid; gap: 2px; }
+  .day-hrow b { align-self: center; }
+  .aw-list .ai-status { flex: none; white-space: nowrap; font-weight: 800; }
+  .aw-list .ai-status.lv-good { background: #dcfce7; } .aw-list .ai-status.lv-mid { background: #fef3c7; } .aw-list .ai-status.lv-low { background: #fee2e2; }
+  .aw-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+  .aw-row .what { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .aw-sum { margin: 6px 0 10px; font-weight: 700; color: var(--muted); }
+  .sc-allws { margin: 0 0 12px; }
+  .sc-pct.none { color: var(--muted); }
+  .sc-more { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 0; color: var(--muted); font-size: 15px; font-weight: 700; }
+  .sc-more .linkbtn { min-height: 36px; font-size: 14px; }
+  /* Inside a subject: 5 big buttons, 2 per row (📝 to do is orange when it has worksheets) */
+  .sc-kbtns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+  .sc-kbtn { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+             min-width: 0; min-height: 116px; padding: 12px 8px; border: 3px solid var(--line); border-radius: 22px;
+             background: #fff; color: inherit; box-shadow: var(--shadow); text-align: center; }
+  .sc-kbtn .e { font-size: 40px; line-height: 1; }
+  .sc-kbtn b { max-width: 100%; font-size: 17px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+  .sc-kbtn.on { border-color: #60a5fa; background: #eef6ff; }
+  .sc-kbtn.hot, .sc-kbtn.hot:hover { border-color: #ea580c; background: #f97316; color: #fff; }
+  .sc-kbtn.hot.on { border-color: #9a3412; background: #ea580c; }
+  .sc-kbtn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* The 3 big buttons inside a subject: side by side on a wide screen, one per row on phones */
+  .sc-kbtns3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* 🎒 My school = big subject tiles · a subject: 📂 / ✏️ tabs, ⬆️ I want to study this, the small row of its other parts */
+  .sc-tiles-big { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+  .sc-tiles-big .sc-tile { min-height: 150px; }
+  .sc-tiles-big .sc-tile .e { font-size: 44px; }
+  .sc-lvstars { color: #e8a020; font-size: 20px; letter-spacing: 2px; }
+  .sc-lvstars.none { color: #cfc8b8; }
+  .sc-kbtns2 .sc-kbtn { min-height: 96px; }
+  .sc-study { margin: 0 0 14px; font-size: 21px; font-weight: 800; }
+  .sc-study small { font-weight: 600; }
+  .sc-filebtns { margin: 4px 0 8px 44px; }
+  .sc-makerow { margin: 0 0 12px; }
+  .sc-subrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+  .sc-subrow .pill { font-size: 14px; min-height: 38px; }
+  .aw-seesaw { margin: 0 0 8px; }
+  .sc-kbtns3 .sc-kbtn:last-child:nth-child(odd) { grid-column: auto; }
+  @media (max-width: 699px) {
+    .sc-kbtns3 { grid-template-columns: 1fr; }
+    .sc-kbtns3 .sc-kbtn { flex-direction: row; justify-content: flex-start; min-height: 72px; padding: 10px 16px; text-align: left; gap: 14px; }
+    .sc-kbtns3 .sc-kbtn .e { font-size: 32px; }
+  }
+  /* 📌 My topics, the 💪 / 🎯 note, ▶️ videos, the topic sheet */
+  .sc-topics { margin-top: 0; }
+  .sc-topics h2 { margin-bottom: 8px; }
+  .sc-tchips { margin-top: 6px; }
+  .sc-tchip { min-height: 44px; max-width: 100%; overflow-wrap: anywhere; text-align: left; }
+  span.sc-tchip { display: inline-flex; align-items: center; cursor: default; }
+  .sc-tchip.weak { border-color: #f59e0b; background: #fff8e6; }
+  .sc-goodnote { margin: 12px 0 16px; padding: 10px 14px; border-radius: 16px; background: var(--accent-soft); color: var(--text); font-size: 15px; line-height: 1.4; }
+  .sc-goodnote p { margin: 0; overflow-wrap: anywhere; }
+  .sc-goodnote p + p { margin-top: 4px; }
+  .sc-make .sc-makebtn { width: 100%; min-height: 56px; }
+  .sc-make .linkbtn { display: block; margin: 10px auto 0; min-height: 40px; text-align: center; }
+  .sc-help h2 + .hint { margin-top: -4px; }
+  .sc-help h2:not(:first-child) { margin-top: 18px; }
+  .sc-videos { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sc-video { display: inline-flex; align-items: center; max-width: 100%; text-decoration: none; overflow-wrap: anywhere; }
+  .sc-fstatus { flex: none; margin-left: auto; padding: 2px 10px; border-radius: 999px; background: #fef3c7; font-size: 13px; font-weight: 800; white-space: nowrap; align-self: center; }
+  .sc-fstatus.ok { background: #dcfce7; }
+  .tp-card { max-width: 440px; padding: 0 20px 20px; }
+  .tp-btns { display: grid; gap: 10px; margin-top: 16px; }
+  .tp-big { min-height: 64px; font-size: 20px; font-weight: 800; border-radius: 20px; }
+  .tp-close { display: block; margin: 12px auto 0; min-height: 44px; }
+  /* 👨‍👩‍👧 ⚙️ For parents, ✏️ Edit subjects, ⭐ on the subject tiles */
+  .sc-parentbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .sc-parentbar .pill.on { border-color: var(--accent); background: var(--accent-soft); }
+  .sc-parentpanel .sc-addbig { width: 100%; }
+  .sc-parentlinks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .sc-subrow { flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .sc-subrow .what { flex: 1 1 140px; min-width: 0; font-weight: 800; overflow-wrap: anywhere; }
+  .sc-subrow.off .what { color: var(--muted); }
+  .sc-subrow .sc-form { flex-basis: 100%; }
+  .sc-subbtns { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sc-subbtns button { min-width: 44px; min-height: 44px; padding: 0 6px; font-size: 17px; }
+  .sc-subedit > .pill { margin-top: 10px; }
+  .sc-sugg { margin-bottom: 10px; }
+  .sc-stars { font-size: 13px; line-height: 1; letter-spacing: -1px; }
+  /* 👨‍👩‍👧 A parent's phone: look only (the kids upload and make worksheets) */
+  /* (✏️ Make a worksheet and 🤖 Explain it are for parents too: only the uploads are the kids') */
+  body.parent-phone #scr-school [data-aiadd], body.parent-phone #scr-school [data-scupload],
+  body.parent-phone #scr-school [data-wsrow^="upload|"] { display: none !important; }
+  .sc-badge { position: absolute; top: 8px; right: 8px; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 999px;
+              background: #dc4a4a; color: #fff; font-size: 15px; font-weight: 800; line-height: 28px; }
+  .sc-kbtn.hot .sc-badge { background: #fff; color: #c2410c; }
+  .sc-score { text-align: center; }
+  .sc-cheer { margin: 4px 0 2px; font-size: 21px; font-weight: 800; }
+  .sc-parent { margin: 0 0 16px; }
+  .sc-wsnote { margin: 0 0 8px 40px; color: var(--muted); font-size: 15px; overflow-wrap: anywhere; }
+  .sc-newtopic { margin: 0 0 14px; background: #eef6ff; border: 3px solid #93c5fd; }
+  .sc-newtopic b { font-size: 19px; overflow-wrap: anywhere; }
+  .sc-newtopic p { margin: 6px 0 0; }
+  .sc-newtopic .btnrow { margin-top: 10px; }
+  /* 📊 Overview */
+  .sc-ov { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .sc-ov > .card { margin: 0; }
+  .sc-ov .sc-wide { grid-column: 1 / -1; }
+  .sc-bignum { font-size: 56px; font-weight: 800; line-height: 1; margin: 8px 0 2px; }
+  .sc-ov small { color: var(--muted); font-weight: 600; }
+  .sc-points { margin: 6px 0 0; padding-left: 22px; font-size: 18px; }
+  .sc-points li { margin: 4px 0; overflow-wrap: anywhere; }
+  .sc-tip { background: #fff8e6; }
+  .sc-tip p { margin: 6px 0; font-size: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sc-ov .bd-avgtop b { min-width: 0; overflow-wrap: anywhere; }
+  .sc-ov .bd-avgtop span { flex: none; }
+  /* 📝 Worksheets list */
+  ul.list li.sc-wsrow { display: block; }
+  .sc-wsstatus { margin: 0 0 8px 40px; font-size: 16px; }
+  .sc-wsbtns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
+  .sc-older-btn { width: 100%; margin: 18px 0 12px; text-align: left; }
+  /* ⬆️ Upload + 📰 Newsletter side by side; 🔔 reminders; 📌 past school dates */
+  .sc-topbtns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; }
+  .sc-make, .sc-make:hover { background: linear-gradient(135deg, #34c38f, #1e9e6e); }
+  .sc-topbtns .sc-addbig { margin: 0; }
+  .sc-news, .sc-news:hover { background: linear-gradient(135deg, #8b7cf6, #6457d9); }
+  .sc-remind { margin: 0 0 18px; background: #fff9db; }
+  .sc-past { margin: 0 0 14px; }
+  .sc-past h2 { font-size: 19px; }
+  /* 🎯 each weak point with its own 🔁 button; 📰 this week; 👤 level */
+  .sc-weak { list-style: none; margin: 6px 0 0; padding: 0; }
+  .sc-weak li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 8px 0; border-bottom: 2px solid var(--line); font-size: 18px; }
+  .sc-weak li:last-child { border-bottom: none; }
+  .sc-weak li span { min-width: 0; overflow-wrap: anywhere; }
+  .sc-weak button { min-height: 40px; padding: 4px 12px; font-size: 15px; }
+  .sc-thisweek { background: #eef6ff; }
+  .sc-level { margin: 0; font-size: 20px; font-weight: 800; }
+  .sc-level small { color: var(--muted); font-size: 15px; }
+  /* 👤 Kid profile */
+  .sc-profile { max-width: 760px; }
+  .sc-prof-sub { border: 2px solid var(--line); border-radius: 18px; padding: 8px 12px 12px; margin: 0 0 12px; min-width: 0; }
+  .sc-prof-sub legend { font-weight: 800; font-size: 18px; padding: 0 6px; }
+  .sc-stars3 { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 6px; }
+  .sc-stars3 label { position: relative; }
+  .sc-stars3 input { position: absolute; opacity: 0; }
+  .sc-stars3 span { display: inline-block; padding: 4px 12px; border-radius: 999px; border: 2px solid var(--line); background: #fff; font-size: 16px; cursor: pointer; }
+  .sc-stars3 input:checked + span { border-color: #e8a020; background: #fff3cd; }
+  .sc-stars3 input:focus-visible + span { outline: 3px solid #93c5fd; }
+  .nl-events small { display: block; color: var(--muted); font-size: 14px; }
+  /* 👨‍👩‍👧 Family page */
+  .fam-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+  .fam-kid { margin: 0; border-top: 8px solid var(--c); }
+  .fam-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .fam-face { flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; font-size: 30px; }
+  .fam-top .what { min-width: 0; font-size: 20px; overflow-wrap: anywhere; }
+  .fam-top small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .fam-code { margin: 6px 0 10px; font-size: 18px; overflow-wrap: anywhere; }
+  .fam-form { margin: 8px 0 12px; }
+  .fam-kid .ai-btns button { min-height: 42px; padding: 4px 12px; font-size: 15px; }
+  /* 🗑️ Reset study data: a red button, and its box (type the kid's name to confirm) */
+  button.danger-fill, .fam-kid .ai-btns button.danger-fill { background: var(--danger); border-color: var(--danger); color: #fff; }
+  button.danger-fill:hover { background: #b91c1c; border-color: #b91c1c; }
+  button.danger-fill:disabled { opacity: .4; cursor: default; }
+  #rsName { width: 100%; margin: 4px 0 14px; }
+  /* ⏳ Waiting for a parent (kids' uploads and requests: a parent's device does the 🤖 part) */
+  .sc-wait { margin: 0 0 18px; background: #eef6ff; border: 3px solid #93c5fd; }
+  .sc-wait li { flex-wrap: wrap; }
+  .sc-wait .what { min-width: 0; overflow-wrap: anywhere; }
+  /* 🧒 A kid's device: no Switch user, Settings, backups, Family, newsletter, 👤 Kid profile edit or deleting */
+  body.kid-device [data-switch], body.kid-device [data-go="settings"], body.kid-device [data-backup], body.kid-device [data-go="family"],
+  body.kid-device [data-nlopen], body.kid-device [data-scgo="profile"], body.kid-device [data-scgo="reports"], body.kid-device [data-scgo="brief"],
+  body.kid-device [data-pactnew], body.kid-device [data-pactedit], body.kid-device [data-pactdel],
+  body.kid-device [data-scdel], body.kid-device #fmDel, body.kid-device [data-del-user],   /* (🗑 an answer photo before the check: kids too) */
+  body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
+  body.kid-device [data-hbdel] { display: none !important; }
+  body.kid-device .sc-topbtns, body.off-newsletter .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (⬆️ + ✏️, no 📰) */
+  /* ⚙️ FEATURES OFF: their buttons are hidden (the cards are left out when drawing) */
+  body.off-newsletter [data-nlopen], body.off-coach [data-aiadd], body.off-coach .sc-addbig, body.off-coach [data-mkopen], body.off-diary [data-dyopen],
+  body.off-prayer #prayCard { display: none !important; }
+  body.off-coach .sc-topbtns { grid-template-columns: 1fr; }
+  .nl-events .checkline span { overflow-wrap: anywhere; }
+  @media (max-width: 600px) {
+    .sc-ov { grid-template-columns: 1fr; }
+    .sc-bignum { font-size: 48px; }
+    .sc-addbig { font-size: 20px; }
+    .sc-kbtn { min-height: 108px; }
+    .sc-kbtn b { font-size: 16px; }
+    .sc-wsstatus, .sc-wsnote { margin-left: 0; }
+    .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (⬆️ and ✏️ side by side, 📰 underneath) */
+    .sc-topbtns .sc-news { grid-column: 1 / -1; }
+    .sc-topbtns .sc-addbig { font-size: 17px; padding: 10px 8px; }
+    .sc-topbtns small { font-size: 13px; }
+  }
+  @media (max-width: 600px) {
+    .home-big { gap: 10px; }
+    .big-btn { min-height: 130px; border-radius: 24px; padding: 12px 8px; }
+    .big-btn .e { font-size: 44px; }
+    .big-btn b { font-size: 24px; }
+    .big-btn small { font-size: 14px; }
+    .bd-tiles { gap: 10px; }
+    .bd-tile { grid-template-columns: 1fr; grid-template-rows: auto; text-align: center; justify-items: center; padding: 12px 8px; border-left-width: 3px; border-top: 10px solid var(--tab); }
+    .bd-tile .e { grid-row: auto; font-size: 34px; }
+    .bd-tile b { font-size: 19px; }
+    .bd-tile small { font-size: 13px; }
+    .bd-points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rp-grid { grid-template-columns: 1fr; }
+  }
+  /* =============================================================
+     🤖 AI HELP (School): 📥 School work cards, 📝 worksheets, 📖 explanations, ✅ checking
+     ============================================================= */
+  .ai-add, .ai-add:hover { background: linear-gradient(135deg, #ffb347, #f0892b); border-color: #f0892b; color: #fff; }
+  .ai-home-actions .ai-add { min-height: 58px; padding: 8px 26px; font-size: 20px; }
+  .ai-work { padding: 12px 4px; border-bottom: 2px solid var(--line); }
+  .ai-work:last-child { border-bottom: none; }
+  .ai-work-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ai-work-title { font-size: 21px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .ai-work-date { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .ai-todo { margin: 6px 0; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .ai-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 4px 2px 12px; border-radius: 999px; font-size: 15px; font-weight: 700;
+             background: var(--soft, #f3e9d6); color: var(--ink, var(--text)); border: 2px solid var(--c, var(--line)); overflow-wrap: anywhere; }
+  .ai-chip button { min-height: 32px; min-width: 34px; padding: 0 6px; border: none; border-radius: 999px; background: #fff; font-size: 15px; }
+  .ai-chip button:hover { background: #fffaf0; }
+  .ai-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+  .ai-files .linkbtn { min-height: 34px; font-size: 14px; overflow-wrap: anywhere; text-align: left; }
+  .ai-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ai-btns button { min-height: 46px; }
+  .ai-status { font-weight: 800; }
+  .ai-status.up { color: #1d4ed8; }
+  .ai-status.done { color: var(--ok); }
+  .ai-toolbar { display: flex; flex-wrap: wrap; gap: 8px; max-width: 820px; margin: 0 auto 14px; }
+  .ai-narrow { max-width: 820px; margin: 0 auto 18px; }
+  .ai-topicpick { max-height: 230px; overflow-y: auto; border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px 2px; margin-bottom: 12px; background: #fffdf8; }
+  .ai-topicpick .checkline span { overflow-wrap: anywhere; }
+  .ai-size { color: var(--muted); font-size: 15px; font-weight: 700; }
+  #awList:empty { display: none; }
+  /* The worksheet (on screen, and the same on paper) */
+  .ws-sheet { background: #fff; color: #1f1f1f; border-radius: 22px; box-shadow: var(--shadow); padding: 26px 28px; max-width: 820px;
+              margin: 0 auto 18px; font-size: 19px; line-height: 1.4; }
+  .ws-namerow { display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; font-size: 17px; border-bottom: 2px solid #333;
+                padding-bottom: 8px; margin-bottom: 12px; }
+  .ws-namerow b { display: inline-block; min-width: 120px; border-bottom: 1.5px dotted #888; padding: 0 6px; }
+  .ws-title { font-size: 30px; font-weight: 800; line-height: 1.15; margin: 4px 0; overflow-wrap: anywhere; }
+  .ws-sub { color: #555; font-size: 15px; margin-bottom: 6px; overflow-wrap: anywhere; }
+  .ws-intro { font-size: 18px; margin: 6px 0 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-qs { list-style: none; padding: 0; margin: 0; }
+  .ws-q { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1.5px dashed #cfcfcf; break-inside: avoid; page-break-inside: avoid; }
+  .ws-num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--accent-soft); color: var(--accent); }
+  .ws-prompt { font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-opts { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 6px 18px; }
+  .ws-opt { display: flex; gap: 8px; align-items: flex-start; overflow-wrap: anywhere; }
+  .ws-circle { flex: none; width: 22px; height: 22px; margin-top: 3px; border: 2px solid #333; border-radius: 50%; }
+  .ws-circle.ws-box { width: 30px; border-radius: 5px; }
+  .ws-line { height: 36px; border-bottom: 1.5px solid #9a9a9a; }
+  .ws-pts { align-self: start; white-space: nowrap; font-size: 14px; font-weight: 800; color: #555; border: 1.5px solid #bbb; border-radius: 10px; padding: 2px 8px; }
+  .ws-ans { margin-top: 8px; padding: 6px 10px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ws-total { width: max-content; max-width: 100%; margin: 16px 0 0 auto; border: 2.5px solid #333; border-radius: 14px; padding: 10px 16px; font-size: 20px; font-weight: 800; }
+  .ws-total i { display: inline-block; width: 64px; border-bottom: 2px solid #333; margin: 0 6px; }
+  /* ✅ The check result */
+  .ai-score { text-align: center; font-size: 64px; font-weight: 800; line-height: 1; color: var(--ok); margin: 6px 0 12px; }
+  .ai-score small { display: block; margin-top: 6px; font-size: 22px; color: var(--muted); }
+  .ai-note { font-size: 18px; background: var(--accent-soft); border-radius: 16px; padding: 10px 14px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai-note.dad { background: #fff7e0; }
+  .ai-mk { flex: none; width: 34px; text-align: center; font-size: 26px; font-weight: 800; }
+  .ai-mk.ok { color: var(--ok); }
+  .ai-mk.no { color: var(--danger); }
+  /* ▶️ YouTube / 🖨️ printable links */
+  .ai-links h2 { font-size: 20px; margin: 4px 0 8px; }
+  .ai-linkrow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .ai-link { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--line);
+             background: #fff; color: var(--text); font-weight: 700; text-decoration: none; overflow-wrap: anywhere; }
+  .ai-link:hover { background: #fffaf0; }
+  .ai-link.yt { border-color: #fecaca; background: #fff5f5; }
+  /* 📖 The explanation: a friendly reading page with big text */
+  .ex-sheet { background: #fff; color: #1f1f1f; border-radius: 22px; box-shadow: var(--shadow); padding: 26px 28px; max-width: 820px;
+              margin: 0 auto 18px; font-size: 21px; line-height: 1.55; }
+  .ex-title { font-size: 34px; font-weight: 800; line-height: 1.15; margin: 2px 0 6px; overflow-wrap: anywhere; }
+  .ex-sec { break-inside: avoid-page; }
+  .ex-sec h3 { font-size: 25px; margin: 20px 0 4px; color: var(--accent); overflow-wrap: anywhere; }
+  .ex-sec p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ex-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 10px; margin-top: 8px; }
+  .ex-word { background: #fff7e0; border: 2px solid #fcd34d; border-radius: 18px; padding: 10px 14px; break-inside: avoid; overflow-wrap: anywhere; }
+  .ex-word b { display: block; font-size: 23px; }
+  .ex-word span { display: block; font-size: 17px; line-height: 1.4; }
+  .ex-try { margin: 6px 0 0; padding-left: 1.3em; }
+  .ex-try li { margin-bottom: 6px; overflow-wrap: anywhere; }
+  @media (max-width: 600px) {
+    .ws-sheet, .ex-sheet { padding: 18px 16px; border-radius: 18px; font-size: 18px; }
+    .ws-q { grid-template-columns: 32px minmax(0, 1fr); }
+    .ws-pts { grid-column: 2; justify-self: start; }
+    .ws-title { font-size: 25px; }
+    .ex-title { font-size: 28px; }
+    .ai-score { font-size: 52px; }
+  }
+  /* On paper (A4, portrait): only the sheet, no app around it */
+  @media print {
+    .ai-print .ws-sheet, .ai-print .ex-sheet { box-shadow: none; border-radius: 0; padding: 0; margin: 0; max-width: none; }
+    .ai-print .ws-sheet { font-size: 13pt; }
+    .ai-print .ex-sheet { font-size: 14pt; }
+    .ai-print .ws-num { background: #fff; color: #000; border: .4mm solid #333; }
+    .ai-print .ws-line { height: 9mm; }
+  }
+  /* An exam on the kid's calendar (under the day name) */
+  .k-exam { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 1px 6px; border-radius: 8px; border: 1px solid #fecaca;
+            background: #fee2e2; color: #b91c1c; font-size: 12px; font-weight: 800; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-exam:hover { background: #fecaca; }
+  /* 📌 A school date (from the 📰 newsletter): dashed border, light yellow */
+  .k-event { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 2px 6px; border-radius: 8px; border: 2px dashed #d4a017;
+             background: #fff9db; color: #6b4f05; font-size: 12px; font-weight: 700; text-align: left; line-height: 1.25; overflow-wrap: anywhere; }
+  .k-event:hover { background: #fff3bf; }
+  /* 📅 A parent's own activity: their color, with a small name tag. All day = a chip under the day name; ✈️ travel = one bar across the days */
+  .k-tag { display: inline-block; max-width: 100%; margin: 0 0 2px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--c);
+           background: #fff; color: var(--ink); font-size: 11px; font-weight: 800; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+  .k-pactday, .k-travel { display: block; width: 100%; min-height: 0; margin: 2px 0 4px; padding: 2px 6px; border-radius: 8px; border: 2px solid var(--c);
+                          background: var(--soft); color: var(--ink); font-size: 12px; font-weight: 800; text-align: left; line-height: 1.3; overflow-wrap: anywhere; }
+  .k-travel { margin: 0; border-radius: 999px; padding: 3px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-pactday.faded, .k-travel.faded { opacity: .25; }
+  .k-pactwrap { display: flex; align-items: center; gap: 4px; margin: 2px 0 4px; }
+  .k-pactwrap .k-pactday { flex: 1; min-width: 0; margin: 0; }
+  .k-week.rows .k-cell.k-barcell { padding: 0 6px; justify-content: center; }
+  /* 📅 The family calendar on a parent's home screen */
+  .fam-cal { margin: 0 0 18px; padding-left: 12px; padding-right: 12px; overflow: hidden; }
+  .fam-cal .sc-head { flex-wrap: wrap; gap: 8px; }
+  .fam-cal h2 { margin: 0; }
+  .fam-cal h2 small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .fam-cal .fc-who { margin: 10px 0 8px; }
+  .fam-cal .k-scroll { margin: 0 -4px; }
+  /* 👤 Kid profile: 📄 syllabus, "Do you know their level?", 🧪 placement test */
+  .sc-syl { margin: 4px 0 14px; padding: 12px; border: 2px dashed var(--line); border-radius: 14px; }
+  .sc-syl .hint { margin: 4px 0 8px; }
+  .sc-syl .sc-sylnote { margin: 10px 0 0; font-size: 14px; }
+  /* 🏫 School · 📚 Curriculum · 🎓 Year / Grade */
+  .sc-schoolpick { margin: 0 0 12px; }
+  /* 🏫 The school suggestions under the box */
+  .sc-schoolpick .row > div { position: relative; }
+  .sch-sug { position: absolute; left: 0; right: 0; z-index: 30; margin-top: 4px; max-height: 300px; overflow-y: auto; border-radius: 14px; border: 2px solid var(--line);
+             background: #fff; box-shadow: var(--shadow); }
+  .sch-sug button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-height: 44px; padding: 6px 12px; border: none;
+                    border-bottom: 1px solid var(--line); border-radius: 0; background: #fff; text-align: left; font-size: 15px; font-weight: 700; box-shadow: none; overflow-wrap: anywhere; }
+  .sch-sug button:hover, .sch-sug button:focus-visible { background: var(--accent-soft); }
+  .sch-sug button small { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .sch-sug button.other { color: var(--accent); }
+  .sc-schoolpick .row > div { min-width: 0; }
+  .sc-schoolpick select, .sc-schoolpick input { width: 100%; min-width: 0; }
+  .sc-schoolpick input[id$="CurrOther"] { margin-top: 6px; }
+  .sc-schoolpick [hidden] { display: none; }
+  .sc-schoolpick .row { flex-wrap: wrap; }
+  .sc-schoolpick .row > div:first-child { flex: 2 1 220px; }
+  .sc-schoolpick .row > div:last-child { flex: 1 1 120px; }
+  .sc-syl-file { margin: 0 0 8px; overflow-wrap: anywhere; }
+  .sc-syl-file small, .sc-know-test small { display: block; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .sc-know { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 2px 0 10px; }
+  .sc-know-q { width: 100%; font-size: 15px; }
+  .sc-know label { cursor: pointer; }
+  .sc-know input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .sc-know span { display: inline-block; padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
+  .sc-know input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .sc-know input:focus-visible + span { outline: 3px solid #93c5fd; }
+  .sc-know-test { margin: 0 0 4px; padding: 10px 12px; border-radius: 12px; background: #f3f0ff; overflow-wrap: anywhere; }
+  .sc-level .linkbtn { margin-left: 8px; }
+  /* 📋 Brief for parents (on screen, and the same on paper) */
+  .bf-sheet { max-width: 760px; margin: 0 auto 18px; padding: 22px 20px; background: #fff; border-radius: 22px; box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,.08)); overflow-wrap: anywhere; }
+  .bf-summary { font-size: 17px; line-height: 1.5; margin: 10px 0 14px; }
+  .bf-sub { border-top: 2px solid var(--line); padding: 12px 0 4px; }
+  .bf-subhead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .bf-subhead h3 { margin: 0; font-size: 19px; }
+  .bf-level { padding: 2px 10px; border-radius: 999px; background: #fff3cd; color: #6b4f05; font-size: 14px; font-weight: 800; }
+  .bf-part { margin: 8px 0 0; }
+  .bf-part ul, .bf-home ul { margin: 4px 0 0; padding-left: 22px; }
+  .bf-part li, .bf-home li { margin: 2px 0; line-height: 1.45; }
+  .bf-home h3 { margin: 0; font-size: 19px; }
+  @media (max-width: 600px) { .bf-sheet { padding: 16px 14px; border-radius: 16px; } .bf-summary { font-size: 16px; } }
+  @media print {
+    .ai-print .bf-sheet { box-shadow: none; border-radius: 0; padding: 0; margin: 0; max-width: none; font-size: 12pt; }
+    .ai-print .bf-sub { break-inside: avoid; }
+  }
+  /* "Save your changes?" box */
+  .leave-card { max-width: 460px; text-align: center; padding-bottom: 22px; }
+  .leave-emoji { font-size: 60px; line-height: 1; margin-top: 22px; }
+  .leave-btns { display: flex; flex-direction: column; gap: 10px; padding: 18px 24px 0; }
+  .leave-btns button { min-height: 56px; border-radius: 999px; font-size: 20px; }
+
+  /* Shining Star of the Week badge */
+  .face { position: relative; }
+  .star-badge { position: absolute; top: -12px; right: -14px; font-size: 48px; line-height: 1;
+                filter: drop-shadow(0 0 10px rgba(250, 204, 21, .9)); animation: shine 1.8s ease-in-out infinite; }
+  @keyframes shine { 0%, 100% { transform: scale(1) rotate(-8deg); } 50% { transform: scale(1.18) rotate(8deg); } }
+  .hello-face .star-badge { font-size: 38px; top: -10px; right: -12px; }
+  .star-label { display: block; font-size: 16px; font-weight: 800; color: #b7791f; line-height: 1.1; }
+
+  /* Points screen */
+  .pt-row { display: grid; grid-template-columns: 44px 84px minmax(0, 1fr); gap: 14px; align-items: center;
+            padding: 14px 0; border-bottom: 2px solid var(--line); }
+  .pt-row:last-child { border-bottom: none; }
+  .pt-rank { font-size: 34px; text-align: center; font-weight: 800; color: var(--muted); }
+  .pt-rank small { display: block; font-size: 13px; line-height: 1.2; }
+  .pt-row .face { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-size: 46px;
+                  background: var(--soft); border: 4px solid #fff; box-shadow: var(--shadow); }
+  .pt-row .star-badge { font-size: 36px; top: -10px; right: -12px; }
+  .pt-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .pt-name { font-size: 26px; font-weight: 800; color: var(--ink); }
+  .pt-num { font-size: 26px; font-weight: 800; }
+  .pt-num small { font-size: 16px; color: var(--muted); font-weight: 600; }
+  .pt-bar { position: relative; height: 22px; border-radius: 999px; background: #f3ead9; overflow: hidden; margin: 6px 0 4px; }
+  .pt-bar i { display: block; height: 100%; border-radius: 999px; background: var(--c); min-width: 0; transition: width .4s; }
+  /* the % at the right end of the track (a small white pill: easy to read on any colour) */
+  .pt-pct { position: absolute; top: 50%; right: 4px; z-index: 2; transform: translateY(-50%); padding: 0 6px; border-radius: 999px;
+            background: rgba(255, 255, 255, .9); color: #3b2f1e; font-size: 12px; font-weight: 800; line-height: 16px; }
+  /* 🌟 The Shining Star's bar: a gold glow, a slow light sweep across the filled part, and ✨ at its end */
+  .pt-bar.shine { box-shadow: 0 0 0 2px #f6c453, 0 0 12px 3px rgba(246, 196, 83, .6); }
+  .pt-bar.shine i { position: relative; overflow: hidden; }
+  .pt-bar.shine i::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
+                           background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .7), transparent);
+                           transform: translateX(-100%); animation: ptSweep 4s ease-in-out infinite; }
+  @keyframes ptSweep { 0% { transform: translateX(-100%); } 55%, 100% { transform: translateX(260%); } }
+  .pt-spark { position: absolute; top: 50%; z-index: 1; transform: translateY(-50%); font-size: 14px; line-height: 1;
+              animation: ptTwinkle 2s ease-in-out infinite; }
+  @keyframes ptTwinkle { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pt-bar.shine i::after { display: none; }
+    .pt-spark { animation: none; }
+  }
+  .pt-sub { font-size: 15px; color: var(--muted); }
+  .hist-row { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 2px solid var(--line);
+              font-size: 19px; flex-wrap: wrap; }
+  .hist-row:last-child { border-bottom: none; }
+  .hello-points { font-size: 22px; font-weight: 700; color: var(--muted); margin: 2px 0 0; }
+  .k-free { text-align: center; color: #b3a9c9; font-size: 20px; padding: 26px 0; }
+  .k-empty { background: #fff; border-radius: 30px; padding: 50px 24px; text-align: center; font-size: 26px;
+             font-weight: 700; box-shadow: var(--shadow); }
+  .k-empty span { display: block; font-size: 70px; }
+
+  /* Tablet: 7 columns are narrower, so the text is a little smaller */
+  @media (max-width: 1150px) {
+    .k-week { gap: 8px; }
+   .k-cell { padding: 0 10px; }
+    .k-cell.k-head { padding-top: 16px; }
+    .k-day { padding: 12px 6px; border-radius: 20px; }
+    .k-dayname { font-size: 16px; }
+    .k-block { padding: 8px 8px; border-radius: 12px; }
+    .k-block .who { font-size: 19px; }
+    .k-block .when { font-size: 15px; }
+    .k-block .what { font-size: 13px; }
+  }
+  @media (min-width: 700px) and (max-width: 1000px) {
+    .k-dayname { font-size: 14px; padding: 5px 2px; }
+    .k-block { padding: 7px 6px; }
+    .k-block .who { font-size: 17px; }
+    .k-block .when { font-size: 14px; white-space: nowrap; letter-spacing: -.01em; }
+  }
+
+  /* 👨‍👩‍👧 Which parent are you? · 👤 Signed in as */
+  .wp-card { padding: 0 16px 16px; }
+  .wp-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 10px; margin-top: 10px; }
+  .wp-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 110px; border-radius: 22px; background: var(--soft); color: var(--ink); white-space: normal; }
+  .wp-btn .e { font-size: 44px; line-height: 1.1; }
+  .wp-btn b { font-size: 19px; }
+  .me-signed { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0 0 12px; font-size: 15px; color: var(--muted); }
+  .me-signed b { color: var(--text); }
+  /* 📜 EVERY pop-up (✨ Spark picker, 🎁 gift, 👋 tour, 🧩 riddle, 🌱 level up, all the boxes): at most the screen height, the
+     middle scrolls inside (smooth on phones); the title stays on top and the Save / Cancel / OK buttons stay at the bottom.
+     (While one is open, the page behind doesn't scroll: html.popup-open, see the script.) */
+  .k-modal, .tour, .lvl-up { overflow: hidden; overscroll-behavior: contain; }
+  .k-modal > .k-card, .tour-box, .lvl-box { max-height: 90vh; max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
+  .k-card > .print-title:first-child, .k-card > div > .print-title:first-child, .k-card > h2:first-child, .k-card > div > h2:first-child {
+    position: sticky; top: 0; z-index: 3; margin-top: 0; padding: 18px 16px 8px; background: #fff;
+    box-shadow: 0 0 0 40px #fff; clip-path: inset(-40px -40px 0 -40px); }   /* (white up to the box's edges, not over the choices) */
+  .k-card > .k-card-top:first-child { position: sticky; top: 0; z-index: 3; }
+  .k-card .btnrow:last-child, .tour-box > .btnrow:last-child { position: sticky; bottom: 0; z-index: 3; margin-bottom: 0; padding: 10px 0 12px;
+    background: #fff; box-shadow: 0 -10px 12px -10px rgba(0, 0, 0, .18); }
+  .k-card > .k-ok { position: sticky; bottom: 12px; z-index: 3; margin-bottom: 12px; box-shadow: 0 0 0 12px #fff, 0 -14px 16px -6px rgba(0, 0, 0, .12); }
+  html.popup-open, html.popup-open body { overflow: hidden; overscroll-behavior: none; }
+  /* The big card that pops up when you tap a block */
+  .k-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px;
+             background: rgba(46, 42, 90, .45); }
+  .k-card { width: 100%; max-width: 440px; background: #fff; border-radius: 32px; overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25); animation: pop .18s ease-out; }
+  @keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .k-card-top { background: var(--soft); text-align: center; padding: 22px 16px 14px; }
+  .k-card-top .big { font-size: 72px; line-height: 1; }
+  .k-card-top .nm { font-size: 34px; font-weight: 800; color: var(--ink); line-height: 1.2; margin-top: 6px; }
+  .k-rows { padding: 10px 24px 4px; }
+  .k-rows div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 2px dashed #f0e9dc;
+                font-size: 21px; }
+  .k-rows div:last-child { border-bottom: none; }
+  .k-rows span { color: var(--muted); flex: none; }
+  .k-rows b { font-weight: 800; text-align: right; }
+  .k-ok { display: block; width: calc(100% - 48px); margin: 8px 24px 24px; min-height: 60px; border-radius: 999px;
+          font-size: 24px; font-weight: 800; background: var(--text); border-color: var(--text); color: #fff; }
+  .k-ok:hover { background: #3d3875; }
+
+  /* =============================================================
+     TIME GRID (Dad's detailed view of everyone's plan)
+     ============================================================= */
+  .cal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cal { min-width: 840px; display: grid; grid-template-columns: 52px repeat(7, 1fr); }
+  .cal-head { padding: 6px 6px 12px; text-align: center; border-bottom: 2px solid var(--line); }
+  .cal-head b { display: block; font-size: 17px; }
+  .cal-head small { color: var(--muted); font-size: 13px; }
+  .meter { height: 6px; background: var(--line); border-radius: 3px; margin: 6px 10px 0; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .times { position: relative; }
+  .times span { position: absolute; right: 8px; font-size: 13px; color: var(--muted); transform: translateY(-50%); }
+  .daycol { position: relative; border-left: 1px solid var(--line); }
+  .freezone { position: absolute; left: 0; right: 0; background: var(--free); }
+  /* Time grid: the same colors as the cards (light person color + darker left border; grey for fixed/shared) */
+  .ev { position: absolute; border-radius: 8px; padding: 3px 7px; color: var(--ink, #333); font-size: 13px; overflow: hidden;
+        background: var(--soft); border: 1px solid rgba(0, 0, 0, .06); border-left: 4px solid var(--c); line-height: 1.25; }
+  .ev b { display: block; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ev span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .92; }
+  .ev.routine { background: #eef0f4; color: #6b7280; box-shadow: none; border: 1px dashed #d3d7e0; font-size: 12px; padding: 1px 6px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 15px; color: var(--muted); margin-top: 14px; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; }
+
+  /* =============================================================
+     PRINT: "Who should I print?" and the paper pages
+     ============================================================= */
+  .print-who { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 18px; padding: 18px 16px 6px; }
+  .print-who .who-btn .face { width: 88px; height: 88px; font-size: 46px; border-width: 4px; }
+  .print-who .who-btn .nm { font-size: 22px; }
+  .print-title { text-align: center; font-size: 30px; font-weight: 800; margin: 22px 16px 0; }
+  .print-hint { text-align: center; color: var(--muted); font-size: 16px; margin: 4px 20px 0; }
+  .bar-right { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  /* ⬅️ Back and 🏠 Home (every page but Home): small, side by side on the left */
+  .bar .nav-btn { min-width: 44px; min-height: 40px; padding: 6px 12px; font-size: 16px; line-height: 1.1; justify-content: center; white-space: nowrap; }
+  /* 🔤 Every symbol has its word next to it (users are new): small buttons grow to fit it, and a long line wraps to two
+     lines on a 360px phone instead of hiding the words */
+  .bar { flex-wrap: wrap; row-gap: 8px; }
+  .bell-btn { font-size: 16px; white-space: nowrap; }
+  .hb-nav button { width: auto; min-width: 44px; padding: 0 12px; border-radius: 999px; font-size: 15px; white-space: nowrap; }
+  .enc-x { width: auto; padding: 0 10px; border-radius: 999px; font-size: 14px; white-space: nowrap; }
+  button.x { font-size: 15px; font-weight: 700; padding: 4px 10px; white-space: nowrap; }
+  button.edit { white-space: nowrap; }
+  .sc-subbtns { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .sc-subbtns button { font-size: 14px; padding: 0 10px; white-space: nowrap; }
+  .sc-up, .sc-down, .sc-same { font-size: 13px; white-space: nowrap; }
+  .bu-badge-lv { font-size: 9px; }
+  .pt-kinds, .hello-points, .ach-kinds { overflow-wrap: anywhere; }
+
+  /* The paper pages: only shown when printing */
+  #printArea { display: none; }
+  #printArea.measuring { display: block; position: absolute; left: -10000px; top: 0; visibility: hidden; }
+  .p-page { width: 281mm; background: #fff; color: #000; font-family: "Baloo 2", system-ui, sans-serif;
+            font-size: var(--fs, 13pt); line-height: 1.2; display: flex; flex-direction: column; gap: 2.5mm; }
+  .p-title { font-size: calc(var(--fs, 13pt) * 2.2); font-weight: 800; color: var(--ink); line-height: 1.05; }
+  .p-sub { font-size: calc(var(--fs, 13pt) * .85); color: #333; }
+  .p-table { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: .6mm solid var(--ink);
+             border-radius: 3mm; overflow: hidden; }
+  .p-col { border-left: .35mm solid #bdbdbd; min-width: 0; }
+  .p-col:first-child { border-left: none; }
+  /* Rows by time of day on paper: a small time label on the left, one row per start time */
+  .p-table.rows { grid-template-columns: var(--cols); align-content: start; }
+  .p-table.rows .p-head { border-left: .35mm solid #bdbdbd; border-bottom: .5mm solid var(--ink); }
+  .p-rowline { grid-column: 1 / -1; border-top: .3mm solid #e2e2e2; }
+  .p-rtime { grid-column: 1; }
+  .p-daybg { border-left: .35mm solid #bdbdbd; }
+  /* An activity spans down to its end time (its box fills those rows); things at the same time sit side by side */
+  .p-cell { display: flex; flex-direction: column; min-width: 0; padding: .4mm; }
+  .p-cell > * { flex: 1; }
+  .p-cell.strip { align-self: start; }
+  .p-cell.strip > *, .p-cell > .pg-rt, .p-cell > .p-routine { flex: none; }   /* get ready / break: thin, glued to their activity */
+  .p-table.rows .p-cell .p-item { border: .3mm solid #c8c8c8; border-radius: 1mm; background: #fff; }
+  .p-table.rows .p-cell .p-item.striped { border-left: 1.4mm solid var(--c); }
+  .p-same { font-size: calc(var(--fs, 13pt) * .6); color: #555; font-weight: 600; }
+  /* Narrow lanes on paper: the tick boxes go above the text and words wrap whole */
+  .p-table.rows .pg-ev { flex-wrap: wrap; align-content: flex-start; overflow-wrap: normal; word-break: normal; }
+  .p-table.rows .pg-ev > div { flex: 1 1 14mm; }
+  .p-table.rows .pg-boxes { flex-direction: row; }
+  .p-corner { background: var(--soft); border-bottom: .5mm solid var(--ink) !important; }
+  .p-rtime { font-size: calc(var(--fs, 13pt) * .7); font-weight: 800; color: #555; padding: 1.2mm 1.2mm 0; white-space: nowrap; text-align: right; }
+  .p-head { background: var(--soft); color: var(--ink); text-align: center; font-weight: 800;
+            font-size: calc(var(--fs, 13pt) * 1.05); padding: 1.2mm 1mm; border-bottom: .5mm solid var(--ink); line-height: 1.1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* "Mon 6 Oct": one line, same for all days */
+  .p-head small { display: block; font-size: calc(var(--fs, 13pt) * .75); color: #333; font-weight: 600; }
+  .p-item { display: flex; gap: 1.6mm; align-items: flex-start; padding: 1.2mm 1.4mm; border-bottom: .3mm dashed #c8c8c8;
+            break-inside: avoid; }
+  .p-item.striped { border-left: 1.4mm solid var(--c); }
+  .p-box { width: calc(var(--fs, 13pt) * 1.45); height: calc(var(--fs, 13pt) * 1.45); flex: none; margin-top: .1em;
+           border: .6mm solid #000; border-radius: .8mm; background: #fff; }
+  .p-time { font-weight: 800; white-space: nowrap; }
+  .p-what { overflow-wrap: anywhere; }
+  .p-note { font-size: calc(var(--fs, 13pt) * .78); color: #444; overflow-wrap: anywhere; }
+  .p-free { text-align: center; color: #777; padding: 3mm 1mm; }
+  .p-routine { font-size: calc(var(--fs, 13pt) * .72); color: #8a8a8a; padding: .5mm 1.4mm; border-bottom: .3mm dotted #d8d8d8;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; break-inside: avoid; }
+  .p-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; flex-wrap: wrap; }
+  .p-stars { font-size: calc(var(--fs, 13pt) * 1.1); font-weight: 800; display: flex; align-items: flex-end; gap: 1.5mm; flex-wrap: wrap; }
+  .p-stars .s { display: inline-flex; flex-direction: column; align-items: center; min-width: 9mm; }
+  .p-stars .s b { font-size: calc(var(--fs, 13pt) * 2.1); line-height: 1; color: var(--ink); font-weight: 400; }
+  .p-stars .s small { font-size: calc(var(--fs, 13pt) * .6); color: #555; font-weight: 600; }
+  .p-sign { font-size: calc(var(--fs, 13pt) * .9); white-space: nowrap; }
+  .p-sign .line { display: inline-block; width: 60mm; border-bottom: .4mm solid #000; margin-left: 2mm; }
+  /* Print: "My activities" list — the 7 days in 3 columns */
+  .pl-cols { flex: 1; columns: 3; column-gap: 6mm; }
+  .pl-day { break-inside: avoid; border: .5mm solid var(--ink); border-radius: 3mm; overflow: hidden; margin-bottom: 3mm; }
+  /* Print: the week as a time grid (hours on the side), always one full sheet */
+  .pg-page { height: 192mm; overflow: hidden; }
+  .pg-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 12mm repeat(7, minmax(0, 1fr));
+             grid-template-rows: auto minmax(0, 1fr); border: .6mm solid var(--ink); border-radius: 3mm; overflow: hidden; }
+  .pg-grid .p-head { border-left: .35mm solid #bdbdbd; }
+  .pg-corner { background: var(--soft); border-bottom: .5mm solid var(--ink); }
+  .pg-hours { position: relative; }
+  .pg-hours span { position: absolute; right: 1.2mm; transform: translateY(-50%); font-size: 7pt; color: #555; white-space: nowrap; }
+  .pg-col { position: relative; border-left: .35mm solid #bdbdbd; overflow: hidden;
+            background-image: linear-gradient(#e4e4e4 .25mm, transparent .25mm); background-size: 100% calc(100% / var(--h)); }
+  .pg-rt { position: absolute; left: .6mm; right: .6mm; background: #f1f1f1; color: #8a8a8a; font-size: 6.5pt; line-height: 1.3;
+           padding: 0 1mm; border-radius: 1mm; overflow: hidden; white-space: nowrap; }
+  .pg-ev { position: absolute; box-sizing: border-box; overflow: hidden; display: flex; gap: .8mm; align-items: flex-start;
+           background: var(--soft); border: .35mm solid var(--c); border-left-width: 1.4mm; border-radius: 1.4mm;
+           padding: .5mm .8mm; font-size: 7.5pt; line-height: 1.15; overflow-wrap: anywhere; }
+  .pg-ev > div { min-width: 0; }
+  .pg-ev.short > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* short ones: one tidy line */
+  .pg-boxes { display: flex; flex-direction: column; gap: .5mm; flex: none; }
+  .pg-ev .p-box { width: 3.2mm; height: 3.2mm; border-width: .4mm; margin: 0; }
+  /* Print: the small "Good habits" table under a kid's calendar */
+  .hb-print { flex: none; }
+  .hb-print-title { font-size: 9pt; font-weight: 800; color: var(--ink); margin-bottom: .8mm; }
+  .hb-tables { display: flex; gap: 4mm; align-items: flex-start; }
+  .hb-table { flex: 1; border-collapse: collapse; font-size: 6.8pt; line-height: 1.15; table-layout: fixed; }
+  .hb-table th { font-weight: 700; background: var(--soft); color: var(--ink); padding: .4mm; border: .2mm solid #c8c8c8; }
+  .hb-table th:first-child { width: 36%; background: none; border: none; }
+  .hb-table td { border: .2mm solid #c8c8c8; padding: .4mm .5mm; text-align: center; }
+  .hb-table td.hb-tname { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hb-table small { color: #777; font-size: 5.5pt; }
+  .hb-table .p-box { display: inline-block; width: 1.8mm; height: 1.8mm; border-width: .25mm; border-radius: .3mm;
+                     margin: 0 .1mm; vertical-align: middle; }
+  /* "Print family week": a clean, professional look (plain font, thin grey lines, no decorations) */
+  .pro { font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; --ink: #333; --soft: #f6f6f6; gap: 3mm; }
+  .pro .pf-top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: .4mm solid #333; padding-bottom: 1.5mm; }
+  .pro .p-title { font-size: 18pt; font-weight: 700; color: #111; letter-spacing: -.01em; }
+  .pro .p-sub { font-size: 11pt; color: #444; }
+  .pro .pg-grid { border: .3mm solid #bbb; border-radius: 1.5mm; }
+  .pro .p-head { background: #f6f6f6; color: #222; font-size: 9pt; font-weight: 600; padding: 1.6mm 1mm; border-bottom: .3mm solid #bbb; }
+  .pro .pg-corner { background: #f6f6f6; border-bottom: .3mm solid #bbb; }
+  .pro .pg-grid .p-head, .pro .pg-col { border-left: .2mm solid #dcdcdc; }
+  .pro .pg-col { background-image: linear-gradient(#ececec .2mm, transparent .2mm); }
+  .pro .pg-hours span { font-size: 7pt; color: #777; }
+  .pro .pg-rt { background: #f7f7f7; color: #a0a0a0; font-size: 6pt; }
+  .pro .pg-ev { border-width: .2mm; border-left-width: 1mm; border-radius: 1mm; font-size: 7pt; line-height: 1.2; color: #222; }
+  .pro .pg-ev b { font-weight: 600; }
+  .pro .pf-meta { color: #555; }
+  .pro .pg-ev .p-box { width: 2.8mm; height: 2.8mm; border-width: .3mm; border-color: #555; border-radius: .5mm; }
+  .pro .p-legend { font-size: 8pt; color: #333; gap: 6mm; }
+  .pro .p-legend i { width: 3mm; height: 3mm; border-radius: .6mm; }
+  /* The colored print blocks inside the rows table: in the cell, one under the other, sized with the page text */
+  .p-table.rows .pg-ev { position: static; margin: .6mm; font-size: calc(var(--fs, 13pt) * .62); }
+  .p-table.rows .pg-rt { position: static; margin: .6mm; font-size: calc(var(--fs, 13pt) * .55); }
+  .p-legend { display: flex; gap: 5mm; flex-wrap: wrap; font-size: calc(var(--fs, 13pt) * .9); }
+  .p-legend i { display: inline-block; width: 4mm; height: 4mm; border-radius: 1mm; background: var(--c); margin-right: 1.2mm; vertical-align: -.5mm; }
+
+  /* ☁️ Family login (shown until the family account is signed in on this device) */
+  .login-screen { position: fixed; inset: 0; z-index: 70; background: var(--bg); overflow-y: auto;
+    display: grid; place-items: center; padding: 16px; }
+  .login-card { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 4px; }
+  .login-card .brand { padding-top: 0; margin-bottom: 10px; }
+  .login-card .brand-name { font-size: 26px; }
+  .login-card h1 { font-size: 34px; text-align: center; margin: 0; }
+  .login-card .hint { text-align: center; }
+  .login-card input { margin-bottom: 10px; }
+  .login-btn { min-height: 56px; border-radius: 999px; font-size: 20px; margin-top: 6px; }
+  .lg-step { display: flex; flex-direction: column; gap: 4px; }
+  .lg-step[hidden] { display: none; }
+  .login-big { min-height: 76px; margin-top: 12px; border-radius: 24px; font-size: 22px; font-weight: 800; }
+  .lg-kid, .lg-kid:hover { background: linear-gradient(135deg, #ffb347, #f0892b); border-color: #f0892b; color: #fff; }
+  .lg-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; margin: 6px 0 2px; border-radius: 16px; background: #f3ecdf; }
+  .lg-modes button { min-width: 0; min-height: 44px; padding: 2px 4px; border: none; border-radius: 12px; background: transparent; font-size: 15px; font-weight: 800; line-height: 1.1; }
+  .lg-modes button.on { background: #fff; box-shadow: var(--shadow); }
+  .lg-back { align-self: center; margin-top: 10px; }
+  .lg-codelabel { font-size: 20px; text-align: center; margin-top: 6px; }
+  .code-input { text-transform: uppercase; letter-spacing: .25em; font-size: 26px !important; font-weight: 800; text-align: center; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .code-big { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 24px; font-weight: 800; letter-spacing: .15em; }
+  /* ☁️ The tiny "Synced / Offline" sign in the top corner */
+  .sync-pill { position: fixed; top: 2px; right: 6px; z-index: 40; pointer-events: none;
+    font-size: 11px; font-weight: 700; line-height: 1.4; padding: 1px 8px; border-radius: 999px;
+    background: rgba(255, 255, 255, .85); color: var(--muted); border: 1px solid var(--line); }
+  .sync-pill.off { color: var(--warn); }
+  .sync-choice small { display: block; font-size: 14px; font-weight: 700; opacity: .85; }
+
+  /* 🔔 What's new: the bell (with a small red number) and its list */
+  .bell-btn { position: relative; padding: 8px 14px; font-size: 20px; line-height: 1; }
+  .bell-num { position: absolute; top: -7px; right: -7px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 999px;
+    background: #e5484d; color: #fff; border: 2px solid #fff; font-size: 13px; font-weight: 800; line-height: 20px; text-align: center; }
+  .start-top { display: flex; justify-content: flex-end; gap: 8px; }
+  /* 🚪 Sign out (top right of every screen): a small pill; on a very small phone only 🚪 */
+  .signout-btn { font-size: 16px; padding: 6px 12px; white-space: nowrap; flex: none; }
+  @media (max-width: 359px) { .signout-word { display: none; } .signout-btn { padding: 6px 10px; } }
+  .bar > .bar-right, .bar > .bar-end { margin-left: auto; }   /* (the right-hand group stays on the right, also when the bar wraps) */
+  @media print { .signout-btn { display: none !important; } }
+  .news-card { max-width: 520px; }
+  /* 🔒 Your privacy (above the login screen too) */
+  .pv-modal { z-index: 80; }
+  .pv-card { max-width: 520px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; }
+  .pv-card .print-title { font-size: 26px; }
+  .pv-list { margin: 12px 0 0; padding: 0 20px 0 44px; }
+  .pv-list li { padding: 8px 0; border-bottom: 2px dashed #f0e9dc; font-size: 17px; line-height: 1.4; }
+  .pv-list li:last-child { border-bottom: none; }
+  .pv-list li::marker { font-weight: 800; color: var(--muted); }
+  .pv-foot { text-align: center; color: var(--muted); font-size: 15px; margin: 8px 20px 0; overflow-wrap: anywhere; }
+  .lg-privacy { align-self: center; margin-top: 14px; font-size: 14px; color: var(--muted); }
+  .news-list { list-style: none; margin: 12px 0 0; padding: 0 20px; max-height: 50vh; overflow-y: auto; }
+  .news-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 8px; border-bottom: 2px dashed #f0e9dc;
+    font-size: 17px; line-height: 1.35; border-radius: 14px; }
+  .news-item.new { background: var(--accent-soft); }
+  .news-face { font-size: 28px; line-height: 1; flex: none; }
+  .news-item small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .news-empty { text-align: center; color: var(--muted); padding: 18px 0; font-size: 17px; }
+  .notify-box .hint { margin: 0 0 10px; }
+  .notify-box .primary { margin-bottom: 12px; }
+  #newsNotify { padding: 14px 24px 0; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+    body > *:not(#printArea) { display: none !important; }   /* hide all buttons, menus and screens */
+    #printArea { display: block !important; position: static !important; visibility: visible !important; }
+    .p-page { height: 192mm; overflow: hidden; break-after: page; page-break-after: always; }
+    .p-page:last-child { break-after: auto; page-break-after: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }  /* keep the light colors */
+  }
+
+  /* =============================================================
+     PHONES
+     ============================================================= */
+  @media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 699px) {
+    .screen { padding: 12px 16px 32px; }
+    .pill { font-size: 16px; padding: 6px 14px; }
+    /* Phone: "My calendar" gets its own row under Home / Switch user, as one big easy button */
+    .bar { flex-wrap: wrap; }
+    .bar .cal-btn { order: 3; flex: 1 1 100%; margin-right: 0; min-height: 56px; font-size: 20px; }
+    .big-title { font-size: 36px; }
+    .page-title { font-size: 30px; }
+    .lead { font-size: 18px; }
+    .who-grid { gap: 14px 22px; }
+    .who-btn .face { width: 108px; height: 108px; font-size: 58px; }
+    .who-btn .nm { font-size: 24px; }
+    .start-section { margin-top: 28px; }
+    .sec-title { font-size: 26px; }
+    .viewall-btn { min-height: 96px; gap: 12px; padding: 14px 20px; }
+    .viewall-btn .t-emoji { font-size: 44px; }
+    .viewall-btn .t-label { font-size: 26px; }
+    .viewall-btn .t-sub { font-size: 15px; }
+    .ach-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ach { padding: 14px 8px 12px; border-radius: 22px; }
+    .ach .face { width: 60px; height: 60px; font-size: 32px; }
+    .ach .star-badge { font-size: 26px; top: -8px; right: -10px; }
+    .ach-name { font-size: 20px; }
+    .ach-pts { font-size: 22px; }
+    .ach-done { font-size: 15px; }
+    .ach-empty { font-size: 20px; }
+    .brand-icon { width: 48px; height: 48px; border-radius: 15px; font-size: 26px; }
+    .brand-name { font-size: 28px; }
+    .brand-date { font-size: 18px; }
+    .hello-face { width: 72px; height: 72px; font-size: 40px; }
+    .menu { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .tile { min-height: 140px; padding: 12px; border-radius: 24px; }
+    .tile .t-emoji { font-size: 44px; }
+    .tile .t-label { font-size: 21px; line-height: 1.15; }
+    .tile .t-sub { font-size: 14px; }
+    .card { padding: 18px 16px; border-radius: 24px; }
+    input[type=text], input[type=number], input[type=time] { font-size: 18px; } /* 16px+ stops iPhone zooming in */
+    .summary { grid-template-columns: 1fr 1fr; }
+    .stat b { font-size: 21px; }
+
+    /* The week: one day at a time */
+    .k-nav { display: block; margin-bottom: 12px; }   /* (its look: see "Phone: one day, big and clear" at the end) */
+    .k-week { grid-template-columns: 1fr; gap: 14px; }
+    .k-week.one-day .k-day:not(.sel) { display: none; }
+    /* Rows by time on the phone. One day: only that day's column (and only its times). */
+    .k-cell { padding: 0 18px; }
+    .k-cell.k-head { padding-top: 20px; }
+    .k-time { font-size: 12px; }
+    .k-week.rows.one-day { grid-template-columns: var(--cols-day); }
+    .k-week.rows.one-day .k-cell:not(.sel), .k-week.rows.one-day .k-time.not-sel { display: none; }
+   /* Week: too wide for the phone, so it scrolls sideways inside the calendar.
+       The time labels (left) and the day names (top) stay in view. */
+    .k-scroll.wide { overflow: auto; max-height: calc(100vh - 110px); -webkit-overflow-scrolling: touch;
+                                                margin: 0 -16px; padding: 0 16px 0 0; }
+    .k-week.rows:not(.one-day) { grid-template-columns: var(--cols-wide); width: max-content; }
+    .k-week.rows:not(.one-day) .k-head { position: sticky; top: 0; z-index: 3; background: #fff; border-radius: 22px 22px 0 0;
+                                         margin: 4px 4px 0; padding: 16px 14px 0; }
+    .k-week.rows:not(.one-day) .k-time { position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 16px; }
+    .k-week.rows:not(.one-day) .k-corner { position: sticky; top: 0; left: 0; z-index: 4; background: var(--bg); }
+    .k-day { min-height: 0; padding: 16px 14px; }
+    .k-dayname { font-size: 24px; }
+    .k-block { padding: 12px 16px; border-radius: 16px; }
+    .k-block .who { font-size: 28px; }
+    .k-block .when { font-size: 21px; }
+    .k-block .what { font-size: 17px; }
+    .k-check { width: 28px; height: 28px; font-size: 15px; }
+    .k-routine { font-size: 17px; padding: 3px 14px; }
+    .k-routine.pad { font-size: 13px; padding: 0 12px; }
+    .brief { font-size: 17px; padding: 10px 14px; }
+    .k-check.hb-check { width: 34px; height: 34px; font-size: 17px; }
+    .hb-progress { font-size: 19px; }
+    .brief-past { font-size: 15px; }
+    .mine-actions .pill { flex: 1 1 auto; }
+    .pt-row { grid-template-columns: 30px 64px minmax(0, 1fr); gap: 10px; }
+    .pt-rank { font-size: 26px; }
+    .pt-row .face { width: 64px; height: 64px; font-size: 34px; }
+    .pt-row .star-badge { font-size: 28px; }
+    .pt-name, .pt-num { font-size: 22px; }
+    .hello-points { font-size: 18px; }
+    .hello-face .star-badge { font-size: 28px; top: -8px; right: -10px; }
+  }
+
+  /* =============================================================
+     COMPACT CALENDAR: the same cards, colors and rows, just smaller, so a whole day fits on one screen.
+     (At the end on purpose: the same size on computer, tablet and phone.)
+     ============================================================= */
+  .k-week.rows { gap: 4px 0; }   /* (the space between days is a small empty column) */
+  .k-week.rows .k-day { border-radius: 16px; border-width: 3px; }
+  .k-week.rows .k-cell { display: flex; flex-direction: column; gap: 3px; padding: 0 7px; }
+  .k-week.rows .k-cell.k-head { padding: 6px 6px 0; }
+  .k-week.rows .k-dayname { font-size: 13px; line-height: 1.2; padding: 3px 2px; margin: 0; border-radius: 8px; }
+  .k-week.rows .k-time { font-size: 11px; padding: 3px 0 0; }
+  .k-week.rows .k-free { font-size: 12px; padding: 4px 0; }
+  /* Cards: small padding; name on line 1, time (+ subject) on line 2 */
+  .k-week.rows .k-block { margin: 0; padding: 4px 6px; border-radius: 9px; border-left-width: 4px; }
+  .k-week.rows .k-block.editable { border-width: 2px; border-left-width: 4px; }
+  /* Never break a word in the middle: the title is one line (cut with "…"), the time line wraps between words only */
+  .k-week.rows .k-block .who { font-size: 13px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; word-break: normal; }
+  .k-week.rows .k-block .k-sub, .k-week.rows .k-block .what { overflow-wrap: normal; word-break: normal; }
+  /* Line 2: the time, then the dots / subject — one line, cut with "…" if the column is narrow */
+  .k-week.rows .k-block .k-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-week.rows .k-block .when { white-space: nowrap; }
+  .k-week.rows .t-short { display: none; }
+  /* A narrow card (side by side): emoji + name on one line, the time on the next; no "with …" line (tap for details) */
+  .k-week.rows .narrow .t-full { display: none; }
+  .k-week.rows .narrow .t-short { display: inline; }
+  .k-week.rows .narrow .what { display: none; }
+  .k-week.rows .narrow .k-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .k-week.rows .narrow .k-block { padding-bottom: 18px; }   /* room for ⇄ at the bottom, so the name gets the whole first line */
+  .k-week.rows .narrow .k-same { position: absolute; left: 6px; bottom: 3px; margin: 0; }
+  /* Narrow cards, and cards with several tick circles: the circles go on their own line under the time,
+     so the name gets the whole first line */
+  .k-week.rows .narrow .k-block, .k-week.rows .k-block.many { display: flex; flex-direction: column; }
+  .k-week.rows .narrow .k-checks, .k-week.rows .k-block.many .k-checks { float: none; order: 3; margin: 3px 0 0; flex-wrap: wrap; }
+  .k-week.rows .k-block.fixed .who { font-size: 13px; }
+  .k-week.rows .k-block .k-sub { display: block; font-size: 11px; line-height: 1.3; }
+  .k-week.rows .k-block .when { display: inline; font-size: 11px; font-weight: 700; margin: 0; }
+  .k-week.rows .k-block .what { display: inline; font-size: 11px; margin: 0; }
+  .k-week.rows .k-dots { margin-right: 3px; gap: 2px; }
+  .k-week.rows .k-dots i { width: 7px; height: 7px; }
+  /* Check circles: still 22px so they're easy to tap, at the top right of the card */
+  .k-week.rows .k-checks { float: right; margin: 0 0 1px 4px; gap: 2px; }
+  .k-week.rows .k-check { width: 22px; height: 22px; border-width: 3px; font-size: 12px; }
+  .k-week.rows .k-check .e { font-size: 11px; }
+  .k-week.rows .k-donetag { display: none; }
+  .k-week.rows .k-pin { top: auto; bottom: 2px; right: 4px; font-size: 11px; }
+  .k-week.rows .k-block.editable .k-pin { right: 4px; }
+  .k-week.rows .k-handle, .k-week.rows .k-lock { top: 3px; right: 5px; font-size: 12px; }
+  /* Routines: thin; Get ready / Break: very thin (about 10px) with tiny text */
+  .k-week.rows .k-routine { margin: 0; padding: 0 7px; font-size: 11px; line-height: 16px; }
+  .k-week.rows .k-routine .r-who { font-size: 10px; }
+  .k-week.rows .k-routine.pad { margin: 0; padding: 0 6px; font-size: 8px; line-height: 10px; }
+  .k-week.rows .k-routine.pad .r-who { font-size: 8px; }
+  /* A card spans down to its end time: its color fills all the rows it covers. Strips stay thin at the top of their row. */
+  .k-week.rows .k-span > .k-block { flex: 1; }
+  .k-week.rows .k-span > .k-routine { flex: none; }   /* its own "Get ready" above / "Break" below, same width as the card */
+  /* When the week is wider than the screen (each day is at least 150px), it scrolls sideways inside the calendar,
+     and the time labels stay on the left */
+  .k-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .k-week.rows .k-time { position: sticky; left: 0; z-index: 2; background: var(--bg); }
+  .k-week.rows .k-corner { position: sticky; left: 0; z-index: 2; background: var(--bg); }
+  .k-week.rows .k-stripcell { align-self: start; }
+  /* ⇄ = at the same time as something else (tap it to see what) */
+  .k-same { display: inline-block; min-height: 0; padding: 0 3px; margin-right: 4px; border: 1px solid var(--line-c); border-radius: 6px;
+            background: #fff; color: var(--ink); font-size: 11px; font-weight: 800; line-height: 14px; vertical-align: 1px; cursor: pointer; }
+  .k-same:hover { background: var(--soft); }
+  /* =============================================================
+     VIEW ALL PLAN: "📆 Day" (a column per person) and "📅 Week summary" (people × days)
+     ============================================================= */
+  .v-top { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; }
+  .v-mode { align-self: flex-start; }
+  .v-who-pick { margin: 0; }   /* Full week: All / one person */
+  .v-days { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding: 2px 0 4px; -webkit-overflow-scrolling: touch; }
+  .v-arrow { flex: none; width: 42px; height: 42px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid var(--line);
+             background: #fff; font-size: 18px; font-weight: 800; }
+  .v-dbtn { flex: none; min-height: 42px; padding: 4px 14px; border-radius: 999px; border: 2px solid var(--line); background: #fff;
+            font-size: 15px; font-weight: 800; white-space: nowrap; }
+  .v-dbtn.istoday { border-color: #facc15; background: #fffbea; }
+  .v-dbtn.sel { background: var(--text); border-color: var(--text); color: #fff; }
+  .v-dbtn .ph, .v-arrow .ph { display: none; }   /* the phone's short "Mon / 5" and ‹ › (see the PHONE part) */
+  .k-week.rows .k-dayname.v-who { background: var(--soft); color: var(--ink); box-shadow: inset 0 -3px 0 var(--c); font-size: 14px; }
+  .v-shared { font-size: 11px; }
+  .vs-scroll { overflow-x: auto; background: #fff; border-radius: 22px; box-shadow: var(--shadow); -webkit-overflow-scrolling: touch; }
+  .vs-table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; font-size: 13px; }
+  .vs-table th, .vs-table td { padding: 6px; vertical-align: top; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .vs-table thead th { background: #fff; font-size: 13px; font-weight: 800; white-space: nowrap; text-align: center; }
+  .vs-table thead th.today { background: #fdf3d3; color: #6b4f05; }
+  .vs-table tr > :first-child { border-left: none; }
+  .vs-table tbody tr:last-child > * { border-bottom: none; }
+  /* The person's name stays visible when the table scrolls sideways */
+  .vs-who, .vs-corner { position: sticky; left: 0; z-index: 1; }
+  .vs-corner { background: #fff; }
+  .vs-who { background: var(--soft); color: var(--ink); box-shadow: inset 5px 0 0 var(--c); text-align: left; white-space: nowrap;
+            font-size: 15px; font-weight: 800; padding-left: 12px !important; }
+  .vs-chip { background: var(--soft); color: var(--ink); border-left: 3px solid var(--c); border-radius: 6px; padding: 1px 6px; margin: 0 0 3px;
+             font-size: 12px; font-weight: 700; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+  .vs-chip.done { opacity: .6; }
+  .vs-total { white-space: nowrap; font-weight: 800; color: var(--ink); vertical-align: middle !important; }
+  /* Printed Week summary: fits one landscape page, the text sized with the page */
+  #printArea .vs-scroll { overflow: visible; box-shadow: none; border-radius: 0; border: .4mm solid var(--ink); }
+  #printArea .vs-table { min-width: 0; table-layout: fixed; font-size: calc(var(--fs, 13pt) * .8); }
+  #printArea .vs-table thead th { font-size: calc(var(--fs, 13pt) * .85); }
+  #printArea .vs-table .vs-corner { width: 13%; }
+  #printArea .vs-table thead th:last-child { width: 11%; }
+  #printArea .vs-who { font-size: calc(var(--fs, 13pt) * .9); }
+  #printArea .vs-chip { max-width: none; font-size: calc(var(--fs, 13pt) * .72); white-space: normal; }   /* on paper: the full name */
+  #printArea .vs-total { white-space: normal; }
+  /* Phone: the same compact size; the week scrolls sideways with narrower days */
+  @media (max-width: 699px) {
+    .k-week.rows.one-day { gap: 4px 0; }
+    .k-week.rows:not(.one-day) { grid-template-columns: var(--cols-wide); gap: 4px 0; }
+    .k-week.rows:not(.one-day) .k-head { margin: 3px 3px 0; padding: 4px 4px 0; border-radius: 13px 13px 0 0; }
+  }
+
+  /* =============================================================
+     PHONE: ONE DAY, BIG AND CLEAR (my calendar, each person's calendar, Everyone's plan, View all plan)
+     One day fills the screen width, with big text, big cards and big tick circles (easy for kids).
+     "📅 Week" still shows the small week above. The computer layout is not touched.
+     ============================================================= */
+  @media (max-width: 699px) {
+    /* Top: a small Day / Week switch, then ‹ Mon Tue … Sun › with the date under each day; today is yellow */
+    .k-navrow { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+    .k-mode, .v-mode { margin: 0; padding: 3px; }
+    .k-mode button, .v-mode button { min-height: 36px; padding: 4px 14px; font-size: 16px; font-weight: 800; }
+    .v-mode { align-self: flex-end; max-width: 100%; flex-wrap: wrap; }
+    .v-mode button { padding: 4px 10px; }   /* Day / Week summary / Full week fit on a small phone */
+    .k-days, .v-days { display: flex; align-items: stretch; gap: 3px; overflow: visible; padding: 0; }
+    .k-arrow, .v-arrow { flex: none; width: 34px; height: auto; min-height: 58px; padding: 0 0 4px; border-radius: 14px;
+                         border: 3px solid var(--line); background: #fff; font-size: 34px; font-weight: 800; line-height: 1; }
+    .k-dbtn, .v-dbtn { flex: 1; min-width: 0; min-height: 58px; padding: 2px 0; border-radius: 14px; border: 3px solid var(--line);
+                       background: #fff; font-size: 15px; font-weight: 800; line-height: 1.15; }
+    .k-dbtn small, .v-dbtn small { display: block; font-size: 17px; font-weight: 800; }
+    .k-dbtn.istoday, .v-dbtn.istoday { border-color: #facc15; background: #fff3c4; }
+    .k-dbtn.sel, .v-dbtn.sel { background: var(--text); border-color: var(--text); color: #fff; }
+    .k-dbtn.sel.istoday, .v-dbtn.sel.istoday { border-color: #facc15; box-shadow: 0 0 0 2px #facc15; }
+    .v-dbtn .pc, .v-arrow .pc { display: none; }
+    .v-dbtn .ph, .v-arrow .ph { display: inline; }
+
+    /* The day: big and clear */
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) { gap: 6px 0; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-day { border-radius: 22px; border-width: 4px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-cell { gap: 6px; padding: 0 10px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-cell.k-head { padding: 10px 10px 2px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-dayname { font-size: 21px; padding: 6px 4px; border-radius: 12px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-time { font-size: 14px; font-weight: 800; padding: 8px 6px 0 0; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-free { font-size: 16px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block { padding: 10px 12px; border-radius: 16px; border-left-width: 7px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block.editable { border-width: 3px; border-left-width: 7px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block .who,
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block.fixed .who { font-size: 21px; line-height: 1.3; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block .k-sub { font-size: 16px; line-height: 1.4; margin-top: 2px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block .when,
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block .what { font-size: 16px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-dots { gap: 3px; margin-right: 5px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-dots i { width: 11px; height: 11px; }
+    /* Tick circles: big enough for small fingers */
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-checks { gap: 6px; margin: 0 0 4px 8px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-check { width: 40px; height: 40px; border-width: 4px; font-size: 22px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-check .e { font-size: 19px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .narrow .k-checks,
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-block.many .k-checks { margin: 6px 0 0; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .narrow .k-block { padding-bottom: 32px; }
+    /* View all plan, a half-width card: the tick circles go under the name, so the name has the whole line */
+    .k-week.rows.v-grid .v-narrow .k-block { display: flex; flex-direction: column; }
+    .k-week.rows.v-grid .v-narrow .k-checks { float: none; order: 3; margin: 6px 0 0; flex-wrap: wrap; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .narrow .k-same { left: 10px; bottom: 6px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-same { font-size: 15px; line-height: 20px; padding: 0 6px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-pin { font-size: 15px; bottom: 4px; right: 6px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-handle,
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-lock { font-size: 16px; top: 5px; right: 8px; }
+    /* Routines (Lunch, Dinner …) and Get ready / Break */
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine { font-size: 16px; line-height: 28px; padding: 0 12px; border-radius: 12px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine .r-who { font-size: 14px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine.pad { font-size: 12px; line-height: 18px; padding: 0 10px; }
+    :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine.pad .r-who { font-size: 12px; }
+  }
