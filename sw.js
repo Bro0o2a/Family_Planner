@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v143";
+const CACHE = "family-planner-v144";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
@@ -22,7 +22,9 @@ function isFirebase(url) {
 }
 
 // The files the app needs to open without internet.
-const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png"];
+// (The app is split into css/app.css + the js/ files: every one of them must be listed here.)
+const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "css/app.css",
+  "js/core.js", "js/screens.js", "js/points.js", "js/fun.js", "js/reports.js", "js/profile.js", "js/home.js", "js/activities.js", "js/calendar.js", "js/school.js", "js/ai.js", "js/study.js", "js/settings.js", "js/taps.js", "js/cloud.js", "js/news.js", "js/start.js"];
 // 🕌 The prayer-times library (from another website). The version is in the address, so it never changes:
 // once it's saved here, it's always used from here (the prayer times then work without internet).
 const ADHAN_URL = "https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js";
