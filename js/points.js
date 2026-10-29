@@ -93,7 +93,7 @@ function studyEarned(kid, kind, ref) {
 //   then after its check +10 (≥ 80 %) / +5 (50–79 %) / 0. Each step once a worksheet (uploading or checking again gives nothing).
 //   Only the first 3 a day for each SUBJECT earn points (the Dubai date the answers went up). Worksheets in a planned session: as before.
 //   data.points.free["date|wsId|kid"] = { make, up, bonus, at, sub, capped?, checked? }   (kept 180 days)
-//   → the kid's ⭐ points (✅ Tasks, see pointKinds) and the 📚 Study score (+ this week's free points ÷ 2, see scoreOf).
+//   → the kid's ⭐ points (✅ Tasks, see pointKinds) and ⚡ the extra-worksheet bonus on the score (see extraBonus / scoreOf).
 const isFreeStudy = w => !!w && !w.session && exists(w.kid) && !isParentId(w.kid);
 const freeKeyOf = (wsId, kid) => Object.keys(data.points.free).find(k => { const [, id, who] = k.split("|"); return id === wsId && who === kid; }) || null;
 // A kid's free study between two dates: { count (worksheets that earned points), points }
@@ -167,14 +167,16 @@ function habitPoints(user, from, to) {
 // ---------- ⭐ SCORE (the new concept): 3 sub-scores from the calendar's activities by their TYPE, and one OVERALL ----------
 // Each person, this week: 📚 Study (type "study") · ⚽ Activity (type "activity") · 🌱 Habit (type "habit"), each 0–100.
 // ("other" is never scored. A parent's ➕ My activity (work / travel / other) isn't scored either.)
-// OVERALL = 65% Study + 25% Activity + 10% Habit, ALWAYS (a type with no items this week scores 0: the weights are never shared out).
+// OVERALL = 45% Study + 20% 🎓 Level + 25% Activity + 10% Habit, ALWAYS, + ⚡ the extra-worksheet bonus on top (v145; it can go over 100) (a type with no items this week scores 0: the weights are never shared out).
 // MAX = 100 × the weights of the types the person HAS items of this week (e.g. no habits → 90). Shown as "37 / 90".
 // The leaderboard and the ⭐ Shining Star compare the OVERALL as it is (not divided by the max); a tie: whoever reached it first.
 // (The old points are still collected: they grow the ✨ Spark and show in "✅ · ⭐ · 🧩", but they're not the score any more.)
-const SCORE_WEIGHTS = { study: 0.65, activity: 0.25, habit: 0.10 };
+const SCORE_WEIGHTS = { study: 0.45, level: 0.20, activity: 0.25, habit: 0.10 };
 // An activity's type: the one picked in ✏️ Add activities (older ones got theirs once, see defaultActType)
 const actTypeOf = a => defaultActType(a);
 const actTypeInfo = k => ACT_TYPES.find(t => t[0] === k) || ACT_TYPES[3];
+// The score's parts: the activity types + 🎓 Level (not an activity type)
+const scorePartInfo = k => k === "level" ? ["level", "🎓", "Level"] : actTypeInfo(k);
 // One type, one person, this week SO FAR: the planned items (days up to today; today's only once they've started, Dubai time)
 // and how many of them are ticked ✅
 function typeTally(id, type) {
@@ -459,29 +461,46 @@ function activityScore(id) { return tallyPct(typeTally(id, "activity")); }
 // 🌱 HABIT sub-score (0–100). FOR NOW: % of this week's planned habit items (so far) that are ticked. (These rules will change later.)
 function habitScore(id) { return tallyPct(typeTally(id, "habit")); }
 // Everything for one person: the 3 sub-scores, which types they have items of, the OVERALL and their MAX
-// 📚 Study = min(100, the planned sessions' score + ⭐ the free-study bonus), the bonus = this week's free-study points ÷ 2.
-// No planned sessions but free study: Study = min(100, the bonus), and its weight counts in the max.
+// 📚 Study = the planned sessions' score (0–100). (Since v145 the free-study worksheets count through ⚡ and 🎓, not here.)
+// 🎓 Level = the average over the kid's subjects with a 🧠 learning profile of: (level × 10 + this week's average % of checked worksheets) / 2
+//    (no checked worksheet this week in a subject → level × 10). No learning profile at all → no Level part ("–").
+// ⚡ Extra = each free-study worksheet this week (not over the daily limit): +1 answers uploaded, then +2 (≥ 80 %) or +1 (50–79 %) once checked.
+function levelScore(id) {
+  const s = schoolOf(id), from = data.points.week, to = weekEnd();
+  const subs = Object.entries(s.learn || {}).filter(([fid]) => s.subjects && s.subjects[fid]).map(([fid, L]) => {
+    const f = s.subjects[fid], pcts = (L.history || []).filter(h => h.date >= from && h.date < to && typeof h.pct === "number").map(h => h.pct);
+    const avg = pcts.length ? Math.round(pcts.reduce((n, x) => n + x, 0) / pcts.length) : null;
+    return { id: fid, name: f.name, emoji: f.emoji || "📘", level: L.level, avg, score: Math.round(avg == null ? L.level * 10 : (L.level * 10 + avg) / 2) };
+  });
+  return { subs, score: subs.length ? Math.round(subs.reduce((n, x) => n + x.score, 0) / subs.length) : 0 };
+}
+function extraBonus(kid, from = data.points.week, to = weekEnd()) {
+  const list = Object.entries(data.points.free).filter(([k, x]) => { const [date, , who] = k.split("|"); return who === kid && !x.capped && date >= from && date < to; }).map(([, x]) => x);
+  const up = list.filter(x => x.up > 0);
+  return { count: up.length, bonus: up.reduce((n, x) => n + 1 + (x.bonus >= FREE_POINTS.top ? 2 : x.bonus > 0 ? 1 : 0), 0) };
+}
 function scoreOf(id) {
   const sessions = studySessions(id), sp = studyParts(sessions);   // (📚 = ⏱️ + 🎯, shown as two parts)
-  const fs = freeStudy(id), free = { ...fs, bonus: Math.round(fs.points / 2) };
-  const study = Math.min(100, (sessions.length ? sp.study : 0) + free.bonus);
-  const subs = { study, activity: activityScore(id), habit: habitScore(id) };
-  const has = Object.fromEntries(Object.keys(SCORE_WEIGHTS).map(k => [k, k === "study" ? sessions.length > 0 || fs.points > 0 : typeTally(id, k).planned > 0]));
-  const overall = Math.round(Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + SCORE_WEIGHTS[k] * subs[k], 0));
+  const fs = freeStudy(id), free = { ...fs, bonus: 0 }, lv = levelScore(id), extra = extraBonus(id);
+  const study = sessions.length ? Math.min(100, sp.study) : 0;
+  const subs = { study, level: lv.score, activity: activityScore(id), habit: habitScore(id) };
+  const has = Object.fromEntries(Object.keys(SCORE_WEIGHTS).map(k => [k, k === "study" ? sessions.length > 0 : k === "level" ? lv.subs.length > 0 : typeTally(id, k).planned > 0]));
+  const base = Math.round(Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + SCORE_WEIGHTS[k] * subs[k], 0));
   const max = Math.round(100 * Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + (has[k] ? SCORE_WEIGHTS[k] : 0), 0));
-  return { ...subs, has, overall, max, sp: sessions.length ? sp : null, free };
+  return { ...subs, has, base, overall: base + extra.bonus, max, sp: sessions.length ? sp : null, free, levels: lv.subs, extra };
 }
 // "37 / 90"
-const scoreText = s => `${s.overall} / ${s.max}`;
-// The 3 small bars: 📚 Study 80% · ⚽ Activity 60% · 🌱 Habit 100% (a type without items this week: "–")
+const scoreText = s => `${s.overall} / ${s.max}${s.extra && s.extra.bonus ? ` (⚡ +${s.extra.bonus})` : ""}`;
+// The small bars: 📚 Study · 🎓 Level · ⚽ Activity · 🌱 Habit (a part without items this week: "–"), then 🎓 each subject and ⚡ the extra worksheets
 function subBarsHtml(s) {
-  return `<div class="score-subs">${Object.keys(SCORE_WEIGHTS).map(k => { const [, e, w] = actTypeInfo(k), on = s.has[k];
-    return `<div class="score-sub ${on ? "" : "none"}"><span class="score-sub-l">${e} ${w}</span><span class="score-sub-bar"><i style="width:${on ? s[k] : 0}%"></i></span><b>${on ? s[k] + "%" : "–"}</b></div>${
-      k === "study" && on && (s.sp || (s.free && s.free.bonus)) ? `<div class="score-parts">📚 Study ${s.study} = ${[s.sp ? `⏱️ Hours ${s.sp.hours}/50 + 🎯 Efficiency ${s.sp.eff}/50` : "",
-        s.free && s.free.bonus ? `⭐ Free study +${s.free.bonus}` : ""].filter(Boolean).join(" + ")}${s.sp && s.sp.study + (s.free ? s.free.bonus : 0) > 100 ? " (100 at most)" : ""}</div>` : ""}`; }).join("")}</div>`;
+  return `<div class="score-subs">${Object.keys(SCORE_WEIGHTS).map(k => { const [, e, w] = scorePartInfo(k), on = s.has[k];
+    return `<div class="score-sub ${on ? "" : "none"}"><span class="score-sub-l">${e} ${w}</span><span class="score-sub-bar"><i style="width:${on ? Math.min(100, s[k]) : 0}%"></i></span><b>${on ? s[k] + "%" : "–"}</b></div>${
+      k === "study" && on && s.sp ? `<div class="score-parts">📚 Study ${s.study} = ⏱️ Hours ${s.sp.hours}/50 + 🎯 Efficiency ${s.sp.eff}/50</div>` : ""}${
+      k === "level" && on && s.levels ? s.levels.map(x => `<div class="score-parts">${safe(x.emoji)} ${safe(x.name)} · Level ${x.level}/10 · ${x.avg == null ? "no worksheet this week" : `this week ${x.avg}%`} → ${x.score}</div>`).join("") : ""}`; }).join("")}${
+    s.extra && s.extra.count ? `<div class="score-parts">⚡ Extra worksheets: +${s.extra.bonus} (${s.extra.count} ${s.extra.count === 1 ? "worksheet" : "worksheets"})</div>` : ""}</div>`;
 }
-// The overall, big ("⭐ Score 37 / 90"), with the 3 bars under it
-const scoreBlockHtml = s => `<div class="score-total"><small>⭐ Score</small><b>${s.overall}</b><small>/ ${s.max}</small></div>${subBarsHtml(s)}`;
+// The overall, big ("⭐ Score 37 / 90 ⚡ +6"), with the bars under it
+const scoreBlockHtml = s => `<div class="score-total"><small>⭐ Score</small><b>${s.overall}</b><small>/ ${s.max}${s.extra && s.extra.bonus ? ` · ⚡ +${s.extra.bonus}` : ""}</small></div>${subBarsHtml(s)}`;
 // Everyone's score this week (kept the old name: the leaderboard, ⭐ star, Hall of Stars, history and reports all read it):
 // { id: { fair: the OVERALL, max, study, activity, habit, has, raw: the old points (only for showing), possible: max } }
 // (👨‍👩‍👧 only kids: parents have no score)

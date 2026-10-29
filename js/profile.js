@@ -590,6 +590,7 @@ function heldBackHtml(id, totals, sorted) {
   const opts = Object.keys(SCORE_WEIGHTS).map(k => { const t = typeTally(id, k); return [k, t, t.planned ? SCORE_WEIGHTS[k] * 100 / t.planned : 0]; })
     .filter(([, t]) => t.planned > t.done).map(([k, t, each]) => { const [, e, w] = actTypeInfo(k), n = Math.max(1, Math.min(t.planned - t.done, Math.ceil(gap / each) || 1));
       return [each, `Tick ${n} more ${e} ${w} ${n === 1 ? "item" : "items"} = +${Math.round(n * each)} ⭐ Score`]; });
+  if (kid) opts.push([3, "Do 1 extra worksheet and get 80%+ = +3 ⚡ Score"]);
   const best = opts.sort((a, b) => b[0] - a[0])[0];
   if (!parts.length && !best) return "";
   return `<details class="pt-held"><summary>🌱 ${mine ? "What held me back" : "What held them back"}</summary>

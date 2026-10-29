@@ -77,7 +77,7 @@ function needsLineHtml() {
 function scoreRingHtml(n, color) {
   const C = 2 * Math.PI * 44;
   return `<span class="kc-ring" role="img" aria-label="Score ${n} this week" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
-    <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * n / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${n}</b></span>`;
+    <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * Math.min(n, 100) / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${n}</b></span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {

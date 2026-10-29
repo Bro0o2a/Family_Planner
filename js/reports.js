@@ -53,7 +53,7 @@ function reportCardsHtml(kid, forPdf) {
   const big = (n, label) => `<div class="rp-num"><b>${n}</b><small>${label}</small></div>`;
   const sc = rpRange === "week" ? scoreOf(kid) : null;   // (⭐ the score is for this week only)
   return `${sc ? `<div class="card rp-card"><h2>⭐ Score this week</h2>${scoreBlockHtml(sc)}</div>` : ""}
-    <div class="card rp-card"><h2>📚 Study per subject</h2>${sc ? `<p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · ⭐ Free study: +${sc.free.bonus}${
+    <div class="card rp-card"><h2>📚 Study per subject</h2>${sc ? `<p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · ⚡ Extra worksheets: +${sc.extra.bonus}${
       sc.free.count ? ` <small>(${sc.free.count} ${sc.free.count === 1 ? "worksheet" : "worksheets"}, ${sc.free.points} points)</small>` : ""}</p>` : ""}${studyTableHtml(kid, null)}</div>
     <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(kid)}</div>
     <div class="card rp-card"><h2>🧠 Learning profile</h2>${learnReportHtml(kid)}</div><div class="card rp-card"><h2>🎒 School</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>

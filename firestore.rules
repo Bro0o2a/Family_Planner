@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// ============================================================
+//  Family Plan: Firestore rules (multi-family, parent + kid roles)
+//  NOT deployed yet. To use them: Firebase console → Firestore → Rules → paste → Publish
+//  (or `firebase deploy --only firestore:rules`).
+//
+//  members/{uid}               = { familyId, role: "parent" | "kid", kidId (kids), code (when joined with a code), name }
+//  codes/{CODE}                = { familyId, kidId (or "parent"), createdBy, createdAt }
+//  families/{familyId}/...     = the family's data (state/plan, state/points, state/habits, state/news,
+//                                state/photo-*, files/*, worksheets/*, explanations/*)
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function memberPath(uid) { return /databases/$(database)/documents/members/$(uid); }
+    function isMember() { return signedIn() && exists(memberPath(request.auth.uid)); }
+    function myMember() { return get(memberPath(request.auth.uid)).data; }
+
+    // In this family: a member of it, or (the old rule) the family's own first account
+    function inFamily(familyId) {
+      return signedIn() && (request.auth.uid == familyId || (isMember() && myMember().familyId == familyId));
+    }
+    // A parent of this family
+    function isParentOf(familyId) {
+      return signedIn() && (request.auth.uid == familyId
+        || (isMember() && myMember().role == 'parent' && myMember().familyId == familyId));
+    }
+
+    // A code that exists and is for this family and this kid ("parent" for a parent code)
+    function validCode(code, familyId, kidId) {
+      return code is string && code.size() == 6
+        && exists(/databases/$(database)/documents/codes/$(code))
+        && get(/databases/$(database)/documents/codes/$(code)).data.familyId == familyId
+        && get(/databases/$(database)/documents/codes/$(code)).data.kidId == kidId;
+    }
+
+    // ---------- Who is who ----------
+    match /members/{uid} {
+      // Your own doc, or a parent of the same family
+      allow read: if signedIn() && (request.auth.uid == uid || isParentOf(resource.data.familyId));
+
+      // Only your own doc:
+      //   parent: a new family (familyId == your uid), or a valid parent code
+      //   kid:    codes/{code} exists and its familyId / kidId match
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.familyId is string
+        && (
+          (request.resource.data.role == 'parent'
+            && (request.resource.data.familyId == request.auth.uid
+                || validCode(request.resource.data.get('code', ''), request.resource.data.familyId, 'parent')))
+          ||
+          (request.resource.data.role == 'kid'
+            && request.resource.data.kidId is string
+            && validCode(request.resource.data.get('code', ''), request.resource.data.familyId, request.resource.data.kidId))
+        );
+
+      // You may change your own doc (e.g. your name), but never your role, family or kid
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.familyId == resource.data.familyId
+        && request.resource.data.get('kidId', null) == resource.data.get('kidId', null);
+
+      // A parent can remove a member of their family (e.g. a kid's old device)
+      allow delete: if isParentOf(resource.data.familyId);
+    }
+
+    // ---------- Kids' and parents' codes ----------
+    match /codes/{code} {
+      allow get: if signedIn();        // reading ONE code you typed
+      allow list: if false;            // never the list of all codes
+      allow create: if isParentOf(request.resource.data.familyId)
+        && request.resource.data.createdBy == request.auth.uid;
+      allow delete: if isParentOf(resource.data.familyId);
+      allow update: if false;
+    }
+
+    // ---------- Each family's data ----------
+    match /families/{familyId} {
+      allow read, write: if inFamily(familyId);
+      match /{rest=**} {
+        allow read, write: if inFamily(familyId);
+      }
+    }
+  }
+}
