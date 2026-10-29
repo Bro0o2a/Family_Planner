@@ -1410,6 +1410,115 @@
   .sc-pct { border-radius: 999px; padding: 2px 12px; font-size: 16px; font-weight: 800; }
   .sc-pct.lv-good { background: #dcfce7; } .sc-pct.lv-mid { background: #fef3c7; } .sc-pct.lv-low { background: #fee2e2; }
   /* 📝 All my worksheets: the score as a coloured badge (🟢 ≥ 80 · 🟡 50–79 · 🔴 < 50) */
+  /* 👨‍👩‍👧 THE PARENT'S HOME: 🔔 Needs you · a card per kid · the Family row (simple, big touch targets, fits a phone for 3 kids) */
+  .p-home { display: grid; gap: 8px; margin-top: 4px; font-family: "Baloo 2", inherit; }
+  #scr-home:not(.kid-home) .enc-line { display: none !important; }   /* (📊 is on each kid's card and in ☰ More) */
+  /* (a parent's home: the hello and the date a little smaller; 📅 is in the Family row, so no big Calendar bar here) */
+  #scr-home:not(.kid-home) .bar .cal-btn { display: none; }
+  #scr-home:not(.kid-home) .home-date { margin: 0 0 6px; }
+  #scr-home:not(.kid-home) .home-date b { font-size: 26px; }
+  #scr-home:not(.kid-home) .home-date span { font-size: 15px; }
+  #scr-home:not(.kid-home) .hello { gap: 12px; margin-bottom: 8px; }
+  #scr-home:not(.kid-home) .hello-face { width: 60px; height: 60px; font-size: 34px; }
+  #scr-home:not(.kid-home) .big-title { font-size: 30px; }
+  .needs-line { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 4px 14px;
+                border-radius: 16px; border: 2px solid #f59e0b; background: #fffbea; font-size: 16px; font-weight: 800; text-align: left; }
+  .needs-line.on { border-radius: 16px 16px 0 0; }
+  .needs-list { display: grid; gap: 6px; padding: 8px; background: #fffbea; border: 2px solid #f59e0b; border-top: 0; border-radius: 0 0 16px 16px; }
+  .needs-list button { min-height: 44px; text-align: left; font-weight: 700; }
+  .needs-panel > .card { margin: 8px 0 0; }
+  .kid-cards { display: grid; gap: 8px; margin: 0; }
+  .p-home > *, .p-home .kid-card { margin-top: 0 !important; margin-bottom: 0 !important; }
+  .kid-card { margin: 0; padding: 8px 10px; border-left: 8px solid var(--c); background: var(--soft); color: var(--ink); }
+  .kc-open { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 0; background: none; border: 0; text-align: left; color: inherit; }
+  .kc-ring { position: relative; flex: none; width: 50px; height: 50px; display: grid; place-items: center; }
+  .kc-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .kc-ring .kc-bar { fill: none; stroke: var(--c); stroke-width: 10; stroke-linecap: round; }
+  .kc-ring b { position: relative; font-size: 18px; }
+  .kc-text { flex: 1; min-width: 0; display: grid; }
+  .kc-text b { font-size: 19px; line-height: 1.15; }
+  .kc-text small { font-size: 13px; font-weight: 700; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kc-go { font-size: 26px; font-weight: 800; opacity: .6; }
+  .kc-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .kc-btns button { min-height: 38px; padding: 2px 4px; border-radius: 12px; background: #fff; font-size: 13px; font-weight: 800; }
+  .fam-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .fam-row button { display: grid; place-items: center; gap: 0; aspect-ratio: 1 / 1; max-height: 74px; width: 100%; min-height: 60px; padding: 4px; border-radius: 18px; background: #fff; }
+  .fam-row button.on { background: var(--text); color: #fff; }
+  .fam-row .e { font-size: 28px; line-height: 1; }
+  .fam-row small { font-size: 12px; font-weight: 800; line-height: 1.15; text-align: center; }
+  .fr-new { display: block; color: var(--danger); }
+  /* 👧 THE KID PAGE */
+  .kp-top { border-top: 8px solid var(--c); }
+  .kp-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .kp-head h1 { margin: 0; font-size: 26px; }
+  .kp-head .kc-ring { width: 72px; height: 72px; }
+  .kp-h { margin: 16px 4px 6px; font-size: 20px; }
+  .td-row.done .td-what { opacity: .6; }
+  /* 📰 The weekly newsletter reminder (a parent's home) */
+  .nl-nudge { border-left: 6px solid var(--c); background: #fffbea; }
+  .nl-nudge p { margin: 0 0 8px; font-weight: 700; }
+  /* ❌ Didn't happen (on the rating cards) */
+  .rate-btns .miss-btn { border-color: #fecaca; }
+  .rate-btns .miss-btn b { font-size: 12px; }
+  /* 🔗 Matching: two columns, clear borders, the same row heights, room to write a letter (phone: still side by side, smaller) */
+  .ws-match { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
+  .ws-match td { width: 50%; height: 48px; padding: 8px; border: 1.5px solid #6b7280; vertical-align: middle; overflow-wrap: anywhere; }
+  .wm-box { display: inline-block; width: 32px; height: 32px; margin-inline-end: 8px; border: 2px solid #111827; border-radius: 4px;
+            text-align: center; line-height: 28px; font-weight: 800; vertical-align: middle; color: #15803d; }
+  @media (max-width: 520px) {
+    .ws-match { font-size: 13px; }
+    .ws-match td { height: 42px; padding: 5px 4px; }
+    .wm-box { width: 26px; height: 26px; line-height: 22px; margin-inline-end: 5px; }
+  }
+  /* 🖼️ A parent's photo instead of their emoji (any size: it follows the emoji's size) */
+  .face-img { display: inline-block; width: 1.15em; height: 1.15em; border-radius: 50%; object-fit: cover; vertical-align: -0.2em; }
+  .me-face .face-img, #homeFace .face-img { width: 1em; height: 1em; }
+  .me-pic { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 4px 0; }
+  .me-pic-now { font-size: 56px; line-height: 1; }
+  .me-pic-img { width: 72px; height: 72px; }
+  /* 🇦🇪 Arabic worksheets (right-to-left) · 🌐 the Arabic translation under a question · the header */
+  .ws-rtl { direction: rtl; text-align: right; }
+  .ws-ar { margin: 3px 0 2px; font-size: .85em; color: #6b7280; direction: rtl; text-align: right; }
+  .ws-head { flex-wrap: wrap; gap: 4px 18px; }
+  .tr-toggle { margin: 8px 0 4px; }
+  /* 📸 answer photos before the check: thumbnails with 🗑 */
+  .ans-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .ans-thumb { position: relative; width: 110px; }
+  .ans-open { display: grid; gap: 4px; width: 100%; min-height: 0; padding: 4px; border-radius: 12px; background: #fff; border: 2px solid var(--line); }
+  .ans-open img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
+  .ans-open .e { font-size: 40px; height: 110px; display: grid; place-items: center; }
+  .ans-open small { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ans-del { position: absolute; top: -8px; right: -8px; width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; background: #fff; border: 2px solid var(--danger); font-size: 17px; }
+  /* ❌ mistakes one by one */
+  .mist-card { margin: 12px 0 0; border-left: 6px solid var(--danger); }
+  .mist-card.ws-rtl { border-left: 0; border-right: 6px solid var(--danger); }
+  .mist-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .mist-q { font-weight: 700; margin: 8px 0; }
+  .mist-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 10px; margin: 6px 0; }
+  .mist-row.bad { background: #fee2e2; } .mist-row.ok { background: #dcfce7; }
+  .mist-why { margin: 8px 0; }
+  /* 📚 Which subject today? · the subject filter under the calendar · 🎯 worksheet goals */
+  .k-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+  .k-pick .chip { min-height: 34px; padding: 2px 10px; font-size: 14px; }
+  .pick-row { justify-content: center; margin: 10px 16px; flex-wrap: wrap; }
+  .subj-filter { margin-top: 14px; }
+  .subj-sum { margin: 10px 0 0; border-left: 6px solid var(--c); line-height: 1.5; }
+  .goal-line { margin: 4px 0; font-weight: 700; }
+  .goal-line.ok { color: #15803d; }
+  .goal-warn { margin: 6px 0 0; color: var(--danger); font-weight: 700; }
+  .goal-set select { max-width: 200px; }
+  /* ⏱️ Enough time: the live line on ✏️ Add activities, and the "Not saved" box */
+  .add-time { margin: -4px 0 14px; font-weight: 700; color: var(--muted); }
+  .add-time .over { color: var(--danger); }
+  .time-short { margin: 8px 18px; text-align: left; }
+  .time-short ul { margin: 6px 0 0; padding-left: 20px; }
+  /* 📌 One-day event on the calendar */
+  .k-block.k-oneday { --soft: #fef3c7; --ink: #6b4f05; --line-c: #f59e0b; border-left-style: dashed; }
+  /* 🕗 My day: "Day starts at" / "Day ends at" for each day */
+  .day-hours { display: grid; gap: 8px; margin: 8px 0 10px; }
+  .day-hrow { display: grid; grid-template-columns: minmax(84px, auto) 1fr 1fr; gap: 8px; align-items: end; }
+  .day-hrow label { display: grid; gap: 2px; }
+  .day-hrow b { align-self: center; }
   .aw-list .ai-status { flex: none; white-space: nowrap; font-weight: 800; }
   .aw-list .ai-status.lv-good { background: #dcfce7; } .aw-list .ai-status.lv-mid { background: #fef3c7; } .aw-list .ai-status.lv-low { background: #fee2e2; }
   .aw-row { display: flex; align-items: center; gap: 10px; width: 100%; }
@@ -1571,7 +1680,7 @@
   body.kid-device [data-switch], body.kid-device [data-go="settings"], body.kid-device [data-backup], body.kid-device [data-go="family"],
   body.kid-device [data-nlopen], body.kid-device [data-scgo="profile"], body.kid-device [data-scgo="reports"], body.kid-device [data-scgo="brief"],
   body.kid-device [data-pactnew], body.kid-device [data-pactedit], body.kid-device [data-pactdel],
-  body.kid-device [data-scdel], body.kid-device [data-wsfdel], body.kid-device #fmDel, body.kid-device [data-del-user],
+  body.kid-device [data-scdel], body.kid-device #fmDel, body.kid-device [data-del-user],   /* (🗑 an answer photo before the check: kids too) */
   body.kid-device [data-del-fixed], body.kid-device [data-del-flex], body.kid-device [data-del-rt],
   body.kid-device [data-hbdel] { display: none !important; }
   body.kid-device .sc-topbtns, body.off-newsletter .sc-topbtns { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* (⬆️ + ✏️, no 📰) */
@@ -2437,6 +2546,8 @@
     <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <h1 class="page-title" id="addTitle"></h1>
   <p class="lead" id="addSub"></p>
+  <!-- ⏱️ Enough time? Each kid's need vs free time this week, live while editing (parents) -->
+  <p class="add-time" id="addTime" hidden></p>
 
   <!-- ✏️ Closed and simple: three big buttons (📌 Fixed · 🔄 Flexible · 🧺 Routines for parents), each opens its list (accordion).
        A list's "➕ New …" or a row opens the form (only then); the form has 💾 Save · Cancel · 🗑️ Delete. See ADD PAGE. -->
@@ -2575,6 +2686,8 @@
   <div class="brief" id="mineBrief"></div>
   <div class="note" id="mineNote" hidden></div>
   <div id="mineWeek"></div>
+  <!-- 📚 Subject filter: All + each subject; a subject = only its sessions this week stand out, with a small summary card -->
+  <div id="mineSubj"></div>
   <div id="mineHabits"></div>
 </section>
 
@@ -2627,17 +2740,11 @@
       <!-- My day -->
       <div class="card">
         <h2>🕗 My day</h2>
-        <p class="hint">When does the day start and end? Free time = the day minus fixed activities and routines.
-          Activities from “Find a time for me” only go in free time.</p>
-        <div class="row">
-          <div><label class="small">Day starts</label><input type="time" id="dayStart" value="08:00"></div>
-          <div><label class="small">Day ends</label><input type="time" id="dayEnd" value="21:00"></div>
-        </div>
-        <label class="checkline"><input type="checkbox" id="wkOwn"> Different hours on the weekend (Saturday and Sunday)</label>
-        <div class="row" id="wkRow" hidden>
-          <div><label class="small">Weekend starts</label><input type="time" id="wkStart" value="08:00"></div>
-          <div><label class="small">Weekend ends</label><input type="time" id="wkEnd" value="21:00"></div>
-        </div>
+        <p class="hint">When does each day start and end? Free time = the day minus fixed activities and routines.
+          The planner never puts anything before the start or after the end, and the calendar shows only that time.</p>
+        <!-- 🕗 Day starts at / Day ends at, Monday … Sunday (filled by fillMyDay) -->
+        <div class="day-hours" id="dayHours"></div>
+        <div class="btnrow"><button type="button" class="pill" id="daySame">📋 Same for all days</button></div>
         <div class="err" id="dayErr"></div>
         <div class="free-title" id="freeTitle"></div>
         <div class="chips free-who" id="freeWho"></div>
@@ -2780,6 +2887,13 @@
   <input type="file" id="aiFile" accept="image/*,application/pdf,.pdf,.pptx,.docx,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
 </section>
 
+<!-- ===== 👧 THE KID PAGE (parents): everything about one kid (open it from their card on the parent's home) ===== -->
+<section class="screen" id="scr-kid" hidden>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button>
+    <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
+  <div id="kidBody"></div>
+</section>
+
 <!-- ⬆️ Upload today's work: pick the files, they're kept in the subject's Files, then 🤖 reads them (a new topic gets a level check) -->
 <!-- ⬆️ Upload (see STUDY TOPICS): in a subject 📚 Add to curriculum or ⚡ Instant worksheet; from the School home 📚 for all subjects (filled by drawUpload) -->
 <div class="k-modal" id="aiWorkModal" hidden>
@@ -2814,6 +2928,8 @@
     <div class="ai-topicpick" id="wsoTopics"></div>
     <label class="small">How many questions?</label>
     <div class="daypick" id="wsoCount"></div>
+    <!-- 🌐 Arabic translation of questions (not for an Arabic / Islamic subject) -->
+    <div id="wsoTr"></div>
     <div class="err" id="wsoErr"></div>
     <div class="btnrow">
       <button class="primary" id="wsoMake" data-aiwait="worksheet">🤖 Make worksheet</button>
@@ -2833,6 +2949,14 @@
       <button id="pmAnswers" hidden>📎 Open the answers</button>
       <button id="pmOk">OK</button>
     </div>
+  </div>
+</div>
+
+<!-- 📌 One-day event (parents): title, who, date, start and end time; then (clashes) Move them / Remove them for that day -->
+<div class="k-modal" id="odModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="odTitle">
+    <div class="print-title" id="odTitle">📌 One-day event</div>
+    <div id="odBody"></div>
   </div>
 </div>
 
@@ -3536,6 +3660,8 @@ function emptyData() {
     // Routines: daily things like eating and shower. Nothing is planned on top of them. No points.
     routines: [],  // e.g. { id, name:"Lunch", emoji:"🍽️", start:"13:00", duration:30, days:[0..6], users:[ids], custom:false }
     // 📅 A parent's own activities (💼 Work, ✈️ Travel, 📌 Other): only on the calendar. The planner never moves them. No points.
+    skips: {},      // ❌ sessions that didn't happen: "date|actId" → { by, at, why: "skip" | "moved" } (never planned on that date again)
+    oneDay: [],     // 📌 one-day events, e.g. { id, title:"Dentist", who:["mody"], date:"2026-10-30", from:"16:00", to:"17:00", by:"dad", skip:[ids] }
     parentActs: [], // e.g. { id, title:"Dad away", type:"travel", by:"dad", start:"2026-10-19", end:"2026-10-22", from:"", to:"", weekly:false }
     //   (from / to = "09:00" / "17:00", or "" = all day; end = start except for travel)
     // When the day starts and ends. Free time = this minus fixed activities.
@@ -3564,6 +3690,7 @@ function emptyData() {
               study: {},   // (🎒 school points: 🤖 explanation read, 📤 answers uploaded: see SCHOOL POINTS)
               sessions: {},     // (📚 study session results: "date|actId|person" → { pct, by, at, ws?, note? }: see STUDY SCORE. Kept 180 days)
               free: {},         // (⭐ free study: "date|wsId|kid" → { make, up, bonus, at, sub }: see FREE STUDY. Kept 180 days)
+              picks: {},        // (📚 "Which subject today?": "date|actId|kid" → { sid, name, by, at }: see STUDY SUBJECTS. Kept 180 days)
               studyWeeks: {},   // (📚 each past week's study per subject: "monday|kid" → { all, subjects }: see STUDY SCORE. Kept 8 weeks)
               prizeMsg: {},   // (⭐ the star, decided Friday 6 PM, and 🎁 the Saturday reminder: see maybeDecideStar)
               community: {}, cmReact: {}, cmDone: {},   // (🏡 Our Community: posts, reactions, ✅ done: see OUR COMMUNITY. Kept 180 days)
@@ -3631,6 +3758,8 @@ function cleanData(d) {
                    ...(u.loves && typeof u.loves === "object" ? { loves: Object.fromEntries(LOVES.map(([k]) => [k, typeof u.loves[k] === "string" ? u.loves[k].trim().slice(0, 30) : ""]).filter(([, v]) => v)) } : {}),
                    // ✨ the Spark's own name (shown as "Spark"; the stored field stays "buddy")
                    ...(typeof u.sparkName === "string" && u.sparkName.trim() ? { sparkName: u.sparkName.trim().slice(0, 12) } : {}),
+                   // 🖼️ a parent's picture: a small square JPEG photo (about 160×160) instead of their emoji (newer: older data has none)
+                   ...(typeof u.photo === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(u.photo) && u.photo.length <= 60000 ? { photo: u.photo } : {}),
                    // ⭐ a parent's chosen habits ("ph-" ids, as many as they like) + focusAt (when chosen: the newer choice wins, see mergeBuddies)
                    ...(Array.isArray(u.focus) ? { focus: [...new Set(u.focus.filter(x => typeof x === "string" && x.startsWith("ph-")))].slice(0, 60),
                                                   ...(typeof u.focusAt === "string" ? { focusAt: u.focusAt } : {}) } : {}),
@@ -3697,7 +3826,12 @@ function cleanData(d) {
     if (type !== "study") return { type, helper };
     const studyMode = f.studyMode === "assisted" && helper ? "assisted" : "sole";
     if (studyMode === "sole") helper = "";
-    return { type, helper, subjectId: typeof f.subjectId === "string" ? f.subjectId.slice(0, 60) : "", studyMode };
+    // 📚 Its subjects: subjectIds = one or more subject ids, or ["all"] (All my subjects). An older single subjectId = a list of one.
+    // (subjectId stays: the first one, for older phones)
+    const ids = (Array.isArray(f.subjectIds) ? f.subjectIds : typeof f.subjectId === "string" && f.subjectId ? [f.subjectId] : [])
+      .filter(x => typeof x === "string" && x).map(x => x.slice(0, 60)).slice(0, 30);
+    const subjectIds = ids.includes(ALL_SUBJECTS) ? [ALL_SUBJECTS] : [...new Set(ids)];
+    return { type, helper, subjectId: subjectIds.find(x => x !== ALL_SUBJECTS) || "", subjectIds, studyMode };
   };
 
   if (Array.isArray(d.fixed)) clean.fixed = d.fixed
@@ -3735,6 +3869,19 @@ function cleanData(d) {
       return { id: String(a.id || newId()), title: a.title.trim().slice(0, 40), type, by: a.by, start: a.start, end,
                from: timed ? a.from : "", to: timed ? a.to : "", weekly: a.weekly === true };
     });
+  // ❌ Sessions that didn't happen (newer: older data has none): the last 60 days
+  if (d.skips && typeof d.skips === "object" && !Array.isArray(d.skips)) Object.entries(d.skips).forEach(([k, v]) => {
+    if (/^\d{4}-\d{2}-\d{2}\|[^|]{1,60}$/.test(k) && k.slice(0, 10) >= addDaysYmd(todayYmd(), -60) && v && typeof v === "object")
+      clean.skips[k] = { by: String(v.by || "").slice(0, 40), at: String(v.at || "").slice(0, 40), why: v.why === "moved" ? "moved" : "skip" };
+  });
+  // 📌 One-day events (newer: older data has none): only on their date, for one or more people, never scored.
+  // skip = the activities a parent removed for that day because of it (the planner doesn't put them back on that date)
+  if (Array.isArray(d.oneDay)) clean.oneDay = d.oneDay
+    .filter(e => e && typeof e.title === "string" && e.title.trim() && isYmdText(e.date) && isTime(e.from) && isTime(e.to) && toMin(e.to) > toMin(e.from)
+                 && Array.isArray(e.who) && e.who.some(id => userIds.includes(id)))
+    .map(e => ({ id: String(e.id || newId()).slice(0, 40), title: e.title.trim().slice(0, 40), who: e.who.filter(id => userIds.includes(id)),
+                 date: e.date, from: e.from, to: e.to, ...(typeof e.by === "string" ? { by: e.by.slice(0, 40) } : {}),
+                 ...(Array.isArray(e.skip) ? { skip: e.skip.map(String).slice(0, 40) } : {}) }));
 
   // Good habits (older saved data has none: start with the default list) and their ticks
   // ("Say please and thank you" was removed from the list: it's dropped from saved data too, with its ticks.)
@@ -3878,6 +4025,9 @@ function cleanData(d) {
     if (okPair(m.start, m.end)) Object.assign(clean.myDay, { start: m.start, end: m.end });
     if (okPair(m.weekendStart, m.weekendEnd)) Object.assign(clean.myDay, { weekendStart: m.weekendStart, weekendEnd: m.weekendEnd });
     clean.myDay.weekendOwn = m.weekendOwn === true;
+    // 🕗 Each day's own start and end, Monday … Sunday (newer: older data has none, then the hours above are used)
+    if (Array.isArray(m.days) && m.days.length === DAYS.length && m.days.every(x => x && okPair(x.start, x.end)))
+      clean.myDay.days = m.days.map(x => ({ start: x.start, end: x.end }));
   }
 
   const max = Math.round(Number(d.maxTogether));
@@ -4023,6 +4173,8 @@ function cleanData(d) {
     const fp = (x, max) => Math.max(0, Math.min(max, Math.round(Number(x) || 0)));
     each(pts.free, (k, v) => { if (dayKey(k, 2)) clean.points.free[k] = { make: fp(v.make, FREE_POINTS.make), up: fp(v.up, FREE_POINTS.up), bonus: fp(v.bonus, FREE_POINTS.top),
       at: s(v.at, 40), sub: s(v.sub, 30), ...(v.capped === true ? { capped: true } : {}), ...(v.checked === true ? { checked: true } : {}) }; });
+    // 📚 The subject a kid picked for a study session with more than one subject (newer: older data has none)
+    each(pts.picks, (k, v) => { if (dayKey(k, 2) && s(v.sid, 60) && s(v.name, 30)) clean.points.picks[k] = { sid: s(v.sid, 60), name: s(v.name, 30), by: s(v.by, 40), at: s(v.at, 40) }; });
     const part = x => { const n = k => Math.max(0, Math.round(Number(x && x[k]) || 0));
       return { planned: n("planned"), done: n("done"), hours: Math.min(50, n("hours")), eff: Math.min(50, n("eff")), study: Math.min(100, n("study")) }; };
     each(pts.studyWeeks, (k, v) => { if (dayKey(k, 1)) clean.points.studyWeeks[k] = { all: part(v.all),
@@ -4121,6 +4273,7 @@ const STUDY_POINTS = { ex: 5, up: 5 };
 // ⭐ Free study (a worksheet outside a planned study session): +2 made (given with the answers) · +15 answers · +10 (≥ 80 %) / +5 (50–79 %) after the check
 // Only the first 3 a day for each subject earn points (Dubai date, counted when the answers go up). See FREE STUDY.
 const FREE_POINTS = { make: 2, up: 15, top: 10, mid: 5 }, FREE_CAP = 3;
+const ALL_SUBJECTS = "all";   // 📚 a study activity's subjectIds: ["all"] = All my subjects (see actSubjectsFor)
 // 🏡 Our Community: the kinds of post [emoji, name, what it's for, an example] and the reactions (see OUR COMMUNITY)
 const CM_TYPES = { note: ["📝", "Note", "Something about our family", "We had fun at the park!"],
                    need: ["🙏", "I need", "Ask Mum and Dad", "I need new school shoes"],
@@ -4182,7 +4335,9 @@ function cleanSchool(s) {
     c.subjects = k.subjects && typeof k.subjects === "object" && !Array.isArray(k.subjects)
       ? list(k.subjects, x => txt(x.name, 30) ? { name: txt(x.name, 30), emoji: txt(x.emoji, 8) || "📘",
                                                    color: hasOwn(PALETTE, x.color) ? x.color : "blue", order: Number(x.order) || 0,
-                                                   ...(x.hidden === true ? { hidden: true } : {}) } : null)   // (🙈 hidden by a parent: kept, not shown)
+                                                   ...(x.hidden === true ? { hidden: true } : {}),   // (🙈 hidden by a parent: kept, not shown)
+                                                   // (🎯 "Worksheets per week" a parent set: 1–7; 0 / none = no goal)
+                                                   ...(Number(x.goal) >= 1 && Number(x.goal) <= 7 ? { goal: Math.round(Number(x.goal)) } : {}) } : null)
       : JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
     c.files = list(k.files, f => {
       const kind = FILE_KINDS.includes(f.kind) ? f.kind : null, url = kind === "link" && /^https?:\/\/\S+$/i.test(String(f.url || "")) ? String(f.url).slice(0, 500) : null;
@@ -4457,6 +4612,14 @@ function dadName() { return userById(DAD).name; }
 function whoText(id) { const u = userById(id); return `${u.emoji} ${u.name}`; }
 function usersText(ids) { return ids.map(whoText).join(", "); }
 function emojisOf(ids) { return ids.map(id => userById(id).emoji).join(""); }
+// 👤 A person's face on the screen (HTML): a parent's photo (picked in 👤 My profile) or, without one, their emoji.
+// (Text-only places — toasts, PDFs, screen-reader labels — keep the emoji.) Kids: their emoji (their ✨ Spark stays as it is).
+const facePhoto = u => u && isParentId(u.id) && typeof u.photo === "string" && u.photo.startsWith("data:image/jpeg;base64,") ? u.photo : "";
+const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
+const facesHtml = ids => ids.map(id => faceHtml(userById(id))).join("");
+const whoHtml = id => { const u = userById(id); return `${faceHtml(u)} ${safe(u.name)}`; };   // ("👩 Mum" with her photo)
+// ✨ Only kids have a Spark (no Spark card, badge, levels or "pick your Spark" for parents)
+const hasSpark = id => feat("buddy") && exists(id) && !isParentId(id);
 function namesOf(ids) { return ids.map(id => userById(id).name).join(" & "); }
 // Who is busy during an activity: its people, plus Dad if it "Needs Dad".
 // Two activities only clash if they share at least one of these people.
@@ -4466,6 +4629,7 @@ function peopleOf(act) { return act.helper && !act.users.includes(act.helper) ? 
 const helperOf = act => act && act.helper && !act.users.includes(act.helper) ? userById(act.helper) || null : null;
 // "🤝 with 🦸‍♂️ Bro2a"
 const withText = act => { const h = helperOf(act); return h ? `🤝 with ${h.emoji} ${h.name}` : ""; };
+const withHtml = act => { const h = helperOf(act); return h ? `🤝 with ${faceHtml(h)} ${safe(h.name)}` : ""; };   // (the same, with a parent's photo)
 // How an activity looks from one person's side: "Gym", or "Math with Bana" when Dad only joins to help.
 function actFor(act, person) { return act.users.includes(person) ? act.name : `${act.name} with ${namesOf(act.users)}`; }
 // The clash message, e.g. "🦸‍♂️ Dad is busy twice on Monday: Gym (9am–10:30am) and Math with Bana (9:30am–10:15am)"
@@ -4530,6 +4694,7 @@ function go(name, fromHistory) {
   if (name === "all" || name === "view") { name = "mine"; calWho = "all"; if (screen === "mine") screen = ""; }
   if (name === "family" && !isParentId(me)) name = "home";   // 👨‍👩‍👧 Family: parents only
   if (name === "kidswork" && !isParentDevice()) name = "home";   // 👀 Your kids' work today: parents only
+  if (name === "kid" && (!isParentDevice() || !exists(kidPage))) name = "home";   // 👧 the Kid page: parents only
   // ✏️ Add activities opens CLOSED and simple every time (no list or form open)
   if (name === "add" && screen !== "add") { addOpen = { fx: false, fl: false, rt: false }; resetFixedForm(); resetFlexForm(); closeRoutineForm(); }
   // 👤 This device is always the person signed in on it (no "Switch user" / "Who are you?"): see deviceMe
@@ -4608,7 +4773,7 @@ function askWhichParent(again) {
   const box = $("whoParentModal");
   if (!box || (!box.hidden && !again)) return;
   $("whoParentList").innerHTML = parentsList().map(u => { const c = colorsOf(u);
-    return `<button class="wp-btn" data-wpick="${safe(u.id)}" style="--soft:${c.soft};--ink:${c.ink}"><span class="e">${safe(u.emoji)}</span><b>${safe(u.name)}</b></button>`; }).join("");
+    return `<button class="wp-btn" data-wpick="${safe(u.id)}" style="--soft:${c.soft};--ink:${c.ink}"><span class="e">${faceHtml(u)}</span><b>${safe(u.name)}</b></button>`; }).join("");
   box.hidden = false;
 }
 document.addEventListener("click", e => {
@@ -4650,6 +4815,7 @@ function render() {
   if (screen === "me") drawMe();
   if (screen === "report") drawReport();
   if (screen === "kidswork") drawKidsWork();   // 👀 (parents)
+  if (screen === "kid") drawKidPage();          // 👧 one kid's page (parents)
   // ⚙️ A feature that's off: body.off-<feature> hides its buttons (see the CSS "FEATURES OFF")
   FEATURES.forEach(([k]) => document.body.classList.toggle("off-" + k, !feat(k)));
   document.body.classList.toggle("parent-phone", isParentPhone());   // 👨‍👩‍👧 School: look only (see the CSS)
@@ -4675,13 +4841,50 @@ function keepNow() { writeData(); render(); }
 // (If only the calendar was edited by hand, nothing is re-planned, so the moves stay exactly where they are.)
 // Everyone's calendar and "View all plan" read the same data, so they're all updated.
 // (writeData() also sends it to the family cloud, so the other phones get it within seconds.)
+// ⏱️ A parent's changed activities must fit: when a kid needs more time than they have this week, NOTHING is saved (see timeBudget).
+// → true when saved
 function saveChanges() {
+  const short = isParentId(me) && planIsOld() ? timeBudget().filter(x => x.need > x.free) : [];
+  if (short.length) { showTimeShort(short); return false; }
   if (!data.plan || data.plan === "redo" || planIsOld()) makeAndKeepPlan();
   cloud.stash = null;   // your saved changes win over a change another phone made meanwhile
   writeData();
   render();
   showSaved();
+  return true;
 }
+// ⏱️ ENOUGH TIME? For each kid, over the plan's 7 days (today … today + 6, whole days):
+//   need = what their flexible activities take (each session with its get ready / break × times a week, e.g. 5 Math × 45 min);
+//   free = each day's start … end, minus their fixed activities (and get ready / break), routines and 📌 one-day events.
+// (Fixed activities are already at their own times, so they're taken out of the free time instead of added to the need.)
+const hmText = m => { const h = Math.floor(m / 60), r = Math.round(m % 60); return h && r ? `${h} h ${r} min` : h ? `${h} h` : `${r} min`; };
+function timeBudget() {
+  const dates = aheadDates();
+  return kidsList().map(k => {
+    const acts = data.flexible.filter(f => peopleOf(f).includes(k.id)).map(f => {
+      const each = f.duration + (f.getReady || 0) + (f.breakAfter || 0), times = Math.min(f.times, dates.length);
+      return { name: f.name, each, times, min: each * times };
+    }).sort((a, b) => b.min - a.min);
+    const free = dates.reduce((n, ds) => {
+      const busy = oneDayOn(ds).filter(e => e.who.includes(k.id)).map(e => [toMin(e.from), toMin(e.to)]);
+      return n + totalLength(freeFor(weekdayOf(ds), k.id).flatMap(p => cutOut(p, busy)));
+    }, 0);
+    return { kid: k, need: acts.reduce((n, a) => n + a.min, 0), free, acts };
+  });
+}
+// The box: "Not enough time for Mody this week: needs 14 h 30 min, free 11 h. …" and the biggest activities with their weekly minutes
+function showTimeShort(short) {
+  $("kCard").style.cssText = "--soft:#fee2e2;--ink:#991b1b";
+  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">⏱️</div><div class="nm">Not saved: not enough time</div></div>
+    ${short.map(x => `<div class="time-short"><p><b>Not enough time for ${safe(x.kid.name)} this week: needs ${hmText(x.need)}, free ${hmText(x.free)}.</b>
+      Make some sessions fewer or shorter.</p>
+      <ul>${x.acts.slice(0, 4).map(a => `<li>${safe(a.name)}: ${a.times} × ${hmText(a.each)} = <b>${hmText(a.min)}</b> a week</li>`).join("")}</ul></div>`).join("")}
+    <button class="k-ok" id="kOk">OK 👍</button>`;
+  $("kModal").hidden = false;
+  $("kOk").focus();
+}
+// The small live line on ✏️ Add activities (parents): "Mody: 9 h 15 min of 11 h free · Bana: …" (red when it doesn't fit)
+const timeLineHtml = () => timeBudget().map(x => `<span class="${x.need > x.free ? "over" : ""}">${safe(x.kid.name)}: ${hmText(x.need)} of ${hmText(x.free)} free</span>`).join(" · ");
 // The "Saved! ✓" box with "📅 See the calendar" under it (goes away by itself after a few seconds)
 let savedTimer = null;
 function showSaved() {
@@ -4723,7 +4926,8 @@ function answerLeave(choice) {
   const then = afterLeave;
   afterLeave = null;
   if (choice === "stay" || !then) return;
-  if (choice === "save") saveChanges(); else cancelChanges(true);
+  if (choice === "save") { if (!saveChanges()) return; }   // (⏱️ not enough time: not saved, so stay here)
+  else cancelChanges(true);
   then();
 }
 // The phone's/browser's Back button: go to the previous screen (and ask first if there are unsaved changes)
@@ -4962,6 +5166,57 @@ const tallyPct = t => t.planned ? Math.round(t.done / t.planned * 100) : 0;
 //      📖 Sole study → the % of its worksheet (✏️ Make my worksheet for this session, then ✅ the check);
 //      🤝 With assistance → the helping parent's rating after it ends (😟 20 · 🙁 40 · 🙂 60 · 😀 80 · 🤩 100).
 // One number for all subjects together; parents also see it per subject (📊 How are my kids doing? and the 🎒 subject page).
+// ---------- 📚 STUDY SUBJECTS: a Study activity may have several subjects (or All my subjects); then the kid picks one for each session ----------
+// The subjects an activity allows for one kid, from THEIR 🎒 School (shown ones only): [{ id, name, emoji, … }]
+// (a saved id may be another kid's id for the same subject: matched by its name)
+const subjectIdsOf = a => Array.isArray(a.subjectIds) && a.subjectIds.length ? a.subjectIds : a.subjectId ? [a.subjectId] : [];
+function actSubjectsFor(a, kid) {
+  const ids = subjectIdsOf(a), mine = subjectList(schoolOf(kid));
+  if (ids.includes(ALL_SUBJECTS)) return mine;
+  const out = [];
+  ids.forEach(id => { const name = subjectNameOf([kid, ...a.users], id), x = mine.find(y => y.id === id) || (name && mine.find(y => sameSubject(y.name, name)));
+    if (x && !out.includes(x)) out.push(x); });
+  return out;
+}
+// "📐 Math, 📖 English" / "All my subjects" (for the activity lists)
+function actSubjectsText(a) {
+  const ids = subjectIdsOf(a);
+  if (ids.includes(ALL_SUBJECTS)) return "All my subjects";
+  return [...new Set(ids.map(id => subjectNameOf(a.users, id)).filter(Boolean))].join(", ");
+}
+// 📚 "Which subject today?": the kid (or a parent) picks one of the allowed subjects for that session → saved for it
+function pickSessionSubject(key, sid) {
+  const [date, actId, kid] = String(key).split("|"), a = allActs().find(x => x.id === actId);
+  if (!a || !exists(kid) || (isKidDevice() && kid !== kidDeviceId()) || (!isParentId(me) && kid !== me)) return false;
+  const x = actSubjectsFor(a, kid).find(o => o.id === sid);
+  if (!x || !isYmd(date)) return false;
+  data.points.picks[key] = { sid: x.id, name: x.name, by: me, at: new Date().toISOString() };
+  writeData();
+  return true;
+}
+// The question with the allowed subjects (chips); start = then 📚 Start session
+const subjectPickHtml = (x, start) => `<span class="k-pick"><b>Which subject today?</b>${x.options.map(o =>
+  `<button class="chip" data-sesspick="${safe(x.key)}|${safe(o.id)}${start ? "|start" : ""}">${safe(o.emoji)} ${safe(o.name)}</button>`).join("")}</span>`;
+// 📚 Start session with no subject picked yet: ask first (a box with the subjects), then start
+function askSessionSubject(x) {
+  $("kCard").style.cssText = "--soft:#e0f2fe;--ink:#075985";
+  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">📚</div><div class="nm">Which subject today?</div></div>
+    <p class="hint" style="text-align:center;margin:6px 16px">${safe(x.act.name)} · ${clock(x.start, true)}–${clock(x.end, true)}</p>
+    <div class="btnrow pick-row">${x.options.map(o => `<button class="pill" data-sesspick="${safe(x.key)}|${safe(o.id)}|start">${safe(o.emoji)} ${safe(o.name)}</button>`).join("")}</div>
+    <button class="k-ok" id="kOk">Cancel</button>`;
+  $("kModal").hidden = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-sesspick]");
+  if (!b) return;
+  e.stopPropagation();
+  const [date, actId, kid, sid, then] = b.dataset.sesspick.split("|"), key = `${date}|${actId}|${kid}`;
+  if (!pickSessionSubject(key, sid)) return;
+  closeCard();
+  render();
+  toast(`📚 ${data.points.picks[key].name} today!`, 2200);
+  if (then === "start") leaveDraft(() => startSession(key));
+}, true);
 // The study sessions of a person in a week (week = its Monday). full = the whole week has ended (last week, on a new week).
 function studySessions(id, week = data.points.week, full = false) { return sessionsIn(id, weekDates(week), full); }
 // The study sessions of a person on some dates (📅 the plan by date): { key "date|actId|person", date, … }
@@ -4973,7 +5228,11 @@ function sessionsIn(id, dates, full = false) {
     const a = acts.find(x => x.id === it.actId);
     if (!a || actTypeOf(a) !== "study") return;
     const key = `${date}|${it.actId}|${id}`;
-    out.push({ key, date, actId: it.actId, act: a, person: id, subject: subjectNameOf(a.users, a.subjectId) || a.name, subjectId: a.subjectId || "",
+    // 📚 Its subject: the one the kid picked (several allowed), the only one allowed, or (none set) the older subject / the name
+    const options = actSubjectsFor(a, id), pick = data.points.picks[key], picked = pick && options.find(o => o.id === pick.sid);
+    const sub = picked || (options.length === 1 ? options[0] : null);
+    out.push({ key, date, actId: it.actId, act: a, person: id, options, needsPick: options.length > 1 && !picked,
+               subject: sub ? sub.name : options.length > 1 ? a.name : subjectNameOf(a.users, a.subjectId) || a.name, subjectId: sub ? sub.id : options.length > 1 ? "" : a.subjectId || "",
                mode: a.studyMode === "assisted" ? "assisted" : "sole", helper: a.studyMode === "assisted" ? a.helper || "" : "",
                start: it.start, end: it.end, minutes: Math.max(0, it.end - it.start), done: isDone(date, it.actId, id),
                ended: full || date < today || (date === today && it.end <= now), result: data.points.sessions[key] || null });
@@ -5037,9 +5296,92 @@ function rateCardsHtml() {
   return list.map(x => { const u = userById(x.person), id = x.key.replace(/[^A-Za-z0-9_-]/g, "_");
     return `<div class="card rate-card" style="--c:${colorsOf(u).color}"><h2>⭐ Rate ${safe(u.name)}'s ${safe(x.subject)} session</h2>
       <p class="hint">${x.date === todayYmd() ? "Today" : dayLong(x.date)} · ${clock(x.start, true)}–${clock(x.end, true)} · ${x.minutes} min · 🤝 with you</p>
-      <div class="rate-btns">${RATES.map(([p, e]) => `<button data-sessrate="${safe(x.key)}|${p}" aria-label="${p}%"><span class="e">${e}</span><b>${p}</b></button>`).join("")}</div>
-      <input type="text" id="rateNote-${id}" maxlength="80" placeholder="A short note (optional)"></div>`; }).join("");
+      <div class="rate-btns">${RATES.map(([p, e]) => `<button data-sessrate="${safe(x.key)}|${p}" aria-label="${p}%"><span class="e">${e}</span><b>${p}</b></button>`).join("")}
+        <button class="miss-btn" data-sessmiss="${safe(x.key)}" aria-label="Didn't happen"><span class="e">❌</span><b>Didn't happen</b></button></div>
+      <input type="text" id="rateNote-${id}" maxlength="80" placeholder="A short note (optional)"></div>`; }).join("")
+    // 📖 Sole study that ended with no worksheet: the parent can say it didn't happen too
+    + kidsList().flatMap(k => sessionsIn(k.id, recentDates())).filter(x => x.mode === "sole" && x.ended && !x.result && !sessionWsIds(x.key).length).map(x => { const u = userById(x.person);
+      return `<div class="card rate-card" style="--c:${colorsOf(u).color}"><h2>📚 ${safe(u.name)}'s ${safe(x.subject)} session · no worksheet</h2>
+        <p class="hint">${x.date === todayYmd() ? "Today" : dayLong(x.date)} · ${clock(x.start, true)}–${clock(x.end, true)} · ${x.minutes} min</p>
+        <div class="rate-btns"><button class="miss-btn" data-sessmiss="${safe(x.key)}" aria-label="Didn't happen"><span class="e">❌</span><b>Didn't happen</b></button></div></div>`; }).join("");
 }
+// ---------- ❌ A SESSION DIDN'T HAPPEN (parents): 📅 Move it to another day, or ⏭️ Skip it ----------
+// Skip: it leaves that day's plan, so it doesn't count in the kid's 📚 Study at all (no booked minutes, no 0 %); nobody loses points.
+// Move: the next free time this week, the same length, inside that day's hours, when the kid AND the helping parent are free and
+// nothing (📌 one-day events too) is on: "Thu 5:00–5:45 pm, OK?" → it moves there (📌 pinned). Either way it never comes back on that date.
+let miss = null;   // { key, slots: [{ date, start }], i }
+function missSlots(x) {
+  const a = x.act, len = x.end - x.start, pre = a.getReady || 0, post = a.breakAfter || 0, people = [x.person, ...(x.helper ? [x.helper] : [])];
+  const today = todayYmd(), now = Math.ceil(dubaiMinutes() / 5) * 5, last = [addDaysYmd(weekEnd(), -1), (hasPlan() && data.plan.upTo) || today].sort()[0];
+  const out = [];
+  for (let ds = today; ds <= last && out.length < 20; ds = addDaysYmd(ds, 1)) {
+    if (ds === x.date || planItemsOn(ds).some(it => it.actId === x.actId) || skippedOn(ds, x.actId)) continue;   // (never twice on one date)
+    const day = planDay(ds), [ws, we] = day.window;
+    const busy = [...day.items.filter(it => it.people.some(p => people.includes(p))).map(it => [it.start, it.end]),
+                  ...day.routines.filter(r => r.users.some(p => people.includes(p))).map(r => [r.start, r.end]),
+                  ...oneDayOn(ds).filter(e => e.who.some(p => people.includes(p))).map(e => [toMin(e.from), toMin(e.to)])];
+    const from = ds === today ? Math.max(ws, now) : ws;   // (today: from now; its get ready inside the day too)
+    for (let s = Math.ceil((from + pre) / 5) * 5; s + len + post <= we; s += 5) {
+      if (busy.some(([b0, b1]) => b0 < s + len + post && s - pre < b1)) continue;
+      out.push({ date: ds, start: s });
+      s += 55;   // (the next offer: an hour later at least)
+    }
+  }
+  return out;
+}
+function askMissed(key) {
+  const x = sessionByKey(key);
+  if (!x || !isParentDevice()) return;
+  miss = { key, slots: null, i: 0 };
+  $("kCard").style.cssText = "--soft:#fee2e2;--ink:#991b1b";
+  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">❌</div><div class="nm">${safe(userById(x.person).name)}'s ${safe(x.subject)} session didn't happen</div></div>
+    <p class="hint" style="text-align:center;margin:6px 16px">${x.date === todayYmd() ? "Today" : dayLong(x.date)} · ${clock(x.start, true)}–${clock(x.end, true)}</p>
+    <div class="btnrow pick-row"><button class="primary" data-missmove>📅 Move it to another day</button><button data-missskip>⏭️ Skip it</button></div>
+    <p class="hint" style="text-align:center;margin:4px 16px">Skipped sessions don't count in the score. Nobody loses points.</p>
+    <button class="k-ok" id="kOk">Cancel</button>`;
+  $("kModal").hidden = false;
+}
+function showMissSlot() {
+  const s = miss.slots[miss.i], x = sessionByKey(miss.key), len = x.end - x.start;
+  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">📅</div><div class="nm">${SHORT[weekdayOf(s.date)]} ${clock(s.start)}–${clock(s.start + len, true)}, OK?</div></div>
+    <p class="hint" style="text-align:center;margin:6px 16px">${safe(dayLong(s.date))} · ${len} min${x.helper ? ` · ${safe(userById(x.person).name)} and ${safe(userById(x.helper).name)} are both free` : ""}</p>
+    <div class="btnrow pick-row"><button class="primary" data-missok>✅ OK</button>${miss.i < miss.slots.length - 1 ? `<button data-missnext>🔁 Pick another time</button>` : ""}</div>
+    <button class="k-ok" id="kOk">Cancel</button>`;
+}
+// Takes the session off its day (and keeps it off that date)
+function takeOffDay(x, why) {
+  const day = data.plan.dates[x.date];
+  if (day) day.items = day.items.filter(it => it.actId !== x.actId);
+  data.skips = { ...(data.skips || {}), [`${x.date}|${x.actId}`]: { by: me, at: new Date().toISOString(), why } };
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-sessmiss], [data-missmove], [data-missskip], [data-missok], [data-missnext]");
+  if (!b || !isParentDevice()) return;
+  const ds = b.dataset;
+  if (ds.sessmiss) return askMissed(ds.sessmiss);
+  const x = miss && sessionByKey(miss.key);
+  if (!x || !hasPlan()) { closeCard(); return; }
+  if ("missskip" in ds) {
+    takeOffDay(x, "skip");
+    closeCard(); miss = null; keepNow();
+    return toast(`⏭️ Skipped. It doesn't count in ${userById(x.person).name}'s score.`, 3200);
+  }
+  if ("missmove" in ds) {
+    miss.slots = missSlots(x); miss.i = 0;
+    if (!miss.slots.length) { closeCard(); return toast("😕 No free time left this week for both of them. You can skip it instead.", 4000); }
+    return showMissSlot();
+  }
+  if ("missnext" in ds) { miss.i = Math.min(miss.i + 1, miss.slots.length - 1); return showMissSlot(); }
+  if ("missok" in ds) {
+    const s = miss.slots[miss.i], len = x.end - x.start;
+    takeOffDay(x, "moved");
+    const to = data.plan.dates[s.date] = data.plan.dates[s.date] || { items: [] };
+    to.items.push({ actId: x.actId, fixed: false, start: s.start, end: s.start + len, pinned: true });
+    to.items.sort((p, q) => p.start - q.start);
+    closeCard(); miss = null; keepNow();
+    return toast(`📅 Moved to ${dayName(s.date)} ${clock(s.start, true)}.`, 3200);
+  }
+});
 // 📊 Parents: a kid's study per subject THIS week (same formulas, only that subject's sessions) + the last 4 weeks (their 📚 /100).
 // only = one subject's name (its 🎒 page). (The kid's ⭐ Study score stays ONE number for all subjects together.)
 function studyTableHtml(kid, only) {
@@ -5061,9 +5403,12 @@ function studyTableHtml(kid, only) {
 function sessionCardsHtml(kid, f) {
   // (📅 the last 7 days, today included)
   const today = todayYmd(), list = sessionsIn(kid, recentDates()).filter(x => x.mode === "sole" && x.date <= today && (!x.result || x.date === today)
-    && (!f || x.subjectId === f.id || sameSubject(x.subject, f.name))
-    && !(f && x.date === today && !x.ended && !sessionWsIds(x.key).length));   // (the subject page: today's 📚 Start session is the big button)
+    && (!f || x.subjectId === f.id || sameSubject(x.subject, f.name) || (x.needsPick && x.options.some(o => o.id === f.id)))   // (📚 not picked yet: on each allowed subject)
+    && !(f && x.date === today && !x.ended && !sessionWsIds(x.key).length && !x.needsPick));   // (the subject page: today's 📚 Start session is the big button)
   return list.map(x => {
+    // 📚 Several subjects, none picked yet: "Which subject today?" (a pick starts the session)
+    if (x.needsPick && !sessionWsIds(x.key).length && !x.ended) return `<div class="card sess-card"><h2>📚 ${safe(x.act.name)} · ${x.minutes} min</h2>
+      <p class="hint">${x.date === today ? "Today" : dayLong(x.date)} · ${clock(x.start, true)}–${clock(x.end, true)}</p>${subjectPickHtml(x, x.date === today)}</div>`;
     const ids = sessionWsIds(x.key), wsId = ids[ids.length - 1], w = wsId && aiDocs.worksheets[wsId], tag = sessionTagText(x);
     const swap = !x.result && ids.map(id => aiDocs.worksheets[id].swap).find(Boolean), live = x.date === today && !x.ended;
     const more = w && live && (w.answers.length || w.check || w.done);
@@ -5176,6 +5521,7 @@ function newWeek() {
   Object.keys(data.points.study).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.study[key]; });   // 🎒 too
   Object.keys(data.points.sessions).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.sessions[key]; });   // 📚 too
   Object.keys(data.points.free).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.free[key]; });   // ⭐ free study too
+  Object.keys(data.points.picks).forEach(key => { if (key.slice(0, 10) < ymd(half)) delete data.points.picks[key]; });   // 📚 subject picks too
   const eightW = new Date(); eightW.setDate(eightW.getDate() - 56);   // 📚 the study history: 8 weeks
   Object.keys(data.points.studyWeeks).forEach(key => { if (key.slice(0, 10) < ymd(eightW)) delete data.points.studyWeeks[key]; });
   Object.entries(data.points.community).forEach(([id, p]) => { if ((p.at || "").slice(0, 10) < ymd(half)) {   // 🏡 too (with its reactions and ✅)
@@ -5202,6 +5548,9 @@ function dubaiMinutes() {
 // ⏰ EVERYONE (kids and parents): an activity can't be ticked before its start time today (Dubai time); later today and past days: fine.
 // (Future days are locked for everyone too. Habits, prayers and 📔 My day are not affected.)
 const tickTimeLock = (date, start) => date === todayYmd() && start >= 0 && start > dubaiMinutes() ? start : null;
+// 👨‍👩‍👧 A parent (on a parent's device) may tick or untick a kid's activity that has already started, on an earlier day of this week too.
+// The tick says who did it (by) and counts for the kid exactly like their own. (Kids: today only, and never before the start time.)
+const parentPastTick = (date, user) => isParentDevice() && exists(user) && !isParentId(user) && date >= data.points.week && date <= todayYmd();
 // day = the date ("2026-10-23"). 📅 Past days are look-only (their ticks stay as they were).
 function toggleDone(day, actId, user, button) {
   if (editMode) return toast("Tap ✅ Done first, then you can tick.");
@@ -5215,7 +5564,8 @@ function toggleDone(day, actId, user, button) {
   if (!(isParentId(me) || user === me)) return toast("You can only tick your own activities.");
   if (isParentId(user)) return;   // (👨‍👩‍👧 parents aren't scored: no tick for points on their own activities)
   if (day > todayYmd()) return toast(`Not yet! You can tick it on ${dayName(day)}.`);
-  if (day < todayYmd()) return toast("📅 Past days are just for looking.");
+  // 📅 Past days: look-only, except 👨‍👩‍👧 a parent's device may tick / untick a kid's activity on an earlier day of THIS week
+  if (day < todayYmd() && !parentPastTick(day, user)) return toast("📅 Past days are just for looking.");
   const owner = userById(user), key = markKey(day, actId, user);
   if (data.points.marks[key]) {
     delete data.points.marks[key];   // ticked by mistake: take it back
@@ -5403,8 +5753,9 @@ const riddleRight = (who, date, n = 0) => riddleState(who, date, n).solved || !!
 // ---------- 🤖 Making today's riddles (the first family device after 5:00, a kid's too; never twice the same day) ----------
 // 🧩 What /riddles gets about each person: ONLY name, role, age / year, curriculum, level and school subjects
 // (never the calendar, activities, habits or anything private: the riddles are brain teasers, school knowledge and world facts)
+// (🧩 kids only: parents never get riddles)
 function riddleMembers() {
-  return data.users.map(u => {
+  return kidsList().map(u => {
     const parent = isParentId(u.id), s = schoolOf(u.id), bd = birthdayInfo(u.birthday);
     const levels = subjectList(s).map(f => { const x = s.profile.subjects[f.id]; return x && x.level ? `${f.name}: ${LEVEL_WORDS[x.level]}` : ""; }).filter(Boolean);
     return { name: u.name, role: parent ? "parent" : "kid", ...(!parent && bd && bd.age != null ? { age: bd.age } : {}),
@@ -5416,7 +5767,8 @@ function riddleMembers() {
 const recentRiddles = () => Object.keys(data.points.riddles).sort().flatMap(k => (data.points.riddles[k].list || []).map(r => r.question)).slice(-60);
 async function maybeMakeRiddles() {
   const { date, hour } = dubaiNow(), day = data.points.riddles[date];
-  if (!feat("riddles") || riddleBusy || hour < RIDDLE_HOUR || !cloud.ready || !aiReady() || aiWait || !data.users.length) return;   // (any family phone, kids' too)
+  // (a kid's phone: 👨‍👩‍👧 a parent's device never makes, shows or pops up riddles)
+  if (!feat("riddles") || isParentDevice() || riddleBusy || hour < RIDDLE_HOUR || !cloud.ready || !aiReady() || aiWait || !kidsList().length) return;
   if (day && (day.list || Date.now() - Date.parse(day.at) < 30 * 60000)) return;   // made, or another device is making them
   riddleBusy = true;
   data.points.riddles[date] = { making: me || "", at: new Date().toISOString() };
@@ -5466,7 +5818,7 @@ function riddlePopCanShow() {
     && !document.querySelector(".tour, .lvl-up, .k-modal:not([hidden])") && !(screen === "school" && schoolView === "worksheet");
 }
 function maybeRiddlePop() {
-  if (!riddleOpen || rdPop || !feat("riddles") || !exists(me)) return;
+  if (!riddleOpen || rdPop || !feat("riddles") || !exists(me) || isParentDevice() || isParentId(me)) return;   // (🧩 kids only)
   if (!riddlePopCanShow()) { if (!rdRetry) rdRetry = setTimeout(() => { rdRetry = null; maybeRiddlePop(); }, 1500); return; }
   const queue = riddleQueue();
   if (!queue.length) { if (riddlesOf(me).length) riddleOpen = false; return; }   // (none made yet: wait for them)
@@ -5536,7 +5888,7 @@ function ownRiddlePopHtml(n, r) {
   let note = "";
   if (hp && !hp.right) note = `<p class="rd-no">${safe(helper)}'s answer wasn't right. Try again!</p>`;
   else if (s.tries) note = `<p class="rd-no">Try again! (${RIDDLE_TRIES - s.tries} try left)</p>`;
-  const others = data.users.filter(u => u.id !== who);
+  const others = kidsList().filter(u => u.id !== who);   // (🧩 helpers: the other kids; parents don't get riddles any more)
   const tools = `<div class="rd-tools">${s.hint ? "" : `<button data-rdhint>💡 Hint</button>`}${s.ask || !others.length ? "" : `<button data-rdask>🆘 Ask for help</button>`}</div>
     ${riddleAsk && !s.ask ? `<div class="rd-ask"><b>Who can help?</b><div class="rd-who">${others.map(u => `<button class="chip" data-rdhelpask="${safe(u.id)}"
       style="--soft:${colorsOf(u).soft};--ink:${colorsOf(u).ink}"><span class="e">${safe(u.emoji)}</span>${safe(u.name)}</button>`).join("")}</div></div>` : ""}`;
@@ -5754,9 +6106,11 @@ function dutyPoints(user, from, to) {
   return Object.entries(data.points.duties).reduce((sum, [key, x]) => { const [date, kid] = key.split("|"); return sum + (kid === user && date >= from && date < to ? DUTY[x.v][2] : 0); }, 0);
 }
 // 👨‍👩‍👧 The evening card on a parent's home
-function dutiesCardHtml() {
-  if (!isParentViewer() || dubaiNow().hour < DUTY_HOUR || !kidsList().length) return "";
-  return `<div class="card du-card"><h2>✅ Did the kids do their duties on time today?</h2>${kidsList().map(k => {
+function dutiesCardHtml() { return dutyRowsCardHtml(kidsList(), "✅ Did the kids do their duties on time today?"); }
+// (👧 the Kid page: one kid's row)
+function dutyRowsCardHtml(kids, title) {
+  if (!isParentViewer() || dubaiNow().hour < DUTY_HOUR || !kids.length) return "";
+  return `<div class="card du-card"><h2>${title}</h2>${kids.map(k => {
     const x = dutyOf(k.id), c = colorsOf(k);
     return `<div class="du-row" style="--soft:${c.soft};--ink:${c.ink}"><span class="du-kid">${safe(k.emoji)} ${safe(k.name)}</span>${x
       ? `<span class="du-done">${DUTY[x.v][0]} ${DUTY[x.v][1]}${DUTY[x.v][2] ? ` · +${DUTY[x.v][2]} ⭐` : ""}<small>${x.by !== me && exists(x.by) ? ` (${safe(userById(x.by).name)})` : ""}</small></span>`
@@ -5822,10 +6176,11 @@ function saveWish(button) {
   toast(old ? "💌 Changed!" : `💌 Sent! +${WISH_POINTS} ⭐`, 2400);
 }
 // 👨‍👩‍👧 "💌 Kids' wishes" on a parent's home: the last 4 weeks, newest first
-function wishesListHtml() {
+// (only = one kid's: 👧 the Kid page)
+function wishesListHtml(only) {
   if (!feat("wishes") || !isParentViewer()) return "";
   const from = (() => { const dt = fromYmd(data.points.week); dt.setDate(dt.getDate() - 21); return ymd(dt); })();
-  const list = Object.entries(data.points.wishes).filter(([key]) => key.slice(0, 10) >= from && exists(key.split("|")[1])).sort((a, b) => b[0].localeCompare(a[0]));
+  const list = Object.entries(data.points.wishes).filter(([key]) => key.slice(0, 10) >= from && exists(key.split("|")[1]) && (!only || key.split("|")[1] === only)).sort((a, b) => b[0].localeCompare(a[0]));
   if (!list.length) return "";
   return `<div class="card wi-list"><h2>💌 Kids' wishes</h2><ul class="list">${list.flatMap(([key, w]) => {
     const kid = key.split("|")[1], u = userById(kid);
@@ -5870,7 +6225,7 @@ function buddyRingSvg(pct) {
 }
 // The home card: pick a buddy (the first time), or the ring with "Lv 4" and "68% to Lv 5"
 function buddyCardHtml(who) {
-  if (!exists(who) || who !== me || !feat("buddy")) return "";
+  if (who !== me || !hasSpark(who)) return "";   // (✨ kids only)
   const u = userById(who), c = colorsOf(u);
   if (!u.buddy) return `<div class="card bu-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><h2>✨ Pick your Spark!</h2>
     <p class="hint">It grows with all your points, forever. (You pick only once.)</p>
@@ -5893,7 +6248,7 @@ function sparkPickHtml(who) {
 const sparkName = (u, cap) => u && u.sparkName ? u.sparkName : cap ? "Your Spark" : "your Spark";
 // Small, next to the name on the leaderboard (a parent taps a kid's to see the level history)
 function buddyMiniHtml(id) {
-  if (!feat("buddy")) return "";
+  if (!hasSpark(id)) return "";   // (✨ kids only)
   const p = lifetimePoints(id), L = levelOf(p), pct = levelPct(p), tap = isParentViewer() && !isParentId(id);
   // The ring and "Lv 2" side by side on the name's line (never on top of other text)
   const inner = `<span class="bu-ring bu-mini" aria-hidden="true">${buddyRingSvg(pct)}<span class="bu-in"><span class="e">${buddyFace(id, L)}</span></span></span><b class="bu-lv">✨ Spark Lv ${L}</b>`;
@@ -6160,7 +6515,8 @@ function familySummaryNode(which) {
   box.innerHTML = `<section class="fs-cover"><div class="fs-deco" aria-hidden="true">✨ ⭐ 🎉 ⭐ ✨</div>
       <h1>🏡 ${safe(fam)}</h1><p class="fs-week">Week of ${safe(wk.label)}</p><p class="fs-dates">${safe(wk.dates)}</p>
       ${starHtml}
-      <div class="fs-family">${data.users.map(u => `<span style="--soft:${colorsOf(u).soft};--ink:${colorsOf(u).ink}"><b>${safe(u.emoji)}</b><i>${buddyFace(u.id, levelOf(lifetimePoints(u.id)))}</i><small>${safe(u.name)}</small></span>`).join("")}</div></section>
+      <div class="fs-family">${data.users.map(u => `<span style="--soft:${colorsOf(u).soft};--ink:${colorsOf(u).ink}"><b>${faceHtml(u)}</b>${
+        hasSpark(u.id) ? `<i>${buddyFace(u.id, levelOf(lifetimePoints(u.id)))}</i>` : ""}<small>${safe(u.name)}</small></span>`).join("")}</div></section>
     ${people.map(fsCardHtml).join("")}
     <section class="fs-end"><h2>🏆 Hall of Stars</h2><ul>${weeks.map(w => { const s = hallStar(w), i = hallWeeks().indexOf(w) + 1;
         return `<li><b>Week ${i}</b> · ${hallWeekRange(w)} · ${s ? `⭐ ${safe(s.name)} ${safe(s.emoji || "")}${s.gift ? ` · 🎁 ${safe(s.gift)}` : ""}` : w === data.points.week ? "⭐ decided on Friday" : "⭐ ?"}</li>`; }).join("")}</ul>
@@ -6316,7 +6672,7 @@ function kidsWorkOpen(v) {
   if (kind === "school") return openSchool(kid);
 }
 document.addEventListener("click", e => {
-  const b = e.target.closest("#scr-kidswork button");
+  const b = e.target.closest("#scr-kidswork button, #scr-kid [data-kwopen]");   // (👧 the Kid page's list too)
   if (!b) return;
   if (b.dataset.kwdetail) { kwDetail = b.dataset.kwdetail; drawKidsWork(); return window.scrollTo(0, 0); }   // a kid's card → their details
   if ("kwback" in b.dataset) { kwDetail = null; return drawKidsWork(); }
@@ -6361,17 +6717,23 @@ function drawMe() {
   const u = userById(meWho), c = colorsOf(u), mine = u.id === me, kid = !isParentId(u.id), parent = isParentViewer();
   const p = lifetimePoints(u.id), L = levelOf(p), pct = levelPct(p), k = weekKinds(u.id), st = weekStats(u.id), bd = birthdayInfo(u.birthday);
   const chips = parent ? `<div class="chips me-chips">${data.users.map(x => { const xc = colorsOf(x); return `<button class="chip ${x.id === u.id ? "on" : ""}" data-mewho="${safe(x.id)}"
-    style="--soft:${xc.soft};--ink:${xc.ink}"><span class="e">${safe(x.emoji)}</span>${x.id === me ? "Me" : safe(x.name)}</button>`; }).join("")}</div>` : "";
+    style="--soft:${xc.soft};--ink:${xc.ink}"><span class="e">${faceHtml(x)}</span>${x.id === me ? "Me" : safe(x.name)}</button>`; }).join("")}</div>` : "";
   const loves = LOVES.map(([key, e, label]) => { const v = (u.loves || {})[key]; return v ? `<li><span>${e} ${label}</span><b>${safe(v)}</b></li>` : ""; }).join("");
   // ⚙️ My settings: each person changes ALL their own things (kids too, from their own account); a parent also every kid's
   const canEdit = canEditProfile(u.id), canBirthday = canEdit, s = kid ? schoolOf(u.id) : null, my = mine ? "My" : `${safe(u.name)}'s`;
   const form = meEdit && canEdit ? `<div class="card sc-form me-form"><h2>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</h2>
       <h3 class="ph-group">👤 ${mine ? "Me" : safe(u.name)}</h3>
       <label class="small" for="meName">📝 Name</label><input type="text" id="meName" maxlength="30" value="${safe(u.name)}">
+      ${isParentId(u.id) ? `<label class="small">🖼️ ${my} picture: an emoji or a photo</label>
+        <div class="me-pic"><span class="me-pic-now" id="mePicNow">${mePicHtml(u)}</span>
+          <button type="button" class="pill" data-mephoto>📷 Take or choose a photo</button>
+          <button type="button" class="pill" data-menophoto ${(mePhoto !== null ? mePhoto : facePhoto(u)) ? "" : "hidden"}>😀 Use my emoji instead</button></div>
+        <input type="file" id="mePhotoFile" accept="image/*" hidden>
+        <p class="hint">Or tap an emoji below. A photo is cut to a square and kept small.</p>` : ""}
       <label class="small">😀 ${my} emoji</label><div class="emoji-pick me-emojis">${[...new Set([u.emoji, ...EMOJIS])].map(e => `<button type="button" class="${e === u.emoji ? "on" : ""}" data-meemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("")}</div>
       <label class="small">🎨 ${my} colour</label><div class="swatches me-colors">${Object.entries(PALETTE).map(([key, x]) => `<label title="${key}"><input type="radio" name="meColor" value="${key}" ${u.color === key ? "checked" : ""}><span style="background:${x.color}"></span></label>`).join("")}</div>
       <label class="small" for="meBirthday">🎂 Birthday</label><input type="date" id="meBirthday" value="${safe(u.birthday || "")}">
-      ${feat("buddy") ? `<h3 class="ph-group">✨ ${my} Spark</h3>
+      ${hasSpark(u.id) ? `<h3 class="ph-group">✨ ${my} Spark</h3>
         <div class="btnrow"><button type="button" class="pill" data-mespark>✨ ${u.buddy ? "Change the Spark" : "Pick a Spark"}</button></div>
         <p class="hint">Change it any time: the level and points stay.</p>
         ${u.buddy ? `<label class="small" for="meSpark">✨ Spark's name</label><input type="text" id="meSpark" maxlength="12" value="${safe(u.sparkName || "")}" placeholder="Zozo">` : ""}` : ""}
@@ -6393,12 +6755,12 @@ function drawMe() {
       <button class="pill" data-go="settings">🕌 Prayer city · ⏰ My day · 💾 Backup</button></div></div>` : "";
   // 👤 Who this device is signed in as (a parent on the family's main login can say "Not you?": the picker again; kids never)
   const meU = userById(me), notYou = !isKidDevice() && isParentId(me) && isMainLogin(cloudMeta().member) && parentsList().length > 1;
-  const signedIn = exists(me) ? `<p class="me-signed">Signed in as: <b>${safe(meU.emoji)} ${safe(meU.name)}</b>${notYou ? `<button class="linkbtn" data-menotyou>Not you?</button>` : ""}</p>` : "";
+  const signedIn = exists(me) ? `<p class="me-signed">Signed in as: <b>${whoHtml(me)}</b>${notYou ? `<button class="linkbtn" data-menotyou>Not you?</button>` : ""}</p>` : "";
   $("meBody").innerHTML = `${signedIn}${chips}
     <div class="card me-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <div class="me-face">${safe(u.emoji)}</div>
+      <div class="me-face">${faceHtml(u)}</div>
       <div class="me-name"><h1>${safe(u.name)}</h1><small>${mine ? "👤 My profile" : "👤 Profile"}</small></div>
-      ${feat("buddy") ? `<button class="me-spark" data-mespark aria-label="${sparkName(u, true)}: level ${L}, ${pct}% to level ${L + 1}">
+      ${hasSpark(u.id) ? `<button class="me-spark" data-mespark aria-label="${sparkName(u, true)}: level ${L}, ${pct}% to level ${L + 1}">
         <span class="bu-ring bu-big" aria-hidden="true">${buddyRingSvg(pct)}<span class="bu-in"><span class="e">${buddyFace(u.id, L)}</span><b>Lv ${L}</b></span></span>
         <span class="bu-text"><b>${pct}% to Lv ${L + 1}</b><small>${u.buddy ? `✨ ${safe(sparkName(u, true))}` : "✨ Pick your Spark"}${kid ? ` · ⭐ ${p} points in all` : ""}</small></span></button>` : ""}
       ${kid ? `<p class="me-kinds">This week: ${kindsText(k)}</p>` : ""}
@@ -6504,6 +6866,29 @@ document.addEventListener("click", e => {
 });
 // Who changes a profile: the person themselves (kids too), or a parent for any kid
 const canEditProfile = id => exists(id) && (id === me || (isParentViewer() && !isParentId(id)));
+// 🖼️ A parent's picture while editing: null = as saved · "" = use the emoji · a new photo (a small JPEG, see takePhoto)
+let mePhoto = null;
+const mePicHtml = u => { const p = mePhoto !== null ? mePhoto : facePhoto(u);
+  return p ? `<img class="face-img me-pic-img" src="${p}" alt="${safe(u.name)}">` : `<span class="me-pic-emoji">${safe(u.emoji)}</span>`; };
+// 📷 A photo → cut to the middle square, made 160×160 and saved as a small JPEG (smaller still if it's big)
+async function takePhoto(file) {
+  if (!file || !/^image\//.test(file.type)) return toast("Please pick a photo.", 2500);
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+    const side = Math.min(img.naturalWidth, img.naturalHeight), cv = document.createElement("canvas");
+    cv.width = cv.height = 160;
+    cv.getContext("2d").drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 160, 160);
+    let q = 0.82, out = cv.toDataURL("image/jpeg", q);
+    while (out.length > 60000 && q > 0.3) { q -= 0.15; out = cv.toDataURL("image/jpeg", q); }
+    mePhoto = out;
+    $("mePicNow").innerHTML = mePicHtml(userById(meWho));
+    const no = $("meBody").querySelector("[data-menophoto]");
+    if (no) no.hidden = false;
+  } catch (e) { toast("Couldn't read that photo. Please try another one.", 3000); }
+  finally { URL.revokeObjectURL(url); }
+}
+document.addEventListener("change", e => { if (e.target.id === "mePhotoFile" && e.target.files[0]) takePhoto(e.target.files[0]); });
 function saveMe() {
   const u = data.users.find(x => x.id === meWho);
   if (!u || !canEditProfile(u.id) || !$("meName")) return;
@@ -6518,6 +6903,9 @@ function saveMe() {
   const b = $("meBirthday").value;
   if (b && /^\d{4}-\d{2}-\d{2}$/.test(b)) u.birthday = b; else delete u.birthday;
   if ($("meSpark")) { const n = $("meSpark").value.trim().slice(0, 12); if (n) u.sparkName = n; else delete u.sparkName; }
+  // 🖼️ a parent's picture: the new photo, or the emoji (no photo)
+  if (isParentId(u.id) && mePhoto !== null) { if (mePhoto) u.photo = mePhoto; else delete u.photo; }
+  mePhoto = null;
   const loves = Object.fromEntries(LOVES.map(([key]) => [key, ($("meLove-" + key).value || "").trim().slice(0, 30)]).filter(([, v]) => v));
   if (Object.keys(loves).length) u.loves = loves; else delete u.loves;
   // 🏫 📚 🎓 the school basics and 📘 the subjects (a kid: the same subjects as in 🎒 School)
@@ -6548,17 +6936,25 @@ document.addEventListener("click", e => {
   const ds = b.dataset;
   if (ds.mewho) { meWho = ds.mewho; meEdit = false; return render(); }
   if ("menotyou" in ds) return askWhichParent(true);   // 👨‍👩‍👧 the family's main login: pick yourself again (this device only)
-  if ("meedit" in ds) { meEdit = true; render(); return $("meBody").querySelector(".me-form").scrollIntoView({ behavior: "smooth", block: "start" }); }
-  if ("mecancel" in ds) { meEdit = false; return render(); }
+  if ("meedit" in ds) { meEdit = true; mePhoto = null; render(); return $("meBody").querySelector(".me-form").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if ("mecancel" in ds) { meEdit = false; mePhoto = null; return render(); }
   if ("mesave" in ds) return saveMe();
-  if (ds.meemoji) { $("meBody").querySelectorAll("[data-meemoji]").forEach(x => x.classList.toggle("on", x === b)); return; }
-  if ("mespark" in ds) { const w = meWho; openBuddyBox(w); if (userById(w).buddy && canChangeBuddy(w)) { buChange = true; drawBuddyBox(); } return; }   // ✨ pick / change the Spark
+  // 🖼️ a parent: 📷 take or choose a photo · 😀 use my emoji instead (tapping an emoji picks the emoji too)
+  if ("mephoto" in ds) { $("mePhotoFile").value = ""; return $("mePhotoFile").click(); }
+  if ("menophoto" in ds) { mePhoto = ""; $("mePicNow").innerHTML = mePicHtml(userById(meWho)); b.hidden = true; return; }
+  if (ds.meemoji) {
+    $("meBody").querySelectorAll("[data-meemoji]").forEach(x => x.classList.toggle("on", x === b));
+    if ($("mePicNow")) { mePhoto = ""; const u = { ...userById(meWho), emoji: ds.meemoji }; $("mePicNow").innerHTML = mePicHtml(u);
+      const no = $("meBody").querySelector("[data-menophoto]"); if (no) no.hidden = true; }
+    return;
+  }
+  if ("mespark" in ds) { const w = meWho; if (!hasSpark(w)) return; openBuddyBox(w); if (userById(w).buddy && canChangeBuddy(w)) { buChange = true; drawBuddyBox(); } return; }   // ✨ pick / change the Spark
 });
 
 // ---------- 🌱 The buddy page (a pop-up box): the ring, "68% to Lv 5", points, level history, 👨‍👩‍👧 Change buddy ----------
 let buWho = null, buChange = false, buFrom = null;
 function openBuddyBox(id) {
-  if (!exists(id) || !feat("buddy")) return;
+  if (!hasSpark(id)) return;   // (✨ kids only)
   if (kidLockedOut(id)) return lockedToast(id);
   buWho = id; buChange = false; buFrom = document.activeElement;
   $("buddyModal").hidden = false;
@@ -6683,7 +7079,7 @@ function updateBuddyBadges() {
   setupBuddyBadges();
   setupSignOutButtons();
   const u = exists(me) && userById(me);
-  const show = !!u && feat("buddy") && !["start", "setup"].includes(screen) && $("loginScreen").hidden;
+  const show = !!u && hasSpark(me) && !["start", "setup"].includes(screen) && $("loginScreen").hidden;   // (✨ no Spark badge for a parent)
   const badges = document.querySelectorAll(".bu-badge");
   if (!show) { badges.forEach(b => b.hidden = true); badgeLast = null; return; }
   const p = lifetimePoints(me), L = levelOf(p), pct = levelPct(p), key = [me, u.buddy, p, colorsOf(u).color].join("|");
@@ -6716,7 +7112,7 @@ const SEEN_LEVEL = SAVE_KEY + ".level.";
 function checkLevels() {
   if (!data.users.length || !feat("buddy")) return;
   let changed = false;
-  data.users.forEach(u => {
+  data.users.filter(u => hasSpark(u.id)).forEach(u => {   // (✨ kids only: parents have no Spark levels)
     const L = levelOf(lifetimePoints(u.id)), list = data.points.levels[u.id] || [], top = list.length ? list[list.length - 1].level : 0;
     if (!top) { data.points.levels[u.id] = [{ level: L, date: todayYmd() }]; changed = true; return; }   // (the first time: no party)
     if (L <= top) return;
@@ -6726,7 +7122,7 @@ function checkLevels() {
   });
   if (changed) writeData("auto");
   // 🎉 The person using the app went up a level (since this device last saw it)
-  if (!exists(me) || screen === "start") return;
+  if (!hasSpark(me) || screen === "start") return;
   const L = levelOf(lifetimePoints(me));
   let seen = 0;
   try { seen = Number(localStorage.getItem(SEEN_LEVEL + me)) || 0; localStorage.setItem(SEEN_LEVEL + me, String(L)); } catch (e) { return; }
@@ -7039,7 +7435,7 @@ function drawPoints() {
       </div></div>`;
   }).join("") + funLineHtml(fair);
   $("ptsHall").innerHTML = hallHtml();   // 🏆 every week's ⭐
-  $("ptsRiddles").innerHTML = riddleBoardHtml();   // 🧩 the family riddle board
+  $("ptsRiddles").innerHTML = isParentDevice() ? "" : riddleBoardHtml();   // 🧩 the family riddle board (kids only)
   maybeMakeRiddles();
   // 🎁 My prizes (a parent's; parents have no habits card any more)
   $("ptsParents").innerHTML = isParentId(me) && !isKidDevice() ? prizesListHtml(me) : "";
@@ -7105,7 +7501,7 @@ function drawStart() {
 // ---------- Home: big buttons ----------
 function drawHome() {
   const u = userById(me), c = colorsOf(u);
-  $("homeFace").innerHTML = safe(u.emoji) + starBadge(me);
+  $("homeFace").innerHTML = faceHtml(u) + starBadge(me);   // (👨‍👩‍👧 a parent: their photo, or emoji)
   $("homeFace").style.cssText = `--soft:${c.soft}`;
   $("homeHello").textContent = `Hi ${u.name}!`;
   // 📅 Today, big: "Thursday" / "22 October 2026" (Dubai time; a bit smaller on a kid's home)
@@ -7118,7 +7514,7 @@ function drawHome() {
   const isDad = isParentId(me), parent = isParentDevice();
   $("backupPill").hidden = !isDad;   // 💾 Backup button: only Bro2a sees it
   // 🌱 The hello: my buddy in its level ring (when Buddy levels is on and I picked one)
-  const buddy = feat("buddy") && u.buddy;
+  const buddy = hasSpark(me) && u.buddy;   // (✨ kids only)
   $("homeFace").classList.toggle("has-buddy", !!buddy);
   if (buddy) {
     const p = lifetimePoints(me), L = levelOf(p), pct = levelPct(p);
@@ -7129,33 +7525,18 @@ function drawHome() {
   $("homePoints").hidden = !parent || isParentId(me);
   $("scr-home").classList.toggle("kid-home", !parent);
   if (!parent) return drawKidHome(u);   // 🧒 a kid's home: super simple (see KIDS' HOME)
-  // A small row of buttons: 🎒 School · 📅 Calendar · 🏆 Points · ☰ More (everything else is in ☰ More)
-  const firstKid = kidsList()[0], schoolFor_ = isDad ? firstKid && firstKid.id : me;
+  // 👨‍👩‍👧 A PARENT'S HOME (simple): the hello and date · 🔔 "Needs you" (only when something does) · one card per kid ·
+  // the Family row (📅 Family calendar · ✏️ Add / Plan · 🏡 Community · ☰ More). Everything else is on each kid's page or in ☰ More.
+  $("homeNote").hidden = true;
   $("homeBig").hidden = false;
-  $("homeBig").className = "home-row";
-  $("homeBig").innerHTML = `${schoolFor_ ? `<button data-school="${safe(schoolFor_)}"><span class="e">🎒</span>School</button>` : ""}
-    <button data-go="mine"><span class="e">📅</span>Calendar</button><button data-go="points"><span class="e">🏆</span>Points</button>
-    <button data-homemore aria-expanded="${homeMore}"><span class="e">☰</span>More</button>`;
-  $("homeMenu").hidden = !homeMore;
-  $("homeMenu").innerHTML = homeMore ? moreTilesHtml() : "";
-  // Dad sees a reminder when the plan is missing or old
-  const note = isDad ? (!data.plan ? "🗓️ No plan yet. Add activities, then press ✨ Plan my week."
-                       : planIsOld() ? "⚠ Things changed since your last plan. Press ✨ Plan my week to update it." : "") : "";
-  $("homeNote").hidden = !note;
-  $("homeNote").textContent = note;
-  // 🏠 TODAY: 📋 my next activities · 🧩 my riddle · 📔 My day, then the rest (each card leaves itself out when it's off or empty);
-  // parents also get the family rows: kids' moods, ✅ duties check, 💌 wishes, 📅 the family today
-  // 👨‍👩‍👧 A parent's home: the 👨‍👩‍👧 Family tiles, then Today, the family calendar, kids' moods, duties check, wishes (and the rest; no parent habits)
-  $("homeHabits").innerHTML = parent
-    ? rateCardsHtml() + kidSetupHtml() + `<div class="rp-tiles"><button class="big-btn rp-open" data-report><span class="e">📊</span><b>How are my kids doing?</b><small>School, tasks, habits and moods</small></button>
-        <button class="big-btn rp-open" data-go="kidswork"><span class="e">👀</span><b>Your kids' work today</b><small>Live, as they do it</small></button></div>${fsButtonsHtml()}`
-      + familyTilesHtml() + todayCardHtml(me) + familyTodayHtml() + kidsMoodHtml() + dutiesCardHtml() + wishesListHtml()
-      + (u.buddy ? "" : buddyCardHtml(me)) + prizeCardHtml(me) + diaryButtonHtml() + extraHomeHtml(me) + habitsCardHtml(me)
-      + `<div class="btnrow su-edit"><button data-setupopen>✏️ Edit my home</button></div>`
-    : (u.buddy ? "" : buddyCardHtml(me)) + todayCardHtml(me) + diaryButtonHtml()
-      + dutyNoteHtml(me) + wishCardHtml(me) + prizeCardHtml(me) + extraHomeHtml(me) + habitsCardHtml(me);
+  $("homeBig").className = "p-home";
+  $("homeBig").innerHTML = needsLineHtml() + `<div class="kid-cards">${kidsList().map(kidCardHtml).join("")}</div>${kidsList().length ? "" : kidSetupHtml()}`
+    + familyRowHtml();
+  $("homeMenu").hidden = !homeMore && !homeAddPlan;
+  $("homeMenu").innerHTML = homeAddPlan ? addPlanMenuHtml() : homeMore ? parentMoreHtml() : "";
+  $("homeHabits").innerHTML = "";
   $("homeCal").innerHTML = "";
-  maybeMakeRiddles();
+  if (!isParentDevice()) maybeMakeRiddles();   // (🧩 riddles: kids only, never made on a parent's device)
   maybeShowTour();
   maybeShowSetup();   // ✨ a parent, the first time: "Make the app yours"
 }
@@ -7200,24 +7581,164 @@ document.addEventListener("click", e => {
 // ☰ More: everything that isn't on the Today screen
 // (☰ More is only 👤 My profile · 🔒 Your privacy · 👋 Show the tour; a parent's other pages are in their Family tiles and 👨‍👩‍👧 Family settings)
 let homeMore = false;
-const tileHtml = t => `<button class="tile ${t.cls || ""}" ${t.plan ? "data-plan" : t.extra ? `data-extra="${t.extra}"`
+const tileHtml = t => `<button class="tile ${t.cls || ""}" ${t.attr ? t.attr : t.plan ? "data-plan" : t.extra ? `data-extra="${t.extra}"`
   : t.tour ? "data-tour" : t.privacy ? "data-privacy" : t.profile ? "data-profile" : t.signout ? "data-signout" : `data-go="${t.go}"`}>
     <span class="t-emoji">${t.emoji}</span><span class="t-label">${t.label}</span><span class="t-sub">${t.sub}</span></button>`;
 const TOUR_TILE = { tour: true, emoji: "👋", label: "Show the tour", sub: "How the app works" };
 const PRIVACY_TILE = { privacy: true, emoji: "🔒", label: "Your privacy", sub: "Who can see your data" };
 const PROFILE_TILE = { profile: true, emoji: "👤", label: "My profile", sub: "My Spark, birthday, things I love" };
 const signOutTile = () => cloud.user ? [{ signout: true, emoji: "🚪", label: "Sign out", sub: "From this phone" }] : [];
+// =====================================================================
+//  👨‍👩‍👧 THE PARENT'S HOME (see drawHome): 🔔 Needs you · a card per kid → 👧 the Kid page · the Family row · ✏️ Add / Plan · ☰ More
+// =====================================================================
+let homeAddPlan = false, needsOpen = null;   // the ✏️ Add / Plan menu is open · "Needs you": null | "list" | one thing's key
+// What needs a parent now: ⭐ sessions to rate (and ❌ sessions without a worksheet), 🧒 a kid's setup, 🗓️ the plan, 📰 newsletters
+function needsItems() {
+  const out = [], rate = rateCardsHtml(), nRate = (rate.match(/class="card rate-card"/g) || []).length;
+  if (nRate) out.push({ key: "rate", text: `⭐ ${nRate} ${nRate === 1 ? "session" : "sessions"} to rate`, html: rate });
+  const setup = kidSetupHtml();
+  if (setup) out.push({ key: "setup", text: "🧒 Finish a kid's setup", html: setup });
+  if (isParentId(me) && (!hasPlan() || planIsOld())) out.push({ key: "plan", text: !hasPlan() ? "🗓️ No plan yet" : "🗓️ Things changed: plan again",
+    html: `<div class="card"><p>${!hasPlan() ? "🗓️ No plan yet. Add activities, then press ✨ Plan my week." : "⚠ Things changed since your last plan. Press ✨ Plan my week to update it."}</p>
+      <div class="btnrow"><button class="primary" data-plan>✨ Plan my week</button><button data-go="add">✏️ Add activities</button></div></div>` });
+  const nl = newsletterDue();
+  if (nl.length) out.push({ key: "nl", text: `📰 Newsletter for ${nl.map(k => k.name).join(", ")}`, html: newsletterNudgeHtml() });
+  return out;
+}
+function needsLineHtml() {
+  const list = needsItems();
+  if (needsOpen && needsOpen !== "list" && !list.some(x => x.key === needsOpen)) needsOpen = null;
+  if (!list.length) return "";
+  const one = list.length === 1, open = needsOpen === "list" || (one && needsOpen === list[0].key) || list.some(x => x.key === needsOpen);
+  const head = `<button class="needs-line ${open ? "on" : ""}" data-needs="${one ? list[0].key : "list"}" aria-expanded="${open}">
+    ${one ? safe(list[0].text) : `🔔 ${list.length} things need you`}<span aria-hidden="true">${open ? "▲" : "›"}</span></button>`;
+  const shown = list.find(x => x.key === needsOpen);
+  return `<div class="needs">${head}${needsOpen === "list" && !one ? `<div class="needs-list">${list.map(x => `<button data-needs="${x.key}">${safe(x.text)} ›</button>`).join("")}</div>` : ""}
+    ${shown ? `<div class="needs-panel">${shown.html}</div>` : ""}</div>`;
+}
+// 🎯 The score ring (0–100) in the kid's colour
+function scoreRingHtml(n, color) {
+  const C = 2 * Math.PI * 44;
+  return `<span class="kc-ring" role="img" aria-label="Score ${n} this week" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
+    <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * n / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${n}</b></span>`;
+}
+// "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
+function kidTodayLine(kid) {
+  const date = todayYmd(), now = dubaiMinutes(), items = todayItems(kid), done = items.filter(x => isDone(date, x.id, kid)).length;
+  if (!items.length) return "Nothing today";
+  if (done === items.length) return "All finished ✅";
+  const next = items.find(x => !isDone(date, x.id, kid) && x.end > now && x.start >= 0);
+  return `Today ${done} of ${items.length} done${next ? ` · next ${next.name} ${clock(next.start)}` : ""}`;
+}
+// ONE CARD PER KID: the score ring, name + today's mood, today's line, 🎒 School · 📅 Calendar · 📊 Report. The card itself → the Kid page
+function kidCardHtml(k) {
+  const c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
+  return `<div class="card kid-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
+    <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">${scoreRingHtml(sc.overall, c.color)}
+      <span class="kc-text"><b>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}</b>
+        <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button>
+    <div class="kc-btns"><button data-school="${safe(k.id)}">🎒 School</button><button data-viewcal="${safe(k.id)}">📅 Calendar</button><button data-kidreport="${safe(k.id)}">📊 Report</button></div></div>`;
+}
+// The Family row: 4 small square buttons
+function familyRowHtml() {
+  const n = feat("meeting") ? cmNewCount() : 0;
+  return `<div class="fam-row">
+    <button data-calall><span class="e">📅</span><small>Family calendar</small></button>
+    <button data-homeaddplan class="${homeAddPlan ? "on" : ""}" aria-expanded="${homeAddPlan}"><span class="e">✏️</span><small>Add / Plan</small></button>
+    ${feat("meeting") ? `<button data-extra="meeting"><span class="e">🏡</span><small>Community${n ? ` <b class="fr-new">${n} new</b>` : ""}</small></button>` : ""}
+    <button data-homemore class="${homeMore ? "on" : ""}" aria-expanded="${homeMore}"><span class="e">☰</span><small>More</small></button></div>`;
+}
+// ✏️ Add / Plan: Add activities · ✨ Plan my week · 📌 One-day event · 🔄 Make a new plan
+function addPlanMenuHtml() {
+  return [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },
+    ...(isParentId(me) ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
+    { attr: "data-onedaynew", emoji: "📌", label: "One-day event", sub: "Only on one date" },
+    ...(hasPlan() ? [{ attr: "data-newplan", emoji: "🔄", label: "Make a new plan", sub: "From today, ticks stay" }] : [])].map(tileHtml).join("");
+}
+// ☰ More (a parent): 📄 Family summary · 📊 How are my kids doing? · 🧹 Home duties · 📔 My day · 👤 My profile · 💾 Backup ·
+// 🔒 Your privacy · 👋 Show the tour · ✏️ Edit my home (and 🏆 Points, 👀 Your kids' work today: nothing that was on the home is lost)
+function parentMoreHtml() {
+  return `${fsButtonsHtml()}` + [
+    { attr: "data-report", emoji: "📊", label: "How are my kids doing?", sub: "All the kids" },
+    ...(feat("chores") ? [{ extra: "chores", emoji: "🧹", label: "Home duties", sub: "Jobs at home" }] : []),
+    ...(feat("diary") ? [{ attr: 'data-dyopen=""', emoji: "📔", label: "My day", sub: "How do you feel today?" }] : []),
+    { attr: 'data-go="kidswork"', emoji: "👀", label: "Your kids' work today", sub: "Live, as they do it" },
+    { attr: 'data-go="points"', emoji: "🏆", label: "Points", sub: "The kids' week" },
+    { ...PROFILE_TILE, sub: "My settings, my picture" },
+    ...(isParentId(me) ? [{ attr: "data-backup", emoji: "💾", label: "Backup", sub: "Save or load the family's data" }] : []),
+    PRIVACY_TILE, TOUR_TILE, { attr: "data-setupopen", emoji: "✏️", label: "Edit my home", sub: "Features on / off" }].map(tileHtml).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-needs], [data-homeaddplan], [data-kidpage], [data-kidreport]");
+  if (!b) return;
+  const ds = b.dataset;
+  if (ds.needs) { needsOpen = needsOpen === ds.needs || (ds.needs === "list" && needsOpen) ? null : ds.needs; return render(); }
+  if ("homeaddplan" in ds) { homeAddPlan = !homeAddPlan; homeMore = false; return render(); }
+  if (ds.kidpage) return openKidPage(ds.kidpage);
+  if (ds.kidreport) { rpKid = ds.kidreport; return openReport(); }
+});
+
+// =====================================================================
+//  👧 THE KID PAGE (a parent's device): everything about one kid — this week's score (📚 Study · ⚽ Activity · 🌱 Habit), today's list
+//  (parents tick; earlier days of this week on 📅 Calendar), 👀 their work today (live), ⭐ habits, ✅ duties, 💌 wishes, 🌟 prize,
+//  📔 moods and the 📊 report. ⬅️ Back → home.
+// =====================================================================
+let kidPage = null;
+function openKidPage(id) {
+  if (!isParentDevice() || !exists(id) || isParentId(id)) return;
+  kidPage = id; homeMore = homeAddPlan = false;
+  go("kid");
+}
+// Today's list for one kid, with ✅ ticks (a parent ticks for the kid; ⏰ not before the start)
+function kidTodayHtml(k) {
+  const d = todayYmd(), all = todayItems(k.id), c = colorsOf(k);
+  return `<div class="card td-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="sc-head"><h2>📋 Today</h2>
+    <span class="td-count">${all.filter(x => isDone(d, x.id, k.id)).length} / ${all.length} ✓</span></div>
+    ${all.length ? all.map(x => { const on = isDone(d, x.id, k.id), lock = !on && tickTimeLock(d, x.start) != null;
+      return `<div class="td-row ${on ? "done" : ""}"><button class="k-check td-check ${on ? "on" : ""} ${lock ? "time-lock" : ""}" data-check="${d}|${safe(x.id)}|${safe(k.id)}" style="--c:${c.color}"
+        aria-pressed="${on}" aria-label="${safe(`${on ? "Done" : lock ? `Locked until ${clock(x.start, true)}` : "Tap when done"}: ${x.name}`)}">${on ? "✓" : lock ? "🔒" : ""}</button>
+        <span class="td-what"><b>${safe(x.name)}</b><small>${x.start >= 0 ? `${clock(x.start)} – ${clock(x.end)}` : "All day"}</small></span></div>`; }).join("")
+      : `<p class="sc-empty">Nothing today. 🎈</p>`}
+    <div class="td-more"><button class="linkbtn" data-viewcal="${safe(k.id)}">📅 The week (tick earlier days) ›</button></div></div>`;
+}
+function drawKidPage() {
+  if (!isParentDevice() || !exists(kidPage) || isParentId(kidPage)) return go("home");
+  const k = userById(kidPage), c = colorsOf(k), sc = scoreOf(k.id), st = weekStats(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
+  const items = kidsWorkItems(), mine = items.filter(x => x.kid === k.id), want = weekItem("want", k.id);
+  $("kidBody").innerHTML = `
+    <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
+      <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}</h1>
+        <small>${safe(kidTodayLine(k.id))}</small></div></div>
+      ${scoreBlockHtml(sc)}${sc.free && sc.free.count ? `<p class="kid-free">${freeLine(sc.free)}</p>` : ""}
+      <div class="kc-btns"><button data-school="${safe(k.id)}">🎒 School</button><button data-viewcal="${safe(k.id)}">📅 Calendar</button><button data-profile="${safe(k.id)}">👤 Profile</button></div></div>
+    ${kidTodayHtml(k)}
+    <h2 class="kp-h">👀 ${safe(k.name)}'s work today</h2>${kwCardHtml(k, items).replace("data-kwdetail", "data-kwsame").replace("<small>Details ›</small>", "")}
+    <details class="card kw-all"><summary>📋 Everything ${safe(k.name)} did today (${mine.length})</summary>
+      ${mine.length ? `<ul class="kw-list">${mine.map(x => { const inner = `<span class="kw-time">${x.cat === "school" || x.cat === "act" ? kwTime(x.at) : ""}</span><span class="kw-what">${safe(x.text)}</span>`;
+        return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`; }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</details>
+    ${habitsCardHtml(k.id)}<div class="btnrow"><button class="pill" data-kidhabits>✏️ Edit the kids' habits</button></div>
+    ${dutyRowsCardHtml([k], `✅ Did ${safe(k.name)} do the duties on time today?`)}
+    ${wishesListHtml(k.id)}
+    ${stars().includes(k.id) ? `<div class="card"><h2>🌟 Shining Star of the Week!</h2><p>${want && want.text ? `🎁 Gift: <b>${safe(want.text)}</b>${want.ok ? " ✅" : ""}` : "🎁 No gift picked yet."}</p>
+      <div class="btnrow"><button class="pill" data-go="points">🏆 Points</button></div></div>` : ""}
+    ${feat("diary") ? `<div class="card"><h2>📔 Moods this week</h2><div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>
+      <div class="btnrow"><button class="pill" data-dyopen="${safe(k.id)}">📔 ${safe(k.name)}'s day</button></div></div>` : ""}
+    <h2 class="kp-h">📊 How ${safe(k.name)} is doing</h2>${reportCardsHtml(k.id)}`;
+}
 // 👨‍👩‍👧 Parents: the Family tiles at the top of their home (a tile whose ⚙️ feature is off is hidden)
 function familyTilesHtml() {
   const tiles = [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },
     ...(isParentId(me) ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
+    // 🔄 / 📌 (a parent's device only: kids never see them)
+    ...(isParentDevice() ? [{ attr: "data-newplan", emoji: "🔄", label: "Make a new plan", sub: "From today, ticks stay" },
+                            { attr: "data-onedaynew", emoji: "📌", label: "One-day event", sub: "Only on one date" }] : []),
     ...EXTRA_PAGES.filter(([k]) => feat(k)).map(([k, emoji, label, sub]) => ({ extra: k, emoji, label, sub }))];
   return `<div class="card fam-tiles-card"><h2>👨‍👩‍👧 Family</h2><div class="fam-tiles">${tiles.map(tileHtml).join("")}</div></div>`;
 }
 // ☰ More: simple, the same for everyone: 👤 My profile (big: each person's ⚙️ settings, and a parent's 👨‍👩‍👧 Family settings,
 // 🚪 Sign out at its bottom) · 🔒 Your privacy · 👋 Show the tour. (✏️ Add activities and 🖨️ Print are on 📅 Calendar.)
 function moreTilesHtml() {
-  return [{ ...PROFILE_TILE, cls: "primary more-profile", sub: "My settings, my Spark, my school" }, PRIVACY_TILE, TOUR_TILE].map(tileHtml).join("");
+  return [{ ...PROFILE_TILE, cls: "primary more-profile", sub: hasSpark(me) ? "My settings, my Spark, my school" : "My settings, my picture" }, PRIVACY_TILE, TOUR_TILE].map(tileHtml).join("");
 }
 // 📅 Calendar's small buttons: ✏️ Add activities (everyone) · 🖨️ Schedules to tick (the parent who plans)
 function calToolsHtml() {
@@ -7271,7 +7792,7 @@ function familyTodayHtml() {
   const order = id => data.users.findIndex(u => u.id === id);
   return `<div class="card fam-today"><div class="sc-head"><h2>📅 The family today</h2><button class="pill" data-pactnew>➕ My activity</button></div>
     ${next.length ? `<ul class="fam-list-today">${next.map(r => `<li><span class="ft-time">${r.start >= 0 ? clock(r.start) : "All day"}</span>
-      <span class="ft-what">${safe(r.name)}</span><span class="ft-who">${r.ids.sort((a, b) => order(a) - order(b)).map(id => safe(userById(id).emoji)).join("")}</span></li>`).join("")}</ul>`
+      <span class="ft-what">${safe(r.name)}</span><span class="ft-who">${r.ids.sort((a, b) => order(a) - order(b)).map(id => faceHtml(userById(id))).join("")}</span></li>`).join("")}</ul>`
       : `<p class="sc-empty">${list.length ? "All done for today 🎉" : "Nothing planned today."}</p>`}
     <div class="td-more"><button class="linkbtn" data-calall>See all →</button></div></div>`;
 }
@@ -7366,7 +7887,7 @@ function communityHtml() {
     const canDone = (p.type === "need" || p.type === "please") && !done && p.by !== me;
     const forWho = p.type === "please" ? (p.to && p.to.length ? p.to.filter(exists).map(id => userById(id).name).join(", ") : "all kids") : "";
     return `<li class="card cm-post cm-${p.type}" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <div class="cm-top"><span class="cm-who"><span class="e">${safe(u ? u.emoji : "🙂")}</span><b>${safe(u ? u.name : "Someone")}</b></span>
+      <div class="cm-top"><span class="cm-who"><span class="e">${u ? faceHtml(u) : "🙂"}</span><b>${safe(u ? u.name : "Someone")}</b></span>
         <span class="cm-kind">${e} ${label}${forWho ? ` · for ${safe(forWho)}` : ""}</span><small class="cm-time">${safe(cmWhen(p.at))}</small></div>
       ${p.type === "review" && p.stars ? `<p class="cm-starsline" aria-label="${p.stars} of 5 stars">${"⭐".repeat(p.stars)}<small> ${p.stars}/5</small></p>` : ""}
       <p class="cm-text">${safe(p.text)}</p>
@@ -7701,18 +8222,27 @@ function subjectNameOf(users, id) {
   for (const u of users) { const x = id && schoolOf(u).subjects[id]; if (x) return x.name; }
   return "";
 }
-// Draws the Study box and the helper line. keep = { subjectId, studyMode, helper } (editing / reset), else what's picked now.
+// The subjects ticked in the Study box: ["all"] (All my subjects) or subject ids
+function pickedSubjects(p) {
+  const on = [...document.querySelectorAll(`#${p}Study input[name="${p}Sub"]:checked`)].map(x => x.value);
+  return on.includes(ALL_SUBJECTS) ? [ALL_SUBJECTS] : on;
+}
+// Draws the Study box and the helper line. keep = { subjectIds, studyMode, helper } (editing / reset), else what's picked now.
+// 📚 Subjects: tick one or MORE (or "All my subjects"); with more than one, the kid picks one for each session ("Which subject today?").
 function drawStudy(p, keep) {
   const study = $(p + "Type").value === "study", box = $(p + "Study");
-  const cur = keep || { subjectId: $(p + "Subject") ? $(p + "Subject").value : "", studyMode: $(p + "How") ? $(p + "How").value : "sole", helper: $(p + "Helper").value };
+  const cur = keep || { subjectIds: $(p + "Study").querySelector(`input[name="${p}Sub"]`) ? pickedSubjects(p) : [], studyMode: $(p + "How") ? $(p + "How").value : "sole", helper: $(p + "Helper").value };
   box.hidden = !study;
   if (study) {
-    const subs = studySubjects(p), kid = pickedWho(p).find(id => !isParentId(id));
-    const name = subjectNameOf(pickedWho(p), cur.subjectId), sel = subs.find(x => x.id === cur.subjectId) || subs.find(x => name && sameSubject(x.name, name));
-    box.innerHTML = `<div class="row"><div><label class="small" for="${p}Subject">📘 Subject</label><select id="${p}Subject" ${subs.length ? "" : "disabled"}>${subs.length
-        ? `<option value="">— Choose —</option>` + subs.map(x => `<option value="${safe(x.id)}" ${sel && x.id === sel.id ? "selected" : ""}>${safe(x.emoji)} ${safe(x.name)}</option>`).join("")
-        : `<option value="">No subjects yet</option>`}</select></div>
-      <div><label class="small" for="${p}How">How</label><select id="${p}How"><option value="sole">📖 Sole study</option>
+    const subs = studySubjects(p), kid = pickedWho(p).find(id => !isParentId(id)), ids = cur.subjectIds || [], all = ids.includes(ALL_SUBJECTS);
+    const names = ids.map(id => subjectNameOf(pickedWho(p), id)).filter(Boolean);
+    const on = x => ids.includes(x.id) || names.some(n => sameSubject(n, x.name));
+    box.innerHTML = `<label class="small">📘 Subjects <small>(tick one or more; with more than one, the kid picks one each time)</small></label>
+      <div class="daypick st-subs" id="${p}Subjects">${subs.length
+        ? `<label><input type="checkbox" name="${p}Sub" value="${ALL_SUBJECTS}" ${all ? "checked" : ""}><span>📚 All my subjects</span></label>`
+          + subs.map(x => `<label><input type="checkbox" name="${p}Sub" value="${safe(x.id)}" ${!all && on(x) ? "checked" : ""} ${all ? "disabled" : ""}><span>${safe(x.emoji)} ${safe(x.name)}</span></label>`).join("")
+        : `<span class="hint">No subjects yet</span>`}</div>
+      <div class="row"><div><label class="small" for="${p}How">How</label><select id="${p}How"><option value="sole">📖 Sole study</option>
         <option value="assisted" ${cur.studyMode === "assisted" ? "selected" : ""}>🤝 With assistance</option></select></div></div>
       ${subs.length ? "" : !kid ? `<p class="hint">Tick a kid in “Who?” to pick one of their subjects.</p>`
         : isParentId(me) && !isKidDevice() ? `<p class="hint">${safe(userById(kid).name)} has no subjects yet. <button type="button" class="pill" data-actsubjects="${safe(kid)}">✏️ Edit subjects</button></p>`
@@ -7731,17 +8261,18 @@ function pickedHelp(p) {
   if (pickedType(p) !== "study") return { helper };
   const studyMode = $(p + "How").value === "assisted" ? "assisted" : "sole";
   if (studyMode === "assisted" && !helper) return { err: "🤝 With assistance: pick who helps." };
-  return { helper: studyMode === "assisted" ? helper : "", subjectId: $(p + "Subject") ? $(p + "Subject").value : "", studyMode };
+  const subjectIds = pickedSubjects(p);
+  return { helper: studyMode === "assisted" ? helper : "", subjectIds, subjectId: subjectIds.find(x => x !== ALL_SUBJECTS) || "", studyMode };
 }
 // Saving: the study fields only on a Study activity, and no older "Needs Dad"
 function putHelp(act, help) {
-  delete act.needsDad; delete act.subjectId; delete act.studyMode;
+  delete act.needsDad; delete act.subjectId; delete act.subjectIds; delete act.studyMode;
   return Object.assign(act, help);
 }
 ["fx", "fl"].forEach(p => {
   $(p + "Who").addEventListener("change", () => drawStudy(p));
   $(p + "Type").addEventListener("change", () => drawStudy(p));
-  $(p + "Study").addEventListener("change", e => { if (e.target.id === p + "How") drawStudy(p); });
+  $(p + "Study").addEventListener("change", e => { if (e.target.id === p + "How" || e.target.value === ALL_SUBJECTS) drawStudy(p); });   // (📚 All my subjects: the others are greyed)
 });
 // ✏️ Edit subjects (no subjects yet): the kid's 🎒 School, with ✏️ Edit subjects open
 document.addEventListener("click", e => {
@@ -7764,6 +8295,9 @@ function drawAdd() {
   $("fxPickWrap").hidden = $("flPickWrap").hidden = !isParentId(me);
   drawFixedList();
   drawFlexibleList();
+  // ⏱️ Enough time? (parents, live: it changes with every edit)
+  $("addTime").hidden = !isParentId(me) || !kidsList().length;
+  if (isParentId(me)) $("addTime").innerHTML = `⏱️ ${timeLineHtml()}`;
   // Routines: parents only
   if (isParentId(me)) { if (!$("rtForm").hidden) drawWho("rt"); drawRoutineList(); }
   drawAddSections();
@@ -7800,7 +8334,7 @@ document.addEventListener("click", e => {
 // One row of a list: name · who (emojis) · days and time (fixed) or minutes × times a week (flexible). Tap = edit (when allowed).
 function addRowHtml(f, kind, editing, what) {
   const [, te, tw] = actTypeInfo(actTypeOf(f));   // (⭐ its type, e.g. "📚 Study")
-  const sub = actTypeOf(f) === "study" && subjectNameOf(f.users, f.subjectId);   // (📚 its subject)
+  const sub = actTypeOf(f) === "study" && actSubjectsText(f);   // (📚 its subjects, or "All my subjects")
   const can = canEdit(f), inner = `<span class="what">${te} ${safe(f.name)}<small>${te} ${tw}${sub ? ` · ${safe(sub)}` : ""} · ${safe(emojisOf(f.users))} · ${what}${helperOf(f) ? ` · ${safe(withText(f))}` : ""}</small></span>`;
   return `<li class="${editing ? "editing" : ""}">${can ? `<button class="add-row" data-edit-${kind}="${f.id}" aria-label="Edit ${safe(f.name)}">${inner}<span class="add-go" aria-hidden="true">✏️</span></button>`
     : `<div class="add-row look">${inner}<span class="tag">👀 shared</span></div>`}</li>`;
@@ -7918,7 +8452,7 @@ function startEditFixed(id) {
   $("fxBreak").value = String(f.breakAfter || 0);
   padTouched.fx = true;   // editing: keep its saved times
   drawWho("fx", f.users);
-  drawStudy("fx", { subjectId: f.subjectId || "", studyMode: f.studyMode || "sole", helper: f.helper || "" });
+  drawStudy("fx", { subjectIds: subjectIdsOf(f), studyMode: f.studyMode || "sole", helper: f.helper || "" });
   $("fxFormTitle").textContent = `✏️ Edit: ${f.name}`;
   $("fxDel").hidden = false; $("fxDel").dataset.delFixed = id;   // (🗑️ goes through the usual delete: same rules as before)
   $("fxErr").textContent = "";
@@ -7939,7 +8473,7 @@ function resetFixedForm() {
   padTouched.fx = false;
   fillPads("fx");          // automatic times (the name is empty now → 5 min before)
   drawWho("fx", [me]);
-  drawStudy("fx", { subjectId: "", studyMode: "sole", helper: "" });
+  drawStudy("fx", { subjectIds: [], studyMode: "sole", helper: "" });
   $("fxFormTitle").textContent = "➕ New fixed activity";
   $("fxDel").hidden = true; delete $("fxDel").dataset.delFixed;
   $("fxForm").hidden = true;   // (the form shows only after ➕ New or a tap on a row)
@@ -8012,7 +8546,7 @@ function startEditFlex(id) {
   $("flTo").value = f.between ? f.between.to : "";
   padTouched.fl = true;   // editing: keep its saved times
   drawWho("fl", f.users);
-  drawStudy("fl", { subjectId: f.subjectId || "", studyMode: f.studyMode || "sole", helper: f.helper || "" });
+  drawStudy("fl", { subjectIds: subjectIdsOf(f), studyMode: f.studyMode || "sole", helper: f.helper || "" });
   $("flFormTitle").textContent = `✏️ Edit: ${f.name}`;
   $("flDel").hidden = false; $("flDel").dataset.delFlex = id;   // (🗑️ goes through the usual delete: same rules as before)
   $("flErr").textContent = "";
@@ -8032,7 +8566,7 @@ function resetFlexForm() {
   padTouched.fl = false;
   fillPads("fl");          // automatic times
   drawWho("fl", [me]);
-  drawStudy("fl", { subjectId: "", studyMode: "sole", helper: "" });
+  drawStudy("fl", { subjectIds: [], studyMode: "sole", helper: "" });
   $("flFormTitle").textContent = "➕ New flexible activity";
   $("flDel").hidden = true; delete $("flDel").dataset.delFlex;
   $("flForm").hidden = true;   // (the form shows only after ➕ New or a tap on a row)
@@ -8182,9 +8716,11 @@ function cutOut([ws, we], busy) {
   return pieces;
 }
 
-// Day i's hours from "My day" (weekend hours for Saturday and Sunday if you set them).
+// Day i's hours from "My day": that day's own start and end (Monday … Sunday), or (older settings) the day / weekend hours.
+// The planner never places anything before the start or after the end, and the calendar shows only that time.
 function dayWindow(i) {
   const m = data.myDay;
+  if (m.days && m.days[i]) return [toMin(m.days[i].start), toMin(m.days[i].end)];
   const weekend = i >= 5 && m.weekendOwn;
   return [toMin(weekend ? m.weekendStart : m.start), toMin(weekend ? m.weekendEnd : m.end)];
 }
@@ -8377,14 +8913,20 @@ function spreadDay(day) {
 // mode "replan" (💾 Save, ✨ Plan my week, "redo"): today keeps what it has and only gets new things AFTER now (Dubai time);
 //      tomorrow … today+6 are planned again (📌 pins stay on their date). No saved plan yet (or "redo"): from now on.
 // mode "roll" (a new day, on a parent's device): only the dates that just came into the window are planned; the rest stays as it is.
+// mode "fresh" (🔄 Make a new plan): like "replan", but today's flexible items that haven't started, aren't ticked and aren't 📌 pinned
+//      are planned again too (from now). Fixed activities, ticked items and 📌 one-day events stay.
+// mode "fill" (📌 a one-day event moved some items away): everything saved stays; only what's missing is placed again, from now on.
 // A deleted activity's items stay on the days that are gone, and today if they started or were ticked (history).
 // Fixed activities and routines go by weekday (a Monday activity is on every Monday date).
+// 📌 One-day events keep their people busy (nothing is planned on top), and an activity "removed for that day" isn't put back on that date.
 function makePlan(mode = "replan") {
   const warnings = [];
   const old = hasPlan() ? data.plan : null, today = todayYmd(), now = dubaiMinutes(), dates = aheadDates();
-  // Kept exactly as saved: "replan" → up to today; "roll" → every date that was already planned (none when the plan is older than today)
-  const keepUpTo = !old ? addDaysYmd(today, -1) : mode === "roll" ? (old.upTo >= today ? old.upTo : addDaysYmd(today, -1)) : today;
-  const open = ds => ds > keepUpTo || (mode === "replan" && ds === today);   // can this date get new things?
+  // Kept exactly as saved: "replan" / "fresh" → up to today; "roll" → every date that was already planned (none when the plan is
+  // older than today); "fill" → every date
+  const keepUpTo = !old ? addDaysYmd(today, -1) : mode === "roll" ? (old.upTo >= today ? old.upTo : addDaysYmd(today, -1))
+    : mode === "fill" ? dates[dates.length - 1] : today;
+  const open = ds => ds > keepUpTo || ((mode === "replan" || mode === "fresh" || mode === "fill") && ds >= today);   // can this date get new things?
   const savedOn = ds => (old && old.dates[ds] && old.dates[ds].items) || [];
 
   // STEP A: For each date, note "My day" (its weekday's hours), and how much free time each person has.
@@ -8402,6 +8944,8 @@ function makePlan(mode = "replan") {
     const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${day.date}|${it.actId}|`));
     // a deleted activity is gone from now on (today: unless it already started or was ticked)
     if (!act && (day.date > today || (it.start > now && !ticked))) return;
+    // 🔄 Make a new plan: today's flexible items that haven't started (not ticked, not pinned) are planned again
+    if (mode === "fresh" && day.date === today && !it.fixed && it.start > now && !ticked && !it.pinned) return;
     const pre = act && !it.fixed ? act.getReady || 0 : 0, post = act && !it.fixed ? act.breakAfter || 0 : 0;
     const people = act ? peopleOf(act) : it.gone ? it.gone.people : [];
     day.items.push({ name: act ? act.name : "", start: it.start - pre, end: it.end + post, pre, post, fixed: !!it.fixed,
@@ -8414,8 +8958,8 @@ function makePlan(mode = "replan") {
   for (const f of data.fixed) {
     const s = toMin(f.start), e = toMin(f.end), people = peopleOf(f);
     for (const [d, day] of days.entries()) {
-      if (!f.days.includes(weekdayOf(day.date)) || !open(day.date)) continue;
-      if (day.date === today && (s < now || day.items.some(it => it.kept && it.actId === f.id))) continue;
+      if (!f.days.includes(weekdayOf(day.date)) || !open(day.date) || skippedOn(day.date, f.id)) continue;
+      if (day.items.some(it => it.kept && it.actId === f.id) || (day.date === today && s < now)) continue;   // (already there, or started)
       // Same person busy twice at once? (activities you allowed together are fine)
       // (Different people at the same time is always fine.)
       const clash = days[d].items.find(it => it.start < e && s < it.end && it.people.some(p => people.includes(p)) && !f.overlapWith.includes(it.actId));
@@ -8431,6 +8975,9 @@ function makePlan(mode = "replan") {
   // (🕌 Prayer times are NOT here: they never block anything.)
   days.forEach(day => routinesOn(weekdayOf(day.date)).forEach(r =>
     day.items.push({ ...r, fixed: true, actId: r.id, people: r.users })));
+  // 📌 One-day events: their people are busy then (like a routine: never saved in the plan, never scored)
+  days.forEach(day => oneDayOn(day.date).forEach(e =>
+    day.items.push({ routine: true, fixed: true, name: e.title, actId: e.id, start: toMin(e.from), end: toMin(e.to), users: e.who, people: e.who })));
   // How full a person's free time is on day d (0 = empty, 1 = full) with flexible activities.
   // For an activity, we look at the busiest of its people (e.g. the kid AND Dad).
   const fullness = (d, people) => Math.max(...people.map(p => capacity[d][p]
@@ -8479,6 +9026,7 @@ function makePlan(mode = "replan") {
       for (const mode of modes) {
         for (let d = 0; d < days.length; d++) {
           if (usedDays.includes(d)) continue;                             // rule: never twice on the same date
+          if (skippedOn(days[d].date, act.id)) continue;                  // (📌 removed for that day by a one-day event)
           const start = earliestStart(days[d], act, mode);
           if (start === null) continue;                                   // doesn't fit this day
           // Score the day: emptier days win (balance),
@@ -8527,6 +9075,8 @@ function planKey() {
     fl: data.flexible.map(f => [f.id, f.duration, f.times, [...f.overlapWith].sort(), f.users, helps(f), ...pads(f),
                                 ...(f.between ? [{ only: [f.between.from, f.between.to] }] : [])]),
     day: [data.myDay.start, data.myDay.end, data.myDay.weekendOwn, data.myDay.weekendStart, data.myDay.weekendEnd],
+    // (🕗 each day's own hours: only when they're set, so a plan made before still counts as up to date)
+    ...(data.myDay.days ? { days: data.myDay.days.map(x => [x.start, x.end]) } : {}),
     max: data.maxTogether,
     // (only when there are routines, so a plan made before routines existed still counts as up to date)
     ...(data.routines.length ? { rt: data.routines.map(r => [r.id, r.days, r.start, r.duration, r.users]) } : {})
@@ -8546,8 +9096,8 @@ function makeAndKeepPlan(mode = "replan") {
   // (kept items are saved exactly as they were)
   p.days.forEach(day => dates[day.date] = { items: day.items.filter(it => !it.routine).map(it => it.kept ? { ...it.kept } :
     ({ actId: it.actId, fixed: !!it.fixed, start: it.start + (it.pre || 0), end: it.end - (it.post || 0), ...(it.pinned ? { pinned: true } : {}) })) });
-  // (a new day only adds a date: the notes and the "up to date" mark stay as the last Save / Plan my week left them)
-  const roll = mode === "roll" && old;
+  // (a new day, or 📌 a one-day event's moves, only add items: the notes and the "up to date" mark stay as the last Save / Plan my week left them)
+  const roll = (mode === "roll" || mode === "fill") && old;
   data.plan = { dates, warnings: roll ? old.warnings : p.warnings, key: roll ? old.key : planKey(), upTo: addDaysYmd(today, PLAN_AHEAD) };
   return p;
 }
@@ -8567,6 +9117,147 @@ function planNow() {
   go("all");
   toast(p.warnings.length ? "✨ Planned! A few things need your attention." : "✨ Everyone's week is planned!");
 }
+// 🔄 Make a new plan (a parent's device): today (from now) up to the end of the plan is planned again.
+// Fixed activities, everything already ticked (or started, or 📌 pinned) and 📌 one-day events stay (see makePlan, mode "fresh").
+function newPlanNow() {
+  if (!isParentDevice()) return;
+  if (hasDraft()) return toast("💾 Save your changes first, then make a new plan.", 3500);
+  if (!confirm("Re-plan this week from today? Ticks already done stay.")) return;
+  const p = makeAndKeepPlan("fresh");
+  writeData();
+  render();
+  toast(p.warnings.length ? "🔄 New plan made! A few things need your attention." : "🔄 New plan made! Ticks already done stayed.", 3500);
+}
+
+// =====================================================================
+//  📌 ONE-DAY EVENTS (parents): a title, who (one or more people), a date, a start and an end time. Only on that date (not every
+//  week), on the calendar with a 📌, never scored. The planner keeps those people free then. When it's saved over planned activities
+//  of those people: the clashes, then "Move them to another free time" (only those are planned again) or "Remove them for that day".
+// =====================================================================
+const oneDayOn = ds => (data.oneDay || []).filter(e => e.date === ds);
+// (also ❌ a session that didn't happen: skipped, or moved to another day)
+const skippedOn = (ds, actId) => oneDayOn(ds).some(e => (e.skip || []).includes(actId)) || hasOwn(data.skips || {}, `${ds}|${actId}`);
+const oneDayWho = e => e.who.filter(exists).map(id => userById(id).emoji).join("");
+// The planned activities of those people at that time: the saved plan's (or, a date it doesn't have yet, the fixed ones by weekday)
+function oneDayClashes(e) {
+  const s = toMin(e.from), t = toMin(e.to), hits = it => it.start < t && s < it.end && it.people.some(p => e.who.includes(p));
+  if (hasPlan() && data.plan.dates[e.date]) return planDay(e.date).items.filter(it => !it.gone && hits(it))
+    .map(it => ({ actId: it.actId, name: it.name, fixed: !!it.fixed, start: it.start, end: it.end, users: it.users }));
+  return data.fixed.filter(f => f.days.includes(weekdayOf(e.date))).map(f => ({ actId: f.id, name: f.name, fixed: true, start: toMin(f.start), end: toMin(f.end), users: f.users, people: peopleOf(f) }))
+    .filter(hits);
+}
+let od = null;   // the open form: { id (null = new), title, who, date, from, to, clashes? }
+function openOneDay(id) {
+  if (!isParentDevice()) return;
+  if (hasDraft()) return toast("💾 Save your changes first, then add the event.", 3500);
+  const e = id && (data.oneDay || []).find(x => x.id === id);
+  od = e ? { ...e, who: [...e.who] } : { id: null, title: "", who: kidsList().map(k => k.id).slice(0, 1), date: todayYmd(), from: "16:00", to: "17:00" };
+  closeCard();
+  drawOneDay();
+  $("odModal").hidden = false;
+  if ($("odName")) $("odName").focus();
+}
+function closeOneDay() { $("odModal").hidden = true; od = null; }
+function drawOneDay() {
+  $("odTitle").textContent = od.id ? "📌 Change the one-day event" : "📌 One-day event";
+  if (od.clashes) {   // step 2: what to do with the clashes
+    $("odBody").innerHTML = `<p class="print-hint">“${safe(od.title)}” on ${safe(dayLong(od.date))}, ${clock(toMin(od.from), true)}–${clock(toMin(od.to), true)} is at the same time as:</p>
+      <ul class="list">${od.clashes.map(c => `<li><span class="what"><b>${safe(c.name)}</b><small>${clock(c.start, true)}–${clock(c.end, true)} · ${safe(namesOf(c.users))}${c.fixed ? " · 🔒 fixed: it can't move, only be removed" : ""}</small></span></li>`).join("")}</ul>
+      <div class="btnrow"><button class="primary" data-odmove>🔀 Move them to another free time</button><button data-odremove>🗑️ Remove them for that day</button><button data-odback>⬅️ Back</button></div>`;
+    return;
+  }
+  $("odBody").innerHTML = `
+    <label class="small" for="odName">Title</label><input type="text" id="odName" maxlength="40" value="${safe(od.title)}" placeholder="Dentist, birthday party…">
+    <label class="small">Who</label><div class="daypick" id="odWho">${data.users.map(u => `<label><input type="checkbox" value="${safe(u.id)}" ${od.who.includes(u.id) ? "checked" : ""}><span>${safe(u.emoji)} ${safe(u.name)}</span></label>`).join("")}</div>
+    <label class="small" for="odDate">Date</label><input type="date" id="odDate" value="${safe(od.date)}">
+    <div class="row"><div><label class="small" for="odFrom">Start time</label><input type="time" id="odFrom" value="${safe(od.from)}"></div>
+      <div><label class="small" for="odTo">End time</label><input type="time" id="odTo" value="${safe(od.to)}"></div></div>
+    <p class="hint">It's only on that date, shows with a 📌 and is never scored. Nothing is planned for those people at that time.</p>
+    <div class="err" id="odErr"></div>
+    <div class="btnrow"><button class="primary" data-odsave>💾 Save</button>${od.id ? `<button class="danger-text" data-oddel>🗑️ Delete</button>` : ""}<button data-odcancel>Cancel</button></div>`;
+}
+// 💾 Save: checked, then (clashes) step 2, or saved now
+function saveOneDay() {
+  const title = $("odName").value.trim().slice(0, 40), who = [...document.querySelectorAll("#odWho input:checked")].map(x => x.value);
+  const date = $("odDate").value, from = $("odFrom").value, to = $("odTo").value, err = t => { $("odErr").textContent = t; };
+  if (!title) return err("Please type a title.");
+  if (!who.length) return err("Please pick who it's for.");
+  if (!isYmd(date)) return err("Please pick the date.");
+  if (!isHm(from) || !isHm(to) || toMin(to) <= toMin(from)) return err("The end time must be after the start time.");
+  Object.assign(od, { title, who, date, from, to });
+  const clashes = oneDayClashes(od);
+  if (clashes.length) { od.clashes = clashes; return drawOneDay(); }
+  finishOneDay([], false);
+}
+// Saves it. removed = the clashing activities taken off that day; move = plan the clashing (flexible) ones again in free time
+function finishOneDay(removed, move) {
+  const was = (data.oneDay || []).find(x => x.id === od.id);
+  const e = { id: od.id || newId(), title: od.title, who: od.who, date: od.date, from: od.from, to: od.to, by: me,
+              skip: [...new Set([...((was && was.date === od.date && was.skip) || []), ...removed])] };
+  if (!e.skip.length) delete e.skip;
+  data.oneDay = [...(data.oneDay || []).filter(x => x.id !== e.id), e];
+  const ids = new Set((od.clashes || []).filter(c => removed.includes(c.actId) || (move && !c.fixed)).map(c => c.actId));
+  if (ids.size && hasPlan() && data.plan.dates[e.date]) data.plan.dates[e.date].items = data.plan.dates[e.date].items.filter(it => !ids.has(it.actId));
+  if (move && ids.size && hasPlan()) makeAndKeepPlan("fill");   // 🔀 only the ones taken off are placed again (from now, in free time)
+  closeOneDay();
+  writeData();
+  render();
+  toast(`📌 ${e.title} is on the calendar${move && ids.size ? `. ${ids.size} ${ids.size === 1 ? "activity was" : "activities were"} moved` : removed.length ? `. ${removed.length} removed for that day` : ""}.`, 3500);
+}
+function deleteOneDay(id) {
+  const e = (data.oneDay || []).find(x => x.id === id);
+  if (!e || !isParentDevice() || !confirm(`Delete “${e.title}”?`)) return;
+  data.oneDay = data.oneDay.filter(x => x.id !== id);
+  if (hasPlan() && e.skip && data.plan.dates[e.date]) makeAndKeepPlan("fill");   // (what it removed for that day can come back)
+  closeCard();
+  closeOneDay();
+  writeData();
+  render();
+  toast("🗑️ Deleted");
+}
+// On the calendar: a 📌 card at its time (no tick: never scored)
+function oneDayCardHtml(e, ds, opts) {
+  const n = blocks.push({ oneDay: e, day: ds }) - 1, faded = (opts.fade && opts.fade !== "all" && !e.who.includes(opts.fade)) || !!opts.subj;
+  return `<div class="k-block k-oneday ${faded ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0" title="${safe(`📌 ${e.title} · ${clock(toMin(e.from), true)}–${clock(toMin(e.to), true)}`)}">
+    <span class="who"><span class="t-full">📌 ${safe(e.title)}</span><span class="t-short">📌 ${safe(e.title)}</span></span>
+    <span class="k-sub"><span class="when">${clock(toMin(e.from))} - ${clock(toMin(e.to))}</span> <span class="what">${facesHtml(e.who.filter(exists))}</span></span></div>`;
+}
+function openOneDayCard(b) {
+  const e = b.oneDay;
+  const rows = [["📌 What", e.title], ["🙂 Who", e.who.filter(exists).map(whoText).join(", ")], ["📅 Day", dayLong(e.date)],
+                ["⏰ Time", `${clock(toMin(e.from), true)} – ${clock(toMin(e.to), true)}`], ["⭐ Points", "None: a one-day event isn't scored"]];
+  $("kCard").style.cssText = "--soft:#fef3c7;--ink:#6b4f05";
+  $("kCard").innerHTML = `
+    <div class="k-card-top"><div class="big">📌</div><div class="nm">${safe(e.title)}</div></div>
+    <div class="k-rows">${rows.map(([l, v]) => `<div><span>${safe(l)}</span><b>${safe(v)}</b></div>`).join("")}</div>
+    ${isParentDevice() ? `<div class="btnrow" style="justify-content:center;margin:10px 16px 0"><button data-onedayedit="${safe(e.id)}">✏️ Change</button>
+      <button class="danger-text" data-onedaydel="${safe(e.id)}">🗑️ Delete</button></div>` : ""}
+    <button class="k-ok" id="kOk">OK 👍</button>`;
+  $("kModal").hidden = false;
+  $("kOk").focus();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-newplan], [data-onedaynew], [data-onedayedit], [data-onedaydel]");
+  if (!b) return;
+  const ds = b.dataset;
+  if ("newplan" in ds) return newPlanNow();
+  if ("onedaynew" in ds) return openOneDay(null);
+  if (ds.onedayedit) return openOneDay(ds.onedayedit);
+  if (ds.onedaydel) return deleteOneDay(ds.onedaydel);
+});
+$("odModal").addEventListener("click", e => {
+  if (e.target === $("odModal")) return closeOneDay();
+  const b = e.target.closest("button");
+  if (!b || !od) return;
+  const ds = b.dataset;
+  if ("odsave" in ds) return saveOneDay();
+  if ("odcancel" in ds) return closeOneDay();
+  if ("oddel" in ds) return deleteOneDay(od.id);
+  if ("odback" in ds) { delete od.clashes; return drawOneDay(); }
+  if ("odmove" in ds) return finishOneDay([], true);
+  if ("odremove" in ds) return finishOneDay(od.clashes.map(c => c.actId), false);
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("odModal").hidden) closeOneDay(); });
 // One date of the saved plan, ready to draw: { date, window, items, routines }. Each block gets its current name, owner and people.
 // (Activities deleted since the plan was made are left out. No plan, or a date it doesn't have: no items, but the routines.)
 function planDay(ds) {
@@ -8682,14 +9373,15 @@ function blockInfo(b) {
   // for each person, so each person's own lessons stand out in their color.
   if (b.fixed || b.users.length > 1) {
     const what = `${te} ${b.fixed || !subject ? b.name : subject.name}`;
-    return { title: what, emoji: b.fixed ? (isSchoolName(b.name) ? "🏫" : "📌") : emojisOf(b.users),
+    return { title: what, titleHtml: safe(what), emoji: b.fixed ? (isSchoolName(b.name) ? "🏫" : "📌") : emojisOf(b.users),
              soft: GREY.soft, ink: GREY.ink, line: GREY.color, dots: b.users,
              what: namesOf(b.users) + withDad };
   }
   // One person's lesson: light background of their color, darker left border, dark text
+  // (titleHtml: the same with a parent's 🖼️ photo instead of their emoji)
   const c = colorsOf(userById(b.users[0]));
-  return { title: `${emojisOf(b.users)} ${namesOf(b.users)}`, emoji: emojisOf(b.users), soft: c.soft, ink: c.ink, line: c.color,
-           what: `${te} ${subject ? subject.name : b.name}` + withDad };
+  return { title: `${emojisOf(b.users)} ${namesOf(b.users)}`, titleHtml: `${facesHtml(b.users)} ${safe(namesOf(b.users))}`, emoji: emojisOf(b.users),
+           soft: c.soft, ink: c.ink, line: c.color, what: `${te} ${subject ? subject.name : b.name}` + withDad };
 }
 // The colors of a block, the same on screen and on paper: one person's lesson → their color; fixed or shared → grey
 function blockColors(it) {
@@ -8731,11 +9423,11 @@ function weekHtml(days, opts) {
     // Routines: a thin grey strip with only the emoji and name (no time, no checkbox). Tap it for the details.
     // On a shared view, small emojis show who it's for (none when it's everyone).
     routineStrips(day.routines, opts.only).forEach(s => {
-      const faded = opts.fade && opts.fade !== "all" && !s.users.includes(opts.fade);
+      const faded = (opts.fade && opts.fade !== "all" && !s.users.includes(opts.fade)) || !!opts.subj;   // (📚 a subject picked: faded)
       const n = blocks.push({ ...s, day: ds, soft: "#f1f2f6", ink: "#6b7280" }) - 1;
       parts.push({ start: s.start, end: s.end, strip: true, padId: s.pad ? s.id : null, html: `<div class="k-routine ${s.pad ? "pad" : ""} ${faded ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0"
           title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${safe(s.emoji)} ${safe(s.name)}</span>${
-          !opts.only && !isEveryone(s.users) ? `<span class="r-who">${safe(emojisOf(s.users))}</span>` : ""}</div>` });
+          !opts.only && !isEveryone(s.users) ? `<span class="r-who">${facesHtml(s.users)}</span>` : ""}</div>` });
     });
     // 📌 School dates with a time: a strip at that time (all-day ones are under the day name). Never planned around.
     eventsOn(ds, opts.only || null).filter(e => e.time).forEach(e =>
@@ -8743,7 +9435,10 @@ function weekHtml(days, opts) {
     // 📅 A parent's own activity with a time: a card in their color with their name (✅ only that parent ticks it)
     const pacts = pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && a.from);
     pacts.forEach(a => parts.push({ start: toMin(a.from), end: toMin(a.to), html: pactCardHtml(a, ds, opts) }));
-    if (!merged.length && !pacts.length) parts.push({ free: true, start: -1, html: `<div class="k-free">${past ? "Nothing planned" : "Free day! 🎉"}</div>` });
+    // 📌 One-day events (only that person's on their own calendar; never a tick)
+    const odays = oneDayOn(ds).filter(e => !opts.only || e.who.includes(opts.only));
+    odays.forEach(e => parts.push({ start: toMin(e.from), end: toMin(e.to), html: oneDayCardHtml(e, ds, opts) }));
+    if (!merged.length && !pacts.length && !odays.length) parts.push({ free: true, start: -1, html: `<div class="k-free">${past ? "Nothing planned" : "Free day! 🎉"}</div>` });
     // 🕌 Prayer times (only for people who want them): inside the activity happening then, otherwise a thin line of its own
     const prays = prayersOn(ds), inPrayer = new Set();
     const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
@@ -8753,7 +9448,8 @@ function weekHtml(days, opts) {
       const info = blockInfo(b);
       // 🤝 On the helping parent's own calendar: the kid's activity shows faded, as "helping"
       const helping = !!opts.only && b.helper === opts.only && !b.users.includes(opts.only);
-      const faded = (opts.fade && opts.fade !== "all" && !b.people.includes(opts.fade)) || helping;
+      // (📚 the subject filter: only that subject's sessions stand out)
+      const faded = (opts.fade && opts.fade !== "all" && !b.people.includes(opts.fade)) || helping || (!!opts.subj && !subjMatch(b, ds, opts, sessOf));
       const kidActs = b.acts.filter(a => !isParentId(a.user));   // (only the kids' parts are ticked)
       const done = kidActs.length > 0 && kidActs.every(a => isDone(ds, a.actId, a.user));
       const n = blocks.push({ ...b, ...info, day: ds }) - 1;
@@ -8761,15 +9457,16 @@ function weekHtml(days, opts) {
       // View only (opts.readOnly): no checkboxes, just "Done!" when it's finished.
       // (👨‍👩‍👧 a parent's own activity: no tick for points, parents aren't scored)
       const checks = opts.readOnly ? "" : b.acts.filter(a => !isParentId(a.user)).map(a => {
-        const on = isDone(ds, a.actId, a.user), owner = userById(a.user);
-        const allowed = (isParentId(me) || a.user === me) && ds === today;
+        const on = isDone(ds, a.actId, a.user), owner = userById(a.user), parentPast = past && parentPastTick(ds, a.user);
+        const allowed = ((isParentId(me) || a.user === me) && ds === today) || parentPast;
         // ⏰ Everyone: locked (grey 🔒) until the start time; a tap says when (see tickTimeLock). Future days: locked too.
         const timeLock = !on && (ds > today || tickTimeLock(ds, b.start) != null);
         if (timeLock && (isParentId(me) || a.user === me)) return `<button class="k-check time-lock" data-check="${ds}|${safe(a.actId)}|${safe(a.user)}" style="--c:${colorsOf(owner).color}"
                   aria-label="${safe(`Locked until ${ds > today ? dayName(ds) : clock(b.start, true)}: ${b.name}`)}" title="${safe(ds > today ? `On ${dayName(ds)}` : `At ${clock(b.start, true)}`)}">🔒</button>`;
         const label = `${on ? "Done! Tap to untick" : ds > today ? "Not yet" : "Tap when done"}: ${owner.name}, ${b.name}`;
-        // 🔒 A kid's device: someone else's tick is only a picture (look-only, no button). 📅 Past days: look-only for everyone.
-        if (kidLockedOut(a.user) || b.gone || past) return `<span class="k-check ${on ? "on" : ""}" role="img" style="--c:${colorsOf(owner).color}"
+        // 🔒 A kid's device: someone else's tick is only a picture (look-only, no button). 📅 Past days: look-only
+        // (except 👨‍👩‍👧 a parent's device on an earlier day of this week: see parentPastTick)
+        if (kidLockedOut(a.user) || b.gone || (past && !parentPast)) return `<span class="k-check ${on ? "on" : ""}" role="img" style="--c:${colorsOf(owner).color}"
                   aria-label="${safe(`${on ? "Done" : "Not done"}: ${owner.name}, ${b.name}`)}">${on ? "✓" : b.acts.length > 1 ? `<span class="e">${safe(owner.emoji)}</span>` : ""}</span>`;
         return `<button class="k-check ${on ? "on" : ""}" data-check="${ds}|${safe(a.actId)}|${safe(a.user)}" ${allowed ? "" : "disabled"}
                   style="--c:${colorsOf(owner).color}" aria-pressed="${on}" aria-label="${safe(label)}" title="${safe(label)}">
@@ -8791,22 +9488,29 @@ function weekHtml(days, opts) {
       // Narrow card (side by side): a short title (emoji + name) instead of the full one.
       // Fixed or shared: just the colored dots, not everyone's names (tap the card for the full details).
       const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1];
-      const shortTitle = b.fixed || b.users.length > 1 ? info.title : `${emojisOf(b.users)} ${te} ${subject ? subject.name : b.name}`;
+      // (as HTML: a parent's 🖼️ photo instead of their emoji)
+      const shortHtml = b.fixed || b.users.length > 1 ? info.titleHtml : `${facesHtml(b.users)} ${safe(`${te} ${subject ? subject.name : b.name}`)}`;
       // Line 2 = time, then the dots (shared) or the type + name, then 🤝 with the helping parent ("🤝 helping" on their own calendar)
-      const whatText = [info.dots ? "" : `${te} ${subject ? subject.name : b.name}`, helping ? "🤝 helping" : b.helper ? withText(b) : ""].filter(Boolean).join(" · ");
+      const whatHtml = [info.dots ? "" : safe(`${te} ${subject ? subject.name : b.name}`), helping ? "🤝 helping" : b.helper ? withHtml(b) : ""].filter(Boolean).join(" · ");
       // 📚 A study session: its result ("✅ 85%", "⏳ 👩 Mum rates it"), or 📖 "📚 Start session" (today only, not while moving cards)
       const sess = b.type === "study" && !opts.drag ? b.acts.map(a => sessOf(a.user).find(x => x.date === ds && x.actId === a.actId)).filter(Boolean) : [];
       const sessHtml = sess.map(x => { const tag = sessionTagText(x), who = sess.length > 1 ? userById(x.person).emoji + " " : "";
         const can = !opts.readOnly && x.mode === "sole" && ds === today && (x.person === me || isParentId(me)) && !kidLockedOut(x.person);
-        return tag ? `<span class="k-sesstag">${safe(who + tag)}</span>` : can ? `<button class="k-sess" data-sessstart="${safe(x.key)}">${safe(who)}📚 Start session</button>` : ""; }).join(" ");
+        // 📚 "Which subject today?" (several subjects allowed, none picked: today or a day ahead, before the session ends)
+        if (!opts.readOnly && x.needsPick && !x.ended && ds >= today && (x.person === me || isParentId(me)) && !kidLockedOut(x.person) && !sessionWsIds(x.key).length)
+          return `${safe(who)}${subjectPickHtml(x, false)}`;
+        const picked = x.options.length > 1 && !x.needsPick ? `<span class="k-sesstag">${safe(who)}📚 ${safe(x.subject)}</span> ` : "";
+        return picked + (tag ? `<span class="k-sesstag">${safe(who + tag)}</span>` : can ? `<button class="k-sess" data-sessstart="${safe(x.key)}">${safe(who)}📚 Start session</button>` : ""); }).join(" ");
       parts.push({ start: b.start, end: b.end, padIds: padIdsOf(b), html: `<div class="k-block ${b.fixed ? "fixed" : ""} ${checks && b.acts.length > 1 ? "many" : ""} ${drag ? "draggable editable" : ""} ${opts.drag && (b.fixed || past) ? "locked" : ""} ${faded ? "faded" : ""} ${done ? "done" : ""}" data-kblock="${n}" role="button" tabindex="0" ${drag}
                  style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}">
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>
-        <span class="who">${sameBtn}<span class="t-full">${safe(info.title)}</span><span class="t-short">${safe(shortTitle)}</span></span>
-        <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatText
-          ? ` <span class="what">${safe(whatText)}</span>` : ""}</span>${sessHtml ? `<span class="k-sessrow">${sessHtml}</span>` : ""}${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
+        <span class="who">${sameBtn}<span class="t-full">${info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
+        <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatHtml
+          ? ` <span class="what">${whatHtml}</span>` : ""}</span>${sessHtml ? `<span class="k-sessrow">${sessHtml}</span>` : ""}${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
     });
-    dayParts.push(parts.sort((a, b) => a.start - b.start));
+    // 🕗 Only that day's time (Day starts at … Day ends at): anything wholly before or after it isn't drawn
+    const [ws, we] = day.window || [0, 24 * 60];
+    dayParts.push(parts.filter(p => p.free || (p.end > ws && p.start < we)).sort((a, b) => a.start - b.start));
   });
   // ✈️ Travel: one bar across its days (under the day names)
   const bars = travelBars(opts.only || null, dates).map(x => ({ ...x, html: travelBarHtml(x, opts) }));
@@ -8953,12 +9657,13 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek, bars = [], dates = 
 function openCard(b) {
   if (b.routine) return openRoutineCard(b);
   if (b.pact) return openPactCard(b);
+  if (b.oneDay) return openOneDayCard(b);
   const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => x.actId === a.id));
   const rows = [
     b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
-    ["🙂 Who", b.users.map(whoText).join(", ")],
+    ["🙂 Who", b.users.map(whoText).join(", "), b.users.map(whoHtml).join(", ")],   // (3rd = as HTML, with a parent's 🖼️ photo)
     ["⭐ Type", (([, e, w]) => `${e} ${w}`)(actTypeInfo(b.type || "activity"))],
-    helperOf(b) ? ["🤝 Helper", `${helperOf(b).emoji} ${helperOf(b).name}`] : null,
+    helperOf(b) ? ["🤝 Helper", `${helperOf(b).emoji} ${helperOf(b).name}`, whoHtml(helperOf(b).id)] : null,
     ["📅 Day", dayLong(b.day)],
     // (👨‍👩‍👧 only the kids' parts: parents aren't ticked)
     b.acts.some(a => !isParentId(a.user)) ? ["✅ Done", b.acts.filter(a => !isParentId(a.user)).map(a => (b.acts.length > 1 ? userById(a.user).emoji + " " : "") + (isDone(b.day, a.actId, a.user) ? "Yes! 🎉" : "Not yet")).join("  ")] : null,
@@ -8968,8 +9673,8 @@ function openCard(b) {
   ].filter(Boolean);
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
-    <div class="k-card-top"><div class="big">${safe(b.fixed ? b.emoji : emojisOf(b.users))}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
-    <div class="k-rows">${rows.map(([label, value]) => `<div><span>${safe(label)}</span><b>${safe(value)}</b></div>`).join("")}</div>
+    <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : facesHtml(b.users)}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
+    <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}</b></div>`).join("")}</div>
     <button class="k-ok" id="kOk">OK 👍</button>`;
   $("kModal").hidden = false;
   $("kOk").focus();
@@ -9233,10 +9938,11 @@ function drawMine() {
   // 🧒 A kid's device: only "🙋 Me" and "👨‍👩‍👧 Everyone" (look-only for other people's items), never one other person's calendar
   if (!isParentDevice() && calWho !== "all") calWho = me;
   const all = calWho === "all", who = all ? null : calWho, u = who ? userById(who) : null, mine = who === me, parent = isParentDevice();
-  const chip = (id, emoji, label, c) => `<button class="chip ${calWho === id ? "on" : ""}" data-calwho="${safe(id)}" style="--soft:${c.soft};--ink:${c.ink}"
-    ${calWho === id ? `aria-current="true"` : ""}><span class="e">${safe(emoji)}</span>${safe(label)}</button>`;
-  $("minePeople").innerHTML = chip(me, parent ? userById(me).emoji : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
-    + (parent ? data.users.filter(x => x.id !== me).map(x => chip(x.id, x.emoji, x.name, colorsOf(x))).join("") : "");
+  // (face = HTML: a parent's 🖼️ photo or their emoji)
+  const chip = (id, face, label, c) => `<button class="chip ${calWho === id ? "on" : ""}" data-calwho="${safe(id)}" style="--soft:${c.soft};--ink:${c.ink}"
+    ${calWho === id ? `aria-current="true"` : ""}><span class="e">${face}</span>${safe(label)}</button>`;
+  $("minePeople").innerHTML = chip(me, parent ? faceHtml(userById(me)) : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
+    + (parent ? data.users.filter(x => x.id !== me).map(x => chip(x.id, faceHtml(x), x.name, colorsOf(x))).join("") : "");
   $("mineTitle").textContent = all ? "📅 Everyone's week" : mine ? `${u.emoji} My week` : `${u.emoji} ${u.name}'s week`;
   $("mineSub").textContent = all ? "Each colour is one person. Tap a block to see more."
     : !mine && !parent ? `Just looking 👀 Only ${u.name}${isParentId(who) ? "" : ` or ${dadName()}`} can tick these.`
@@ -9249,7 +9955,9 @@ function drawMine() {
   $("mineActions").innerHTML = `<button class="pill" data-go="add">✏️ Add / edit activities</button>
     ${isParentId(me) && real && !editMode ? `<button class="pill edit-cal-btn" data-editcal>✏️ Edit calendar</button>` : ""}
     ${isParentId(me) && (!real || planIsOld()) ? `<button class="pill primary" data-plan>✨ Plan my week</button>` : ""}
-    ${parent ? `<button class="pill" data-pactnew>➕ My activity</button>` : ""}`;
+    ${parent ? `<button class="pill" data-pactnew>➕ My activity</button>` : ""}
+    ${parent && real ? `<button class="pill" data-newplan>🔄 Make a new plan</button>` : ""}
+    ${parent ? `<button class="pill" data-onedaynew>📌 One-day event</button>` : ""}`;
   // ⚠ The plan's notes (parents, on Everyone) / "not in the plan yet" (kids)
   let top = "";
   if (isParentId(me) && all && real) {
@@ -9266,12 +9974,61 @@ function drawMine() {
   $("mineBrief").hidden = !who;
   if (who) $("mineBrief").style.cssText = `--c:${colorsOf(u).color}`;
   // Ticks: always drawn; each one only works for its owner and the parents. In edit mode (Bro2a): moving, no ticking.
+  // 📚 The subject filter's kid: the kid whose calendar it is; a parent on Everyone / a parent's calendar: the kid picked under it; a kid: themselves
+  const sk = subjFilterKid(who), subj = sk && calSubj !== "all" ? { kid: sk, name: calSubj } : null;
   keepCalScroll("mineWeek");
-  $("mineWeek").innerHTML = editBarHtml() + weekHtml(days, { only: who, readOnly: editing, drag: editing });
+  $("mineWeek").innerHTML = editBarHtml() + weekHtml(days, { only: who, readOnly: editing, drag: editing, subj });
   putCalScroll("mineWeek");   // (📅 opens with today in view; a tick or a tap keeps it where it was)
+  $("mineSubj").innerHTML = sk ? subjFilterHtml(sk, who) : "";
   $("mineHabits").innerHTML = who && !kidLockedOut(who) ? habitsCardHtml(who) : "";   // ⭐ good habits (a kid; 🔒 a kid's device: only their own; parents have none)
 }
 
+// ---------- 📚 SUBJECT FILTER (bottom of the calendar): "All" + each subject of a kid; a subject → only its study sessions this
+// week stand out (the rest is faded) and a summary card. Parents switch between kids; a kid sees only themselves. ----------
+let calSubj = "all", sfKid = null;   // the subject (its name) or "all" · the kid a parent picked here (when the calendar isn't one kid's)
+function subjFilterKid(who) {
+  if (!isParentDevice()) return exists(me) && !isParentId(me) ? me : null;
+  if (who && !isParentId(who)) return who;
+  if (!kidsList().some(k => k.id === sfKid)) sfKid = kidsList().length ? kidsList()[0].id : null;
+  return sfKid;
+}
+// Does this block count for the subject? (its session's subject: the one picked, the only one, or one it may still be)
+function subjMatch(b, ds, opts, sessOf) {
+  const { kid, name } = opts.subj;
+  return b.type === "study" && b.acts.some(a => { if (a.user !== kid) return false;
+    const x = sessOf(kid).find(y => y.date === ds && y.actId === a.actId);
+    return !!x && (sameSubject(x.subject, name) || (x.needsPick && x.options.some(o => sameSubject(o.name, name)))); });
+}
+// "📐 Math this week: 4 sessions (Mon, Tue, Thu, Sat) · 3 h · done 2 of 4 · worksheets done 3 of 5 · topics covered 6 of 14"
+function subjSummaryHtml(kid, f) {
+  const sess = studySessions(kid).filter(x => sameSubject(x.subject, f.name)), mins = sess.reduce((n, x) => n + x.minutes, 0);
+  const days = [...new Set(sess.map(x => SHORT[weekdayOf(x.date)]))];
+  const from = data.points.week, to = weekEnd(), ws = wsOf(kid, f.name).filter(w => w.date >= from && w.date < to);
+  const done = ws.filter(w => w.check || w.answers.length).length, rows = topicRows(kid, schoolOf(kid), f);
+  const covered = rows.filter(t => t.st === "practising" || t.st === "mastered").length;   // (🟡 / 🟢)
+  return `<div class="card subj-sum" style="--c:${subjectColors(f).color}"><b>${safe(f.emoji)} ${safe(f.name)} this week:</b>
+    ${sess.length} ${sess.length === 1 ? "session" : "sessions"}${days.length ? ` (${days.join(", ")})` : ""} · ${hmText(mins)} · done ${sess.filter(x => x.done).length} of ${sess.length}
+    · worksheets done ${done} of ${ws.length} · topics covered ${covered} of ${rows.length}</div>`;
+}
+function subjFilterHtml(kid, who) {
+  const s = schoolOf(kid), subs = subjectList(s);
+  if (!subs.length) return "";
+  if (calSubj !== "all" && !subs.some(x => sameSubject(x.name, calSubj))) calSubj = "all";
+  const kids = isParentDevice() && (!who || isParentId(who)) && kidsList().length > 1
+    ? `<div class="chips subj-kids">${kidsList().map(k => `<button class="chip ${k.id === kid ? "on" : ""}" data-sfkid="${safe(k.id)}" aria-pressed="${k.id === kid}"><span class="e">${safe(k.emoji)}</span>${safe(k.name)}</button>`).join("")}</div>` : "";
+  const chip = (v, label) => `<button class="chip ${lowerT(calSubj) === lowerT(v) ? "on" : ""}" data-calsubj="${safe(v)}" aria-pressed="${lowerT(calSubj) === lowerT(v)}">${label}</button>`;
+  const f = calSubj !== "all" && subs.find(x => sameSubject(x.name, calSubj));
+  return `<div class="card subj-filter"><h2>📚 Subjects${isParentDevice() ? ` · ${safe(userById(kid).name)}` : ""}</h2>${kids}
+    <div class="chips subj-chips">${chip("all", "All")}${subs.map(x => chip(x.name, `${safe(x.emoji)} ${safe(x.name)}`)).join("")}</div>
+    ${f ? subjSummaryHtml(kid, f) : ""}</div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-calsubj], [data-sfkid]");
+  if (!b) return;
+  if (b.dataset.sfkid) { sfKid = b.dataset.sfkid; calSubj = "all"; }
+  else calSubj = b.dataset.calsubj;
+  render();
+});
 // The week in short, e.g. "📅 This week: 12 activities · 7 done ✓ · 5 left" / "⏱️ 8h 30m of activities · ⭐ 35 points"
 // Only the person's own activities count (not lessons Dad only helps with), just like points.
 function briefHtml(who, days) {
@@ -9937,6 +10694,7 @@ function drawSchool() {
   $("schoolBody").querySelectorAll(".sc-starpick").forEach(showStars);
   if (focus && $(focus) && $("schoolBody").contains($(focus))) $(focus).focus();
   fillPhotos($("schoolBody"));
+  fillAnswerThumbs($("schoolBody"));   // 📸 the answer photos' thumbnails (before the check)
   showAiWait();
 }
 
@@ -10042,10 +10800,43 @@ function schoolHomeHtml(s, isDad) {
   const looseHtml = loose.length ? `<div class="card bd-card"><h2>📂 School files</h2><ul class="list">${loose.map(x => fileRowHtml(x, s, true)).join("")}</ul></div>` : "";
   // 📝 Every worksheet of the kid, all subjects, with its score (the kid's own; a parent: look-only)
   const allWs = `<div class="btnrow sc-allws"><button class="pill" data-scgo="allws">📝 All my worksheets</button></div>`;
-  return sess + up + allWs + (list.length ? `<div class="sc-tiles sc-tiles-big">${list.map(x => subjectTileHtml(s, x)).join("")}</div>${looseHtml}${edit}`
+  return sess + up + allWs + goalsLineHtml(schoolKid) + (list.length ? `<div class="sc-tiles sc-tiles-big">${list.map(x => subjectTileHtml(s, x)).join("")}</div>${looseHtml}${edit}`
     : edit ? `<div class="card"><p class="sc-empty">No subjects yet.</p>${edit}</div>` : `<div class="card"><p class="sc-empty">No subjects yet. ${look ? `Add them in ${safe(userById(schoolKid).name)}'s 👤 profile → ⚙️ Settings.` : "Add them in 👤 My profile → ⚙️ My settings."}</p>
       <div class="btnrow"><button class="pill" data-scprof="${safe(schoolKid)}">👤 Open the profile</button></div></div>`);
 }
+// ---------- 🎯 WORKSHEET GOALS: per subject, a parent sets "Worksheets per week" (0–7, 0 = no goal) in the kid's 🎒 School ----------
+// Progress (kid and parents): the worksheets of that subject this week (Monday … Sunday) with the answers uploaded or a check.
+const wsDoneThisWeek = (kid, name) => wsOf(kid, name).filter(w => w.date >= data.points.week && w.date < weekEnd() && (w.check || w.answers.length)).length;
+const goalText = (kid, f) => `${f.name}: ${wsDoneThisWeek(kid, f.name)} of ${f.goal} worksheets this week`;
+// The family's 🤖 limit a month (from the server's last answer on this device), or null = unlimited / not known
+const aiLimit = () => { const u = aiUsage(); return u && Number(u.limit) > 0 ? Number(u.limit) : null; };
+// All the kids' goals together, a month (about 4.3 weeks)
+const goalsPerMonth = () => Math.round(kidsList().reduce((n, k) => n + subjectList(schoolOf(k.id)).reduce((m, f) => m + (f.goal || 0), 0), 0) * 52 / 12);
+// On the subject page: the progress, and (a parent's device) the setting with the 🤖 note and, over the limit, a warning
+function goalCardHtml(kid, f) {
+  const parent = isParentDevice(), goal = f.goal || 0;
+  if (!goal && !parent) return "";
+  const done = goal ? wsDoneThisWeek(kid, f.name) : 0, limit = aiLimit(), month = goalsPerMonth();
+  const progress = goal ? `<p class="goal-line ${done >= goal ? "ok" : ""}">🎯 ${safe(goalText(kid, f))}${done >= goal ? " 🎉" : ""}</p>` : "";
+  const setting = parent ? `<div class="goal-set"><label class="small" for="wsGoal">🎯 Worksheets per week</label>
+      <select id="wsGoal" data-wsgoal="${safe(kid)}|${safe(f.id)}">${[0, 1, 2, 3, 4, 5, 6, 7].map(n => `<option value="${n}" ${n === goal ? "selected" : ""}>${n === 0 ? "0 (no goal)" : n}</option>`).join("")}</select>
+      <p class="hint">Each worksheet uses the AI. Your plan includes ${limit ? limit : "unlimited"} AI actions per month.</p>
+      ${limit && month > limit ? `<p class="goal-warn">⚠️ All the kids' worksheet goals together are about ${month} worksheets a month, more than your plan's ${limit} AI actions. Lower some goals.</p>` : ""}</div>` : "";
+  return `<div class="card bd-card goal-card"><h2>🎯 Worksheet goal</h2>${progress || (parent ? `<p class="hint">No goal yet for ${safe(f.name)}.</p>` : "")}${setting}</div>`;
+}
+// On the School home: every subject with a goal, in one line
+function goalsLineHtml(kid) {
+  const list = subjectList(schoolOf(kid)).filter(f => f.goal);
+  return list.length ? `<div class="card bd-card goal-card"><p class="goal-line">🎯 ${list.map(f => `${safe(f.emoji)} ${safe(goalText(kid, f))}`).join(" · ")}</p></div>` : "";
+}
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("[data-wsgoal]") || !isParentDevice()) return;
+  const [kid, sid] = e.target.dataset.wsgoal.split("|"), x = schoolFor(kid).subjects[sid], n = Number(e.target.value);
+  if (!x) return;
+  if (n >= 1 && n <= 7) x.goal = n; else delete x.goal;
+  keepNow();
+  toast(n ? `🎯 ${x.name}: ${n} ${n === 1 ? "worksheet" : "worksheets"} a week` : `🎯 ${x.name}: no goal`, 2500);
+});
 // ---------- 📝 ALL MY WORKSHEETS: every worksheet of the kid, all subjects, newest first, with its score ----------
 // (📚 curriculum, ⚡ instant, 📚 study session, 🔁 practice, 🚀 challenge … all of them. A tap opens it as usual: the answers follow the 🔒 rule.)
 // Kept for good: a checked worksheet and its result are never deleted by the app (only 🗑️ Reset study data does). A small copy of
@@ -10598,6 +11389,8 @@ function schoolSubjectHtml(s, isDad, u) {
       <button class="st-btn" data-stup="${safe(f.id)}"><span class="e">⬆️</span><b>Upload</b></button>
       ${now ? `<button class="st-btn go" data-sessstart="${safe(now.key)}" data-aiwait="session|${safe(now.key)}"><span class="e">📚</span><b>Start session</b></button>` : ""}
       <button class="st-btn ${stWs ? "on" : ""}" data-stws aria-expanded="${stWs}"><span class="e">✏️</span><b>My worksheets</b>${todo ? `<span class="sc-badge">${todo}</span>` : ""}</button></div>`;
+  html += translateToggleHtml(schoolKid, f.name);   // 🌐 Arabic translation of questions (for this kid's new worksheets; not Arabic / Islamic)
+  html += goalCardHtml(schoolKid, f);   // 🎯 "Math: 2 of 4 worksheets this week" (a parent: the setting too)
   html += sessionCardsHtml(schoolKid, f);
   if (stWs) html += all.length ? aiMount(() => aiListCard("✏️ My worksheets", h("ul", { class: "list" }, [...all].sort((a, b) => (a.check ? 1 : 0) - (b.check ? 1 : 0)).map(w => wsRowNode(s, w))), ""))
     : `<div class="card"><p class="sc-empty">No worksheets yet. Tick a topic, then ✏️ Make a worksheet.</p></div>`;
@@ -11388,9 +12181,9 @@ function travelBars(who, dates) {
   });
   return bars;
 }
-const pactFaded = (a, opts) => opts.fade && opts.fade !== "all" && opts.fade !== a.by;
+const pactFaded = (a, opts) => (opts.fade && opts.fade !== "all" && opts.fade !== a.by) || !!opts.subj;   // (📚 a subject picked: faded)
 const pactStyle = a => { const c = colorsOf(userById(a.by)); return `--soft:${c.soft};--ink:${c.ink};--c:${c.color};--line-c:${c.color}`; };
-const pactTag = a => { const u = userById(a.by); return `<span class="k-tag">${safe(u.emoji)} ${safe(u.name)}</span>`; };
+const pactTag = a => `<span class="k-tag">${whoHtml(a.by)}</span>`;   // (🖼️ the parent's photo, or emoji)
 // ✅ Its "done" tick (+10, like an activity): only that parent ticks it. Others see a ✓ once it's done (just looking).
 // (d = the date; 📅 past days: look-only. 👨‍👩‍👧 Parents aren't scored any more, so their own activities have no tick at all.)
 function pactCheckHtml(a, d, opts) {
@@ -12125,7 +12918,11 @@ function cleanWorksheet(d) {
              points: aiInt(q.points, 0, 100, 1), answer: aiTxt(q.answer, 1000),
              // 🧠 its topic, skill and difficulty 1–10 (newer worksheets)
              ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
-             ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}), ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}) };
+             ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}), ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}),
+             ...(aiTxt(q.question_ar, 1000) ? { question_ar: aiTxt(q.question_ar, 1000) } : {}),   // (🌐 its Arabic translation, when asked for)
+             // (🔗 matching: column 1, numbered, and column 2, lettered: see matchNode)
+             ...(aiArr(q.left, 8).map(x => aiTxt(x, 200)).filter(Boolean).length ? { left: aiArr(q.left, 8).map(x => aiTxt(x, 200)).filter(Boolean) } : {}),
+             ...(aiArr(q.right, 9).map(x => aiTxt(x, 200)).filter(Boolean).length ? { right: aiArr(q.right, 9).map(x => aiTxt(x, 200)).filter(Boolean) } : {}) };
   }).filter(q => q.prompt);
   if (!questions.length) return null;
   const check = cleanCheck(d.check, questions.reduce((n, q) => n + q.points, 0));
@@ -12143,7 +12940,8 @@ function cleanWorksheet(d) {
                  from: aiInt(x.from_question != null ? x.from_question : x.from, 1, 99, 1), to: aiInt(x.to_question != null ? x.to_question : x.to, 1, 99, 99) })).filter(x => x.title || x.topic) } : {}),
            ...(["instant", "igcse"].includes(d.src) ? { src: d.src } : {}),
            ...(aiTxt(d.detected_topic, 80) ? { detected_topic: aiTxt(d.detected_topic, 80) } : {}), ...(aiTxt(d.detected_subject, 30) ? { detected_subject: aiTxt(d.detected_subject, 30) } : {}),
-           ...(aiTxt(d.swap, 30) ? { swap: aiTxt(d.swap, 30) } : {}), ...(d.done === true ? { done: true } : {}) };
+           ...(aiTxt(d.swap, 30) ? { swap: aiTxt(d.swap, 30) } : {}), ...(d.done === true ? { done: true } : {}),
+           ...(d.lang === "ar" ? { lang: "ar" } : {}) };   // (🇦🇪 written in Arabic: shown right-to-left)
 }
 // The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote?,
 //              strong_points?, weak_points?: ["Adding fractions", …], coach_tip?: for the parents }   (older checks have none of the last 3)
@@ -12155,6 +12953,9 @@ function cleanCheck(c, fallbackMax) {
   const out = { score: aiNum(c.score, 0, max, 0), max_score: max, overall_note: aiTxt(c.overall_note, 800),
                 questions: aiObjs(c.questions, 40).map(q => ({ number: aiInt(q.number, 0, 99, 0), correct: q.correct === true,
                                                                points: aiNum(q.points, 0, 100, 0), note: aiTxt(q.note, 400),
+                                                               // (newer checks: what the child wrote, and why the right answer is right)
+                                                               ...(aiTxt(q.your_answer, 400) ? { your_answer: aiTxt(q.your_answer, 400) } : {}),
+                                                               ...(aiTxt(q.explanation, 600) ? { explanation: aiTxt(q.explanation, 600) } : {}),
                                                                ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
                                                                ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}),
                                                                ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}) })),
@@ -12567,6 +13368,33 @@ document.addEventListener("click", e => {
   const [kid, fid, skill] = b.dataset.learnpr.split("|");
   learnPractise(kid, fid, decodeURIComponent(skill || ""));
 });
+// ---------- 🇦🇪 ARABIC WORKSHEETS · 🌐 ARABIC TRANSLATION OF QUESTIONS ----------
+// An Arabic / Islamic subject (Islamic studies, Quran, Tarbiya, دين, عربي …) → lang "ar": the whole worksheet in Arabic, right-to-left.
+// Any other subject → translate: true when "🌐 Arabic translation of questions" is on for that kid (remembered on this device):
+// each question then has question_ar, shown small and grey under it, right-to-left.
+const AR_SUBJECT = /arab|islam|quran|qur'?an|tarbiya|عرب|إسلام|اسلام|دين|قرآن|تربية/i;
+const isArabicSubject = name => AR_SUBJECT.test(String(name || ""));
+const isArabicWs = w => w.lang === "ar" || isArabicSubject(w.subject);
+const TR_KEY = SAVE_KEY + ".translate.";
+const translateOn = kid => { try { return localStorage.getItem(TR_KEY + kid) === "1"; } catch (e) { return false; } };
+const setTranslate = (kid, on) => { try { localStorage.setItem(TR_KEY + kid, on ? "1" : "0"); } catch (e) {} };
+// What goes to the worksheet server (and lang is kept on the worksheet)
+const langBody = (kid, subject) => isArabicSubject(subject) ? { lang: "ar" } : translateOn(kid) ? { translate: true } : {};
+// The toggle (not for an Arabic / Islamic subject: those are all in Arabic)
+const translateToggleHtml = (kid, subject) => isArabicSubject(subject) ? "" :
+  `<label class="checkline tr-toggle"><input type="checkbox" data-translate="${safe(kid)}" ${translateOn(kid) ? "checked" : ""}> 🌐 Arabic translation of questions</label>`;
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("[data-translate]")) return;
+  setTranslate(e.target.dataset.translate, e.target.checked);
+  toast(e.target.checked ? "🌐 New worksheets will have an Arabic translation of each question." : "🌐 No Arabic translation on new worksheets.", 3000);
+});
+// "Wed 29 Oct 2026" (the day the worksheet was made)
+const wsDateText = s => { if (!isYmd(s)) return ""; const d = fromYmd(s); return `${SHORT[weekdayOf(s)]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+// The header on every worksheet (screen, PDF and answer key PDF): Name · Subject · Date
+const wsHeaderNode = (w, first) => h("div", { class: "ws-namerow ws-head", dir: "ltr" },
+  first ? h("span", null, first + " ·") : null,
+  h("span", null, "Name: ", h("b", null, kidNameOf(w.kid)), " ·"), h("span", null, "Subject: ", h("b", null, w.subject || "–"), " ·"),
+  h("span", null, "Date: ", h("b", null, wsDateText(w.date))));
 // A new worksheet from the AI, saved (and opened when open = true). extra = { part, work?, title? }. → its id, or null.
 async function newWorksheet(kid, subject, topics, count, mode, key, extra, open = true) {
   // (📚 a study session's worksheet: extra.minutes = the session's minutes → the AI fills them; sections = its parts in order;
@@ -12577,10 +13405,11 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
   const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: MODE_NOTES[mode],
                                         mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
                                         ...(sections && sections.length ? { sections } : {}), ...(instant ? { instant: true, files } : {}),
-                                        ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus) }, key);   // (🧠 level, skills, focus)
+                                        ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus),   // (🧠 level, skills, focus)
+                                        ...langBody(kid, subject) }, key);   // (🇦🇪 Arabic / 🌐 translation)
   if (!r) return null;
   const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
-  const ws = cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me,
+  const ws = cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
                               at: new Date().toISOString(), answers: [], purpose: mode, ...(instant && found ? { part: found } : {}), ...keep });
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
   delete ws.check;
@@ -12784,6 +13613,7 @@ async function startSession(key) {
   const x = sessionByKey(key);
   if (!x) return toast("This session isn't in this week's plan any more.", 3000);
   if (kidLockedOut(x.person)) return lockedToast(x.person);
+  if (x.needsPick) return askSessionSubject(x);   // 📚 several subjects and none picked yet: "Which subject today?" first
   const s = schoolOf(x.person), sid = x.subjectId && s.subjects[x.subjectId] ? x.subjectId : folderIdFor(s, x.subject);
   if (!sid) return toast(`📘 Pick a subject for “${x.act.name}” in ✏️ Add activities first.`, 4000);
   const f = { id: sid, ...s.subjects[sid] };
@@ -13263,6 +14093,44 @@ function weekNumberOf(label) {
   t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
   return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
 }
+// 📚 Topics into a subject's 📚 My topics (⚪ new), with the same "no doubles" check as everywhere (sameTopicTitle). → how many were new
+function addSchoolTopics(s, sid, titles, added) {
+  if (!s.curr) s.curr = {};
+  const have = topicsOf(s, sid);
+  let n = 0;
+  titles.forEach(t => {
+    const title = String(t || "").trim().slice(0, 80);
+    if (!title || have.some(x => sameTopicTitle(x.title, title))) return;
+    const id = topicIdOf(sid, title);
+    s.curr[id] = { sub: sid, title, note: "", added, files: [], by: me };
+    have.unshift({ id, ...s.curr[id] });
+    n++;
+  });
+  return n;
+}
+// 📰 THE WEEKLY NEWSLETTER REMINDER (a parent's home): on Friday, Saturday and Sunday (Dubai time), for each kid whose newsletter for the
+// coming week (Monday … Sunday) isn't in yet. "📰 Upload" opens the newsletter box for that kid; "Remind me later" hides it until the
+// app is opened again (this device, that day). It stops once that kid's newsletter for that week is in (their 📰 This week).
+let nlLater = { date: "", kids: [] };
+function newsletterDue() {
+  if (!isParentDevice() || !feat("newsletter")) return [];
+  const d = dubaiNow().date, wd = weekdayOf(d);
+  if (wd < 4) return [];
+  const monday = addDaysYmd(d, 7 - wd);   // (the coming week)
+  if (nlLater.date !== d) nlLater = { date: d, kids: [] };
+  return kidsList().filter(k => { const w = schoolOf(k.id).week; return !(w && w.start === monday) && !nlLater.kids.includes(k.id); });
+}
+function newsletterNudgeHtml() {
+  return newsletterDue().map(k => `<div class="card nl-nudge" style="--c:${colorsOf(k).color}"><p>📰 Upload this week's school newsletter for ${safe(k.name)} so ${safe(k.name)}'s study matches what school will cover.</p>
+    <div class="btnrow"><button class="primary" data-nlnudge="${safe(k.id)}">📰 Upload the newsletter</button><button data-nllater="${safe(k.id)}">Remind me later</button></div></div>`).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-nlnudge], [data-nllater]");
+  if (!b) return;
+  if (b.dataset.nllater) { nlLater.kids.push(b.dataset.nllater); return render(); }
+  schoolKid = b.dataset.nlnudge;
+  openNewsletter();
+});
 // ✅ Add to the plan: the ticked 📌 school dates (no doubles), 📰 This week + 🔔 reminders, then a 📰 week review per subject
 async function addNewsletter() {
   const box = nl;
@@ -13275,17 +14143,19 @@ async function addNewsletter() {
     s.events[newId()] = { date: e.date, time: e.time, title: e.title, note: e.note, by: me };
     added++;
   });
-  // This week = the week of today (on Saturday / Sunday: the week that starts on Monday)
+  // This week = the week of today (on Friday / Saturday / Sunday: the coming week, that starts on Monday)
   const now = new Date();
-  if ((now.getDay() + 6) % 7 >= 5) now.setDate(now.getDate() + 7);
+  if ((now.getDay() + 6) % 7 >= 4) now.setDate(now.getDate() + 7);
   const start = mondayOf(now), end = new Date(fromYmd(start)), n = weekNumberOf(res.week_label);
   end.setDate(end.getDate() + 6);
-  const subjects = res.subjects.map(x => ({ subject: s.subjects[ensureFolder(s, x.subject)].name, topics: x.topics }));
-  s.week = { label: res.week_label, n, start, end: ymd(end), subjects, reminders: res.reminders };
+  const subjects = res.subjects.map(x => ({ sid: ensureFolder(s, x.subject), topics: x.topics })).map(x => ({ ...x, subject: s.subjects[x.sid].name }));
+  // 📚 Its topics go into each subject's 📚 My topics (⚪ new, no doubles), so next week's worksheets follow them
+  const newTopics = subjects.reduce((sum, x) => sum + addSchoolTopics(s, x.sid, x.topics, start), 0);
+  s.week = { label: res.week_label, n, start, end: ymd(end), subjects: subjects.map(({ sid, ...x }) => x), reminders: res.reminders };
   writeData();
   closeNewsletter();
   if (screen === "school") { schoolKid = kid; goSchool("home"); }
-  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${subjects.length ? ". Making the week reviews…" : ""}`, 4000);
+  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length ? ". Making the week reviews…" : ""}`, 4000);
   // 📰 Week {n} review: one for each subject, one after the other (checked like any worksheet)
   let made = 0;
   for (const x of subjects) {
@@ -13503,6 +14373,7 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
     h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
+  $("wsoTr").innerHTML = translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
   $("wsoMake").focus();
 }
@@ -13524,9 +14395,10 @@ async function makeWorksheet() {
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
                                         notes: MODE_NOTES[mode], mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
-                                        ...learnBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus)
+                                        ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
   const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
+                              ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
                               answers: [], ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) });
   if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
   delete ws.check;
@@ -13553,22 +14425,53 @@ document.addEventListener("keydown", e => {
 const ptsText = n => `${num(n)} ${n === 1 ? "pt" : "pts"}`;
 const wsTotal = w => w.questions.reduce((n, q) => n + q.points, 0);
 // The sheet itself (on screen, and the same on paper). Answers only when showAns (never on the printed worksheet).
+// 🔗 MATCHING in two columns: column 1 "1. item" (with an empty box to write a letter in), column 2 "A. match" (أ ب ج … on an Arabic
+// sheet). From the worksheet's left / right; older ones: each option split on " - ", " – ", ":" or "→", column 2 shuffled (always the same
+// way, so the screen, the PDF and the answer key agree). Not possible → null (shown as before). The key: each box's right letter.
+const MATCH_LETTERS = { en: "ABCDEFGHI".split(""), ar: ["أ", "ب", "ج", "د", "ه", "و", "ز", "ح", "ط"] };
+function matchCols(q, ar) {
+  const L = ar ? MATCH_LETTERS.ar : MATCH_LETTERS.en;
+  if (q.left && q.left.length && q.right && q.right.length) {
+    const key = {};
+    String(q.answer || "").replace(/(\d+)\s*[-–—:→=.)]?\s*([A-Za-zء-ي])/g, (m, n, l) => { key[n] = /[a-z]/i.test(l) ? l.toUpperCase() : l; });
+    return { left: q.left, right: q.right, letters: L, key };
+  }
+  const parts = q.options.map(o => o.split(/\s+[-–—]\s+|\s*:\s*|\s*→\s*/));
+  if (parts.length < 2 || parts.length > 8 || parts.some(p => p.length !== 2 || !p[0].trim() || !p[1].trim())) return null;
+  const left = parts.map(p => p[0].trim()), rights = parts.map(p => p[1].trim());
+  let order = rights.map((_, i) => i).sort((a, b) => hash36(rights[a] + "|" + q.number).localeCompare(hash36(rights[b] + "|" + q.number)));
+  if (order.every((x, i) => x === i)) order = [...order.slice(1), order[0]];   // (never in the same order as column 1)
+  const key = {};
+  left.forEach((_, i) => { key[i + 1] = L[order.indexOf(i)]; });
+  return { left, right: order.map(i => rights[i]), letters: L, key };
+}
+function matchNode(q, ar, showAns) {
+  const m = q.kind === "matching" && matchCols(q, ar);
+  if (!m) return null;
+  return h("table", { class: "ws-match" }, h("tbody", null, Array.from({ length: Math.max(m.left.length, m.right.length) }, (_, i) => h("tr", null,
+    h("td", { class: "wm-l" }, m.left[i] != null ? [h("span", { class: "wm-box", "aria-label": "Write a letter" }, showAns ? m.key[i + 1] || "" : ""), h("b", null, `${i + 1}.`), " ", m.left[i]] : ""),
+    h("td", { class: "wm-r" }, m.right[i] != null ? [h("b", null, `${m.letters[i]}.`), " ", m.right[i]] : "")))));
+}
+// 🇦🇪 An Arabic worksheet: right-to-left · 🌐 question_ar: small and grey under its question, right-to-left · the header: Name · Subject · Date
 function wsSheetNode(w, showAns) {
-  return h("div", { class: "ws-sheet" },
-    h("div", { class: "ws-namerow" }, h("span", null, "Name: ", h("b", null, kidNameOf(w.kid))), h("span", null, "Date: ", h("b", null, longDate(w.date)))),
+  const rtl = isArabicWs(w);
+  return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+    wsHeaderNode(w),
     h("div", { class: "ws-title" }, w.title),
     h("div", { class: "ws-sub" }, [w.subject, w.topics.join(", ")].filter(Boolean).join(" · ")),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
-    h("ol", { class: "ws-qs" }, w.questions.flatMap(q => [   // (📚 each part's title above its first question)
+    h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
+      return [   // (📚 each part's title above its first question)
       ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)), h("li", { class: "ws-q" },
       h("span", { class: "ws-num" }, String(q.number)),
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
-        q.options.length ? h("ul", { class: "ws-opts" }, q.options.map(o => h("li", { class: "ws-opt" },
-          h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null,
-        Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
-        showAns ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
-      h("span", { class: "ws-pts" }, ptsText(q.points)))])),
+        q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
+        match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map(o => h("li", { class: "ws-opt" },
+          h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
+        match ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
+        showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
+      h("span", { class: "ws-pts" }, ptsText(q.points)))]; })),
     h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // 🔑 May the answers be seen? A parent's device: always. A kid (a kid's device, or a kid using the app): once the worksheet has a
@@ -13595,12 +14498,14 @@ document.addEventListener("click", e => {
   wsRowAction("upload|" + b.dataset.wslockup);
 });
 // 🔑 The answer key: only the answers, on its own page
+// (🇦🇪 an Arabic worksheet: right-to-left · the header: Name · Subject · Date)
 function wsKeyNode(w) {
-  return h("div", { class: "ws-sheet" },
-    h("div", { class: "ws-namerow" }, h("span", null, "🔑 Answer key"), h("span", null, `${kidNameOf(w.kid)} · ${longDate(w.date)}`)),
+  const rtl = isArabicWs(w);
+  return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+    wsHeaderNode(w, "🔑 Answer key"),
     h("div", { class: "ws-title" }, w.title),
     h("ol", { class: "ws-qs" }, w.questions.map(q => h("li", { class: "ws-q" },
-      h("span", { class: "ws-num" }, String(q.number)), h("div", { class: "ws-ans" }, q.answer || "—"), h("span", { class: "ws-pts" }, ptsText(q.points))))),
+      h("span", { class: "ws-num" }, String(q.number)), matchNode(q, rtl, true) || h("div", { class: "ws-ans" }, q.answer || "—"), h("span", { class: "ws-pts" }, ptsText(q.points))))),   // (🔗 matching: each box's letter)
     h("div", { class: "ws-total" }, `Total: ${num(wsTotal(w))} points`));
 }
 function schoolWorksheetHtml(s, isDad) {
@@ -13625,10 +14530,16 @@ function wsViewNode(w, id, s, isDad) {
       done ? resultNode(w) : h("p", { class: "hint" }, files.length
         ? "The answers are uploaded. Tap ✅ Check now!"
         : "Do the worksheet on paper, then upload a photo (or PDF) of your answers."),
-      files.length ? h("ul", { class: "list" }, files.map(fid => h("li", null,
+      // 📸 Before the check: each answer photo as a thumbnail with 🗑 (remove a wrong or blurry one, then take it again).
+      // After the check they're locked: just the list.
+      files.length && !done ? h("div", { class: "ans-thumbs" }, files.map(fid => { const f = s.files[fid];
+        return h("div", { class: "ans-thumb" },
+          h("button", { class: "ans-open", data: { scfile: fid }, "aria-label": "Open " + f.name },
+            f.kind === "image" ? h("img", { alt: f.name, data: { ansimg: fid } }) : h("span", { class: "e" }, FILE_EMOJI[f.kind]), h("small", null, f.name)),
+          canRemoveAnswer(w, f) ? h("button", { class: "ans-del", "aria-label": "Remove " + f.name, title: "Remove this photo", data: { wsfdel: fid } }, "🗑") : null); }))
+      : files.length ? h("ul", { class: "list" }, files.map(fid => h("li", null,
         h("button", { class: "bd-file", data: { scfile: fid } }, h("span", { class: "e" }, FILE_EMOJI[s.files[fid].kind]),
-          h("span", { class: "what" }, s.files[fid].name, h("small", null, `${shortDate(s.files[fid].date)} · ${sizeText(s.files[fid].size)}`))),
-        canAct && canChange(s.files[fid]) ? h("button", { class: "x", "aria-label": "Remove " + s.files[fid].name, data: { wsfdel: fid } }, "✕") : null))) : null,
+          h("span", { class: "what" }, s.files[fid].name, h("small", null, `${shortDate(s.files[fid].date)} · ${sizeText(s.files[fid].size)}`)))))) : null,
       h("div", { class: "ai-btns", style: "margin-top:12px" },
         canAct ? h("button", { data: { wsact: "upload" } }, "⬆ Upload my answers") : null,
         canAct && files.length ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "✅ Check now") : null,
@@ -13647,9 +14558,30 @@ function sessionBarNode(w, id) {
       ? h("button", { class: "primary", data: { sessmore: w.session, aiwait: "more|" + w.session } }, "➕ More questions")
       : h("button", { data: { sessdone: id } }, "🙋 I'm done")));
 }
-// The score big, ✓ / ✗ for each question with its note, and the overall note
+// ❌ MISTAKES ONE BY ONE (after the check): the score card first, then each wrong answer in its own card — the question,
+// "Your answer", "Correct answer", a short explanation — with "Next mistake ➡️ (2 of 5)" and "Done". Right answers aren't repeated.
+// 👨‍👩‍👧 Parents also have "See all answers" (every question with ✓ / ✗).
+let wsMist = { id: null, i: 0, done: false }, wsAllAns = false;
+function mistakesNode(w, c) {
+  const wrong = c.questions.filter(q => !q.correct);
+  if (wsMist.id !== schoolDoc) { wsMist = { id: schoolDoc, i: 0, done: false }; wsAllAns = false; }
+  if (!wrong.length) return h("p", { class: "ai-note mist-none" }, "🌟 No mistakes! Every answer is right.");
+  if (wsMist.done) return h("div", { class: "btnrow" }, h("button", { data: { wsact: "mistagain" } }, `❌ See my mistakes again (${wrong.length})`));
+  const i = Math.min(wsMist.i, wrong.length - 1), q = wrong[i], wq = w.questions.find(x => x.number === q.number) || {}, rtl = isArabicWs(w);
+  return h("div", { class: "card mist-card" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null },
+    h("div", { class: "mist-head", dir: "ltr" }, h("b", null, `❌ Mistake ${i + 1} of ${wrong.length}`), h("small", null, `Question ${q.number}`)),
+    h("p", { class: "mist-q" }, wq.prompt || `Question ${q.number}`),
+    wq.question_ar && !rtl ? h("p", { class: "ws-ar", dir: "rtl", lang: "ar" }, wq.question_ar) : null,
+    h("div", { class: "mist-row bad" }, h("span", null, "Your answer"), h("b", null, q.your_answer || "—")),
+    h("div", { class: "mist-row ok" }, h("span", null, "Correct answer"), h("b", null, wq.answer || "—")),
+    q.explanation || q.note ? h("p", { class: "mist-why" }, "💡 " + (q.explanation || q.note)) : null,
+    h("div", { class: "btnrow", dir: "ltr" },
+      i < wrong.length - 1 ? h("button", { class: "primary", data: { wsact: "mistnext" } }, `Next mistake ➡️ (${i + 2} of ${wrong.length})`) : null,
+      h("button", { data: { wsact: "mistdone" } }, "Done")));
+}
+// The score big, the notes, then the mistakes one by one (parents: "See all answers" for ✓ / ✗ on every question)
 function resultNode(w) {
-  const c = w.check, most = Object.fromEntries(w.questions.map(q => [q.number, q.points])), pct = Math.round(c.score / c.max_score * 100);
+  const c = w.check, most = Object.fromEntries(w.questions.map(q => [q.number, q.points])), pct = Math.round(c.score / c.max_score * 100), parent = isParentDevice();
   return h("div", null,
     h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}% ${pct >= 80 ? "🌟" : pct >= 50 ? "👍" : "💪"}`)),
     c.overall_note ? h("p", { class: "ai-note" }, "🤖 " + c.overall_note) : null,
@@ -13657,10 +14589,12 @@ function resultNode(w) {
     c.strong_points && c.strong_points.length ? h("p", { class: "ai-note" }, "💪 Strong: " + c.strong_points.join(" · ")) : null,
     c.weak_points && c.weak_points.length ? h("p", { class: "ai-note" }, "🎯 Practise: " + c.weak_points.join(" · ")) : null,
     c.coach_tip ? h("p", { class: "ai-note" }, "🦉 " + c.coach_tip) : null,
-    c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,
+    c.questions.length ? mistakesNode(w, c) : null,
+    parent && c.questions.length ? h("div", { class: "btnrow" }, h("button", { data: { wsact: "allans" }, "aria-expanded": String(wsAllAns) }, wsAllAns ? "Hide all answers" : "📋 See all answers")) : null,
+    parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,
       h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
       h("div", { class: "what" }, `Question ${q.number}`,
-        h("small", null, `${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.note ? " · " + q.note : ""}`))))) : null);
+        h("small", null, `${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}`))))) : null);
 }
 // ✏️ Bro2a changes the score / adds his own note
 function fixFormNode(w) {
@@ -13678,6 +14612,11 @@ function wsAction(act) {
   const id = schoolDoc, w = aiDocs.worksheets[id];
   if (!w) return;
   if ((act === "answers" || act === "key") && !answersOpen(w)) { wsAnswers = false; return answersLocked(id); }   // 🔒 a kid before the check
+  // ❌ the mistakes one by one · 📋 all answers (parents)
+  if (act === "mistnext") { wsMist.i++; schoolFresh = true; return render(); }
+  if (act === "mistdone") { wsMist.done = true; schoolFresh = true; return render(); }
+  if (act === "mistagain") { wsMist = { id: id, i: 0, done: false }; schoolFresh = true; return render(); }
+  if (act === "allans" && isParentDevice()) { wsAllAns = !wsAllAns; schoolFresh = true; return render(); }
   if (act === "answers") { wsAnswers = !wsAnswers; return render(); }
   if (act === "pdf") return worksheetPdf(w);                     // (never with the answers, even when 🔑 is open)
   if (act === "key") return answerKeyPdf(w);                     // (🔒 a kid: only after the check, see above)
@@ -13731,10 +14670,16 @@ async function addAnswerFiles(wsId, files) {
   render();
   toast(`📎 The answers are uploaded!${got ? ` +${STUDY_POINTS.up} ⭐` : ""} Now tap ✅ Check now.`, 3500);
 }
+// 📸 The thumbnails: each answer photo, from this device or the cloud (after the page is drawn)
+function fillAnswerThumbs(root) {
+  root.querySelectorAll("img[data-ansimg]").forEach(img => fileUrl(img.dataset.ansimg).then(url => { if (url) img.src = url; }).catch(() => {}));
+}
+// 🗑 An answer photo may go before the check: the kid (their own worksheet, also on their own device) or a parent. After the check: locked.
+const canRemoveAnswer = (w, f) => !w.check && canChange(f) && (!isKidDevice() || w.kid === kidDeviceId());
 function removeAnswerFile(fid) {
   const w = aiDocs.worksheets[schoolDoc], s = schoolFor(schoolKid), f = s.files[fid];
-  if (!w || !f || !canChange(f) || (w.check && !isDadNow()) || isKidDevice()) return;
-  if (!confirm(`Remove “${f.name}”?`)) return;
+  if (!w || !f || !canRemoveAnswer(w, f)) return;
+  if (!confirm(`Remove “${f.name}”? Then you can take it again.`)) return;
   deleteFileData(fid);
   delete s.files[fid];
   writeData();
@@ -13913,31 +14858,33 @@ function drawSettings() {
 }
 
 // ---------- My day ----------
-// Puts the saved "My day" hours into the boxes.
+// Puts the saved "My day" hours into the boxes: "Day starts at" / "Day ends at" for each day, Monday … Sunday.
 function fillMyDay() {
-  const m = data.myDay;
-  $("dayStart").value = m.start;
-  $("dayEnd").value = m.end;
-  $("wkOwn").checked = m.weekendOwn;
-  $("wkStart").value = m.weekendStart;
-  $("wkEnd").value = m.weekendEnd;
-  $("wkRow").hidden = !m.weekendOwn;
+  const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  $("dayHours").innerHTML = DAYS.map((name, i) => { const [s, e] = dayWindow(i);
+    return `<div class="day-hrow"><b>${name}</b>
+      <label><span class="small">Day starts at</span><input type="time" id="dh-s-${i}" value="${hm(s)}" aria-label="${name}: day starts at"></label>
+      <label><span class="small">Day ends at</span><input type="time" id="dh-e-${i}" value="${hm(e)}" aria-label="${name}: day ends at"></label></div>`; }).join("");
   $("dayErr").textContent = "";
 }
-// Any change in the "My day" boxes: check it, then save.
-// If a time is wrong, show a message and don't save until it's fixed.
-["dayStart", "dayEnd", "wkOwn", "wkStart", "wkEnd"].forEach(id => $(id).addEventListener("change", () => {
-  const start = $("dayStart").value, end = $("dayEnd").value;
-  const wkOwn = $("wkOwn").checked, wkStart = $("wkStart").value, wkEnd = $("wkEnd").value;
-  $("wkRow").hidden = !wkOwn;
-  if (!start || !end || toMin(end) <= toMin(start))
-    return $("dayErr").textContent = "The day must end after it starts.";
-  if (wkOwn && (!wkStart || !wkEnd || toMin(wkEnd) <= toMin(wkStart)))
-    return $("dayErr").textContent = "The weekend day must end after it starts.";
-  data.myDay = { start, end, weekendOwn: wkOwn,
-                 weekendStart: wkStart || data.myDay.weekendStart, weekendEnd: wkEnd || data.myDay.weekendEnd };
+// Any change in the boxes: check every day, then save (a wrong time: a message, and nothing is saved until it's fixed).
+// (The older single day / weekend hours follow Monday and Saturday, for phones that don't have this update yet.)
+function saveDayHours() {
+  const days = DAYS.map((_, i) => ({ start: $(`dh-s-${i}`).value, end: $(`dh-e-${i}`).value }));
+  const bad = days.findIndex(x => !x.start || !x.end || toMin(x.end) <= toMin(x.start));
+  if (bad >= 0) return $("dayErr").textContent = `${DAYS[bad]}: the day must end after it starts.`;
+  $("dayErr").textContent = "";
+  data.myDay = { start: days[0].start, end: days[0].end, weekendOwn: sameText(days[5]) !== sameText(days[0]),
+                 weekendStart: days[5].start, weekendEnd: days[5].end, days };
   changed();
-}));
+}
+$("dayHours").addEventListener("change", e => { if (e.target.matches("input[type=time]")) saveDayHours(); });
+// 📋 Same for all days: Monday's hours for every day
+$("daySame").addEventListener("click", () => {
+  for (let i = 1; i < DAYS.length; i++) { $(`dh-s-${i}`).value = $("dh-s-0").value; $(`dh-e-${i}`).value = $("dh-e-0").value; }
+  saveDayHours();
+  toast("📋 Every day now has Monday's hours.", 2500);
+});
 // The calculated free time of one person for each day, listed under the "My day" boxes,
 // with the flexible activities the SAVED plan put inside it (nothing is re-planned here)
 // and the free time left after them (and their get ready / break).
@@ -14419,6 +15366,7 @@ async function resetStudyData(kid) {
   // 3) Their 📚 study session results ("date|actId|kid")
   Object.keys(data.points.sessions).forEach(key => { if (key.split("|").pop() === kid) delete data.points.sessions[key]; });
   Object.keys(data.points.free).forEach(key => { if (key.split("|").pop() === kid) delete data.points.free[key]; });   // ⭐ their free study entries too
+  Object.keys(data.points.picks).forEach(key => { if (key.split("|").pop() === kid) delete data.points.picks[key]; });   // 📚 and their subject picks
   keepNow();
   toast(`✓ ${name}'s study data was reset.`, 3500);
   addNews([newsItem("school", `🗑️ ${userById(me).name} reset ${name}'s study data`, "🗑️ reset study data", me)]);
@@ -14592,7 +15540,7 @@ document.addEventListener("click", e => {
   // 🎁 A parent's weekly prize
   if ("pzgive" in ds) return givePrize();
   // 🏠 Today: ☰ More, 👋 the tour, 📅 the family calendar; ☰ More pages (🗣️ 📱 📗 🧹)
-  if ("homemore" in ds) { homeMore = !homeMore; return render(); }
+  if ("homemore" in ds) { homeMore = !homeMore; homeAddPlan = false; return render(); }
   if ("tour" in ds) { homeMore = false; render(); return showTour(); }
   // ⭐ ✏️ Kids' habits (parents): Settings → the kids' habits card
   if ("kidhabits" in ds) { go("settings"); return requestAnimationFrame(() => $("kidHabitsCard").scrollIntoView({ behavior: "smooth", block: "start" })); }
@@ -14623,7 +15571,7 @@ document.addEventListener("click", e => {
   if (ds.buhist) return isParentDevice() || ds.buhist === me ? openBuddyBox(ds.buhist) : undefined;   // 👨‍👩‍👧 a kid's buddy page (🧒 a kid: only their own; someone else's does nothing)
   // 🌱 The buddy badge (top bar) → the buddy page; 👨‍👩‍👧 Change buddy
   if ("bubadge" in ds) return openProfile(me);   // 👤 the Spark badge → My profile
-  if ("profile" in ds) return openProfile(me);   // ☰ More → 👤 My profile
+  if ("profile" in ds) return openProfile(ds.profile && isParentViewer() ? ds.profile : me);   // ☰ More → 👤 My profile (👧 the Kid page: that kid's)
   if ("report" in ds) return openReport();       // 📊 How are my kids doing? (parents)
   // ✨ The encouraging line: go there, or ✕ hide it for today
   if (ds.encgo) return encGo(ds.encgo);
@@ -15183,7 +16131,7 @@ function keepEarlyChanges(remote, base, local) {
   });
   // 📚 Study session results made here in those first seconds win too (🧒 a kid's device: only their own)
   // (⭐ free study points too)
-  ["sessions", "free"].forEach(part => {
+  ["sessions", "free", "picks"].forEach(part => {
     const bs = b.points[part] || {}, ls = l.points[part] || {}, rs = r.points[part] = r.points[part] || {};
     new Set([...Object.keys(bs), ...Object.keys(ls)]).forEach(key => {
       if (sameText(bs[key]) === sameText(ls[key]) || (kid && key.split("|").pop() !== kid)) return;
@@ -15286,7 +16234,7 @@ function cloudUpdateFields(name, now) {
   // Ticks, 👨‍👩‍👧 auto points, 🎁 prizes, 🧩 riddles and answers: one field per item (so two phones don't overwrite each other)
   const BY_ITEM = ["marks", "auto", "prizes", "riddles", "riddleAns", "diary", "lifetime", "levels", "duties", "wishes",
                    "meeting", "screen", "quran", "quranHeard", "chores", "want", "notes", "study", "prizeMsg", "reach", "when", "hall", "community", "cmReact", "cmDone",
-                   "sessions", "studyWeeks", "free"];   // (📚 study session results, each past week's study, ⭐ free study)
+                   "sessions", "studyWeeks", "free", "picks"];   // (📚 study session results, each past week's study, ⭐ free study, 📚 subject picks)
   const kid = isKidDevice() ? kidDeviceId() : null;   // (🧒 a kid's device: only their own ticks, 📚 sessions and their own school data go up)
   BY_ITEM.filter(k => now[k] && typeof now[k] === "object").forEach(k => {
     let was = before[k] && typeof before[k] === "object" ? before[k] : {};
@@ -15301,7 +16249,7 @@ function cloudUpdateFields(name, now) {
       was = w;
     }
     new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
-      if (kid && ["marks", "sessions", "studyWeeks", "free"].includes(k) && key.split("|").pop() !== kid) return;
+      if (kid && ["marks", "sessions", "studyWeeks", "free", "picks"].includes(k) && key.split("|").pop() !== kid) return;
       if (!hasOwn(is, key)) changes.push(new fb.FieldPath(k, cloudKey[key] || key), fb.deleteField());   // unticked
       else if (sameText(was[key]) !== sameText(is[key])) changes.push(new fb.FieldPath(k, key), is[key]);
     });
@@ -15502,7 +16450,8 @@ function habitNews(before, now) {
 // A saved plan change, in words: "added Math · changed School · changed the routines"
 function planNews(before, now) {
   const acts = p => [...(p.fixed || []), ...(p.flexible || []),
-                     ...(p.parentActs || []).map(a => ({ ...a, name: `${pactType(a)[1]} ${a.title}` }))];   // (📅 a parent's own activities too)
+                     ...(p.parentActs || []).map(a => ({ ...a, name: `${pactType(a)[1]} ${a.title}` })),   // (📅 a parent's own activities too)
+                     ...(p.oneDay || []).map(e => ({ ...e, name: `📌 ${e.title}` }))];   // (📌 one-day events too)
   const was = acts(before), is = acts(now), find = (list, id) => list.find(a => a.id === id);
   const few = list => list.slice(0, 3).map(a => a.name).join(", ") + (list.length > 3 ? ` +${list.length - 3} more` : "");
   const added = is.filter(a => !find(was, a.id)), removed = was.filter(a => !find(is, a.id));
