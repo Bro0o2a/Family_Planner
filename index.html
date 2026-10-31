@@ -102,7 +102,6 @@
         <div><label class="small" for="fxBreak">☕ Break after</label><select id="fxBreak" class="pad-pick"></select></div>
       </div>
       <div class="study-box" id="fxStudy" hidden></div>
-      <label class="checkline" id="fxMustLine" hidden><input type="checkbox" id="fxMust"> ⭐ Must-do <small>(missed → the week's ⭐ Score is locked 🔒)</small></label>
       <div class="needs-line" id="fxDadLine">
         <label class="small" for="fxHelper" id="fxHelperLabel">🤝 A parent helps?</label><select id="fxHelper"></select>
         <small class="needs-help">That parent must be free at this time too.</small>
@@ -147,7 +146,6 @@
       </div>
       <p class="hint between-hint">Optional. Empty = any free time. <button type="button" class="linkbtn" id="flAnyTime">✕ Any time</button></p>
       <div class="study-box" id="flStudy" hidden></div>
-      <label class="checkline" id="flMustLine" hidden><input type="checkbox" id="flMust"> ⭐ Must-do <small>(missed → the week's ⭐ Score is locked 🔒)</small></label>
       <div class="needs-line" id="flDadLine">
         <label class="small" for="flHelper" id="flHelperLabel">🤝 A parent helps?</label><select id="flHelper"></select>
         <small class="needs-help">That parent must be free at this time too.</small>
@@ -382,6 +380,7 @@
       <div style="flex:0 0 96px"><label class="small" for="hbPoints">Points</label><select id="hbPoints"><option value="1">+1</option><option value="2">+2</option>
         <option value="3">+3</option><option value="5">+5</option><option value="10">+10</option></select></div>
     </div>
+    <label class="checkline"><input type="checkbox" id="hbMust"> ⭐ Must-do <small>(a day not fully done → that week's ⭐ Score is locked 🔒 at 0)</small></label>
     <div class="btnrow">
       <button class="primary" id="hbAdd">Add habit</button>
       <button id="hbCancel" hidden>Cancel</button>

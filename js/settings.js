@@ -184,7 +184,7 @@ function drawHabitList() {
   const kids = data.users.filter(u => !isParentId(u.id)), list = data.habits.filter(h => !h.gone);
   $("hbList").innerHTML = list.length ? list.map((h, i) => `
     <li class="${h.id === editingHabit ? "editing" : ""}"><span class="uemoji">${safe(h.emoji)}</span>
-      <span class="what">${safe(h.name)}<small>${h.kind === "prayers" ? `5 ticks: ${PRAYERS.join(", ")}` : h.kind === "water" ? `${WATER_DROPS} drops a day` : `1 tick a day · +${h.points || 1}`}</small>
+      <span class="what">${safe(h.name)}<small>${h.kind === "prayers" ? `5 ticks: ${PRAYERS.join(", ")}` : h.kind === "water" ? `${WATER_DROPS} drops a day` : `1 tick a day · +${h.points || 1}`}${h.must ? ` · <b style="color:#b45309">⭐ Must-do</b>` : ""}</small>
         <span class="hb-kids">${kids.map(k => { const c = colorsOf(k), on = !h.off.includes(k.id);
           return `<button class="chip ${on ? "on" : "off"}" data-hbkid="${safe(h.id)}|${safe(k.id)}" style="--soft:${c.soft};--ink:${c.ink}"
             aria-pressed="${on}" title="${on ? "On" : "Off"} for ${safe(k.name)}"><span class="e">${safe(k.emoji)}</span>${safe(k.name)}</button>`; }).join("")}</span></span>
@@ -214,6 +214,7 @@ function startEditHabit(id) {
   $("hbEmoji").value = h.emoji;
   $("hbName").value = h.name;
   $("hbPoints").value = String(h.points || 1);
+  $("hbMust").checked = !!h.must;
   $("hbAdd").textContent = "Save changes";
   $("hbCancel").hidden = false;
   $("hbErr").textContent = "";
@@ -225,6 +226,7 @@ function resetHabitForm() {
   $("hbEmoji").value = "";
   $("hbName").value = "";
   $("hbPoints").value = "1";
+  $("hbMust").checked = false;
   $("hbAdd").textContent = "Add habit";
   $("hbCancel").hidden = true;
   $("hbErr").textContent = "";
@@ -236,9 +238,12 @@ $("hbAdd").onclick = () => {
   const name = $("hbName").value.trim().slice(0, 40), emoji = $("hbEmoji").value.trim().slice(0, 8) || "⭐";
   const points = HABIT_PTS.includes(Number($("hbPoints").value)) ? Number($("hbPoints").value) : 1;
   if (!name) return $("hbErr").textContent = "Please type a habit.";
-  const old = data.habits.find(x => x.id === editingHabit);
+  const old = data.habits.find(x => x.id === editingHabit), must = $("hbMust").checked;
+  // ⭐ Must-do: remembers the day it was switched on (days before that never lock the score)
+  const mustOf = h => must ? (h && h.must) || todayYmd() : null;
+  if (old) { const m = mustOf(old); if (m) old.must = m; else delete old.must; }
   if (old) { Object.assign(old, { name, emoji }); if (old.kind === "single") { if (points > 1) old.points = points; else delete old.points; } }
-  else data.habits.push({ id: newId(), name, emoji, kind: "single", off: [], ...(points > 1 ? { points } : {}) });
+  else data.habits.push({ id: newId(), name, emoji, kind: "single", off: [], ...(points > 1 ? { points } : {}), ...(must ? { must: todayYmd() } : {}) });
   resetHabitForm();
   changed();
   draftToast(old ? "✓ Changed" : `✓ ${emoji} ${name} added`);

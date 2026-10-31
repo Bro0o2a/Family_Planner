@@ -176,7 +176,7 @@ const SCORE_WEIGHTS = { marks: 0.70, extra: 0.10, ticks: 0.20 };   // (v149: �
 const EXTRA_MAX = 10;   // ⚡ at most 10 points a week from checked extra worksheets (each adds its mark: 90 % → 0.9)
 // An activity's type: the one picked in ✏️ Add activities (older ones got theirs once, see defaultActType)
 const actTypeOf = a => defaultActType(a);
-const actTypeInfo = k => ACT_TYPES.find(t => t[0] === k) || ACT_TYPES[3];
+const actTypeInfo = k => ACT_TYPES.find(t => t[0] === k) || ACT_TYPES.find(t => t[0] === "other");
 // The score's parts: the activity types + 🎓 Level (not an activity type)
 const scorePartInfo = k => k === "marks" ? ["marks", "📝", "Session marks"] : k === "extra" ? ["extra", "⚡", "Extra worksheets"] : k === "ticks" ? ["ticks", "✅", "Ticks"] : k === "level" ? ["level", "🎓", "Level"] : actTypeInfo(k);
 // One type, one person, this week SO FAR: the planned items (days up to today; today's only once they've started, Dubai time)
@@ -511,21 +511,16 @@ function ticksTally(id) {
   });
   return { planned, done };
 }
-// ⭐ Must-do routines (a 🌱 Routine with ⭐ Must-do ticked) this week that were missed: their time is over and they aren't ticked
-// (today's only once they've ended, Dubai time) → [{ name, date }]. Any → the week's ⭐ Score is locked 🔒 (0).
+// ⭐ Must-do habits (⭐ Kids' habits, Must-do ticked) missed this week: a day (from the day it became a Must-do, until yesterday)
+// when it wasn't fully done (all 5 prayers, all drops …) → [{ name, date }]. Any → the week's ⭐ Score is locked 🔒 (0).
+// (Today never locks: the kid has until midnight. Turned off for that kid / removed: not counted.)
 function mustMissed(id) {
-  const days = planDays(), today = todayYmd(), now = dubaiMinutes(), acts = allActs(), out = [];
-  (days || []).forEach(day => {
-    if (day.date > today) return;
-    day.items.forEach(it => {
-      if (!it.users.includes(id)) return;
-      const a = acts.find(x => x.id === it.actId);
-      if (!a || !a.must || actTypeOf(a) !== "habit" || isDone(day.date, it.actId, id)) return;
-      if (day.date === today && it.end > now) return;
-      out.push({ name: a.name, date: day.date });
-    });
+  const today = todayYmd(), out = [];
+  data.habits.filter(h => h.must && !h.gone && !h.off.includes(id)).forEach(h => {
+    for (let d = h.must > data.points.week ? h.must : data.points.week; d < today && d < weekEnd(); d = addDaysYmd(d, 1))
+      if (!habitDone(h, data.habitMarks[habitKey(d, h.id, id)])) out.push({ name: `${h.emoji} ${h.name}`, date: d });
   });
-  return out;
+  return out.sort((a, b) => a.date.localeCompare(b.date));
 }
 function scoreOf(id) {
   const sessions = studySessions(id), sp = studyParts(sessions);

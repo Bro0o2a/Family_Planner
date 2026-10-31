@@ -135,7 +135,7 @@ function planDay(ds) {
     // (🗂️ a deleted activity kept as history on a day that's gone: drawn from what it remembers, look-only)
     const g = !act && it.gone, users = g ? g.users.filter(exists) : [];
     if (g) return users.length ? { ...it, name: g.name, users, people: g.people.filter(exists), helper: "", type: g.type } : null;
-    return act ? { ...it, name: act.name, users: act.users, people: peopleOf(act), helper: helperOf(act) ? act.helper : "", type: actTypeOf(act), ...(act.must ? { must: true } : {}) } : null;
+    return act ? { ...it, name: act.name, users: act.users, people: peopleOf(act), helper: helperOf(act) ? act.helper : "", type: actTypeOf(act) } : null;
   }).filter(Boolean).sort((a, b) => a.start - b.start || b.fixed - a.fixed);
   // Strips (kept apart from activities: no checkbox, no points): routines, the fixed activities' get ready / break,
   // and the get ready / break around each planned flexible activity (not a deleted one's).
@@ -229,7 +229,7 @@ function navHtml(dates) {
 // What a block shows: big title, colors, and a smaller line underneath.
 function blockInfo(b) {
   const withDad = b.helper ? ` · ${withText(b)}` : "";   // (🤝 with the helping parent)
-  const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1] + (b.must ? "⭐" : "");   // (⭐ the type's emoji next to the name)
+  const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1];   // (⭐ the type's emoji next to the name)
   // Fixed activities (School, Gym, Work …) and shared ones (several people): soft grey, with a small colored dot
   // for each person, so each person's own lessons stand out in their color.
   if (b.fixed || b.users.length > 1) {
@@ -348,7 +348,7 @@ function weekHtml(days, opts) {
       const sameBtn = same ? `<button class="k-same" data-same="${safe(same)}" title="${safe(same)}" aria-label="${safe(same)}">⇄</button>` : "";
       // Narrow card (side by side): a short title (emoji + name) instead of the full one.
       // Fixed or shared: just the colored dots, not everyone's names (tap the card for the full details).
-      const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1] + (b.must ? "⭐" : "");
+      const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1];
       // (as HTML: a parent's 🖼️ photo instead of their emoji)
       const shortHtml = b.fixed || b.users.length > 1 ? info.titleHtml : `${facesHtml(b.users)} ${safe(`${te} ${subject ? subject.name : b.name}`)}`;
       // Line 2 = time, then the dots (shared) or the type + name, then 🤝 with the helping parent ("🤝 helping" on their own calendar)
@@ -913,7 +913,7 @@ let viewMode = "day";
 let viewWho = "all";
 // The activity's name for View all plan: "🏫 School", "🔢 Math", "Gym_kids" (no names list, no "with …")
 function viewTitle(b) {
-  const subject = !b.fixed && findSubject(b.name), te = actTypeInfo(b.type || "activity")[1] + (b.must ? "⭐" : "");   // (⭐ the type's emoji next to the name)
+  const subject = !b.fixed && findSubject(b.name), te = actTypeInfo(b.type || "activity")[1];   // (⭐ the type's emoji next to the name)
   return `${te} ${subject ? subject.name : b.name}`;
 }
 // 📅 Week summary: rows = people, columns = Mon–Sun. Each cell: that person's activities as one-line chips
