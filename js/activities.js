@@ -70,9 +70,9 @@ function drawStudy(p, keep) {
     const subs = studySubjects(p), kid = pickedWho(p).find(id => !isParentId(id)), ids = cur.subjectIds || [], all = ids.includes(ALL_SUBJECTS);
     const names = ids.map(id => subjectNameOf(pickedWho(p), id)).filter(Boolean);
     const on = x => ids.includes(x.id) || names.some(n => sameSubject(n, x.name));
-    box.innerHTML = `<label class="small">📘 Subjects <small>(tick one or more; with more than one, the kid picks one each time)</small></label>
+    box.innerHTML = `<label class="small">📘 Subjects <small>(tick one or more, or 📚 Free Study; with more than one, the kid picks one each time)</small></label>
       <div class="daypick st-subs" id="${p}Subjects">${subs.length
-        ? `<label><input type="checkbox" name="${p}Sub" value="${ALL_SUBJECTS}" ${all ? "checked" : ""}><span>📚 All my subjects</span></label>`
+        ? `<label><input type="checkbox" name="${p}Sub" value="${ALL_SUBJECTS}" ${all ? "checked" : ""}><span>📚 Free Study</span></label>`
           + subs.map(x => `<label><input type="checkbox" name="${p}Sub" value="${safe(x.id)}" ${!all && on(x) ? "checked" : ""} ${all ? "disabled" : ""}><span>${safe(x.emoji)} ${safe(x.name)}</span></label>`).join("")
         : `<span class="hint">No subjects yet</span>`}</div>
       <div class="row"><div><label class="small" for="${p}How">How</label><select id="${p}How"><option value="sole">📖 Sole study</option>
@@ -336,7 +336,7 @@ $("flAdd").onclick = () => {
   if (!name) return $("flErr").textContent = "Please type a name.";
   if (!users.length) return $("flErr").textContent = "Tick “Who?” — at least one person.";
   if (!(duration >= 5)) return $("flErr").textContent = "It should be at least 5 minutes.";
-  if (!(times >= 1 && times <= DAYS.length)) return $("flErr").textContent = `Times per week must be 1 to ${DAYS.length} (max once per day).`;
+  if (!(times >= 1 && times <= DAYS.length)) return $("flErr").textContent = `Times per week must be 1 to ${DAYS.length}.`;
   // "Only between": both times or none; the time must be long enough for the activity
   const from = $("flFrom").value, to = $("flTo").value;
   if (!from !== !to) return $("flErr").textContent = "“Only between”: pick both times, or tap ✕ Any time.";
@@ -345,14 +345,16 @@ $("flAdd").onclick = () => {
     return $("flErr").textContent = `“Only between” is only ${showDuration(toMin(to) - toMin(from))}, but ${name} takes ${showDuration(duration)}.`;
   const between = from ? { from, to } : null;
   if (help.err) return $("flErr").textContent = help.err;
+  const twice = $("flTwice").checked;   // (2️⃣ off = never twice on one day)
 
   let id = editingFlex;
   if (old) {                                                                       // update the existing one
     putHelp(Object.assign(old, { name, duration, times, overlapWith, users, getReady, breakAfter, type }), help);
     if (between) old.between = between; else delete old.between;
+    if (twice) delete old.twice; else old.twice = false;
   } else {                                                                         // add a new one
     id = newId();
-    data.flexible.push(putHelp({ id, name, duration, times, overlapWith, users, getReady, breakAfter, type, ...(between ? { between } : {}) }, help));
+    data.flexible.push(putHelp({ id, name, duration, times, overlapWith, users, getReady, breakAfter, type, ...(between ? { between } : {}), ...(twice ? {} : { twice: false }) }, help));
   }
   if (isParentId(me)) syncPartners(id, overlapWith); // keep it two-way
   resetFlexForm();
@@ -368,6 +370,7 @@ function startEditFlex(id) {
   $("flType").value = actTypeOf(f); typeTouched.fl = true;
   $("flDur").value = f.duration;
   $("flTimes").value = f.times;
+  $("flTwice").checked = f.twice !== false;
   $("flReady").value = String(f.getReady || 0);
   $("flBreak").value = String(f.breakAfter || 0);
   $("flFrom").value = f.between ? f.between.from : "";
@@ -390,6 +393,7 @@ function resetFlexForm() {
   $("flType").value = "activity"; typeTouched.fl = false;
   $("flDur").value = 45;
   $("flTimes").value = 3;
+  $("flTwice").checked = true;
   $("flFrom").value = $("flTo").value = "";   // any free time
   padTouched.fl = false;
   fillPads("fl");          // automatic times
@@ -866,6 +870,27 @@ function makePlan(mode = "replan") {
         }
         if (best) break; // found a spot, no need for the next try
       }
+      // 2️⃣ Last try (unless switched off): no new day has room → make its session LONGER on a day that already has it
+      // (one block, one tick, one worksheet for the whole time). Each day's session gets longer only once.
+      if (!best && act0.twice !== false) {
+        for (const mode of modes) {
+          for (const d of [...new Set(usedDays)]) {
+            const day = days[d], it = day.items.find(x => x.actId === act.id && !x.kept && !x.pinned && !x.fixed && !x.longer);
+            if (!it || skippedOn(day.date, act.id)) continue;
+            const others = day.items.filter(x => x !== it), len = it.end - it.start + act0.duration;
+            const start = earliestStart({ ...day, items: others }, { ...act, duration: len }, mode);
+            if (start === null) continue;
+            const score = fullness(d, people);
+            if (!best || score < best.score) best = { d, score, start, it, len };
+          }
+          if (best) break;
+        }
+        if (best) {   // (start/end are the whole span: get ready + the longer session + break)
+          Object.assign(best.it, { start: best.start, end: best.start + best.len, longer: true });
+          usedDays.push(best.d);
+          continue;
+        }
+      }
       if (!best) break; // no day has room left
 
       // (start/end here are the whole span; pre/post say how much of it is get ready / break)
@@ -901,7 +926,7 @@ function planKey() {
     fx: data.fixed.map(f => [f.id, f.days, f.start, f.end, [...f.overlapWith].sort(), f.users, helps(f), ...pads(f)]),
     // (the "Only between" time only when it's set, so plans made before it existed still count as up to date)
     fl: data.flexible.map(f => [f.id, f.duration, f.times, [...f.overlapWith].sort(), f.users, helps(f), ...pads(f),
-                                ...(f.between ? [{ only: [f.between.from, f.between.to] }] : [])]),
+                                ...(f.between ? [{ only: [f.between.from, f.between.to] }] : []), ...(f.twice === false ? [{ once: true }] : [])]),
     day: [data.myDay.start, data.myDay.end, data.myDay.weekendOwn, data.myDay.weekendStart, data.myDay.weekendEnd],
     // (🕗 each day's own hours: only when they're set, so a plan made before still counts as up to date)
     ...(data.myDay.days ? { days: data.myDay.days.map(x => [x.start, x.end]) } : {}),

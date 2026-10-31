@@ -222,7 +222,7 @@ function actSubjectsFor(a, kid) {
 // "📐 Math, 📖 English" / "All my subjects" (for the activity lists)
 function actSubjectsText(a) {
   const ids = subjectIdsOf(a);
-  if (ids.includes(ALL_SUBJECTS)) return "All my subjects";
+  if (ids.includes(ALL_SUBJECTS)) return "Free Study";
   return [...new Set(ids.map(id => subjectNameOf(a.users, id)).filter(Boolean))].join(", ");
 }
 // 📚 "Which subject today?": the kid (or a parent) picks one of the allowed subjects for that session → saved for it

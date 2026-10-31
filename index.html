@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=147">
+<link rel="stylesheet" href="css/app.css?v=148">
 </head>
 <body>
 <!-- ============================================================
@@ -134,6 +134,7 @@
         <div><label class="small">Minutes each time</label><input type="number" id="flDur" min="5" step="5" value="45"></div>
         <div><label class="small">Times per week</label><input type="number" id="flTimes" min="1" max="7" value="3"></div>
       </div>
+      <label class="checkline"><input type="checkbox" id="flTwice" checked> ⏱️ No free day left? Make one day's session longer</label>
       <div class="row">
         <div><label class="small" for="flReady">🎒 Get ready before</label><select id="flReady" class="pad-pick"></select></div>
         <div><label class="small" for="flBreak">☕ Break after</label><select id="flBreak" class="pad-pick"></select></div>
@@ -775,22 +776,22 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=147"></script>
-<script src="js/screens.js?v=147"></script>
-<script src="js/points.js?v=147"></script>
-<script src="js/fun.js?v=147"></script>
-<script src="js/reports.js?v=147"></script>
-<script src="js/profile.js?v=147"></script>
-<script src="js/home.js?v=147"></script>
-<script src="js/activities.js?v=147"></script>
-<script src="js/calendar.js?v=147"></script>
-<script src="js/school.js?v=147"></script>
-<script src="js/ai.js?v=147"></script>
-<script src="js/study.js?v=147"></script>
-<script src="js/settings.js?v=147"></script>
-<script src="js/taps.js?v=147"></script>
-<script src="js/cloud.js?v=147"></script>
-<script src="js/news.js?v=147"></script>
-<script src="js/start.js?v=147"></script>
+<script src="js/core.js?v=148"></script>
+<script src="js/screens.js?v=148"></script>
+<script src="js/points.js?v=148"></script>
+<script src="js/fun.js?v=148"></script>
+<script src="js/reports.js?v=148"></script>
+<script src="js/profile.js?v=148"></script>
+<script src="js/home.js?v=148"></script>
+<script src="js/activities.js?v=148"></script>
+<script src="js/calendar.js?v=148"></script>
+<script src="js/school.js?v=148"></script>
+<script src="js/ai.js?v=148"></script>
+<script src="js/study.js?v=148"></script>
+<script src="js/settings.js?v=148"></script>
+<script src="js/taps.js?v=148"></script>
+<script src="js/cloud.js?v=148"></script>
+<script src="js/news.js?v=148"></script>
+<script src="js/start.js?v=148"></script>
 </body>
 </html>

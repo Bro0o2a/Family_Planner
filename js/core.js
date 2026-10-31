@@ -659,6 +659,7 @@ function cleanData(d) {
                duration: Number(f.duration), times: Math.min(DAYS.length, Number(f.times)),
                overlapWith: Array.isArray(f.overlapWith) ? f.overlapWith.map(String) : [],
                users, ...helpOf(f, users, true), ...padsOf(f), ...betweenOf(f),   // (🤝 helper · ⭐ type · 📚 study details)
+               ...(f.twice === false ? { twice: false } : {}),   // (⏱️ "make one day's session longer" switched off)
                oldCanOverlap: f.canOverlap === true };
     });
 
