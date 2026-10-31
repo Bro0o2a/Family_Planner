@@ -1189,7 +1189,7 @@ async function addAnswerFiles(wsId, files) {
     const free = giveFreeUp(now, wsId);
     if (free) writeData();
     render();
-    if (free > 0) { pointPop(free, colorsOf(userById(w.kid)).color); return toast(`⭐ +${free} for your answers! Now tap ✅ Check now.`, 3500, colorsOf(userById(w.kid)).color); }
+    if (free > 0) return toast("📎 The answers are uploaded! Now tap ✅ Check now: your points come with the check ⭐", 4000, colorsOf(userById(w.kid)).color);
     if (free < 0) return toast(freeCapText(now.subject), 6000);
     return toast("📎 The answers are uploaded! Now tap ✅ Check now.", 3500);
   }

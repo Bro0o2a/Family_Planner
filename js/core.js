@@ -547,6 +547,7 @@ function cleanData(d) {
     const type = defaultActType(f);
     let helper = typeof f.helper === "string" ? (parentIds.includes(f.helper) && !users.includes(f.helper) ? f.helper : "")
       : needsDadOf(f, users, wasFlexible) ? DAD : "";
+    if (type === "habit") return { type, helper, ...(f.must === true ? { must: true } : {}) };   // (⭐ a must-do routine: see mustMissed)
     if (type !== "study") return { type, helper };
     const studyMode = f.studyMode === "assisted" && helper ? "assisted" : "sole";
     if (studyMode === "sole") helper = "";
@@ -984,7 +985,7 @@ const DEFAULT_SUBJECTS = {
 // 🏫 📚 🎓 The school basics saved on the kid (in 👤 the profile), in the order a missing one is asked
 const BASIC_KEYS = ["school", "curriculum", "year"];
 // ⭐ An activity's TYPE for the score (see SCORE): [key, emoji, word]. "other" is never scored.
-const ACT_TYPES = [["study", "📚", "Study"], ["activity", "⚽", "Activity"], ["habit", "🌱", "Habit"], ["other", "🗂️", "Other"]];
+const ACT_TYPES = [["study", "📚", "Study"], ["activity", "⚽", "Activity"], ["habit", "🌱", "Routine"], ["other", "🗂️", "Other"]];
 const ACT_TYPE_KEYS = ACT_TYPES.map(t => t[0]);
 // An activity saved before types existed gets one, once (then it's kept): a name with "school" → "other" (on the calendar, no score),
 // everything else → "activity". An unknown type → "activity". (Hoisted: cleanData uses it while loading.)

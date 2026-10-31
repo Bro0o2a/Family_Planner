@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=148">
+<link rel="stylesheet" href="css/app.css?v=149">
 </head>
 <body>
 <!-- ============================================================
@@ -102,6 +102,7 @@
         <div><label class="small" for="fxBreak">☕ Break after</label><select id="fxBreak" class="pad-pick"></select></div>
       </div>
       <div class="study-box" id="fxStudy" hidden></div>
+      <label class="checkline" id="fxMustLine" hidden><input type="checkbox" id="fxMust"> ⭐ Must-do <small>(missed → the week's ⭐ Score is locked 🔒)</small></label>
       <div class="needs-line" id="fxDadLine">
         <label class="small" for="fxHelper" id="fxHelperLabel">🤝 A parent helps?</label><select id="fxHelper"></select>
         <small class="needs-help">That parent must be free at this time too.</small>
@@ -146,6 +147,7 @@
       </div>
       <p class="hint between-hint">Optional. Empty = any free time. <button type="button" class="linkbtn" id="flAnyTime">✕ Any time</button></p>
       <div class="study-box" id="flStudy" hidden></div>
+      <label class="checkline" id="flMustLine" hidden><input type="checkbox" id="flMust"> ⭐ Must-do <small>(missed → the week's ⭐ Score is locked 🔒)</small></label>
       <div class="needs-line" id="flDadLine">
         <label class="small" for="flHelper" id="flHelperLabel">🤝 A parent helps?</label><select id="flHelper"></select>
         <small class="needs-help">That parent must be free at this time too.</small>
@@ -776,22 +778,22 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=148"></script>
-<script src="js/screens.js?v=148"></script>
-<script src="js/points.js?v=148"></script>
-<script src="js/fun.js?v=148"></script>
-<script src="js/reports.js?v=148"></script>
-<script src="js/profile.js?v=148"></script>
-<script src="js/home.js?v=148"></script>
-<script src="js/activities.js?v=148"></script>
-<script src="js/calendar.js?v=148"></script>
-<script src="js/school.js?v=148"></script>
-<script src="js/ai.js?v=148"></script>
-<script src="js/study.js?v=148"></script>
-<script src="js/settings.js?v=148"></script>
-<script src="js/taps.js?v=148"></script>
-<script src="js/cloud.js?v=148"></script>
-<script src="js/news.js?v=148"></script>
-<script src="js/start.js?v=148"></script>
+<script src="js/core.js?v=149"></script>
+<script src="js/screens.js?v=149"></script>
+<script src="js/points.js?v=149"></script>
+<script src="js/fun.js?v=149"></script>
+<script src="js/reports.js?v=149"></script>
+<script src="js/profile.js?v=149"></script>
+<script src="js/home.js?v=149"></script>
+<script src="js/activities.js?v=149"></script>
+<script src="js/calendar.js?v=149"></script>
+<script src="js/school.js?v=149"></script>
+<script src="js/ai.js?v=149"></script>
+<script src="js/study.js?v=149"></script>
+<script src="js/settings.js?v=149"></script>
+<script src="js/taps.js?v=149"></script>
+<script src="js/cloud.js?v=149"></script>
+<script src="js/news.js?v=149"></script>
+<script src="js/start.js?v=149"></script>
 </body>
 </html>

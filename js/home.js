@@ -425,7 +425,7 @@ const TOUR_KID = [["✅", "Tick your tasks", "When you finish something, tap its
                   ["✨", "Grow your Spark", "All your points help your Spark grow. Can you reach the next level?"]];
 const TOUR_PARENT = [["📅", "Family calendar", "Everyone's week in one place. ✨ Plan my week fits all the activities together."],
                      ["🎒", "School coach", "Upload today's school work: 🤖 makes worksheets, checks the answers and tells you what to practise."],
-                     ["⭐", "Points & the kids' habits", "⭐ Score: the calendar's 📚 Study (65%), ⚽ Activity (25%) and 🌱 Habit (10%) items ticked ✅ this week. Points still grow the ✨ Spark."],
+                     ["⭐", "Points & the kids' habits", "⭐ Score (out of 100, each week): 📝 marks of the study-session worksheets (70) + ⚡ checked extra worksheets (each adds its mark, up to 10) + ✅ 📚 ⚽ 🌱 items ticked (20). Points still grow the ✨ Spark."],
                      ["⚙️", "Settings", "Turn features on or off for your family, and set up the people and the day."]];
 let tourShown = false;   // (once per opening of the app)
 function maybeShowTour() {

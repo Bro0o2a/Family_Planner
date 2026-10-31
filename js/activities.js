@@ -66,6 +66,7 @@ function drawStudy(p, keep) {
   const study = $(p + "Type").value === "study", box = $(p + "Study");
   const cur = keep || { subjectIds: $(p + "Study").querySelector(`input[name="${p}Sub"]`) ? pickedSubjects(p) : [], studyMode: $(p + "How") ? $(p + "How").value : "sole", helper: $(p + "Helper").value };
   box.hidden = !study;
+  $(p + "MustLine").hidden = $(p + "Type").value !== "habit";   // (⭐ Must-do: only on a 🌱 Routine)
   if (study) {
     const subs = studySubjects(p), kid = pickedWho(p).find(id => !isParentId(id)), ids = cur.subjectIds || [], all = ids.includes(ALL_SUBJECTS);
     const names = ids.map(id => subjectNameOf(pickedWho(p), id)).filter(Boolean);
@@ -91,6 +92,7 @@ function drawStudy(p, keep) {
 function pickedHelp(p) {
   const users = pickedWho(p), h = $(p + "Helper").value;
   const helper = h && isParentId(h) && !users.includes(h) ? h : "";
+  if (pickedType(p) === "habit") return { helper, ...($(p + "Must").checked ? { must: true } : {}) };   // (⭐ must-do routine)
   if (pickedType(p) !== "study") return { helper };
   const studyMode = $(p + "How").value === "assisted" ? "assisted" : "sole";
   if (studyMode === "assisted" && !helper) return { err: "🤝 With assistance: pick who helps." };
@@ -99,7 +101,7 @@ function pickedHelp(p) {
 }
 // Saving: the study fields only on a Study activity, and no older "Needs Dad"
 function putHelp(act, help) {
-  delete act.needsDad; delete act.subjectId; delete act.subjectIds; delete act.studyMode;
+  delete act.needsDad; delete act.must; delete act.subjectId; delete act.subjectIds; delete act.studyMode;
   return Object.assign(act, help);
 }
 ["fx", "fl"].forEach(p => {
@@ -273,6 +275,7 @@ function startEditFixed(id) {
   editingFixed = id;
   $("fxName").value = f.name;
   $("fxType").value = actTypeOf(f); typeTouched.fx = true;
+  $("fxMust").checked = !!f.must;
   $("fxDays").querySelectorAll("input").forEach(c => c.checked = f.days.includes(Number(c.value)));
   $("fxStart").value = f.start;
   $("fxEnd").value = f.end;
@@ -295,6 +298,7 @@ function resetFixedForm() {
   editingFixed = null;
   $("fxName").value = "";
   $("fxType").value = "activity"; typeTouched.fx = false;
+  $("fxMust").checked = false;
   $("fxDays").querySelectorAll("input").forEach(c => c.checked = Number(c.value) < 5); // Mon–Fri
   $("fxStart").value = "07:30";
   $("fxEnd").value = "14:00";
@@ -368,6 +372,7 @@ function startEditFlex(id) {
   editingFlex = id;
   $("flName").value = f.name;
   $("flType").value = actTypeOf(f); typeTouched.fl = true;
+  $("flMust").checked = !!f.must;
   $("flDur").value = f.duration;
   $("flTimes").value = f.times;
   $("flTwice").checked = f.twice !== false;
@@ -391,6 +396,7 @@ function resetFlexForm() {
   editingFlex = null;
   $("flName").value = "";
   $("flType").value = "activity"; typeTouched.fl = false;
+  $("flMust").checked = false;
   $("flDur").value = 45;
   $("flTimes").value = 3;
   $("flTwice").checked = true;
