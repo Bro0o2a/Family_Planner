@@ -511,16 +511,23 @@ function ticksTally(id) {
   });
   return { planned, done };
 }
-// ⭐ Must-do habits (⭐ Kids' habits, Must-do ticked) missed this week: a day (from the day it became a Must-do, until yesterday)
-// when it wasn't fully done (all 5 prayers, all drops …) → [{ name, date }]. Any → the week's ⭐ Score is locked 🔒 (0).
-// (Today never locks: the kid has until midnight. Turned off for that kid / removed: not counted.)
+// ⭐ Must-do habits (⭐ Kids' habits, Must-do ticked): how much of them was done this week, from the day each became a Must-do
+// until yesterday (today never counts: the kid has until midnight). Each habit-day counts its part done: 🕌 3 of 5 prayers = 0.6,
+// 💧 4 of 6 drops = 0.67, a one-tick habit 1 or 0. → { ratio (0–1, 1 when nothing is due yet), due, done, missed: [{ name, date }] }
+// The week's ⭐ Score = the total × ratio (✖️ the must-do multiplier).
 function mustMissed(id) {
-  const today = todayYmd(), out = [];
+  const today = todayYmd(), missed = [];
+  let due = 0, done = 0;
   data.habits.filter(h => h.must && !h.gone && !h.off.includes(id)).forEach(h => {
-    for (let d = h.must > data.points.week ? h.must : data.points.week; d < today && d < weekEnd(); d = addDaysYmd(d, 1))
-      if (!habitDone(h, data.habitMarks[habitKey(d, h.id, id)])) out.push({ name: `${h.emoji} ${h.name}`, date: d });
+    for (let d = h.must > data.points.week ? h.must : data.points.week; d < today && d < weekEnd(); d = addDaysYmd(d, 1)) {
+      const v = data.habitMarks[habitKey(d, h.id, id)];
+      const part = h.kind === "prayers" ? (Array.isArray(v) ? v.filter(Boolean).length : 0) / PRAYERS.length
+        : h.kind === "water" ? Math.min(WATER_DROPS, Number(v) || 0) / WATER_DROPS : v === true ? 1 : 0;
+      due++; done += part;
+      if (part < 1) missed.push({ name: `${h.emoji} ${h.name}`, date: d });
+    }
   });
-  return out.sort((a, b) => a.date.localeCompare(b.date));
+  return { ratio: due ? done / due : 1, due, done, missed: missed.sort((a, b) => a.date.localeCompare(b.date)) };
 }
 function scoreOf(id) {
   const sessions = studySessions(id), sp = studyParts(sessions);
@@ -529,9 +536,9 @@ function scoreOf(id) {
   const subs = { marks: mk.avg || 0, extra: Math.round(mk.extraPts / EXTRA_MAX * 100), ticks: tk.planned ? Math.round(tk.done / tk.planned * 100) : 0 };
   const has = { marks: mk.count > 0, extra: true, ticks: tk.planned > 0 };   // (⚡ always counts in the max: extras are how to reach 100)
   const missed = mustMissed(id), base = Math.round(SCORE_WEIGHTS.marks * subs.marks + mk.extraPts + SCORE_WEIGHTS.ticks * subs.ticks);
-  const overall = missed.length ? 0 : base;   // 🔒 a missed must-do locks the week's score
+  const overall = Math.round(base * missed.ratio);   // ✖️ the total × how much of the ⭐ must-dos was done
   const max = Math.round(100 * Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + (has[k] ? SCORE_WEIGHTS[k] : 0), 0));
-  return { ...subs, study, level: lv.score, activity: activityScore(id), habit: habitScore(id), has, base, overall, max, locked: missed,
+  return { ...subs, study, level: lv.score, activity: activityScore(id), habit: habitScore(id), has, base, overall, max, must: missed,
            sp: sessions.length ? sp : null, free, levels: lv.subs, extra: { count: 0, bonus: 0 }, marksCount: mk.count, extraCount: mk.extraCount, extraPts: mk.extraPts, tk };
 }
 // "37 / 90"
@@ -547,9 +554,10 @@ function subBarsHtml(s) {
 }
 // The overall, big ("⭐ Score 37 / 90 ⚡ +6"), with the bars under it
 const scoreBlockHtml = s => `<div class="score-total"><small>⭐ Score</small><b>${s.overall}</b><small>/ ${s.max}${s.extra && s.extra.bonus ? ` · ⚡ +${s.extra.bonus}` : ""}</small></div>${lockedHtml(s)}${subBarsHtml(s)}`;
-// 🔒 "Locked: 🪥 Brush teeth (Mon) missed" (would be 82 without it)
-const lockedHtml = s => s.locked && s.locked.length ? `<div class="score-parts" style="color:#b91c1c;font-weight:700">🔒 Locked: ${s.locked.slice(0, 4).map(x =>
-  `${safe(x.name)} (${DAYS[(new Date(x.date + "T12:00:00Z").getUTCDay() + 6) % 7].slice(0, 3)})`).join(", ")}${s.locked.length > 4 ? " …" : ""} missed. Must-dos come first! (${s.base} without it)</div>` : "";
+// ✖️ "⭐ Must-dos: 18 of 20 done (90%) → 90 × 0.9 = 81 · missed: 🪥 Brush teeth (Mon)"
+const lockedHtml = s => s.must && s.must.due ? `<div class="score-parts" style="${s.must.ratio < 1 ? "color:#b91c1c;font-weight:700" : ""}">⭐ Must-dos: ${
+  Math.round(s.must.ratio * 100)}% done${s.must.ratio < 1 ? ` → ${s.base} × ${Math.round(s.must.ratio * 100) / 100} = ${s.overall}. Missed: ${s.must.missed.slice(0, 4).map(x =>
+  `${safe(x.name)} (${DAYS[(new Date(x.date + "T12:00:00Z").getUTCDay() + 6) % 7].slice(0, 3)})`).join(", ")}${s.must.missed.length > 4 ? " …" : ""}` : " ✓"}</div>` : "";
 // Everyone's score this week (kept the old name: the leaderboard, ⭐ star, Hall of Stars, history and reports all read it):
 // { id: { fair: the OVERALL, max, study, activity, habit, has, raw: the old points (only for showing), possible: max } }
 // (👨‍👩‍👧 only kids: parents have no score)
