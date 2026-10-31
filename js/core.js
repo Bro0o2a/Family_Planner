@@ -391,7 +391,8 @@ function emptyData() {
     // When the day starts and ends. Free time = this minus fixed activities.
     // weekendOwn = true → Saturday and Sunday use weekendStart / weekendEnd instead.
     myDay: { start: "08:00", end: "21:00", weekendOwn: false, weekendStart: "08:00", weekendEnd: "21:00" },
-    starAt: { day: 4, time: "18:00" },   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
+    starAt: { day: 4, time: "18:00" },
+    extraLimit: 3,   // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
     plan: null,     // the week Dad planned with "Plan my week" (null = not planned yet)
     // Points: which activities are done this week. Starts again every Monday.
@@ -760,6 +761,7 @@ function cleanData(d) {
 
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
+  if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);   // 🤖 (otherwise the default 3)
   // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
   if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
     clean.starAt = { day: d.starAt.day, time: d.starAt.time };

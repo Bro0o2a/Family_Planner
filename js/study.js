@@ -822,6 +822,7 @@ async function makePdf(node, fileName, opts = {}) {
     const top = () => { if (!head) return M; pdf.addImage(head.url, "JPEG", M, M, head.w, head.h); return M + head.h + GAP; };
     let y = top();
     for (const el of parts) {
+      if (el.classList && el.classList.contains("pdf-break")) { pdf.addPage(); y = top(); continue; }   // (✏️ the answer sheet: a new page)
       if (!el.getBoundingClientRect().height) continue;
       const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: "#ffffff", logging: false, useCORS: true });
       let w = el.getBoundingClientRect().width * mmPerPx, hgt = el.getBoundingClientRect().height * mmPerPx;
@@ -873,7 +874,10 @@ function pdfReadyBar(file) {
   setTimeout(() => bar.remove(), 30000);
 }
 // 📄 A worksheet (never the answers) and 📋 the parents' brief
-const worksheetPdf = w => makePdf(wsSheetNode(w, false), pdfName(kidNameOf(w.kid), w.subject, w.title));
+// 📄 The questions (compact) + ✏️ the ANSWER SHEET on its own last page
+const worksheetPdf = w => { const node = wsSheetNode(w, false, true);
+  node.append(h("div", { class: "pdf-break" }), wsAnswerSheetNode(w));
+  return makePdf(node, pdfName(kidNameOf(w.kid), w.subject, w.title)); };
 const answerKeyPdf = w => makePdf(wsKeyNode(w), pdfName(kidNameOf(w.kid), w.subject, `${w.title} answer key`));   // 🔑 (only the answers)
 const briefPdf = kid => { const b = schoolOf(kid).brief; if (b) makePdf(briefNode(kid, b), pdfName(kidNameOf(kid), "Brief for parents", b.date)); };
 
@@ -980,9 +984,12 @@ function matchNode(q, ar, showAns) {
     h("td", { class: "wm-r" }, m.right[i] != null ? [h("b", null, `${m.letters[i]}.`), " ", m.right[i]] : "")))));
 }
 // 🇦🇪 An Arabic worksheet: right-to-left · 🌐 question_ar: small and grey under its question, right-to-left · the header: Name · Subject · Date
-function wsSheetNode(w, showAns) {
+// compact (📄 the PDF): small, no writing lines, choices with letters A B C …: the kid answers on the ✏️ ANSWER SHEET (the last page)
+const OPT_LETTERS = "ABCDEFGHIJ";
+const isChoiceQ = q => q.options.length > 0 && q.kind !== "matching" && q.kind !== "ordering";
+function wsSheetNode(w, showAns, compact = false) {
   const rtl = isArabicWs(w);
-  return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+  return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsHeaderNode(w),
     h("div", { class: "ws-title" }, w.title),
     h("div", { class: "ws-sub" }, [w.subject, w.topics.join(", ")].filter(Boolean).join(" · ")),
@@ -994,11 +1001,33 @@ function wsSheetNode(w, showAns) {
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
-        match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map(o => h("li", { class: "ws-opt" },
-          h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
-        match ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
+        match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
+          compact && isChoiceQ(q) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
+            : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
+        match || compact ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
       h("span", { class: "ws-pts" }, ptsText(q.points)))]; })),
+    compact ? h("div", { class: "ws-to-sheet" }, "✏️ Write your answers on the ANSWER SHEET (the last page).")
+      : h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
+}
+// ✏️ The ANSWER SHEET (the PDF's last page, always ONE page): each question's number + bubbles (choices), boxes (matching,
+// ordering) or 1–3 lines. The kid uploads only this page → fewer photos for ✅ Check now.
+function wsAnswerSheetNode(w) {
+  const rtl = isArabicWs(w);
+  const cell = q => {
+    const n = h("b", { class: "as-num" }, `${q.number}.`);
+    if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
+    if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
+      return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, Array.from({ length: k }, (_, i) => h("span", { class: "as-pair" }, `${i + 1}→`, h("i", { class: "as-box" }))))); }
+    if (q.kind === "ordering") return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map(() => h("i", { class: "as-box" }))));
+    const lines = Math.max(1, Math.min(3, q.answer_lines || 1));
+    return h("div", { class: "as-q as-wide" }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
+  };
+  return h("div", { class: "ws-sheet ws-answers" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+    h("div", { class: "as-title" }, "✏️ ANSWER SHEET"),
+    wsHeaderNode(w),
+    h("div", { class: "ws-sub" }, w.title),
+    h("div", { class: "as-grid" }, w.questions.map(cell)),
     h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // 🔑 May the answers be seen? A parent's device: always. A kid (a kid's device, or a kid using the app): once the worksheet has a
@@ -1231,8 +1260,13 @@ async function checkWorksheet(wsId) {
   try { files = await aiFilesFor(ids.map((f, i) => ({ name: s.files[f].name, url: urls[i] }))); }
   catch (err) { return toast(aiFileError(err), 6000); }
   const lv = learnRead(w.kid, w.subject);   // (🧠 each question's skill and difficulty, and the level before this worksheet)
-  const r = await callAi("check", { ...kidInfo(w.kid), title: w.title, ...(lv ? { level: lv.level } : {}),
-    answerKey: w.questions.map(q => ({ number: q.number, answer: q.answer, points: q.points,
+  // (✏️ the PDF's ANSWER SHEET: the kid writes the question number + the letter of a choice, so the key says the letter too)
+  const keyOf = q => { if (!isChoiceQ(q)) return q.answer; const t = x => String(x || "").trim().toLowerCase(), a = t(q.answer);
+    const i = q.options.findIndex(o => t(o) === a || (a && (t(o).startsWith(a) || a.startsWith(t(o)))));
+    return i >= 0 ? `${OPT_LETTERS[i] || i + 1}) ${q.answer}` : q.answer; };
+  const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, numbers in boxes for matching / ordering)`,
+    answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), points: q.points,
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}) })), files }, "check|" + wsId);
   if (!r) return;
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));

@@ -630,6 +630,26 @@
   .fs-end ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; }
   .fs-close { margin: 6px 0 2px; text-align: center; font-size: 20px; font-weight: 800; }
   .pdf-stage .ai-print { width: 703px; }
+  /* 📄 A worksheet PDF: compact questions (no writing lines, choices with letters) + ✏️ the ANSWER SHEET page */
+  .pdf-stage .ws-compact { font-size: 15px; padding: 0; box-shadow: none; }
+  .pdf-stage .ws-compact .ws-q { padding: 6px 0; gap: 8px; }
+  .pdf-stage .ws-compact .ws-num { width: 26px; height: 26px; font-size: 14px; background: #fff; color: #000; border: 1.5px solid #333; }
+  .pdf-stage .ws-compact .ws-opts { margin-top: 4px; gap: 2px 14px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .pdf-stage .ws-compact .ws-title { font-size: 22px; }
+  .ws-letter { flex: none; min-width: 22px; }
+  .ws-to-sheet { margin: 12px 0 0; padding: 8px 12px; border: 2px dashed #333; border-radius: 12px; font-weight: 800; text-align: center; }
+  .ws-answers { font-size: 15px; padding: 0; box-shadow: none; }
+  .as-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+  .as-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; margin-top: 10px; }
+  .as-q { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1.5px dashed #ccc; }
+  .as-q.as-wide { grid-column: 1 / -1; align-items: flex-start; }
+  .as-num { min-width: 30px; font-size: 17px; }
+  .as-bubbles { display: flex; flex-wrap: wrap; gap: 8px 10px; }
+  .as-bubble { width: 28px; height: 28px; border: 2px solid #333; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+  .as-pair { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; }
+  .as-box { display: inline-block; width: 26px; height: 26px; border: 2px solid #333; border-radius: 5px; }
+  .as-lines { flex: 1; }
+  .as-line { height: 30px; border-bottom: 1.5px solid #888; }
   .pdf-ready { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
                max-width: 480px; margin: 0 auto; padding: 10px 14px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); font-weight: 800; }
   .pdf-ready span { flex: 1 1 140px; }

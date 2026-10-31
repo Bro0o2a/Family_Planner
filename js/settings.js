@@ -10,6 +10,7 @@ function drawSettings() {
   $("maxTogether").value = data.maxTogether;
   $("starDay").innerHTML = DAYS.map((d, i) => `<option value="${i}" ${i === starTime().day ? "selected" : ""}>${d}</option>`).join("");
   $("starClock").value = starTime().time;
+  $("extraLimit").value = String(data.extraLimit || 3);
   fillPrayer();
   drawUsers();
   drawHabitList();
@@ -110,6 +111,9 @@ $("maxTogether").addEventListener("change", () => {
   data.points.week = pointsWeekOf(new Date());
   changed();
 }));
+
+// 🤖 Extra worksheets per kid per day (3–5)
+$("extraLimit").addEventListener("change", () => { const n = Number($("extraLimit").value); if ([3, 4, 5].includes(n)) data.extraLimit = n; changed(); });
 
 // ---------- 🕌 Prayer times ----------
 // On / Off and the reminder are each person's own choice: kept right away (on all their devices).

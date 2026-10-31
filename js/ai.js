@@ -722,6 +722,12 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
   //  ⚡ instant + files = only about the file (never kept); avoid = questions already given; focus = the skills to practise.
   //  Those go to the AI only: the rest of extra is saved with the worksheet.)
   const { files, instant, sections, avoid, focus, ...keep } = extra || {};
+  // 🤖 A kid's EXTRA worksheets (not in a planned study session): at most data.extraLimit a day (⚙️ Settings: 3–5, the AI costs money)
+  if (!keep.session && !isParentId(me) && !["level_check", "placement"].includes(mode)) {
+    const lim = data.extraLimit || 3, today = todayYmd();
+    const made = Object.values(aiDocs.worksheets).filter(x => x && x.kid === kid && !x.session && x.date === today).length;
+    if (made >= lim) { toast(`🌟 You've made today's ${lim} extra worksheets. Great work! More tomorrow 📚`, 5000); return null; }
+  }
   const minutes = keep.minutes >= 5 && keep.minutes <= 240 ? Math.round(keep.minutes) : 0;
   const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: MODE_NOTES[mode],
                                         mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
