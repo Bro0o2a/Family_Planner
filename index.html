@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=149">
+<link rel="stylesheet" href="css/app.css?v=150">
 </head>
 <body>
 <!-- ============================================================
@@ -289,6 +289,16 @@
         </div>
         <p class="hint" style="margin:8px 0 0">One person is only in two activities at once if you allowed them together.
           Different people can always do different things at the same time.</p>
+      </div>
+      <!-- ⭐ When the Shining Star is announced (parents) -->
+      <div class="card" style="margin-top:18px">
+        <h2>🌟 Shining Star announcement</h2>
+        <div class="row" style="margin-top:10px">
+          <div><label class="small" for="starDay">Day</label><select id="starDay"></select></div>
+          <div><label class="small" for="starClock">Time (Dubai)</label><input type="time" id="starClock" value="18:00"></div>
+        </div>
+        <p class="hint" style="margin:8px 0 0">At this time everyone gets a pop-up with the results and the ⭐ Shining Star.
+          The new week (scores back to zero) starts at midnight after it. Changing it starts the new count from today's week.</p>
       </div>
       <!-- 🕌 Prayer times: each person's own choice (every person can open Settings for this card) -->
       <div class="card for-all" style="margin-top:18px">
@@ -777,22 +787,22 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=149"></script>
-<script src="js/screens.js?v=149"></script>
-<script src="js/points.js?v=149"></script>
-<script src="js/fun.js?v=149"></script>
-<script src="js/reports.js?v=149"></script>
-<script src="js/profile.js?v=149"></script>
-<script src="js/home.js?v=149"></script>
-<script src="js/activities.js?v=149"></script>
-<script src="js/calendar.js?v=149"></script>
-<script src="js/school.js?v=149"></script>
-<script src="js/ai.js?v=149"></script>
-<script src="js/study.js?v=149"></script>
-<script src="js/settings.js?v=149"></script>
-<script src="js/taps.js?v=149"></script>
-<script src="js/cloud.js?v=149"></script>
-<script src="js/news.js?v=149"></script>
-<script src="js/start.js?v=149"></script>
+<script src="js/core.js?v=150"></script>
+<script src="js/screens.js?v=150"></script>
+<script src="js/points.js?v=150"></script>
+<script src="js/fun.js?v=150"></script>
+<script src="js/reports.js?v=150"></script>
+<script src="js/profile.js?v=150"></script>
+<script src="js/home.js?v=150"></script>
+<script src="js/activities.js?v=150"></script>
+<script src="js/calendar.js?v=150"></script>
+<script src="js/school.js?v=150"></script>
+<script src="js/ai.js?v=150"></script>
+<script src="js/study.js?v=150"></script>
+<script src="js/settings.js?v=150"></script>
+<script src="js/taps.js?v=150"></script>
+<script src="js/cloud.js?v=150"></script>
+<script src="js/news.js?v=150"></script>
+<script src="js/start.js?v=150"></script>
 </body>
 </html>

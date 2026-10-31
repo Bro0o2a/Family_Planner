@@ -171,7 +171,7 @@ const savedDay = () => CAL_BACK;
 // When the app comes back after a while (10+ minutes away), or at midnight while it's open: "today" is picked again everywhere
 let dayAway = 0, lastToday = null;   // (set on the first check)
 function backToToday() {
-  viewDay = CAL_BACK; habitDay = todayIndex(); lastToday = todayYmd();
+  viewDay = CAL_BACK; habitDay = weekIndex(); lastToday = todayYmd();
   calScrollFresh();
   if (exists(me)) render();
   scrollStripToToday();

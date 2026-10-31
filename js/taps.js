@@ -61,7 +61,7 @@ document.addEventListener("click", e => {
   if ("backupyes" in ds) { closeBackupBox(); return pickBackupFile(true); }
   // ⭐ Good habits: a tick, and ◀ ▶ for earlier days this week
   if (ds.hb) { const [who, id, part] = ds.hb.split("|"); toggleHabit(who, id, Number(part), t); return popButton(`[data-hb="${ds.hb}"]`); }
-  if (ds.hbday) { habitDay = Math.max(0, Math.min(todayIndex(), habitDay + Number(ds.hbday))); return render(); }
+  if (ds.hbday) { habitDay = Math.max(0, Math.min(weekIndex(), habitDay + Number(ds.hbday))); return render(); }
   // 🎁 A parent's weekly prize
   if ("pzgive" in ds) return givePrize();
   // 🏠 Today: ☰ More, 👋 the tour, 📅 the family calendar; ☰ More pages (🗣️ 📱 📗 🧹)

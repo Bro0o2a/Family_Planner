@@ -161,7 +161,7 @@ function kidTodayHtml(k) {
 function drawKidPage() {
   if (!isParentDevice() || !exists(kidPage) || isParentId(kidPage)) return go("home");
   const k = userById(kidPage), c = colorsOf(k), sc = scoreOf(k.id), st = weekStats(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
-  const items = kidsWorkItems(), mine = items.filter(x => x.kid === k.id), want = weekItem("want", k.id);
+  const items = kidsWorkItems(), mine = items.filter(x => x.kid === k.id), want = wantItem(k.id);
   $("kidBody").innerHTML = `
     <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
       <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}</h1>

@@ -35,7 +35,7 @@ function go(name, fromHistory) {
   // Tapping "📅 Calendar" while already on it goes back to that first chip.
   if (name === "mine" && screen !== "mine") restoreMine();
   else if (name === "mine") calWho = null;
-  if ((name === "home" || name === "mine") && screen !== name) habitDay = todayIndex();     // habits: start on today
+  if ((name === "home" || name === "mine") && screen !== name) habitDay = weekIndex();     // habits: start on today
   if (name !== screen) { editMode = false; editUndo = []; }   // leaving the page ends "Edit calendar"
   screen = name;
   trackScreen(name);   // 📊 screen_view (the page's fixed name only)
@@ -124,8 +124,9 @@ function render() {
   // 📅 A new day: the date that comes into the plan's window (today + 6) is planned (a parent's device only, see rollPlan)
   if (rollPlan()) writeData("auto");
   if (!draft && exists(me) && updateReach()) writeData("auto");   // ⚖️ when each fair score was reached (a tie: who got there first)
-  maybeDecideStar();   // ⭐ Friday 6 PM: the Shining Star is decided (🎁 Saturday evening: a reminder when no gift is chosen)
+  maybeDecideStar();   // ⭐ the announce day + time (⚙️ Settings): the Shining Star is decided (🎁 next evening: a reminder when no gift is chosen)
   if (!draft && exists(me) && seedHall()) writeData("auto");   // 🏆 the first 3 stars, saved once
+  if (!draft) maybeShowStar();   // 📣 the announcement pop-up (once on each device)
   if (screen === "start") drawStart();
   if (screen === "points") drawPoints();
   if (screen === "home") drawHome();

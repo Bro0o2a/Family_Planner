@@ -11,7 +11,7 @@ function openReport() {
   go("report");
 }
 function reportRange() {
-  if (rpRange === "week") return { from: data.points.week, to: weekEnd(), days: todayIndex() + 1, label: "This week" };
+  if (rpRange === "week") return { from: data.points.week, to: weekEnd(), days: weekIndex() + 1, label: "This week" };
   const now = new Date(), from = ymd(new Date(now.getFullYear(), now.getMonth(), 1)), to = ymd(new Date(now.getFullYear(), now.getMonth() + 1, 1));
   return { from, to, days: now.getDate(), label: now.toLocaleDateString("en-GB", { month: "long", year: "numeric" }) };
 }

@@ -26,7 +26,7 @@ function birthdayInfo(b) {
 function weekStats(id) {
   const from = data.points.week, to = weekEnd(), planned = plannedCount(id), done = (activityPointsByUser()[id] || 0) / POINTS_EACH;
   const ticks = Object.entries(data.habitMarks).filter(([k, v]) => { const [date, , who] = k.split("|"); return who === id && date >= from && date < to && v; }).length;
-  const moods = Array.from({ length: todayIndex() + 1 }, (_, d) => { const e = diaryOf(id, ymd(dayDate(d))); return { day: SHORT[d], face: e ? moodFace(e.mood) : "" }; });
+  const moods = Array.from({ length: weekIndex() + 1 }, (_, d) => { const e = diaryOf(id, ymd(dayDate(d))); return { day: SHORT[weekdayOf(ymd(dayDate(d)))], face: e ? moodFace(e.mood) : "" }; });
   return { pct: planned ? Math.min(100, Math.round(done / planned * 100)) : null, done, planned, ticks, moods };
 }
 function drawMe() {
@@ -320,9 +320,9 @@ function encMessages() {
     out.push({ text: `Get ${need} more points and ${u.sparkName || "your Spark"} grows to Lv ${L + 1}! ✨`, go: "spark" });
   }
   if (stars().includes(me)) out.push({ text: `You're the ⭐ Shining Star this week, ${first(u.name)}! 🌟`, go: "points" });
-  else if (totals[me] > 0 && rank === 1 && !starDecided()) out.push({ text: `🔥 You're in the lead, ${first(u.name)}! Keep going till Friday ⭐`, go: "points" });
+  else if (totals[me] > 0 && rank === 1 && !starDecided()) out.push({ text: `🔥 You're in the lead, ${first(u.name)}! Keep going till ${starWhenText()} ⭐`, go: "points" });
   else if (rank > 1) out.push({ text: `You're ${ordinal(rank)} on the board, the ⭐ is so close!`, go: "points" });
-  if (starDecided() && stars().includes(me) && !weekItem("want", me)) out.push({ text: "You're the ⭐ Shining Star! Choose your gift 🎁", go: "prize" });
+  if (stars().includes(me) && !wantItem(me)) out.push({ text: "You're the ⭐ Shining Star! Choose your gift 🎁", go: "prize" });
   const left = scored ? todayItems(me).filter(x => !isDone(todayYmd(), x.id, me)).length : 0;
   if (left) out.push({ text: `${left} ${left === 1 ? "task" : "tasks"} left today, you can do it 💪`, go: "tasks" });
   if (isParentDevice() && kidsList().length) out.push({ text: "See how the kids are doing this week 📊", go: "report" });
@@ -466,12 +466,14 @@ function showLevelUp(id, L) {
 // =====================================================================
 let ptEdit = null;   // the small form open under a row: { id, kind: "want" | "note" }
 const weekItem = (map, id) => data.points[map][`${data.points.week}|${id}`] || null;
+// 🎁 The star's gift: kept under the week the star was announced for (so they can still choose it after the new week starts)
+const wantItem = id => data.points.want[`${starWeek()}|${id}`] || null;
 // 🎁 The chip: "🎁 Ice cream" (gold when approved; "🏆 You won: …!" for the Shining Star). Tap: the person changes it, a parent ✅ approves / changes it.
 // (🎁 The ⭐ Shining Star is decided on FRIDAY 6 PM (Dubai time), not during the week: see STAR_HOUR.
 //  Until then nobody has a gift picker: the one in 1st place sees "🔥 You're in the lead!". After it, ONLY the star gets "🎁 Choose my gift".)
 function wantChipHtml(id, isStar) {
-  if (!starDecided() || !isStar) return "";   // (a choice saved earlier in the week is kept, just not shown)
-  const w = weekItem("want", id), parent = isParentDevice();
+  if (!isStar) return "";   // (⭐ only the announced star)
+  const w = wantItem(id), parent = isParentDevice();
   if (!w) return id === me ? `<button class="pt-want add star" data-want="${safe(id)}">🎁 Choose my gift</button>` : `<span class="pt-want locked">🎁 Choosing a gift…</span>`;
   const text = `🏆 My gift: ${safe(w.text)}${w.ok ? "" : " <small>⏳</small>"}`;
   return id === me || parent ? `<button class="pt-want ok" data-want="${safe(id)}" aria-label="Gift: ${safe(w.text)}${w.ok ? ", approved" : ", waiting for OK"}">${text}</button>`
@@ -480,36 +482,60 @@ function wantChipHtml(id, isStar) {
 // ⭐ The star: decided once, on Friday at 6 PM Dubai time (the best ⚖️ fair score then; a tie: who got there first), on any device.
 // data.points.prizeMsg = "monday" → { star: "id", at, reminded? }   (reminded = the parents got the Saturday-evening reminder)
 const STAR_HOUR = 18, GIFT_REMIND_HOUR = 18;
+// ⭐ The announce moment: the LAST day of this points week (its weekday = data.starAt.day) at data.starAt.time (Dubai)
+const starTime = () => data.starAt || { day: 4, time: "18:00" };
+const starMinutes = () => { const [h, m] = starTime().time.split(":").map(Number); return h * 60 + m; };
 function starDecided() {
-  const d = dubaiNow(), friday = ymd(dayDate(4));   // (this points week's Friday)
-  return d.date > friday || (d.date === friday && d.hour >= STAR_HOUR) || !!data.points.prizeMsg[data.points.week];
+  const d = dubaiNow(), last = addDaysYmd(data.points.week, 6);
+  return d.date > last || (d.date === last && dubaiMinutes() >= starMinutes()) || !!data.points.prizeMsg[data.points.week];
 }
+// "Friday 6:00 PM"
+const starWhenText = () => `${DAYS[starTime().day]} ${clock(starMinutes(), true)}`;
 function maybeDecideStar() {
   if (!exists(me) || hasDraft()) return;
   const week = data.points.week, rec = data.points.prizeMsg[week];
-  if (!rec) {
-    if (!starDecided()) return;
-    const win = leaders();
-    if (!win.length) return;
-    data.points.prizeMsg[week] = { star: win.join(",").slice(0, 200), text: "", at: new Date().toISOString() };
-    hallSave(week, win[0]);   // 🏆 into the Hall of Stars
-    return writeData("auto");
+  // 🎁 Last week's star hasn't chosen a gift by 6 PM of the new week's first day (or later): one gentle reminder for the parents
+  const pw = addDaysYmd(week, -7), prec = data.points.prizeMsg[pw];
+  if (prec && !prec.reminded && dubaiNow().hour >= GIFT_REMIND_HOUR && !(cloud.user && !(feed.ref && cloud.fb))) {
+    const waiting = stars(pw).filter(id => !data.points.want[`${pw}|${id}`]);
+    prec.reminded = true;
+    if (waiting.length) addNews(waiting.map(id => newsItem("school", `⭐ ${userById(id).name} is the Shining Star and hasn't picked a gift yet. Maybe ask what they'd like? 🎁`, "🎁 a gift reminder", id)));
+    writeData("auto");
   }
-  // 🎁 No gift chosen by Saturday evening: one gentle reminder for the parents
-  const d = dubaiNow(), sat = ymd(dayDate(5));
-  if (rec.reminded || !(d.date > sat || (d.date === sat && d.hour >= GIFT_REMIND_HOUR))) return;
-  if (cloud.user && !(feed.ref && cloud.fb)) return;   // (the family's news isn't ready yet: later, so it isn't lost)
-  const waiting = stars().filter(id => !weekItem("want", id));
-  rec.reminded = true;
-  if (waiting.length) addNews(waiting.map(id => newsItem("school", `⭐ ${userById(id).name} is this week's Shining Star and hasn't picked a gift yet. Maybe ask what they'd like? 🎁`, "🎁 a gift reminder", id)));
+  if (rec || !starDecided()) return;
+  const win = leaders();
+  if (!win.length) return;
+  const fair = fairScores();   // (📣 the results as they were at the announcement: everyone sees the same in the pop-up)
+  data.points.prizeMsg[week] = { star: win.join(",").slice(0, 200), text: "", at: new Date().toISOString(),
+                                 board: fairOrder(fair).map(u => ({ id: u.id, s: fair[u.id] })) };
+  hallSave(week, win[0]);   // 🏆 into the Hall of Stars
   writeData("auto");
+}
+// 📣 The announcement pop-up: once on every device, for everyone, when a new ⭐ Shining Star was announced
+function maybeShowStar() {
+  const w = starWeek(), rec = data.points.prizeMsg[w];
+  if (!exists(me) || !rec || !rec.board || !$("kModal").hidden || screen === "start") return;
+  let seen = ""; try { seen = localStorage.getItem("starSeen") || ""; } catch (e) {}
+  if (seen === w) return;
+  try { localStorage.setItem("starSeen", w); } catch (e) { return; }   // (no storage: never pop up again and again)
+  const win = stars(w), medal = i => ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
+  const rows = rec.board.filter(x => exists(x.id)).map((x, i) => { const u = userById(x.id);
+    return `<div class="k-row" style="display:flex;justify-content:space-between;gap:12px;padding:6px 4px;font-size:1.1em${win.includes(x.id) ? ";font-weight:800" : ""}">
+      <span>${medal(i)} ${safe(u.emoji)} ${safe(u.name)}</span><b>${x.s}</b></div>`; }).join("");
+  $("kCard").style.cssText = "--soft:#fef3c7;--ink:#92400e";
+  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">🌟</div><div class="nm">Shining Star of the Week!</div></div>
+    <p style="text-align:center;font-size:1.3em;margin:6px 12px"><b>${win.map(id => `${safe(userById(id).emoji)} ${safe(userById(id).name)}`).join(" & ")}</b> 🎉</p>
+    <div style="margin:8px 16px">${rows}</div>
+    <p class="hint" style="text-align:center;margin:6px 16px">A new week starts at midnight. Good luck everyone! 💪${win.includes(me) ? "<br>🎁 Choose your gift in ⭐ Points!" : ""}</p>
+    <button class="k-ok" id="kOk">Yay! 🎉</button>`;
+  $("kModal").hidden = false;
 }
 // 🎁 Choose my gift (only the ⭐ star, from Friday 6 PM): big option buttons (kids' / parents'), or ✏️ type my own (40 letters).
 // Each choice sends a 💌 message to ALL the parents right away (a "school" news line: only parents see those).
 const PRIZES_KID = ["🍦 Ice cream", "🎮 1 hour games", "🍕 Pick dinner", "🎬 Movie night pick", "🛝 Park trip", "🧸 Small toy", "🌙 Stay up 30 min", "📚 New book"];
 const PRIZES_PARENT = ["☕ Coffee out", "😴 Sleep in", "🍽️ Dinner out", "💆 Spa time", "📺 Pick the movie", "🧹 Day off chores", "🎁 Small gift"];
 function wantFormHtml(id) {
-  const w = weekItem("want", id), parent = isParentDevice() && id !== me, own = id === me;
+  const w = wantItem(id), parent = isParentDevice() && id !== me, own = id === me;
   const opts = own ? (isParentId(id) ? PRIZES_PARENT : PRIZES_KID) : [];
   return `<div class="pt-form"><label class="small" for="wantText">🎁 ${own ? "You're the ⭐ Shining Star! Choose your gift" : `${safe(userById(id).name)}'s gift`}</label>
     ${opts.length ? `<div class="pz-opts">${opts.map(t => `<button class="${w && w.text === t ? "on" : ""}" data-wantpick="${safe(t)}">${safe(t)}</button>`).join("")}</div>
@@ -548,8 +574,8 @@ function cheerLine(id, rank, fi, order) {
     const best = Object.entries(bySub).map(([sub, l]) => [sub, l.reduce((a, b) => a + b, 0) / l.length]).sort((a, b) => b[1] - a[1])[0];
     if (best && best[1] >= 70) out.push(`Great ${best[0]} work this week, keep it up 📚`);
   }
-  if (!decided && todayIndex() >= 2) out.push("Friday is close, one more push! 🚀");
-  if (decided) out.push("A fresh start on Monday, you've got this 🌱");
+  if (!decided && weekIndex() >= 4) out.push(`The ⭐ Shining Star is on ${starWhenText()}, one more push! 🚀`);
+  if (decided) out.push("A fresh start tomorrow, you've got this 🌱");
   if (!out.length) return "Every tick counts! 🌱";
   let h = 0;
   for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
@@ -564,7 +590,7 @@ function ptNoteFormHtml(id) {   // (renamed in v144: the School note form had th
 // 🌱 What held me back (not for the Shining Star; only the person and the parents see it): this week's missed things in kind words + one tip
 function heldBackHtml(id, totals, sorted) {
   if (id !== me && !isParentDevice()) return "";
-  const today = todayIndex(), days = planDays(), from = data.points.week, mine = id === me;
+  const today = weekIndex(), days = planDays(), from = data.points.week, mine = id === me;
   const parts = [];
   // Activities not done (days up to today)
   let notDone = 0, left = 0;
@@ -602,20 +628,20 @@ function leaderTap(ds) {
   if (ds.halledit || ds.hallsave || "hallcancel" in ds) return hallTap(ds);   // 🏆
   if ("ptcancel" in ds) { ptEdit = null; return render(); }
   // (🎁 only the ⭐ Shining Star, and only after Friday 6 PM)
-  const notYet = "⭐ The Shining Star is decided on Friday at 6 PM. Keep going! 💪";
+  const notYet = `⭐ The Shining Star is announced on ${starWhenText()}. Keep going! 💪`, wkey = id => `${starWeek()}|${id}`;
   if ("wantlock" in ds) return toast(notYet, 3000);
   if (ds.want) {
     if (ds.want !== me && !parent) return;
-    if (!starDecided() || !stars().includes(ds.want)) return toast(notYet, 3000);
+    if (!stars().includes(ds.want)) return toast(notYet, 3000);
     ptEdit = { id: ds.want, kind: "want" }; return render();
   }
   if (ds.wantsave || ds.wantpick) {
-    const id = ds.wantpick ? me : ds.wantsave, text = (ds.wantpick || $("wantText").value).trim().slice(0, 40), old = data.points.want[key(id)];
+    const id = ds.wantpick ? me : ds.wantsave, text = (ds.wantpick || $("wantText").value).trim().slice(0, 40), old = data.points.want[wkey(id)];
     if (id !== me && !parent) return;
-    if (!starDecided() || !stars().includes(id)) { ptEdit = null; render(); return toast(notYet, 3000); }
-    if (!text) delete data.points.want[key(id)];
-    else data.points.want[key(id)] = { text, ok: parent, by: me };   // (set by a parent = approved; one's own wish waits for a parent's ✅)
-    hallSave(data.points.week, id, text);   // 🏆 the gift in the Hall of Stars too
+    if (!stars().includes(id)) { ptEdit = null; render(); return toast(notYet, 3000); }
+    if (!text) delete data.points.want[wkey(id)];
+    else data.points.want[wkey(id)] = { text, ok: parent, by: me };   // (set by a parent = approved; one's own wish waits for a parent's ✅)
+    hallSave(starWeek(), id, text);   // 🏆 the gift in the Hall of Stars too
     ptEdit = null; keepNow();
     // 💌 To ALL the parents, right away (only parents see "school" news)
     if (text && id === me && (!old || old.text !== text)) {
@@ -624,7 +650,7 @@ function leaderTap(ds) {
     }
     return;
   }
-  if (ds.wantok && parent) { const w = data.points.want[key(ds.wantok)]; if (w) { data.points.want[key(ds.wantok)] = { ...w, ok: true }; ptEdit = null; keepNow(); toast("✅ Approved"); } return; }
+  if (ds.wantok && parent) { const w = data.points.want[wkey(ds.wantok)]; if (w) { data.points.want[wkey(ds.wantok)] = { ...w, ok: true }; ptEdit = null; keepNow(); toast("✅ Approved"); } return; }
   if (ds.ptnote && parent) { ptEdit = { id: ds.ptnote, kind: "note" }; return render(); }
   if (ds.notesave && parent) {
     const id = ds.notesave, text = $("noteText").value.trim().slice(0, 80);
@@ -696,7 +722,7 @@ function hallHtml() {
   const rows = weeks.map((wk, i) => {
     const now = wk === data.points.week, st = hallStar(wk);
     if (st && !(now && !starDecided())) count[st.name] = (count[st.name] || 0) + 1;
-    const who = now && !starDecided() && !data.points.hall[wk] ? `⭐ <small>decided on Friday</small>` : st ? `⭐ ${safe(st.name)} ${safe(st.emoji || "")}` : "⭐ ?";
+    const who = now && !starDecided() && !data.points.hall[wk] ? `⭐ <small>announced ${safe(starWhenText())}</small>` : st ? `⭐ ${safe(st.name)} ${safe(st.emoji || "")}` : "⭐ ?";
     const gift = st && st.gift ? ` · 🎁 Gift: ${safe(st.gift)}` : "";
     const edit = parent && !now ? `<button class="linkbtn hall-edit" data-halledit="${wk}" aria-label="Set the star of week ${i + 1}">✏️ Edit</button>` : "";
     const form = hallEdit === wk ? `<div class="pt-form hall-form"><label class="small" for="hallWho">⭐ The star of Week ${i + 1}</label>

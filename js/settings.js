@@ -8,6 +8,8 @@ function drawSettings() {
   fillMyDay();
   drawFreeTime();
   $("maxTogether").value = data.maxTogether;
+  $("starDay").innerHTML = DAYS.map((d, i) => `<option value="${i}" ${i === starTime().day ? "selected" : ""}>${d}</option>`).join("");
+  $("starClock").value = starTime().time;
   fillPrayer();
   drawUsers();
   drawHabitList();
@@ -98,6 +100,16 @@ $("maxTogether").addEventListener("change", () => {
   if (n >= 1 && n <= 5) data.maxTogether = n;   // only accept 1 to 5
   changed();                                    // (if the number was wrong, this puts the old one back)
 });
+
+// 🌟 The Shining Star's announce day + time: the points week then runs from the next day (see pointsWeekOf).
+// The week is moved straight away (no star for the part-week): ticks are by date, so nothing is lost.
+["starDay", "starClock"].forEach(id => $(id).addEventListener("change", () => {
+  const day = Number($("starDay").value), time = $("starClock").value;
+  if (!(day >= 0 && day <= 6) || !/^\d{2}:\d{2}$/.test(time)) return drawSettings();
+  data.starAt = { day, time };
+  data.points.week = pointsWeekOf(new Date());
+  changed();
+}));
 
 // ---------- 🕌 Prayer times ----------
 // On / Off and the reminder are each person's own choice: kept right away (on all their devices).

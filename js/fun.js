@@ -1,7 +1,7 @@
 // =====================================================================
 //  ⭐ GOOD HABITS: a daily checklist for the kids (not on the calendar)
 // =====================================================================
-let habitDay = todayIndex();   // which day the habits card shows (0 = Monday … today). No future days.
+let habitDay = -1;   // (-1 = today) which day of the points week the habits card shows (0 = its first day … today; set when a screen opens). No future days.
 
 // The habits that are on for this person (kids only; Bro2a can turn them off per kid in Settings)
 function habitsFor(user) { return isParentId(user) || !exists(user) ? [] : data.habits.filter(h => !h.gone && !h.off.includes(user)); }
@@ -16,8 +16,8 @@ function habitDone(h, v) {
 function habitsCardHtml(who) {
   const list = habitsFor(who);
   if (!list.length) return "";
-  const u = userById(who), c = colorsOf(u), today = todayIndex();
-  if (habitDay > today) habitDay = today;
+  const u = userById(who), c = colorsOf(u), today = weekIndex();
+  if (habitDay < 0 || habitDay > today) habitDay = today;
   const d = habitDay, date = ymd(dayDate(d)), isToday = d === today;
   const canTick = isParentId(me) || who === me;            // same rule as activities
   const dis = canTick ? "" : "disabled";
@@ -48,7 +48,7 @@ function habitsCardHtml(who) {
       <span class="hb-progress">${done} / ${list.length}${isToday ? " today" : ""} ${done === list.length ? "🌟" : "💪"}</span></div>
     <div class="hb-nav">
       <button data-hbday="-1" ${d === 0 ? "disabled" : ""} aria-label="Day before">◀ Before</button>
-      <b>${isToday ? "Today" : DAYS[d]}, ${dateOfDay(d)}</b>
+      <b>${isToday ? "Today" : DAYS[weekdayOf(date)]}, ${dateOfDay(d)}</b>
       <button data-hbday="1" ${d >= today ? "disabled" : ""} aria-label="Next day">Next ▶</button>
       ${canTick ? "" : `<span class="hb-look">Just looking 👀</span>`}
     </div>
@@ -67,7 +67,7 @@ function toggleHabit(who, habitId, part, button) {
   const h = data.habits.find(x => x.id === habitId);
   if (!h || !habitsFor(who).includes(h)) return;
   if (!(isParentId(me) || who === me)) return toast("You can only tick your own habits.");
-  if (habitDay > todayIndex()) return toast("Not yet!");
+  if (habitDay > weekIndex()) return toast("Not yet!");
   const date = ymd(dayDate(habitDay)), key = habitKey(date, habitId, who), old = data.habitMarks[key];
   let now;
   if (h.kind === "prayers") {

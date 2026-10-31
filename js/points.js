@@ -602,9 +602,14 @@ function fairOrder(fair = fairScores()) {
   const at = id => { const r = data.points.reach[`${data.points.week}|${id}`]; return r && r.s === fair[id] && r.at ? r.at : "~"; };
   return [...scoredUsers()].sort((a, b) => fair[b.id] - fair[a.id] || at(a.id).localeCompare(at(b.id)));
 }
-// ⭐ The Shining Star of the week: decided on Friday 6 PM (see maybeDecideStar); before that there's none, only 🔥 the leader
-function stars() {
-  const r = data.points.prizeMsg[data.points.week];
+// ⭐ The Shining Star: announced at the end of each points week (⚙️ Settings, see maybeDecideStar). Until the next announcement
+// the last one stays the star (its 🎁 gift, its 🌟 badge): starWeek() = the week it was announced for.
+function starWeek() {
+  const w = data.points.week, back = addDaysYmd(w, -7);
+  return data.points.prizeMsg[w] ? w : Object.keys(data.points.prizeMsg).filter(k => k < w && k >= back).sort().pop() || back;
+}
+function stars(week = starWeek()) {
+  const r = data.points.prizeMsg[week];
   return r && r.star ? r.star.split(",").filter(id => exists(id) && !isParentId(id)) : [];   // (👨‍👩‍👧 an older parent star isn't shown)
 }
 // 🔥 First place right now: the best fair score (more than 0); a tie: whoever reached it first
@@ -620,10 +625,10 @@ const starBadge = id => stars().includes(id) ? `<span class="star-badge" aria-la
 
 // Every Monday: remember last week's star(s), then start again from zero.
 function newWeek() {
-  const thisWeek = mondayOf(new Date());
+  const thisWeek = pointsWeekOf(new Date());   // (⭐ the day after the Shining Star's announce day)
   if (data.points.week === thisWeek) return false;
   // (nobody opened the app after Friday 6 PM: the star is the leader now)
-  const totals = pointsByUser(), win = stars().length ? stars() : leaders(), fair = fairScores(), best = win.length ? totals[win[0]] : 0;
+  const totals = pointsByUser(), win = stars(data.points.week).length ? stars(data.points.week) : leaders(), fair = fairScores(), best = win.length ? totals[win[0]] : 0;
   // 🌱 Bank last week's points for the buddies (one item per week and person: the same on every phone)
   scoredUsers().forEach(u => { if (totals[u.id] > 0) data.points.lifetime[`${data.points.week}|${u.id}`] = totals[u.id]; });   // (kids only)
   // 📚 Keep last week's study (all subjects and each subject) for the 4-week history, before its ticks are cleared below

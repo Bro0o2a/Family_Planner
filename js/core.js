@@ -391,6 +391,7 @@ function emptyData() {
     // When the day starts and ends. Free time = this minus fixed activities.
     // weekendOwn = true → Saturday and Sunday use weekendStart / weekendEnd instead.
     myDay: { start: "08:00", end: "21:00", weekendOwn: false, weekendStart: "08:00", weekendEnd: "21:00" },
+    starAt: { day: 4, time: "18:00" },   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
     plan: null,     // the week Dad planned with "Plan my week" (null = not planned yet)
     // Points: which activities are done this week. Starts again every Monday.
@@ -407,7 +408,7 @@ function emptyData() {
     //   diary    = 📔 "date|person" → { mood, best, bad, hard, scared, private, pts, at } (+5 the first save of the day). Kept 180 days.
     //   lifetime = 🌱 "monday|person" → that week's points (banked on the new week; all of them = the buddy's level). Never cleared.
     //   levels   = 🌱 person → [{ level, date }] (each level reached, for the level history)
-    points: { week: mondayOf(new Date()), since: ymd(new Date()), marks: {}, history: [], log: [], auto: {}, prizes: {}, riddles: {}, riddleAns: {},
+    points: { week: pointsWeekOf(new Date()), since: ymd(new Date()), marks: {}, history: [], log: [], auto: {}, prizes: {}, riddles: {}, riddleAns: {},
               diary: {}, lifetime: {}, levels: {}, duties: {}, wishes: {},   // (✅ duties, 💌 wishes: see DUTIES ON TIME and WISHES)
               meeting: {}, screen: {}, quran: {}, quranHeard: {}, chores: {},   // (☰ MORE PAGES)
               want: {}, notes: {},   // (🎁 the prize I want, 💬 notes: see LEADERBOARD ROWS)
@@ -759,6 +760,9 @@ function cleanData(d) {
 
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
+  // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
+  if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
+    clean.starAt = { day: d.starAt.day, time: d.starAt.time };
 
   // The saved plan. Older versions didn't save the plan, they only remembered "planned":
   // then we plan once with the new rules when the app opens ("redo").
@@ -890,7 +894,8 @@ function cleanData(d) {
     each(pts.hall, (k, v) => { if (dayKey(k, 0) && (s(v.id, 40) || s(v.name, 30))) clean.points.hall[k] = { id: s(v.id, 40), name: s(v.name, 30), emoji: s(v.emoji, 8), gift: s(v.gift, 40), by: s(v.by, 10) }; });   // 🏆
     if (obj(pts.when)) Object.entries(pts.when).forEach(([k, v]) => { if (dayKey(k, 3) && typeof v === "string") clean.points.when[k] = v.slice(0, 40); });   // 👀
     each(pts.reach, (k, v) => { const n = Math.round(Number(v.s)); if (dayKey(k, 1) && n >= 0 && n <= 100) clean.points.reach[k] = { s: n, at: s(v.at, 40) }; });   // ⚖️
-    each(pts.prizeMsg, (k, v) => { if (dayKey(k, 0)) clean.points.prizeMsg[k] = { star: s(v.star, 200), text: s(v.text, 80), at: s(v.at, 40), ...(v.reminded === true ? { reminded: true } : {}) }; });   // ⭐ 🎁
+    each(pts.prizeMsg, (k, v) => { if (dayKey(k, 0)) clean.points.prizeMsg[k] = { star: s(v.star, 200), text: s(v.text, 80), at: s(v.at, 40), ...(v.reminded === true ? { reminded: true } : {}),
+      ...(Array.isArray(v.board) ? { board: v.board.filter(x => x && typeof x.id === "string").slice(0, 12).map(x => ({ id: s(x.id, 40), s: Math.max(0, Math.min(200, Math.round(Number(x.s) || 0))) })) } : {}) }; });   // ⭐ 🎁 (board = the results when announced)
     each(pts.study, (k, v) => { if (dayKey(k, 3) && hasOwn(STUDY_POINTS, k.split("|")[2])) clean.points.study[k] = { at: s(v.at, 40) }; });   // 🎒
     // 📚 Study sessions: the result (0–100 %) of one session, and each past week's study per subject (newer: older data has none)
     each(pts.sessions, (k, v) => { const p = Math.round(Number(v.pct)); if (dayKey(k, 2) && p >= 0 && p <= 100)
@@ -1308,9 +1313,18 @@ function safe(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<
 function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 const $ = id => document.getElementById(id);
 // Today as 0 = Monday … 6 = Sunday (JavaScript counts from Sunday, so we shift it)
-function todayIndex() { return (new Date().getDay() + 6) % 7; }
+function todayIndex() { return (new Date().getDay() + 6) % 7; }   // today's weekday (0 = Monday)
+// Today's place in the points week (0 = its first day … 6; the week may start on any weekday, see pointsWeekOf)
+function weekIndex() { return Math.max(0, Math.min(6, daysBetween(data.points.week, todayYmd()))); }
 // Dates. "2026-10-05" style, in this device's own time zone.
 function ymd(dt) { return dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0"); }
+// ⭐ The points week starts the day AFTER the Shining Star's announce day (⚙️ Settings, default Friday → Saturday–Friday weeks)
+function pointsWeekOf(dt) {
+  let ann = 4;   // (while the app starts, the data isn't there yet: Friday)
+  try { if (data && data.starAt) ann = data.starAt.day; } catch (e) {}
+  const first = (ann + 1) % 7;
+  const m = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()); m.setDate(m.getDate() - ((m.getDay() + 6) % 7 - first + 7) % 7); return ymd(m);
+}
 function mondayOf(dt) { const m = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()); m.setDate(m.getDate() - (m.getDay() + 6) % 7); return ymd(m); }
 function fromYmd(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
 // (function declarations, so the saved data can be read with them while the app starts)
