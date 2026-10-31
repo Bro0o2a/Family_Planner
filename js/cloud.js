@@ -296,6 +296,7 @@ async function cloudSignedIn(user) {
   cloud.refs = { plan: ref("plan"), points: ref("points"), habits: ref("habits") };
   cloud.snaps = {};
   cloud.ready = false;
+  clearTimeout(cloud.cacheTimer); cloud.cacheTimer = null; cloud.cacheOk = false;   // (see cloudFirstSync)
   cloud.base = savedJson;   // this device's data now: changes made before the cloud answers are kept (see keepEarlyChanges)
   cloud.unsub = Object.keys(cloud.refs).map(name => fb.onSnapshot(cloud.refs[name], { includeMetadataChanges: true },
     snap => cloudSnap(name, snap), cloudError));
@@ -352,9 +353,16 @@ function cloudSnap(name, snap) {
 function cloudFirstSync() {
   const s = cloud.snaps;
   if (!s.plan || !s.points || !s.habits || cloud.asking) return;
-  const cloudHasData = s.plan.exists();
+  const cloudHasData = s.plan.exists(), cached = [s.plan, s.points, s.habits].some(x => x.metadata.fromCache);
   // Not in the offline copy yet: wait for the cloud's real answer before deciding it's empty
-  if (!cloudHasData && [s.plan, s.points, s.habits].some(x => x.metadata.fromCache)) return;
+  if (!cloudHasData && cached) return;
+  // ⚠️ Only this phone's OLD offline copy so far (e.g. a phone not opened for days): wait for the cloud's real answer,
+  // so old activities are never taken as the family's plan. No answer in 10 s (no internet): go on with the copy,
+  // but the plan is not sent up until the cloud has really answered (see cloudUpload).
+  if (cached && !cloud.cacheOk) {
+    if (!cloud.cacheTimer) cloud.cacheTimer = setTimeout(() => { cloud.cacheOk = true; if (!cloud.ready) cloudFirstSync(); }, 10000);
+    return;
+  }
   // 1) The cloud is empty: upload everything from this device
   if (!cloudHasData) {
     cloudUploadAll();
@@ -513,7 +521,12 @@ function cloudUpload(how) {
     console.warn("☁️ The week plan was NOT sent: it has no items, but the family's cloud plan has some. The cloud copy is kept.");
     now.plan = { ...now.plan, plan: before.plan };
   }
-  if (sameText(now.plan) !== sameText(before)) {
+  // ⚠️ Safety net: the plan only goes up after the cloud has really answered (not from this phone's old offline copy):
+  // an old phone must never put back old activities over the family's plan
+  const planFromCache = cloud.snaps.plan && cloud.snaps.plan.metadata.fromCache;
+  if (planFromCache && sameText(now.plan) !== sameText(before))
+    console.warn("☁️ The plan was NOT sent yet: this phone hasn't heard from the cloud (old offline copy).");
+  else if (sameText(now.plan) !== sameText(before)) {
     // ⚠️ Safety net: never send a plan with 0 activities and 0 routines over a cloud plan that has some
     // (only a parent deleting them on purpose in the activities editor, on a parent's device, may do that)
     if (planSize(before) > 0 && planSize(now.plan) === 0 && !(planWipeOk && isParentDevice() && !kid)) {
