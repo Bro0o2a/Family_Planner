@@ -529,12 +529,32 @@ function mustMissed(id) {
   });
   return { ratio: due ? done / due : 1, due, done, missed: missed.sort((a, b) => a.date.localeCompare(b.date)) };
 }
+// ⭐ Kids' habits ticked this week (all of the kid's habits, must-dos too): each habit-day counts its part done
+// (🕌 3 of 5 prayers = 0.6, 💧 4 of 6 drops ≈ 0.67, one tick = 1). Today's only once they're (partly) ticked. → { planned, done }
+function habitsTally(id) {
+  const today = todayYmd(), out = { planned: 0, done: 0 };
+  data.habits.filter(h => !h.gone && !h.off.includes(id)).forEach(h => {
+    for (let d = data.points.week; d <= today && d < weekEnd(); d = addDaysYmd(d, 1)) {
+      const v = data.habitMarks[habitKey(d, h.id, id)];
+      const part = h.kind === "prayers" ? (Array.isArray(v) ? v.filter(Boolean).length : 0) / PRAYERS.length
+        : h.kind === "water" ? Math.min(WATER_DROPS, Number(v) || 0) / WATER_DROPS : v === true ? 1 : 0;
+      if (d === today && !part) continue;
+      out.planned++; out.done += part;
+    }
+  });
+  return out;
+}
 function scoreOf(id) {
   const sessions = studySessions(id), sp = studyParts(sessions);
   const fs = freeStudy(id), free = { ...fs, bonus: 0 }, lv = levelScore(id), mk = scoreMarks(id), tk = ticksTally(id);
   const study = sessions.length ? Math.min(100, sp.study) : 0;
-  const subs = { marks: mk.avg || 0, extra: Math.round(mk.extraPts / EXTRA_MAX * 100), ticks: tk.planned ? Math.round(tk.done / tk.planned * 100) : 0 };
-  const has = { marks: mk.count > 0, extra: true, ticks: tk.planned > 0 };   // (⚡ always counts in the max: extras are how to reach 100)
+  const subs = { marks: mk.avg || 0, extra: Math.round(mk.extraPts / EXTRA_MAX * 100), ticks: 0 };
+  // ✅ Ticks = half 📅 the calendar's 📚 ⚽ items, half ⭐ the kids' habits (only one of them this week: that one alone)
+  const ht = habitsTally(id), calPct = tk.planned ? tk.done / tk.planned * 100 : null, habPct = ht.planned ? ht.done / ht.planned * 100 : null;
+  subs.ticks = Math.round(calPct != null && habPct != null ? (calPct + habPct) / 2 : calPct != null ? calPct : habPct || 0);
+  tk.habits = { done: Math.round(ht.done * 10) / 10, planned: ht.planned, pct: habPct == null ? null : Math.round(habPct) };
+  tk.calPct = calPct == null ? null : Math.round(calPct);
+  const has = { marks: mk.count > 0, extra: true, ticks: tk.planned > 0 || ht.planned > 0 };   // (⚡ always counts in the max: extras are how to reach 100)
   const missed = mustMissed(id), base = Math.round(SCORE_WEIGHTS.marks * subs.marks + mk.extraPts + SCORE_WEIGHTS.ticks * subs.ticks);
   const overall = Math.round(base * missed.ratio);   // ✖️ the total × how much of the ⭐ must-dos was done
   const max = Math.round(100 * Object.keys(SCORE_WEIGHTS).reduce((s, k) => s + (has[k] ? SCORE_WEIGHTS[k] : 0), 0));
@@ -550,7 +570,8 @@ function subBarsHtml(s) {
       k === "marks" && on ? `<div class="score-parts">📝 ${s.marksCount} ${s.marksCount === 1 ? "worksheet" : "worksheets"} from study sessions checked this week (average ${s.marks}%)</div>${
         (s.levels || []).filter(x => x.avg != null).map(x => `<div class="score-parts">${safe(x.emoji)} ${safe(x.name)} · ${x.avg}% · Level ${x.level}/10</div>`).join("")}` : ""}${
       k === "extra" ? `<div class="score-parts">⚡ ${s.extraPts} of ${EXTRA_MAX} points · ${s.extraCount || 0} checked ${s.extraCount === 1 ? "extra" : "extras"} (each adds its mark)</div>` : ""}${
-      k === "ticks" && on && s.tk ? `<div class="score-parts">✅ ${s.tk.done} of ${s.tk.planned} ticked</div>` : ""}`; }).join("")}</div>`;
+      k === "ticks" && on && s.tk ? `<div class="score-parts">📅 Calendar: ${s.tk.done} of ${s.tk.planned} ticked${s.tk.calPct != null ? ` (${s.tk.calPct}%)` : ""}${
+        s.tk.habits && s.tk.habits.planned ? ` · ⭐ Habits: ${s.tk.habits.pct}%` : ""}</div>` : ""}`; }).join("")}</div>`;
 }
 // The overall, big ("⭐ Score 37 / 90 ⚡ +6"), with the bars under it
 const scoreBlockHtml = s => `<div class="score-total"><small>⭐ Score</small><b>${s.overall}</b><small>/ ${s.max}${s.extra && s.extra.bonus ? ` · ⚡ +${s.extra.bonus}` : ""}</small></div>${lockedHtml(s)}${subBarsHtml(s)}`;
