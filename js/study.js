@@ -824,6 +824,13 @@ async function makePdf(node, fileName, opts = {}) {
     for (const el of parts) {
       if (el.classList && el.classList.contains("pdf-break")) { pdf.addPage(); y = top(); continue; }   // (✏️ the answer sheet: a new page)
       if (!el.getBoundingClientRect().height) continue;
+      // ✏️ the answer sheet fills its whole page (the rows and writing lines grow), so it's never small on a big empty page
+      if (el.classList && el.classList.contains("ws-answers")) {
+        const roomPx = (H - M - FOOT - M - (head ? head.h + GAP : 0)) / mmPerPx;
+        el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
+        if (el.getBoundingClientRect().height > roomPx + 1) el.classList.remove("as-fill");   // (many questions: the normal sizes, so it still fits)
+        if (el.getBoundingClientRect().height > roomPx + 1) el.classList.add("as-tight");     // (still too many: 2 writing lines, closer)
+      }
       const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: "#ffffff", logging: false, useCORS: true });
       let w = el.getBoundingClientRect().width * mmPerPx, hgt = el.getBoundingClientRect().height * mmPerPx;
       const room = H - M - FOOT - M - (head ? head.h + GAP : 0);

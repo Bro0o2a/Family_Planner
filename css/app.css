@@ -652,6 +652,18 @@
   .as-box { display: inline-block; width: 26px; height: 26px; border: 2px solid #333; border-radius: 5px; }
   .as-lines { flex: 1; }
   .as-line { height: 30px; border-bottom: 1.5px solid #888; }
+  .as-tight .as-line { height: 26px; }
+  .as-tight .as-line:nth-child(n+3) { display: none; }
+  .as-tight .as-q { padding: 3px 0; }
+  .ws-answers.as-fill { display: flex; flex-direction: column; font-size: 17px; }
+  .as-fill .as-grid { flex: 1; align-content: stretch; }
+  .as-fill .as-q { align-items: center; }
+  .as-fill .as-q.as-wide { align-items: stretch; }
+  .as-fill .as-num { font-size: 19px; }
+  .as-fill .as-bubble { width: 34px; height: 34px; font-size: 16px; }
+  .as-fill .as-box { width: 32px; height: 32px; }
+  .as-fill .as-lines { display: flex; flex-direction: column; justify-content: space-evenly; }
+  .as-fill .as-line { flex: 1; height: auto; min-height: 30px; max-height: 46px; }
   .pdf-ready { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
                max-width: 480px; margin: 0 auto; padding: 10px 14px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); font-weight: 800; }
   .pdf-ready span { flex: 1 1 140px; }
