@@ -987,6 +987,16 @@ function matchNode(q, ar, showAns) {
 // compact (📄 the PDF): small, no writing lines, choices with letters A B C …: the kid answers on the ✏️ ANSWER SHEET (the last page)
 const OPT_LETTERS = "ABCDEFGHIJ";
 const isChoiceQ = q => q.options.length > 0 && q.kind !== "matching" && q.kind !== "ordering";
+// 🔢 Put in order (the PDF): each step has a letter; on the answer sheet the kid writes the letters in order (1st, 2nd …).
+// The key: the letters in the right order, from the answer's steps (split on ";" or new lines). Not found → null.
+const isOrderQ = q => q.kind === "ordering" && q.options.length > 1;
+function orderKey(q) {
+  const t = x => String(x || "").trim().toLowerCase().replace(/[.\s]+$/, ""), steps = String(q.answer || "").split(/\s*[;\n]\s*/).map(t).filter(Boolean);
+  if (steps.length !== q.options.length) return null;
+  const idx = steps.map(st => q.options.findIndex(o => t(o) === st || t(o).startsWith(st) || st.startsWith(t(o))));
+  return idx.some(i => i < 0) || new Set(idx).size !== idx.length ? null : idx.map(i => OPT_LETTERS[i] || String(i + 1));
+}
+const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
   const rtl = isArabicWs(w);
   return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
@@ -1002,8 +1012,9 @@ function wsSheetNode(w, showAns, compact = false) {
         h("div", { class: "ws-prompt" }, q.prompt),
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
-          compact && isChoiceQ(q) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
+          compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
+        compact && isOrderQ(q) ? h("div", { class: "ws-to-order" }, "✏️ On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …).") : null,
         match || compact ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
       h("span", { class: "ws-pts" }, ptsText(q.points)))]; })),
@@ -1019,7 +1030,9 @@ function wsAnswerSheetNode(w) {
     if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
     if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
       return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, Array.from({ length: k }, (_, i) => h("span", { class: "as-pair" }, `${i + 1}→`, h("i", { class: "as-box" }))))); }
-    if (q.kind === "ordering") return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map(() => h("i", { class: "as-box" }))));
+    if (q.kind === "ordering") return h("div", { class: "as-q as-wide" }, n, h("div", null,
+      h("div", { class: "as-how" }, "Write the letters in order:"),
+      h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
     const lines = Math.max(1, Math.min(3, q.answer_lines || 1));
     return h("div", { class: "as-q as-wide" }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
   };
@@ -1261,11 +1274,12 @@ async function checkWorksheet(wsId) {
   catch (err) { return toast(aiFileError(err), 6000); }
   const lv = learnRead(w.kid, w.subject);   // (🧠 each question's skill and difficulty, and the level before this worksheet)
   // (✏️ the PDF's ANSWER SHEET: the kid writes the question number + the letter of a choice, so the key says the letter too)
-  const keyOf = q => { if (!isChoiceQ(q)) return q.answer; const t = x => String(x || "").trim().toLowerCase(), a = t(q.answer);
+  const keyOf = q => { if (isOrderQ(q)) { const k = orderKey(q); return k ? `${k.join(", ")} (letters in order: ${q.answer})` : q.answer; }
+    if (!isChoiceQ(q)) return q.answer; const t = x => String(x || "").trim().toLowerCase(), a = t(q.answer);
     const i = q.options.findIndex(o => t(o) === a || (a && (t(o).startsWith(a) || a.startsWith(t(o)))));
     return i >= 0 ? `${OPT_LETTERS[i] || i + 1}) ${q.answer}` : q.answer; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, numbers in boxes for matching / ordering)`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …)`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), points: q.points,
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}) })), files }, "check|" + wsId);
   if (!r) return;
