@@ -777,7 +777,7 @@ function cleanData(d) {
   const txt = (x, n) => typeof x === "string" ? x.slice(0, n) : "";
   const cleanItems = day => (day && Array.isArray(day.items) ? day.items : [])
     .filter(it => it && typeof it.actId === "string" && Number.isFinite(it.start) && Number.isFinite(it.end))
-    .map(it => ({ actId: it.actId, fixed: !!it.fixed, start: it.start, end: it.end, ...(it.pinned === true ? { pinned: true } : {}),
+    .map(it => ({ actId: it.actId, fixed: !!it.fixed, start: it.start, end: it.end, ...(it.pinned === true ? { pinned: true } : {}), ...(it.longer === true ? { longer: true } : {}),
                   // (🗂️ a deleted activity kept as history: what it was)
                   ...(it.gone && typeof it.gone === "object" && txt(it.gone.name, 60) ? { gone: { name: txt(it.gone.name, 60),
                       users: (Array.isArray(it.gone.users) ? it.gone.users : []).map(String), people: (Array.isArray(it.gone.people) ? it.gone.people : []).map(String),

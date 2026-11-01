@@ -774,8 +774,16 @@ function makePlan(mode = "replan") {
   days.forEach((day, d) => { if (day.date <= keepUpTo) savedOn(day.date).forEach(it => {
     const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === it.actId);
     const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${day.date}|${it.actId}|`));
-    // a deleted activity is gone from now on (today: unless it already started or was ticked)
-    if (!act && (day.date > today || (it.start > now && !ticked))) return;
+    // ✏️ Edited activities show at once, today too (only what nobody ticked yet stays as it was):
+    if (day.date >= today && open(day.date) && !ticked) {
+      if (!act) return;   // deleted
+      // fixed: its weekday taken off, or new times → placed again with the new times (STEP B)
+      if (it.fixed && (!act.days.includes(weekdayOf(day.date)) || it.start !== toMin(act.start) || it.end !== toMin(act.end))) return;
+      // flexible: new length, and it hasn't started → placed again
+      if (!it.fixed && it.start > now && it.end - it.start !== act.duration && !it.longer) return;
+    }
+    // a deleted activity that was ticked stays (history)
+    if (!act && day.date > today) return;
     // 🔄 Make a new plan: today's flexible items that haven't started (not ticked, not pinned) are planned again
     if (mode === "fresh" && day.date === today && !it.fixed && it.start > now && !ticked && !it.pinned) return;
     const pre = act && !it.fixed ? act.getReady || 0 : 0, post = act && !it.fixed ? act.breakAfter || 0 : 0;
@@ -786,12 +794,12 @@ function makePlan(mode = "replan") {
   }); });
 
   // STEP B: Put fixed activities at their exact times, on the dates of their weekdays that can get new things.
-  // (Today: only if it isn't there yet and starts from now.)
+  // (Today: only if it isn't there yet and isn't over.)
   for (const f of data.fixed) {
     const s = toMin(f.start), e = toMin(f.end), people = peopleOf(f);
     for (const [d, day] of days.entries()) {
       if (!f.days.includes(weekdayOf(day.date)) || !open(day.date) || skippedOn(day.date, f.id)) continue;
-      if (day.items.some(it => it.kept && it.actId === f.id) || (day.date === today && s < now)) continue;   // (already there, or started)
+      if (day.items.some(it => it.kept && it.actId === f.id) || (day.date === today && e <= now)) continue;   // (already there, or over)
       // Same person busy twice at once? (activities you allowed together are fine)
       // (Different people at the same time is always fine.)
       const clash = days[d].items.find(it => it.start < e && s < it.end && it.people.some(p => people.includes(p)) && !f.overlapWith.includes(it.actId));
@@ -948,7 +956,7 @@ function makeAndKeepPlan(mode = "replan") {
   // (the plan keeps the activity's own times: the get ready / break around it are added when drawing)
   // (kept items are saved exactly as they were)
   p.days.forEach(day => dates[day.date] = { items: day.items.filter(it => !it.routine).map(it => it.kept ? { ...it.kept } :
-    ({ actId: it.actId, fixed: !!it.fixed, start: it.start + (it.pre || 0), end: it.end - (it.post || 0), ...(it.pinned ? { pinned: true } : {}) })) });
+    ({ actId: it.actId, fixed: !!it.fixed, start: it.start + (it.pre || 0), end: it.end - (it.post || 0), ...(it.pinned ? { pinned: true } : {}), ...(it.longer ? { longer: true } : {}) })) });
   // (a new day, or 📌 a one-day event's moves, only add items: the notes and the "up to date" mark stay as the last Save / Plan my week left them)
   const roll = (mode === "roll" || mode === "fill") && old;
   data.plan = { dates, warnings: roll ? old.warnings : p.warnings, key: roll ? old.key : planKey(), upTo: addDaysYmd(today, PLAN_AHEAD) };
