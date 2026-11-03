@@ -227,12 +227,16 @@ function actSubjectsText(a) {
   if (ids.includes(ALL_SUBJECTS)) return "Free Study";
   return [...new Set(ids.map(id => subjectNameOf(a.users, id)).filter(Boolean))].join(", ");
 }
+// ⏰ A session can't be picked or started before its start time (Dubai time), nor on a later day (v154: everyone, like ticks)
+const sessionNotYet = x => x.date > todayYmd() || (x.date === todayYmd() && dubaiMinutes() < x.start);
+const sessionNotYetToast = x => toast(`🔒 ${x.act.name} opens ${x.date === todayYmd() ? `at ${clock(x.start, true)}` : `on ${dayLong(x.date)}`}. Choose then! 📅`, 3200);
 // 📚 "Which subject today?": the kid (or a parent) picks one of the allowed subjects for that session → saved for it
 function pickSessionSubject(key, sid) {
   const [date, actId, kid] = String(key).split("|"), a = allActs().find(x => x.id === actId);
   if (!a || !exists(kid) || (isKidDevice() && kid !== kidDeviceId()) || (!isParentId(me) && kid !== me)) return false;
-  const x = actSubjectsFor(a, kid).find(o => o.id === sid);
+  const x = actSubjectsFor(a, kid).find(o => o.id === sid), sess = sessionByKey(key);
   if (!x || !isYmd(date)) return false;
+  if (sess && sessionNotYet(sess)) { sessionNotYetToast(sess); return false; }
   data.points.picks[key] = { sid: x.id, name: x.name, by: me, at: new Date().toISOString() };
   writeData();
   return true;

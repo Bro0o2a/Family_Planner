@@ -140,6 +140,7 @@ async function startSession(key) {
   const x = sessionByKey(key);
   if (!x) return toast("This session isn't in this week's plan any more.", 3000);
   if (kidLockedOut(x.person)) return lockedToast(x.person);
+  if (sessionNotYet(x)) return sessionNotYetToast(x);   // ⏰ only once its time has come
   if (x.needsPick) return askSessionSubject(x);   // 📚 several subjects and none picked yet: "Which subject today?" first
   const s = schoolOf(x.person), sid = x.subjectId && s.subjects[x.subjectId] ? x.subjectId : folderIdFor(s, x.subject);
   if (!sid) return toast(`📘 Pick a subject for “${x.act.name}” in ✏️ Add activities first.`, 4000);

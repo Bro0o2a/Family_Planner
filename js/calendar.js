@@ -357,11 +357,21 @@ function weekHtml(days, opts) {
       const sess = b.type === "study" && !opts.drag ? b.acts.map(a => sessOf(a.user).find(x => x.date === ds && x.actId === a.actId)).filter(Boolean) : [];
       const sessHtml = sess.map(x => { const tag = sessionTagText(x), who = sess.length > 1 ? userById(x.person).emoji + " " : "";
         const can = !opts.readOnly && x.mode === "sole" && ds === today && (x.person === me || isParentId(me)) && !kidLockedOut(x.person);
-        // 📚 "Which subject today?" (several subjects allowed, none picked: today or a day ahead, before the session ends)
-        if (!opts.readOnly && x.needsPick && !x.ended && ds >= today && (x.person === me || isParentId(me)) && !kidLockedOut(x.person) && !sessionWsIds(x.key).length)
-          return `${safe(who)}${subjectPickHtml(x, false)}`;
+        // 📚 Everything about a session is HERE, and only once its time has come (v154): before the start: "🔒 Opens at 4:15 PM";
+        // from the start: "Which subject today?" (several subjects allowed) → the pick starts the session, else 📚 Start session;
+        // its worksheet made: 📝 My worksheet (+ ➕ More questions / 🙋 I'm done while it lasts)
+        const mine = !opts.readOnly && x.mode === "sole" && (x.person === me || isParentId(me)) && !kidLockedOut(x.person);
+        const ids = sessionWsIds(x.key), wsId = ids[ids.length - 1], w = wsId && aiDocs.worksheets[wsId], live = ds === today && !x.ended;
+        if (mine && live && sessionNotYet(x)) return `<span class="k-sesstag">${safe(who)}🔒 Opens at ${clock(x.start, true)}</span>`;
+        if (mine && live && x.needsPick && !ids.length) return `${safe(who)}${subjectPickHtml(x, true)}`;
         const picked = x.options.length > 1 && !x.needsPick ? `<span class="k-sesstag">${safe(who)}📚 ${safe(x.subject)}</span> ` : "";
-        return picked + (tag ? `<span class="k-sesstag">${safe(who + tag)}</span>` : can ? `<button class="k-sess" data-sessstart="${safe(x.key)}">${safe(who)}📚 Start session</button>` : ""); }).join(" ");
+        if (tag) return picked + `<span class="k-sesstag">${safe(who + tag)}</span>`;
+        if (!can) return picked;
+        if (!w) return picked + (live ? `<button class="k-sess" data-sessstart="${safe(x.key)}" data-aiwait="session|${safe(x.key)}">${safe(who)}📚 Start session</button>` : "");
+        const more = live && (w.answers.length || w.check || w.done);
+        return picked + `<button class="k-sess" data-sessstart="${safe(x.key)}">${safe(who)}📝 My worksheet</button>${
+          more ? ` <button class="k-sess" data-sessmore="${safe(x.key)}" data-aiwait="more|${safe(x.key)}">➕ More questions</button>`
+          : live && !w.check ? ` <button class="k-sess" data-sessdone="${safe(wsId)}">🙋 I'm done</button>` : ""}`; }).join(" ");
       parts.push({ start: b.start, end: b.end, padIds: padIdsOf(b), html: `<div class="k-block ${b.fixed ? "fixed" : ""} ${checks && b.acts.length > 1 ? "many" : ""} ${drag ? "draggable editable" : ""} ${opts.drag && (b.fixed || past) ? "locked" : ""} ${faded ? "faded" : ""} ${done ? "done" : ""}" data-kblock="${n}" role="button" tabindex="0" ${drag}
                  style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}">
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>

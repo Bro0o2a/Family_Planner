@@ -242,7 +242,7 @@ function schoolHomeHtml(s, isDad) {
   // 👨‍👩‍👧 A parent's phone: ✏️ Edit subjects (➕ add · ✏️ rename · 🙈 hide · 🗑️ delete, any time; 📚 Study activities pick from them)
   if (look && isDad && scSubEdit) return subjectsEditHtml(s);
   const edit = look && isDad ? `<div class="btnrow"><button class="pill" data-scsubedit>✏️ Edit subjects</button></div>` : "";
-  const sess = sessionCardsHtml(schoolKid, null);   // (📚 STUDY: today's study sessions, each with 📚 Start session)
+  const sess = "";   // (📚 v154: study sessions are only on 📅 the calendar now)
   // ⬆️ Upload a school file (a newsletter, a school review …): its topics go into every subject (see STUDY TOPICS)
   const up = feat("coach") && list.length ? `<button class="sc-addbig st-up" data-stup="">⬆️ Upload<small>A newsletter, a school review or school work: I find the topics for every subject</small></button>` : "";
   // 👨‍👩‍👧 the kid's files that aren't in a subject (newsletters, reviews …)
@@ -774,8 +774,7 @@ function schoolSubjectHtml(s, isDad, u) {
   if (stSub !== f.id) { stSub = f.id; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; }
   html += levelBannerHtml();
   // The big buttons: ⬆️ Upload · 📚 Start session (this subject's session today, not made yet) · ✏️ My worksheets
-  const now = sessionsIn(schoolKid, [todayYmd()]).find(x => x.mode === "sole" && !x.ended && !sessionWsIds(x.key).length
-    && (x.subjectId === f.id || sameSubject(x.subject, f.name)));
+  const now = null;   // (📚 v154: 📚 Start session is only on 📅 the calendar, once the session's time has come)
   const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check).length;
   html += `<div class="st-big">
       <button class="st-btn" data-stup="${safe(f.id)}"><span class="e">⬆️</span><b>Upload</b></button>
@@ -783,7 +782,7 @@ function schoolSubjectHtml(s, isDad, u) {
       <button class="st-btn ${stWs ? "on" : ""}" data-stws aria-expanded="${stWs}"><span class="e">✏️</span><b>My worksheets</b>${todo ? `<span class="sc-badge">${todo}</span>` : ""}</button></div>`;
   html += translateToggleHtml(schoolKid, f.name);   // 🌐 Arabic translation of questions (for this kid's new worksheets; not Arabic / Islamic)
   html += goalCardHtml(schoolKid, f);   // 🎯 "Math: 2 of 4 worksheets this week" (a parent: the setting too)
-  html += sessionCardsHtml(schoolKid, f);
+  // (📚 v154: the session cards are on 📅 the calendar now)
   if (stWs) html += all.length ? aiMount(() => aiListCard("✏️ My worksheets", h("ul", { class: "list" }, [...all].sort((a, b) => (a.check ? 1 : 0) - (b.check ? 1 : 0)).map(w => wsRowNode(s, w))), ""))
     : `<div class="card"><p class="sc-empty">No worksheets yet. Tick a topic, then ✏️ Make a worksheet.</p></div>`;
   html += topicsCardHtml(s, f, parent);

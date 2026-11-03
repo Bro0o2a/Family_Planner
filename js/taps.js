@@ -104,6 +104,8 @@ document.addEventListener("click", e => {
   if ("signout" in ds) return signOutDevice();   // 🚪 (My profile, ☰ More)
   // 📚 Study sessions: 📚 Start session (it makes the session's worksheet) · ⭐ the helper's rating
   if (ds.sessstart) return leaveDraft(() => startSession(ds.sessstart));
+  if (ds.sessmore && !e.target.closest("#scr-school")) return moreQuestions(ds.sessmore);   // (📅 calendar; 🎒 School has its own)
+  if (ds.sessdone && !e.target.closest("#scr-school")) return sessionDone(ds.sessdone);
   if (ds.sessrate) { const i = ds.sessrate.lastIndexOf("|"); return rateSession(ds.sessrate.slice(0, i), Number(ds.sessrate.slice(i + 1))); }
   if ("buclose" in ds) return closeBuddyBox();
   if ("buchange" in ds) { buChange = true; return drawBuddyBox(); }
