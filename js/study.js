@@ -86,7 +86,7 @@ function topicsCardHtml(s, f, parent) {
     ${all.length ? `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>
       <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
       <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
-      : `<p class="sc-empty">📂 No topics yet. Tap ⬆️ Upload and add a school file (a photo or PDF).</p>`}</div>`;
+      : `<p class="sc-empty">📂 No topics yet. Tap ⬆️ Upload topic and add a school file (a photo or PDF).</p>`}</div>`;
 }
 // 👨‍👩‍👧 A topic's history: each worksheet, its date, score and 🎯 weak points
 function topicHistoryHtml(t) {
@@ -193,7 +193,7 @@ function closeWork() { $("aiWorkModal").hidden = true; aw = null; }   // (📚 f
 function drawUpload() {
   if (!aw) return;
   const s = schoolOf(aw.kid), f = aw.sid && s.subjects[aw.sid], body = [];
-  $("awTitle").textContent = f ? `⬆️ Upload · ${f.emoji} ${f.name}` : "⬆️ Upload a school file";
+  $("awTitle").textContent = f ? `⬆️ Upload topic · ${f.emoji} ${f.name}` : "⬆️ Upload topic";
   if (!aw.kind) body.push(h("p", { class: "print-hint" }, "What is this file for?"),
     h("div", { class: "aw-kinds" },
       h("button", { type: "button", class: "aw-kind", data: { awkind: "curr" } }, h("span", { class: "e" }, "📚"), h("b", null, "Add to curriculum"), h("small", null, "Keep it in 📂 Files and add its topics")),
@@ -493,7 +493,7 @@ function mapCardHtml(kid, f) {
 // ---------- 📊 The parents' summary (📊 How are my kids doing?): per subject ⚪ · 🔴 · 🟢, the 🔴 topics first with ✏️ Practise ----------
 function topicsSummaryHtml(kid) {
   const s = schoolOf(kid), subs = subjectList(s).filter(f => topicsOf(s, f.id).length);
-  if (!subs.length) return `<p class="sc-empty">No school topics yet. They come from ⬆️ Upload in 🎒 School.</p>`;
+  if (!subs.length) return `<p class="sc-empty">No school topics yet. They come from ⬆️ Upload topic in 🎒 School.</p>`;
   return subs.map(f => { const rows = topicRows(kid, s, f), n = k => rows.filter(t => t.st === k).length, red = rows.filter(t => t.st === "needs");
     return `<div class="st-sum"><p><b>${safe(f.emoji)} ${safe(f.name)}</b> <small>⚪ ${n("new")} not practised · 🔴 ${n("needs")} needs work · 🟢 ${n("mastered")} mastered</small></p>
       ${red.length ? `<ul class="learn-weak">${red.map(t => `<li><span>🔴 ${safe(t.title)} <small>${meanPct(t.info.results.slice(-3).map(x => x.pct))}%</small></span>

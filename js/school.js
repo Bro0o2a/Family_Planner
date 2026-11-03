@@ -244,7 +244,7 @@ function schoolHomeHtml(s, isDad) {
   const edit = look && isDad ? `<div class="btnrow"><button class="pill" data-scsubedit>✏️ Edit subjects</button></div>` : "";
   const sess = "";   // (📚 v154: study sessions are only on 📅 the calendar now)
   // ⬆️ Upload a school file (a newsletter, a school review …): its topics go into every subject (see STUDY TOPICS)
-  const up = feat("coach") && list.length ? `<button class="sc-addbig st-up" data-stup="">⬆️ Upload<small>A newsletter, a school review or school work: I find the topics for every subject</small></button>` : "";
+  const up = feat("coach") && list.length ? `<button class="sc-addbig st-up" data-stup="">⬆️ Upload topic<small>A newsletter, a school review or school work: I find the topics for every subject</small></button>` : "";
   // 👨‍👩‍👧 the kid's files that aren't in a subject (newsletters, reviews …)
   const loose = isParentDevice() ? Object.entries(s.files).map(([id, x]) => ({ id, ...x })).filter(x => !x.subject && !x.worksheet && x.kind !== "link")
     .sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 10) : [];
@@ -771,31 +771,38 @@ function schoolSubjectHtml(s, isDad, u) {
   if (editing) html += subjectFormHtml(f);
   // ⚙️ School coach off: just the files and the older records (no 🤖 worksheets, %, strong / weak points)
   if (!feat("coach")) return html + subjectFilesHtml(s, f, `📁 ${u.name}'s uploaded files`) + subjectOlderHtml(s, f, c, isDad);
-  if (stSub !== f.id) { stSub = f.id; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; }
+  if (stSub !== f.id) { stSub = f.id; stSec = null; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; }
   html += levelBannerHtml();
-  // The big buttons: ⬆️ Upload · 📚 Start session (this subject's session today, not made yet) · ✏️ My worksheets
-  const now = null;   // (📚 v154: 📚 Start session is only on 📅 the calendar, once the session's time has come)
-  const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check).length;
-  html += `<div class="st-big">
-      <button class="st-btn" data-stup="${safe(f.id)}"><span class="e">⬆️</span><b>Upload</b></button>
-      ${now ? `<button class="st-btn go" data-sessstart="${safe(now.key)}" data-aiwait="session|${safe(now.key)}"><span class="e">📚</span><b>Start session</b></button>` : ""}
-      <button class="st-btn ${stWs ? "on" : ""}" data-stws aria-expanded="${stWs}"><span class="e">✏️</span><b>My worksheets</b>${todo ? `<span class="sc-badge">${todo}</span>` : ""}</button></div>`;
-  html += translateToggleHtml(schoolKid, f.name);   // 🌐 Arabic translation of questions (for this kid's new worksheets; not Arabic / Islamic)
-  html += goalCardHtml(schoolKid, f);   // 🎯 "Math: 2 of 4 worksheets this week" (a parent: the setting too)
-  // (📚 v154: the session cards are on 📅 the calendar now)
-  if (stWs) html += all.length ? aiMount(() => aiListCard("✏️ My worksheets", h("ul", { class: "list" }, [...all].sort((a, b) => (a.check ? 1 : 0) - (b.check ? 1 : 0)).map(w => wsRowNode(s, w))), ""))
-    : `<div class="card"><p class="sc-empty">No worksheets yet. Tick a topic, then ✏️ Make a worksheet.</p></div>`;
-  html += topicsCardHtml(s, f, parent);
-  if (!parent) return html + learnKidLine(schoolKid, f);   // 🧒 the kid: that's all
-  // 👨‍👩‍👧 Parents only
-  html += `<div class="card bd-card"><h2>📊 Study this week</h2>${studyTableHtml(schoolKid, f.name)}</div>
-    <div class="card bd-card"><h2>🧠 Learning profile</h2>${learnCardHtml(schoolKid, f)}</div>
-    <div class="card bd-card"><h2>🌍 Official curriculum</h2>${mapCardHtml(schoolKid, f)}</div>`;
-  const files = filesOf(s, f.name);
-  html += `<div class="card bd-card"><div class="sc-head"><h2>📂 Files</h2><button class="linkbtn" data-stfiles aria-expanded="${stFiles}">${stFiles ? "Hide" : `Show (${files.length})`}</button></div>
-    ${stFiles ? files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s, true)).join("")}</ul>` : `<p class="sc-empty">Nothing uploaded yet.</p>` : ""}</div>`;
-  const ex = exOf(schoolKid, f.name);
-  if (ex.length) html += aiMount(() => aiListCard("📖 Explanations", exListNode(ex), ""));
+  // 🎒 v154: the subject is a short summary + BIG BUTTONS; a tap opens ONLY that part (stSec). "⬅️ All about Math" (or ⬅️ Back) → the buttons.
+  const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check).length, sum = kidSubjectSummary(schoolKid, f);
+  const secs = subjectSecs(parent).filter(x => x.id !== "files" || filesOf(s, f.name).length || exOf(schoolKid, f.name).length);
+  if (stSec && !secs.some(x => x.id === stSec)) stSec = null;
+  if (!stSec) {
+    const line = (e, label, xs) => xs.length ? `<p class="ks-line"><span>${e} <b>${label}</b></span> ${safe(xs.join(", "))}</p>` : "";
+    html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>📋 In short</h2>
+        <span class="ks-avg">${sum.avg != null ? `${sum.avg}%` : "–"}<small>${sum.count} checked${sum.level ? ` · Level ${sum.level}/10` : ""}</small></span></div>
+      ${line("💪", "Good at:", sum.good) + line("😕", "Weak at:", sum.weak) + line("🎯", "Practise:", sum.practise)
+        || `<p class="sc-empty">Do a worksheet and the summary shows here.</p>`}</div>
+      <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
+      <button class="kp-tile sj-go" data-stup="${safe(f.id)}"><span class="e" aria-hidden="true">⬆️</span><b>Upload topic</b><small>A photo or file from school</small></button>
+      ${secs.map(x => `<button class="kp-tile" data-stsec="${x.id}"><span class="e" aria-hidden="true">${x.emoji}</span><b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
+        x.id === "ws" && todo ? `<span class="sc-badge">${todo}</span>` : ""}</button>`).join("")}</div>`;
+    return html;
+  }
+  const t = secs.find(x => x.id === stSec);
+  html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.emoji} ${t.label}</h1></div>`;
+  if (stSec === "ws") return html + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
+  if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
+  if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
+  if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;
+  if (stSec === "profile") return html + `<div class="card bd-card">${learnCardHtml(schoolKid, f) || `<p class="sc-empty">No checked worksheets yet: the profile starts with the first one.</p>`}</div>`;
+  if (stSec === "curr") return html + `<div class="card bd-card">${mapCardHtml(schoolKid, f)}</div>`;
+  if (stSec === "files") {
+    const files = filesOf(s, f.name), ex = exOf(schoolKid, f.name);
+    html += `<div class="card bd-card"><h2>📂 Files (${files.length})</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s, true)).join("")}</ul>` : `<p class="sc-empty">Nothing uploaded yet.</p>`}</div>`;
+    return html + (ex.length ? aiMount(() => aiListCard("📖 Explanations", exListNode(ex), "")) : "");
+  }
+  // 🗂️ More: the older parts
   const fid = safe(f.id), checked = checkedOf(schoolKid, f.name);
   html += `<div class="sc-subrow">${[["marks", "📊 Marks"], ["homework", "📝 Homework"], ["reviews", "⭐ Reviews"], ["reports", "📄 Reports"]]
       .map(([v, label]) => `<button class="pill" data-scgo="${v}|${fid}">${label}</button>`).join("")}
@@ -803,6 +810,53 @@ function schoolSubjectHtml(s, isDad, u) {
   if (isDad && !isKidDevice() && checked.length) html += aiMount(() => parentExtrasNode(s, checked));   // (🦉 the coach's tip, "By part")
   return html + subjectOlderHtml(s, f, c, isDad);
 }
+// 🎒 The subject's big buttons (the kid: worksheets, topics, goal; parents: all)
+let stSec = null;
+function subjectSecs(parent) {
+  return [{ id: "ws", emoji: "✏️", label: "My worksheets" }, { id: "topics", emoji: "📚", label: "My topics" }, { id: "goal", emoji: "🎯", label: "Weekly goal" },
+    ...(parent ? [{ id: "study", emoji: "📊", label: "Study this week" }, { id: "profile", emoji: "🧠", label: "Learning profile" },
+      { id: "curr", emoji: "🌍", label: "Official curriculum" }, { id: "files", emoji: "📂", label: "Files" }, { id: "more", emoji: "🗂️", label: "More" }] : [])];
+}
+function subjectSecLine(id, s, f, all, todo) {
+  if (id === "ws") { const wait = all.filter(w => !w.check && w.answers.some(x => s.files[x])).length;
+    return all.length ? [todo - wait ? `${todo - wait} to do` : "", wait ? `${wait} waiting` : "", `${all.length - todo} checked`].filter(Boolean).join(" · ") : "None yet"; }
+  if (id === "topics") { const rows = topicRows(schoolKid, s, f), n = k => rows.filter(t => t.st === k).length;
+    return rows.length ? `${rows.length} topics · 🟢 ${n("mastered")} · 🔴 ${n("needs")}` : "None yet"; }
+  if (id === "goal") return "Worksheets this week";
+  if (id === "study") return "Planned and done hours";
+  if (id === "profile") { const L = learnRead(schoolKid, f.name); return L ? `Level ${L.level}/10` : "Starts with the first check"; }
+  if (id === "curr") return "The school's official list";
+  if (id === "files") return `${filesOf(s, f.name).length} files`;
+  return "Marks, homework, reviews, reports";
+}
+// ✏️ The worksheets in 3 groups: ✏️ To do · ⏳ Waiting for check · ✅ Checked (newest first), each a tidy row; tap → open it
+function wsGroupedHtml(s, all) {
+  if (!all.length) return `<div class="card"><p class="sc-empty">No worksheets yet. Open 📚 My topics, tick a topic, then ✏️ Make a worksheet.</p></div>`;
+  const has = w => w.answers.some(x => s.files[x]), byNew = (a, b) => String(b.date || "").localeCompare(String(a.date || ""));
+  const groups = [["todo", "✏️ To do", all.filter(w => !w.check && !has(w)).sort(byNew)], ["wait", "⏳ Waiting for check", all.filter(w => !w.check && has(w)).sort(byNew)],
+    ["done", "✅ Checked", all.filter(w => w.check).sort((a, b) => String(b.check.at || b.date || "").localeCompare(String(a.check.at || a.date || "")))]];
+  return groups.filter(g => g[2].length).map(([k, title, list]) => `<div class="card wsg wsg-${k}"><div class="wsg-head"><h2>${title}</h2><span class="wsg-n">${list.length}</span></div>
+    ${aiMount(() => h("ul", { class: "wsg-list" }, list.map(w => wsNiceNode(s, w, k))))}</div>`).join("");
+}
+function wsNiceNode(s, w, k) {
+  const [emoji, label] = WS_PURPOSE[w.purpose] || ["📝", ""], canAct = isDadNow() || !w.check, pct = w.check ? wsPct(w) : null;
+  const badge = k === "done" ? h("span", { class: "wsg-score lv-" + pctLevel(pct) }, `${pct}%`, h("small", null, `${num(w.check.score)}/${num(w.check.max_score)}`))
+    : h("span", { class: "wsg-tag " + k }, k === "wait" ? "⏳ Waiting" : "✏️ To do");
+  const act = k === "todo" && canAct ? [h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"), h("button", { class: "primary", data: { wsrow: "upload|" + w.id } }, "📸 Upload answers")]
+    : k === "wait" && canAct ? [h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, "✅ Check now")]
+    : [h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Answers" : "🔒 Answers")];
+  return h("li", { class: "wsg-row" },
+    h("button", { class: "wsg-main", data: { aiopen: "worksheet|" + w.id } }, h("span", { class: "e" }, emoji),
+      h("span", { class: "what" }, h("b", null, w.title), h("small", null, [shortDate(w.date), label, partOf(w, s), madeByParent(w)].filter(Boolean).join(" · "))), badge),
+    h("div", { class: "wsg-btns" }, ...act));
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#scr-school [data-stsec], #scr-school [data-navback]");
+  if (!b) return;
+  if ("navback" in b.dataset) { if (!stSec || screen !== "school") return; e.stopImmediatePropagation(); stSec = null; }
+  else { e.stopImmediatePropagation(); stSec = b.dataset.stsec || null; }
+  schoolFresh = true; render(); window.scrollTo(0, 0);
+});
 // ---------- 📌 A topic chip → the small sheet: 🤖 Explain it to me · ✏️ Make a worksheet (the kid, or a parent for that kid) ----------
 let tp = null;   // { kid, subject, title, work, workTitle, topics }
 function openTopicSheet(i) {
@@ -867,7 +921,7 @@ function subjectFilesHtml(s, f, title = "📁 Files", status = false) {
   return `${look ? "" : `<div class="sc-actions"><button class="pill" data-scupload="${safe(f.name)}">⬆ Upload</button><button class="pill" data-scedit="link">🔗 Add link</button></div>
     ${schoolEdit === "link" ? linkFormHtml() : ""}`}
     <div class="card bd-card"><h2>${safe(title)}</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s, status)).join("")}</ul>`
-      : `<p class="sc-empty">${look ? "Nothing uploaded yet." : "No files yet. Use ⬆️ Upload today's work, or ⬆ Upload."}</p>`}</div>`;
+      : `<p class="sc-empty">${look ? "Nothing uploaded yet." : "No files yet. Use ⬆️ Upload topic."}</p>`}</div>`;
 }
 // ✅ / ⏳ for an uploaded file: 🤖 read it (a school work card) or its worksheet is checked · waiting for a parent's phone or the check
 function fileStatus(f, s) {
@@ -982,7 +1036,7 @@ function schoolHomeworkHtml(s) {
   return `<div class="bd-head"><h2>📝 Homework & exams${only ? ` · ${safe(only)}` : ""}</h2>${open ? "" : `<button class="edit" data-scedit="task">➕ Add</button>`}</div>
     ${open ? taskFormHtml(s, only || "") : ""}<div class="card bd-card">${tasksListHtml(s, all)}</div>
     <div style="height:18px"></div>${aiMount(() => aiListCard("📝 Worksheets", wsListNode(wsOf(schoolKid, only || undefined), true),
-      "No worksheets yet. Use ⬆️ Upload today's work: a new topic gets a short level check."))}`;
+      "No worksheets yet. Use ⬆️ Upload topic: a new topic gets a short level check."))}`;
 }
 // To do (soonest first), then the last ones done
 function tasksListHtml(s, all) {
