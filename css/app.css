@@ -1468,6 +1468,25 @@
   .kp-head h1 { margin: 0; font-size: 26px; }
   .kp-head .kc-ring { width: 72px; height: 72px; }
   .kp-h { margin: 16px 4px 6px; font-size: 20px; }
+  .kp-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+  .kp-tile { display: grid; justify-items: start; align-content: start; gap: 2px; min-height: 96px; padding: 12px; border-radius: 18px; text-align: left;
+             background: var(--soft); color: var(--ink); border: 2px solid transparent; }
+  .kp-tile:hover, .kp-tile:focus-visible { border-color: var(--c); }
+  .kp-tile .e { font-size: 30px; line-height: 1; }
+  .kp-tile b { font-size: 17px; line-height: 1.2; }
+  .kp-tile small { font-size: 13px; font-weight: 700; opacity: .8; line-height: 1.3; }
+  .ks-top { display: grid; justify-items: start; gap: 6px; margin: 4px 0 10px; }
+  .ks-title { margin: 0; font-size: 26px; color: var(--ink); }
+  .ks-intro { margin: 0 4px 8px; }
+  .ks-big { font-size: 20px; font-weight: 800; margin: 4px 0; }
+  .ks-card .ks-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .ks-card h2 { margin: 0; }
+  .ks-avg { display: grid; justify-items: end; font-size: 22px; font-weight: 800; }
+  .ks-avg small { font-size: 12px; font-weight: 700; opacity: .75; }
+  .ks-line { margin: 6px 0 0; line-height: 1.4; }
+  .ks-line span { white-space: nowrap; }
+  .ks-more { margin-top: 8px; }
+  .ks-more summary { cursor: pointer; font-weight: 800; }
   .td-row.done .td-what { opacity: .6; }
   /* 📰 The weekly newsletter reminder (a parent's home) */
   .nl-nudge { border-left: 6px solid var(--c); background: #fffbea; }

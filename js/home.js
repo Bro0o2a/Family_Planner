@@ -146,7 +146,7 @@ document.addEventListener("click", e => {
 let kidPage = null;
 function openKidPage(id) {
   if (!isParentDevice() || !exists(id) || isParentId(id)) return;
-  kidPage = id; homeMore = homeAddPlan = false;
+  kidPage = id; kidSec = null; homeMore = homeAddPlan = false;
   go("kid");
 }
 // Today's list for one kid, with ✅ ticks (a parent ticks for the kid; ⏰ not before the start)
@@ -161,30 +161,120 @@ function kidTodayHtml(k) {
       : `<p class="sc-empty">Nothing today. 🎈</p>`}
     <div class="td-more"><button class="linkbtn" data-viewcal="${safe(k.id)}">📅 The week (tick earlier days) ›</button></div></div>`;
 }
+// 👧 The kid page is a MENU of big buttons (each with a one-line status); a tap opens ONLY that part (kidSec).
+//    ⬅️ Back (or "All about …") → the menu again. Sections: today · habits · star · score · study · points (💪 strong / 🎯 weak per subject)
+//    · tasks · school · work · moods (📔 moods, ✅ duties, 💌 wishes) · report (the full 📊 report, as before).
+let kidSec = null;
+const starAnnounceText = () => { const t = starTime(); return `every ${DAYS[t.day]} at ${clock(toMin(t.time), true)}`; };
+// ⭐ Today's habits: done / all (prayers and water: done only when all parts are done)
+function kidHabitsToday(id) {
+  const list = habitsFor(id), d = todayYmd();
+  return { all: list.length, done: list.filter(h => habitDone(h, data.habitMarks[habitKey(d, h.id, id)])).length };
+}
+// 🌟 Where the kid stands this week: Star (last week's winner) · 🔥 Leading · "2nd of 3"
+function kidStarLine(id) {
+  const fair = fairScores(), order = fairOrder(fair).filter(u => fair[u.id] > 0), pos = order.findIndex(u => u.id === id) + 1, nth = n => n + (["th", "st", "nd", "rd"][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] || "th");
+  return [stars().includes(id) ? "🌟 Last week's Shining Star" : "", leaders().includes(id) ? "🔥 Leading this week" : pos ? `${nth(pos)} of ${order.length} this week` : ""].filter(Boolean).join(" · ");
+}
+// 🎯 One subject in a few words: 💪 good at · 😕 weak at · 🎯 practise (from the checked worksheets and the 🧠 learning profile)
+function kidSubjectSummary(kid, f) {
+  const L = learnRead(kid, f.name), rows = L ? learnTopicRows(kid, f) : [], all = checkedOf(kid, f.name), last = all[0];
+  const uniq = list => [...new Set(list.filter(Boolean))].slice(0, 3);
+  const good = uniq([...rows.filter(r => r.pct >= 85).sort((a, b) => b.pct - a.pct).map(r => r.title), ...(L ? strongSkills(L).map(x => x.skill) : []),
+    ...(last ? last.check.strong_points || [] : [])]);
+  const weak = uniq([...rows.filter(r => r.pct < 60).sort((a, b) => a.pct - b.pct).map(r => r.title), ...(last ? last.check.weak_points || [] : [])]);
+  const practise = uniq([...rows.filter(r => r.st === "needs" || r.pct < 70).flatMap(r => r.weak.length ? r.weak : [r.title]), ...(L ? weakSkills(L).map(x => x.skill) : [])]);
+  return { f, avg: avgPct(all), count: all.length, level: L ? L.level : 0, good, weak, practise, has: !!(all.length || rows.length) };
+}
+function kidSubjectsHtml(kid) {
+  const s = schoolOf(kid), list = subjectList(s).map(f => kidSubjectSummary(kid, f));
+  if (!list.length) return `<div class="card"><p class="sc-empty">No subjects yet. Add them in 🎒 School.</p></div>`;
+  const line = (e, label, xs) => xs.length ? `<p class="ks-line"><span>${e} <b>${label}</b></span> ${safe(xs.join(", "))}</p>` : "";
+  return list.map(x => `<div class="card ks-card"><div class="ks-head"><h2>${safe(x.f.emoji)} ${safe(x.f.name)}</h2>
+      <span class="ks-avg">${x.avg != null ? `${x.avg}%` : "–"}<small>${x.count} ${x.count === 1 ? "worksheet" : "worksheets"}${x.level ? ` · Level ${x.level}/10` : ""}</small></span></div>
+      ${x.has ? line("💪", "Good at:", x.good) + line("😕", "Weak at:", x.weak) + line("🎯", "Needs to practise:", x.practise)
+        + (!x.good.length && !x.weak.length && !x.practise.length ? `<p class="sc-empty">Not enough checked work yet to tell.</p>` : "")
+        : `<p class="sc-empty">No checked worksheets in this subject yet.</p>`}
+      ${(schoolOf(kid).learn || {})[x.f.id] ? `<details class="ks-more"><summary>🧠 All the details</summary>${learnCardHtml(kid, x.f)}</details>` : ""}</div>`).join("");
+}
+// The part that's open (kidSec), with its big title
+function kidSectionHtml(k, sec) {
+  const c = colorsOf(k), sc = scoreOf(k.id), items = kidsWorkItems(), mine = items.filter(x => x.kid === k.id), want = wantItem(k.id), st = weekStats(k.id);
+  const keep = rpRange; rpRange = "week";
+  const x = reportData(k.id, reportRange()), lines = reportLines(x, reportRange(), k.name);
+  rpRange = keep;
+  const big = (n, label) => `<div class="rp-num"><b>${n}</b><small>${label}</small></div>`;
+  const S = {
+    today: () => kidTodayHtml(k),
+    habits: () => (habitsCardHtml(k.id) || `<div class="card"><p class="sc-empty">No habits are on for ${safe(k.name)}.</p></div>`) + `<div class="btnrow"><button class="pill" data-kidhabits>✏️ Edit the kids' habits</button></div>`,
+    star: () => `<div class="card"><h2>🌟 Shining Star this week</h2><p class="ks-big">${safe(kidStarLine(k.id) || "No scores yet this week")}</p>
+        <p class="hint">The star is chosen ${safe(starAnnounceText())}: the best score wins.</p>
+        ${stars().includes(k.id) ? `<p>${want && want.text ? `🎁 Gift: <b>${safe(want.text)}</b>${want.ok ? " ✅" : ""}` : "🎁 No gift picked yet."}</p>` : ""}
+        <div class="btnrow"><button class="pill" data-go="points">🏆 Points and leaderboard</button></div></div>`,
+    score: () => `<div class="card"><h2>🏆 Score this week</h2>${scoreBlockHtml(sc)}${sc.free && sc.free.count ? `<p class="kid-free">${freeLine(sc.free)}</p>` : ""}</div>`,
+    study: () => `<div class="card rp-card"><h2>📚 Study per subject</h2><p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · 📝 Marks: ${sc.has.marks ? sc.marks + "%" : "–"}${
+        sc.free.count ? ` <small>(${sc.free.count} ${sc.free.count === 1 ? "worksheet" : "worksheets"}, ${sc.free.points} points)</small>` : ""}</p>${studyTableHtml(k.id, null)}</div>
+      <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(k.id)}</div>`,
+    points: () => `<p class="hint ks-intro">Each subject in a few words, from ${safe(k.name)}'s checked worksheets.</p>${kidSubjectsHtml(k.id)}`,
+    tasks: () => `<div class="card rp-card"><h2>✅ Tasks this week</h2><div class="rp-nums">${x.tasksPct != null ? big(x.tasksPct + "%", `of planned activities done (${x.done} of ${x.planned})`) : big("–", "no planned activities this week")}</div>
+        <div class="btnrow"><button class="pill" data-viewcal="${safe(k.id)}">📅 The week</button></div></div>${dutyRowsCardHtml([k], `✅ Did ${safe(k.name)} do the duties on time today?`)}`,
+    school: () => `<div class="card rp-card"><h2>🎒 School this week</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>
+        <div class="btnrow"><button class="primary" data-school="${safe(k.id)}">🎒 Open ${safe(k.name)}'s School</button></div></div>`,
+    work: () => `${kwCardHtml(k, items).replace("data-kwdetail", "data-kwsame").replace("<small>Details ›</small>", "")}
+      <div class="card"><h2>📋 Everything ${safe(k.name)} did today (${mine.length})</h2>
+      ${mine.length ? `<ul class="kw-list">${mine.map(x => { const inner = `<span class="kw-time">${x.cat === "school" || x.cat === "act" ? kwTime(x.at) : ""}</span><span class="kw-what">${safe(x.text)}</span>`;
+        return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`; }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</div>`,
+    moods: () => `${feat("diary") ? `<div class="card"><h2>📔 Moods this week</h2><div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>
+      <div class="btnrow"><button class="pill" data-dyopen="${safe(k.id)}">📔 ${safe(k.name)}'s day</button></div></div>` : ""}${wishesListHtml(k.id)}`,
+    report: () => `${lines.best || lines.help ? `<div class="card rp-card rp-lines">${lines.best ? `<p>🌟 <b>Best this week:</b> ${safe(lines.best)}</p>` : ""}${lines.help ? `<p>👀 <b>Needs help:</b> ${safe(lines.help)}</p>` : ""}</div>` : ""}
+      <div class="btnrow"><button class="primary" data-kidreport="${safe(k.id)}">📊 Open the full report (PDF, this month)</button></div>`
+  };
+  const t = KID_SECS.find(s => s.id === sec);
+  return `<div class="ks-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><button class="pill" data-kidsec="">⬅️ All about ${safe(k.name)}</button>
+    <h1 class="ks-title">${t.emoji} ${safe(k.name)}'s ${t.label.toLowerCase()}</h1></div>${S[sec]()}`;
+}
+const KID_SECS = [
+  { id: "today", emoji: "📋", label: "Today" }, { id: "habits", emoji: "⭐", label: "Good habits today" },
+  { id: "star", emoji: "🌟", label: "Shining Star" }, { id: "score", emoji: "🏆", label: "Score this week" },
+  { id: "study", emoji: "📚", label: "Study per subject" }, { id: "points", emoji: "🎯", label: "Strong and weak points" },
+  { id: "tasks", emoji: "✅", label: "Tasks" }, { id: "school", emoji: "🎒", label: "School" },
+  { id: "work", emoji: "👀", label: "Work today" }, { id: "moods", emoji: "📔", label: "Moods and wishes" }, { id: "report", emoji: "📊", label: "Report" }];
+// The status line under each big button
+function kidSecLine(k, id) {
+  const sc = scoreOf(k.id), h = kidHabitsToday(k.id);
+  if (id === "today") return kidTodayLine(k.id);
+  if (id === "habits") return h.all ? `${h.done} of ${h.all} done today` : "No habits on";
+  if (id === "star") return kidStarLine(k.id) || "No scores yet";
+  if (id === "score") return `${sc.overall} / ${sc.max}`;
+  if (id === "study") return `Sessions ${sc.sp ? sc.sp.study + "%" : "–"} · Marks ${sc.has.marks ? sc.marks + "%" : "–"}`;
+  if (id === "points") { const n = subjectList(schoolOf(k.id)).length; return n ? `${n} ${n === 1 ? "subject" : "subjects"}: good at, weak at, practise` : "No subjects yet"; }
+  if (id === "tasks") { const t = sc.tk || {}; return t.planned ? `${Math.round(t.done / t.planned * 100)}% done this week` : "Nothing planned yet"; }
+  if (id === "school") return "Files, worksheets, marks";
+  if (id === "work") { const n = kidsWorkItems().filter(x => x.kid === k.id).length; return n ? `${n} ${n === 1 ? "thing" : "things"} today` : "Nothing yet today"; }
+  if (id === "moods") return "Moods, wishes";
+  return "Best thing, needs help, PDF";
+}
 function drawKidPage() {
   if (!isParentDevice() || !exists(kidPage) || isParentId(kidPage)) return go("home");
-  const k = userById(kidPage), c = colorsOf(k), sc = scoreOf(k.id), st = weekStats(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
-  const items = kidsWorkItems(), mine = items.filter(x => x.kid === k.id), want = wantItem(k.id);
+  const k = userById(kidPage), c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
+  const secs = KID_SECS.filter(s => (s.id !== "habits" || habitsFor(k.id).length) && (s.id !== "moods" || feat("diary") || wishesListHtml(k.id)));
+  if (kidSec && !secs.some(s => s.id === kidSec)) kidSec = null;
+  if (kidSec) { $("kidBody").innerHTML = kidSectionHtml(k, kidSec); return; }
   $("kidBody").innerHTML = `
     <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}</h1>
-        <small>${safe(kidTodayLine(k.id))}</small></div></div>
-      ${scoreBlockHtml(sc)}${sc.free && sc.free.count ? `<p class="kid-free">${freeLine(sc.free)}</p>` : ""}
-      <div class="kc-btns"><button data-school="${safe(k.id)}">🎒 School</button><button data-viewcal="${safe(k.id)}">📅 Calendar</button><button data-profile="${safe(k.id)}">👤 Profile</button></div></div>
-    ${kidTodayHtml(k)}
-    <h2 class="kp-h">👀 ${safe(k.name)}'s work today</h2>${kwCardHtml(k, items).replace("data-kwdetail", "data-kwsame").replace("<small>Details ›</small>", "")}
-    <details class="card kw-all"><summary>📋 Everything ${safe(k.name)} did today (${mine.length})</summary>
-      ${mine.length ? `<ul class="kw-list">${mine.map(x => { const inner = `<span class="kw-time">${x.cat === "school" || x.cat === "act" ? kwTime(x.at) : ""}</span><span class="kw-what">${safe(x.text)}</span>`;
-        return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`; }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</details>
-    ${habitsCardHtml(k.id)}<div class="btnrow"><button class="pill" data-kidhabits>✏️ Edit the kids' habits</button></div>
-    ${dutyRowsCardHtml([k], `✅ Did ${safe(k.name)} do the duties on time today?`)}
-    ${wishesListHtml(k.id)}
-    ${stars().includes(k.id) ? `<div class="card"><h2>🌟 Shining Star of the Week!</h2><p>${want && want.text ? `🎁 Gift: <b>${safe(want.text)}</b>${want.ok ? " ✅" : ""}` : "🎁 No gift picked yet."}</p>
-      <div class="btnrow"><button class="pill" data-go="points">🏆 Points</button></div></div>` : ""}
-    ${feat("diary") ? `<div class="card"><h2>📔 Moods this week</h2><div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>
-      <div class="btnrow"><button class="pill" data-dyopen="${safe(k.id)}">📔 ${safe(k.name)}'s day</button></div></div>` : ""}
-    <h2 class="kp-h">📊 How ${safe(k.name)} is doing</h2>${reportCardsHtml(k.id)}`;
+      <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>
+        <small>${safe(kidTodayLine(k.id))}</small></div></div></div>
+    <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">${secs.map(s => `<button class="kp-tile" data-kidsec="${s.id}">
+      <span class="e" aria-hidden="true">${s.emoji}</span><b>${s.label}</b><small>${safe(kidSecLine(k, s.id))}</small></button>`).join("")}</div>`;
 }
+// A big button → only that part; "⬅️ All about …" (or ⬅️ Back on the page) → the menu. (Runs before the general taps, see taps.js)
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#scr-kid [data-kidsec], #scr-kid [data-navback]");
+  if (!b) return;
+  if ("navback" in b.dataset) { if (!kidSec) return; e.stopImmediatePropagation(); kidSec = null; }
+  else kidSec = b.dataset.kidsec || null;
+  render(); window.scrollTo(0, 0);
+});
 // ☰ More: simple, the same for everyone: 👤 My profile (big: each person's ⚙️ settings, and a parent's 👨‍👩‍👧 Family settings,
 // 🚪 Sign out at its bottom) · 🔒 Your privacy · 👋 Show the tour. (✏️ Add activities and 🖨️ Print are on 📅 Calendar.)
 function moreTilesHtml() {

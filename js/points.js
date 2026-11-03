@@ -566,7 +566,9 @@ const scoreText = s => `${s.overall} / ${s.max}${s.extra && s.extra.bonus ? ` (�
 // The small bars: 📝 Marks (with each subject under it) · ✅ Ticks (a part with nothing this week: "–")
 function subBarsHtml(s) {
   return `<div class="score-subs">${Object.keys(SCORE_WEIGHTS).map(k => { const [, e, w] = scorePartInfo(k), on = s.has[k];
-    return `<div class="score-sub ${on ? "" : "none"}"><span class="score-sub-l">${e} ${w}</span><span class="score-sub-bar"><i style="width:${on ? Math.min(100, s[k]) : 0}%"></i></span><b>${on ? s[k] + "%" : "–"}</b></div>${
+    // (⚡ s.extra is an older { count, bonus } object, so the extras' % comes from extraPts)
+    const v = k === "extra" ? Math.round((s.extraPts || 0) / EXTRA_MAX * 100) : s[k];
+    return `<div class="score-sub ${on ? "" : "none"}"><span class="score-sub-l">${e} ${w}</span><span class="score-sub-bar"><i style="width:${on ? Math.min(100, v) : 0}%"></i></span><b>${on ? v + "%" : "–"}</b></div>${
       k === "marks" && on ? `<div class="score-parts">📝 ${s.marksCount} ${s.marksCount === 1 ? "worksheet" : "worksheets"} from study sessions checked this week (average ${s.marks}%)</div>${
         (s.levels || []).filter(x => x.avg != null).map(x => `<div class="score-parts">${safe(x.emoji)} ${safe(x.name)} · ${x.avg}% · Level ${x.level}/10</div>`).join("")}` : ""}${
       k === "extra" ? `<div class="score-parts">⚡ ${s.extraPts} of ${EXTRA_MAX} points · ${s.extraCount || 0} checked ${s.extraCount === 1 ? "extra" : "extras"} (each adds its mark)</div>` : ""}${
