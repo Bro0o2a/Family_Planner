@@ -59,7 +59,7 @@ function reportCardsHtml(kid, forPdf) {
     <div class="card rp-card"><h2>🧠 Learning profile</h2>${learnReportHtml(kid)}</div><div class="card rp-card"><h2>🎒 School</h2><div class="rp-nums">${big(x.files, "files uploaded")}${big(x.sheets, "worksheets done")}${big(x.avg != null ? x.avg + "%" : "–", "average mark")}</div>
       ${x.subjects.length ? `<ul class="rp-subs">${x.subjects.map(f => `<li>${forPdf ? `<div class="rp-sub">` : `<button class="rp-sub" data-rpsub="${safe(f.id)}">`}
         <span class="rp-subname">${safe(f.emoji)} ${safe(f.name)}</span><span class="rp-stars" aria-label="${f.level ? `Level ${f.level} of 3` : "No level yet"}">${stars5(f.level) || "–"}</span>
-        ${f.strong.length ? `<small>💪 Good at: ${safe(f.strong.join(", "))}</small>` : ""}${f.weak.length ? `<small>🎯 Work on: ${safe(f.weak.join(", "))}</small>` : ""}${forPdf ? "</div>" : "</button>"}</li>`).join("")}</ul>` : ""}</div>
+        ${f.strong.length ? `<small>Good at: ${safe(f.strong.join(", "))}</small>` : ""}${f.weak.length ? `<small>Work on: ${safe(f.weak.join(", "))}</small>` : ""}${forPdf ? "</div>" : "</button>"}</li>`).join("")}</ul>` : ""}</div>
     <div class="card rp-card"><h2>✅ Tasks</h2><div class="rp-nums">${x.tasksPct != null ? big(x.tasksPct + "%", `of planned activities done this week (${x.done} of ${x.planned})`) : big("–", "no planned activities this week")}
       ${rpRange === "month" ? big(x.points, "points this month") : ""}</div></div>
     ${x.habits.length ? `<div class="card rp-card"><h2>⭐ Habits</h2><ul class="me-list">${x.habits.map(({ h, days }) => `<li><span>${safe(h.emoji)} ${safe(h.name)}</span><b>${days} of ${r.days} days</b></li>`).join("")}</ul></div>` : ""}
@@ -156,7 +156,7 @@ function fsCardHtml(p) {
     ${p.fair != null ? bar(p.fair) + subBarsHtml(p.score) : ""}
     ${row("✅ Tasks done", p.tasksPct != null ? `${p.tasksPct}% (${p.tasksDone} of ${p.tasksPlanned})` : `${p.tasksDone} done`)}
     ${p.kid ? row("📚 Worksheets done", `${p.sheets}${p.avg != null ? ` · average ${p.avg}%` : ""}`) : ""}
-    ${p.strong.length ? row("💪 Good at", safe(p.strong.join(", "))) : ""}${p.weak.length ? row("🎯 Work on", safe(p.weak.join(", "))) : ""}
+    ${p.strong.length ? row("Good at", safe(p.strong.join(", "))) : ""}${p.weak.length ? row("Work on", safe(p.weak.join(", "))) : ""}
     ${p.habitCount ? row("⭐ Habits ticked", p.ticks) : ""}${p.prayerMax ? row("🕌 Prayers", `${p.prayed} of ${p.prayerMax}`) : ""}
     ${feat("diary") && p.moods.length ? `<div class="fs-row"><span>📔 Moods</span><b class="fs-moods">${p.moods.map(m => m || "·").join(" ")}</b></div>` : ""}
     <div class="fs-tips"><b>💡 Tips for next week</b><ul>${fsTips(p).map(t => `<li>${safe(t)}</li>`).join("")}</ul></div></section>`;

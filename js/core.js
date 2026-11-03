@@ -1275,7 +1275,7 @@ function storeLocal() {
   try {
     localStorage.setItem(SAVE_KEY, savedJson);
   } catch (e) {
-    if (!saveWarned) toast("⚠ This browser isn't saving (maybe a private window). Use “Export backup” in Settings.", 6000);
+    if (!saveWarned) toast("⚠ This browser isn't saving (maybe a private window). Use Backup → “Save a copy”.", 6000);
     saveWarned = true;
   }
 }

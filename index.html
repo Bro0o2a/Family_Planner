@@ -356,14 +356,19 @@
       </div>
       <!-- Backup -->
       <div class="card" style="margin-top:18px">
-        <h2>💾 Backup</h2>
-        <p class="hint">Everything is saved in the family cloud and on this device. A backup file keeps an extra copy safe.</p>
+        <h2>Backup</h2>
+        <p class="hint">Your data is saved in the family cloud. A backup is an extra copy in a file, just in case.</p>
         <div class="btnrow">
-          <button id="exportBtn">⬇ Export backup</button>
-          <button id="importBtn">⬆ Import backup</button>
-          <button id="exampleBtn">Load example</button>
-          <button id="clearBtn" class="danger-text">Clear everything</button>
+          <button id="exportBtn">Save a copy</button>
+          <button id="importBtn">Bring back a copy</button>
         </div>
+        <details class="bk-adv"><summary>Advanced (careful)</summary>
+          <p class="hint">These change the data on every device.</p>
+          <div class="btnrow">
+            <button id="exampleBtn">Load the example week</button>
+            <button id="clearBtn" class="danger-text">Delete everything</button>
+          </div>
+        </details>
         <!-- Hidden file picker: the "Import backup" button opens it -->
         <input type="file" id="importFile" accept=".json,application/json" hidden>
       </div>
@@ -565,20 +570,21 @@
   <div class="k-card leave-card" role="dialog" aria-modal="true" aria-labelledby="backupTitle">
     <!-- Step 1: pick Export or Import -->
     <div id="backupPick">
-      <div class="print-title" id="backupTitle">💾 Backup</div>
-      <p class="print-hint">Save all your data to a file, or load it back from a file.</p>
-      <div class="leave-btns">
-        <button data-backupexport>⬇ Export backup</button>
-        <button data-backupimport>⬆ Import backup</button>
-        <button data-backupclose>Cancel</button>
+      <div class="print-title" id="backupTitle">Backup</div>
+      <p class="print-hint">Your data is already saved in the family cloud. A backup is an extra copy in a file on this device, just in case.</p>
+      <div class="bk-choice">
+        <button class="bk-btn bk-main" data-backupexport><b>Save a copy</b><small>Downloads one file with all the family's data. Safe: nothing changes.</small></button>
+        <button class="bk-btn" data-backupimport><b>Bring back a copy</b><small>Only if data was lost. Pick a backup file: it replaces today's data on every device.</small></button>
       </div>
+      <p class="print-hint bk-tip">Tip: save a copy every week or two.</p>
+      <div class="leave-btns"><button data-backupclose>Close</button></div>
     </div>
     <!-- Step 2 (Import only): "Are you sure?" -->
     <div id="backupAsk" hidden>
-      <div class="leave-emoji">⚠️</div>
-      <div class="print-title">This will replace the family's data on all devices. Continue?</div>
+      <div class="print-title">Replace today's data?</div>
+      <p class="print-hint">Everything now in the app (on all devices) will be replaced by the file you pick. Save a copy first if you are not sure.</p>
       <div class="leave-btns">
-        <button class="save-btn" data-backupyes>Yes, continue</button>
+        <button class="save-btn" data-backupyes>Yes, pick the file</button>
         <button data-backupclose>Cancel</button>
       </div>
     </div>

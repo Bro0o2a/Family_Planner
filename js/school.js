@@ -135,7 +135,7 @@ function drawSchool() {
   }
   const u = userById(schoolKid), s = schoolOf(schoolKid);
   if ((schoolView === "subject" && !s.subjects[schoolSubject]) || schoolView === "subjects" || schoolView === "seesaw") schoolView = "home";
-  $("schoolTitle").textContent = isDad ? `🎒 ${u.emoji} ${u.name}'s school` : "🎒 My school";
+  $("schoolTitle").textContent = isDad ? `${u.name}'s school` : "My school";
   $("schoolSub").textContent = "";
   // Drawn again while a form is open (e.g. a change from another phone): keep what was typed
   const typed = {}, focus = document.activeElement && document.activeElement.id;
@@ -152,6 +152,7 @@ function drawSchool() {
   $("schoolBody").innerHTML = `<datalist id="scSubjects">${subjectsOf(s).map(x => `<option value="${safe(x)}">`).join("")}</datalist>`
     + (view === schoolView ? crumbHtml(s) : "") + (views[view] || schoolHomeHtml)(s, isDad, u);
   fillAiMounts($("schoolBody"));   // 🤖 the parts with text from the AI (built as plain text)
+  plainHeads($("schoolBody"));   // (v155: titles without pictures)
   Object.entries(typed).forEach(([id, v]) => { const el = $(id); if (el) el.value = v; });
   $("schoolBody").querySelectorAll(".sc-starpick").forEach(showStars);
   if (focus && $(focus) && $("schoolBody").contains($(focus))) $(focus).focus();
@@ -164,13 +165,13 @@ function drawSchool() {
 const VIEW_NAMES = { allws: "📝 All worksheets", make: "✏️ Make a worksheet", homework: "📝 Homework", marks: "📊 Marks", reviews: "⭐ Reviews", info: "🏫 School info", reports: "📄 Reports" };
 function crumbHtml(s) {
   if (schoolView === "home") return "";
-  const parts = [["🎒 School", "home"]], f = schoolSubject && s.subjects[schoolSubject];
-  if (schoolView === "subject") parts.push([`${f.emoji} ${f.name}`, null]);
+  const parts = [["School", "home"]], f = schoolSubject && s.subjects[schoolSubject];
+  if (schoolView === "subject") parts.push([f.name, null]);
   else if (schoolView === "worksheet" || schoolView === "explain") {
     // 🤖 a worksheet / explanation: back to its subject's 📝 Worksheets (or to the School home when the folder is gone)
-    if (f) parts.push([`${f.emoji} ${f.name}`, "subject|" + schoolSubject + "|worksheets"]);
-    parts.push([schoolView === "worksheet" ? "📝 Worksheet" : "📖 Explanation", null]);
-  } else if (schoolView === "brief") parts.push(["👤 Profile", "profile"], ["📋 Brief for parents", null]);
+    if (f) parts.push([f.name, "subject|" + schoolSubject + "|worksheets"]);
+    parts.push([schoolView === "worksheet" ? "Worksheet" : "Explanation", null]);
+  } else if (schoolView === "brief") parts.push(["👤 Profile", "profile"], ["Brief for parents", null]);
   else {
     if (f && VIEW_NAMES[schoolView]) parts.push([`${f.emoji} ${f.name}`, "subject|" + schoolSubject]);   // (a subject's 📊 📝 ⭐ 📄 📥: back to it)
     parts.push([schoolView === "profile" ? "👤 Profile" : VIEW_NAMES[schoolView], null]);
@@ -687,17 +688,17 @@ function schoolBriefHtml(s, isDad, u) {
 }
 // The brief card (on screen, and the same on paper)
 function briefNode(kid, b) {
-  const u = userById(kid), items = (emoji, title, list) => list.length ? h("div", { class: "bf-part" }, h("b", null, `${emoji} ${title}`),
+  const u = userById(kid), items = (emoji, title, list) => list.length ? h("div", { class: "bf-part" }, h("b", null, title),
     h("ul", null, list.map(t => h("li", null, t)))) : null;
   return h("div", { class: "bf-sheet" },
-    h("div", { class: "ws-namerow" }, h("span", null, "📋 Brief for parents"), h("span", null, b.date ? longDate(b.date) : "")),
-    h("h1", { class: "ex-title" }, `${u.emoji} ${u.name}`),
+    h("div", { class: "ws-namerow" }, h("span", null, "Brief for parents"), h("span", null, b.date ? longDate(b.date) : "")),
+    h("h1", { class: "ex-title" }, u.name),
     h("div", { class: "ws-sub" }, [gradeOf(kid), u.school].filter(Boolean).join(" · ")),
     h("p", { class: "bf-summary" }, b.summary),
     b.subjects.map(x => h("section", { class: "bf-sub" },
-      h("div", { class: "bf-subhead" }, h("h3", null, `${subjectEmoji(schoolOf(kid), x.subject)} ${x.subject}`), x.level ? h("span", { class: "bf-level" }, x.level) : null),
+      h("div", { class: "bf-subhead" }, h("h3", null, x.subject), x.level ? h("span", { class: "bf-level" }, x.level) : null),
       items("💪", "Strong", x.strong_points), items("🎯", "To work on", x.weak_points), items("➡️", "Next steps", x.next_steps))),
-    b.home_tips.length ? h("section", { class: "bf-sub bf-home" }, h("h3", null, "🏠 Home tips"), h("ul", null, b.home_tips.map(t => h("li", null, t)))) : null);
+    b.home_tips.length ? h("section", { class: "bf-sub bf-home" }, h("h3", null, "Home tips"), h("ul", null, b.home_tips.map(t => h("li", null, t)))) : null);
 }
 function subjectTileHtml(s, x) {
   const avg = avgPct(checkedOf(schoolKid, x.name)), level = (s.profile.subjects[x.id] || {}).level;
@@ -779,10 +780,9 @@ function schoolSubjectHtml(s, isDad, u) {
   if (stSec && !secs.some(x => x.id === stSec)) stSec = null;
   if (!stSec) {
     const upTile = `<button class="kp-tile sj-go" data-stup="${safe(f.id)}"><span class="e" aria-hidden="true">⬆️</span><b>Upload topic</b><small>A photo or file from school</small></button>`;
-    const line = (e, label, xs) => xs.length ? `<p class="ks-line"><span>${e} <b>${label}</b></span> ${safe(xs.join(", "))}</p>` : "";
-    html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>📋 In short</h2>
+    html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>In short</h2>
         <span class="ks-avg">${sum.avg != null ? `${sum.avg}%` : "–"}<small>${sum.count} checked${sum.level ? ` · Level ${sum.level}/10` : ""}</small></span></div>
-      ${line("💪", "Good at:", sum.good) + line("😕", "Weak at:", sum.weak) + line("🎯", "Practise:", sum.practise)
+      ${sumLinesHtml(sum)
         || `<p class="sc-empty">Do a worksheet and the summary shows here.</p>`}</div>
       <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
       ${secs.map((x, i) => (i === 1 ? upTile : "") + `<button class="kp-tile" data-stsec="${x.id}"><span class="e" aria-hidden="true">${x.emoji}</span><b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
@@ -790,7 +790,7 @@ function schoolSubjectHtml(s, isDad, u) {
     return html;
   }
   const t = secs.find(x => x.id === stSec);
-  html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.emoji} ${t.label}</h1></div>`;
+  html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.label}</h1></div>`;
   if (stSec === "ws") return html + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
   if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);

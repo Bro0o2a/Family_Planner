@@ -856,7 +856,7 @@ function drawHome() {
   $("homePoints").textContent = (stars().includes(me) ? `🌟 Shining Star of the Week · ⭐ Score ${myFair} · ${myPoints} points` : `⭐ Score ${myFair} · ${myPoints} points this week`)
     + ` · ${kindsText(weekKinds(me))}`;
   const isDad = isParentId(me), parent = isParentDevice();
-  $("backupPill").hidden = !isDad;   // 💾 Backup button: only Bro2a sees it
+  $("backupPill").hidden = true;   // (v155: 💾 Backup is only in the home list → Settings, one place)
   // 🌱 The hello: my buddy in its level ring (when Buddy levels is on and I picked one)
   const buddy = hasSpark(me) && u.buddy;   // (✨ kids only)
   $("homeFace").classList.toggle("has-buddy", !!buddy);
@@ -870,14 +870,14 @@ function drawHome() {
   $("scr-home").classList.toggle("kid-home", !parent);
   if (!parent) return drawKidHome(u);   // 🧒 a kid's home: super simple (see KIDS' HOME)
   // 👨‍👩‍👧 A PARENT'S HOME (simple): the hello and date · 🔔 "Needs you" (only when something does) · one card per kid ·
-  // the Family row (📅 Family calendar · ✏️ Add / Plan · 🏡 Community · ☰ More). Everything else is on each kid's page or in ☰ More.
+  // one clear list in groups (Plan the week · The kids · Family · Settings: see familyRowHtml).
   $("homeNote").hidden = true;
   $("homeBig").hidden = false;
   $("homeBig").className = "p-home";
   $("homeBig").innerHTML = needsLineHtml() + `<div class="kid-cards">${kidsList().map(kidCardHtml).join("")}</div>${kidsList().length ? "" : kidSetupHtml()}`
     + familyRowHtml();
-  $("homeMenu").hidden = !homeMore && !homeAddPlan;
-  $("homeMenu").innerHTML = homeAddPlan ? addPlanMenuHtml() : homeMore ? parentMoreHtml() : "";
+  $("homeMenu").hidden = true;   // (v155: no ☰ More / ✏️ Add menus on a parent's home: everything is in the list above)
+  $("homeMenu").innerHTML = "";
   $("homeHabits").innerHTML = "";
   $("homeCal").innerHTML = "";
   if (!isParentDevice()) maybeMakeRiddles();   // (🧩 riddles: kids only, never made on a parent's device)

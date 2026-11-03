@@ -614,7 +614,7 @@ function openBackupBox() {
 function closeBackupBox() { $("backupModal").hidden = true; }
 
 $("clearBtn").onclick = () => {
-  if (!confirm("Delete all activities, people and settings — on ALL the family's devices?\n\nTip: click Cancel and use “Export backup” first if you might want them back.")) return;
+  if (!confirm("Delete all activities, people and settings — on ALL the family's devices?\n\nTip: click Cancel and use “Save a copy” first if you might want them back.")) return;
   data = emptyData();
   allFilter = "all";
   cloud.stash = null;

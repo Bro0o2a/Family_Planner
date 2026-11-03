@@ -1245,12 +1245,12 @@ function mistakesNode(w, c) {
 function resultNode(w) {
   const c = w.check, most = Object.fromEntries(w.questions.map(q => [q.number, q.points])), pct = Math.round(c.score / c.max_score * 100), parent = isParentDevice();
   return h("div", null,
-    h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}% ${pct >= 80 ? "🌟" : pct >= 50 ? "👍" : "💪"}`)),
-    c.overall_note ? h("p", { class: "ai-note" }, "🤖 " + c.overall_note) : null,
+    h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}%`)),
+    c.overall_note ? h("p", { class: "ai-note" }, c.overall_note) : null,
     c.dadNote ? h("p", { class: "ai-note dad" }, `${userById(DAD).emoji} ${dadName()}: ${c.dadNote}`) : null,
-    c.strong_points && c.strong_points.length ? h("p", { class: "ai-note" }, "💪 Strong: " + c.strong_points.join(" · ")) : null,
-    c.weak_points && c.weak_points.length ? h("p", { class: "ai-note" }, "🎯 Practise: " + c.weak_points.join(" · ")) : null,
-    c.coach_tip ? h("p", { class: "ai-note" }, "🦉 " + c.coach_tip) : null,
+    c.strong_points && c.strong_points.length ? h("p", { class: "ai-note" }, "Strong: " + c.strong_points.join(" · ")) : null,
+    c.weak_points && c.weak_points.length ? h("p", { class: "ai-note" }, "Practise: " + c.weak_points.join(" · ")) : null,
+    c.coach_tip ? h("p", { class: "ai-note" }, "Coach tip: " + c.coach_tip) : null,
     c.questions.length ? mistakesNode(w, c) : null,
     parent && c.questions.length ? h("div", { class: "btnrow" }, h("button", { data: { wsact: "allans" }, "aria-expanded": String(wsAllAns) }, wsAllAns ? "Hide all answers" : "📋 See all answers")) : null,
     parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,

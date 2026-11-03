@@ -97,16 +97,36 @@ function kidCardHtml(k) {
     <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">${scoreRingHtml(sc.overall, c.color)}
       <span class="kc-text"><b>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
         <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button>
-    <div class="kc-btns"><button data-school="${safe(k.id)}">🎒 School</button><button data-viewcal="${safe(k.id)}">📅 Calendar</button><button data-kidreport="${safe(k.id)}">📊 Report</button></div></div>`;
+    <div class="kc-btns"><button data-school="${safe(k.id)}">School</button><button data-viewcal="${safe(k.id)}">Calendar</button><button data-kidreport="${safe(k.id)}">Report</button></div></div>`;
 }
-// The Family row: 4 small square buttons
+// v155: the parent's home ends with ONE clear list in 4 groups (no hidden menus): Plan the week · The kids · Family · Settings.
+//   Each row = a title + one short line + ›. No pictures (Broo2a: simpler and more professional).
+const hubAttr = t => t.attr ? t.attr : t.plan ? "data-plan" : t.extra ? `data-extra="${t.extra}"` : t.tour ? "data-tour"
+  : t.privacy ? "data-privacy" : t.profile ? "data-profile" : `data-go="${t.go}"`;
+const hubRowHtml = t => `<button class="hub-row${t.cls ? " " + t.cls : ""}" ${hubAttr(t)}><span class="hub-t"><b>${t.label}${t.badge ? ` <i class="hub-new">${t.badge}</i>` : ""}</b>
+  <small>${t.sub}</small></span><span class="hub-go" aria-hidden="true">›</span></button>`;
 function familyRowHtml() {
-  const n = feat("meeting") ? cmNewCount() : 0;
-  return `<div class="fam-row">
-    <button data-calall><span class="e">📅</span><small>Family calendar</small></button>
-    <button data-homeaddplan class="${homeAddPlan ? "on" : ""}" aria-expanded="${homeAddPlan}"><span class="e">✏️</span><small>Add / Plan</small></button>
-    ${feat("meeting") ? `<button data-extra="meeting"><span class="e">🏡</span><small>Community${n ? ` <b class="fr-new">${n} new</b>` : ""}</small></button>` : ""}
-    <button data-homemore class="${homeMore ? "on" : ""}" aria-expanded="${homeMore}"><span class="e">☰</span><small>More</small></button></div>`;
+  const n = feat("meeting") ? cmNewCount() : 0, dad = isParentId(me);
+  const groups = [
+    ["Plan the week", [{ attr: "data-calall", label: "Family calendar", sub: "Everyone's week in one place", cls: "hub-main" },
+      { go: "add", label: "Add activities", sub: "School, clubs, work, sports" },
+      ...(dad ? [{ plan: true, label: "Plan my week", sub: "Fit all the activities together" }] : []),
+      { attr: "data-onedaynew", label: "One-day event", sub: "Something on one date only" },
+      ...(hasPlan() ? [{ attr: "data-newplan", label: "Make a new plan", sub: "Start again from today (ticks stay)" }] : [])]],
+    ["The kids", [{ attr: "data-report", label: "How are my kids doing?", sub: "Scores, study and habits" },
+      { attr: 'data-go="kidswork"', label: "Kids' work today", sub: "Live, as they do it" },
+      { attr: 'data-go="points"', label: "Points and leaderboard", sub: "This week's scores" },
+      { attr: 'data-fsweek="this"', label: "Family summary: this week", sub: "A PDF to read or print" },
+      { attr: 'data-fsweek="last"', label: "Family summary: last week", sub: "A PDF to read or print" }]],
+    ["Family", [...(feat("meeting") ? [{ extra: "meeting", label: "Our Community", sub: "Family notes and requests", badge: n ? `${n} new` : "" }] : []),
+      ...(feat("chores") ? [{ extra: "chores", label: "Home duties", sub: "Jobs at home" }] : []),
+      ...(feat("diary") ? [{ attr: 'data-dyopen=""', label: "My day", sub: "How do you feel today?" }] : [])]],
+    ["Settings", [{ profile: true, label: "My profile", sub: "My name, picture and settings" },
+      ...(dad ? [{ attr: "data-backup", label: "Backup", sub: "Keep a safe copy of the family's data" }] : []),
+      { attr: "data-setupopen", label: "Edit my home", sub: "Turn features on or off" },
+      { ...PRIVACY_TILE, sub: "Who can see your data" }, { ...TOUR_TILE, sub: "How the app works" }]]];
+  return groups.filter(g => g[1].length).map(([title, rows]) => `<section class="hub-group"><h2 class="hub-h">${title}</h2>
+    <div class="hub-list">${rows.map(hubRowHtml).join("")}</div></section>`).join("");
 }
 // ✏️ Add / Plan: Add activities · ✨ Plan my week · 📌 One-day event · 🔄 Make a new plan
 function addPlanMenuHtml() {
@@ -186,16 +206,18 @@ function kidSubjectSummary(kid, f) {
   const practise = uniq([...rows.filter(r => r.st === "needs" || r.pct < 70).flatMap(r => r.weak.length ? r.weak : [r.title]), ...(L ? weakSkills(L).map(x => x.skill) : [])]);
   return { f, avg: avgPct(all), count: all.length, level: L ? L.level : 0, good, weak, practise, has: !!(all.length || rows.length) };
 }
+// Good at · Weak at · Practise: a small coloured word (no pictures), then the list
+const sumLinesHtml = x => [["sum-good", "Good at", x.good], ["sum-weak", "Weak at", x.weak], ["sum-prac", "Practise", x.practise]]
+  .filter(r => r[2].length).map(([c, label, xs]) => `<p class="sum-line"><span class="sum-tag ${c}">${label}</span>${safe(xs.join(", "))}</p>`).join("");
 function kidSubjectsHtml(kid) {
   const s = schoolOf(kid), list = subjectList(s).map(f => kidSubjectSummary(kid, f));
   if (!list.length) return `<div class="card"><p class="sc-empty">No subjects yet. Add them in 🎒 School.</p></div>`;
-  const line = (e, label, xs) => xs.length ? `<p class="ks-line"><span>${e} <b>${label}</b></span> ${safe(xs.join(", "))}</p>` : "";
-  return list.map(x => `<div class="card ks-card"><div class="ks-head"><h2>${safe(x.f.emoji)} ${safe(x.f.name)}</h2>
+  return list.map(x => `<div class="card ks-card"><div class="ks-head"><h2>${safe(x.f.name)}</h2>
       <span class="ks-avg">${x.avg != null ? `${x.avg}%` : "–"}<small>${x.count} ${x.count === 1 ? "worksheet" : "worksheets"}${x.level ? ` · Level ${x.level}/10` : ""}</small></span></div>
-      ${x.has ? line("💪", "Good at:", x.good) + line("😕", "Weak at:", x.weak) + line("🎯", "Needs to practise:", x.practise)
+      ${x.has ? sumLinesHtml(x)
         + (!x.good.length && !x.weak.length && !x.practise.length ? `<p class="sc-empty">Not enough checked work yet to tell.</p>` : "")
         : `<p class="sc-empty">No checked worksheets in this subject yet.</p>`}
-      ${(schoolOf(kid).learn || {})[x.f.id] ? `<details class="ks-more"><summary>🧠 All the details</summary>${learnCardHtml(kid, x.f)}</details>` : ""}</div>`).join("");
+      ${(schoolOf(kid).learn || {})[x.f.id] ? `<details class="ks-more"><summary>All the details</summary>${learnCardHtml(kid, x.f)}</details>` : ""}</div>`).join("");
 }
 // The part that's open (kidSec), with its big title
 function kidSectionHtml(k, sec) {
@@ -231,7 +253,17 @@ function kidSectionHtml(k, sec) {
   };
   const t = KID_SECS.find(s => s.id === sec);
   return `<div class="ks-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><button class="pill" data-kidsec="">⬅️ All about ${safe(k.name)}</button>
-    <h1 class="ks-title">${t.emoji} ${safe(k.name)}'s ${t.label.toLowerCase()}</h1></div>${S[sec]()}`;
+    <h1 class="ks-title">${safe(k.name)}'s ${t.label.toLowerCase()}</h1></div>${S[sec]()}`;
+}
+// v155: titles without pictures (more professional): takes the emoji off the start of every h1 / h2 / h3 inside root
+const PICS_RE = /^[\s\p{Extended_Pictographic}\p{Emoji_Modifier}\uFE0F\u200D]+/u;
+function plainHeads(root) {
+  if (!root) return;
+  root.querySelectorAll("h1, h2, h3").forEach(el => {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n;
+    while ((n = w.nextNode()) && !n.nodeValue.trim()) {}
+    if (n && PICS_RE.test(n.nodeValue) && el.textContent.trim().replace(PICS_RE, "").trim()) n.nodeValue = n.nodeValue.replace(PICS_RE, "");
+  });
 }
 const KID_SECS = [
   { id: "today", emoji: "📋", label: "Today" }, { id: "habits", emoji: "⭐", label: "Good habits today" },
@@ -259,7 +291,7 @@ function drawKidPage() {
   const k = userById(kidPage), c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
   const secs = KID_SECS.filter(s => (s.id !== "habits" || habitsFor(k.id).length) && (s.id !== "moods" || feat("diary") || wishesListHtml(k.id)));
   if (kidSec && !secs.some(s => s.id === kidSec)) kidSec = null;
-  if (kidSec) { $("kidBody").innerHTML = kidSectionHtml(k, kidSec); return; }
+  if (kidSec) { $("kidBody").innerHTML = kidSectionHtml(k, kidSec); return plainHeads($("kidBody")); }
   $("kidBody").innerHTML = `
     <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
       <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>
