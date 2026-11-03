@@ -546,17 +546,18 @@ function curBriefHtml(kid, f) {
   const next3 = nextUp.length ? nextUp : off.filter(t => !t.practised).slice(0, 3);
   const extra = rows.filter(r => !m.list.some(t => curSame(r.title, t.title)));
   const pctAll = Math.round(matched.length / off.length * 100);
-  const li = (t, extra) => `<li><b>${safe(t.title)}</b>${t.term ? ` <small>${safe(t.term)}</small>` : ""}${extra || ""}</li>`;
+  // (v154: simple rows: the name big, one short grey line under it)
+  const li = (t, extra) => `<li><b>${safe(t.title)}</b>${extra || t.term ? `<small>${safe([String(extra || "").replace(/^ · /, ""), t.term].filter(Boolean).join(" · "))}</small>` : ""}</li>`;
   const block = (cls, title, list, fn, empty) => `<div class="cur-block ${cls}"><h3>${title} <span class="wsg-n">${list.length}</span></h3>${list.length ? `<ul>${list.map(fn).join("")}</ul>` : `<p class="hint">${empty}</p>`}</div>`;
-  return `<div class="cur-brief"><h2>🌍 The brief</h2>
+  return `<div class="cur-brief">
     <div class="cur-bar" role="img" aria-label="${pctAll}% of the official topics practised"><i style="width:${pctAll}%"></i></div>
-    <p class="cur-sum"><b>${matched.length} of ${off.length}</b> official topics practised (${pctAll}%) · ${extra.length} extra topics not in the curriculum</p>
+    <p class="cur-sum"><b>${matched.length} of ${off.length}</b> official topics practised (${pctAll}%) · ${extra.length} extra ${extra.length === 1 ? "topic" : "topics"}</p>
     ${nowList.length ? `<div class="cur-next now"><span>📍 In class now</span><b>${safe(nowList.map(t => t.title).join(", "))}</b></div>` : ""}
     ${next3.length ? `<div class="cur-next"><span>⏭️ Next ${next3.length === 1 ? "lesson" : `${next3.length} lessons`}</span>${next3.map(t => `<b>${safe(t.title)}</b>`).join("")}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every official topic is practised</b></div>`}
-    ${block("ok", "✅ Done and matched", matched, t => li(t, t.pct != null ? ` · ${t.pct}%` : ""), "Nothing practised from the official list yet.")}
-    ${block("risk", "⚠️ Risk: not practised yet", [...behind, ...inSchool], t => li(t, t.mine.length ? " · in the topics, no worksheet yet" : " · should be done by now"), "No gaps so far. 👍")}
-    ${weak.length ? block("risk", "🔴 Risk: weak marks", weak, t => li(t, ` · ${t.pct}%`), "") : ""}
-    ${block("extra", "➕ Extra (not in the curriculum)", extra, t => `<li><b>${safe(t.title)}</b></li>`, "None.")}</div>`;
+    ${block("ok", "✅ Done and matched", matched, t => li(t, t.pct != null ? `${t.pct}%` : ""), "Nothing practised from the official list yet.")}
+    ${block("risk", "⚠️ Not practised yet", [...behind, ...inSchool], t => li(t, t.mine.length ? "No worksheet yet" : "Should be done by now"), "No gaps so far. 👍")}
+    ${weak.length ? block("weak", "🔴 Weak marks", weak, t => li(t, `${t.pct}%`), "") : ""}
+    ${block("extra", "➕ Extra, not in the curriculum", extra, t => `<li><b>${safe(t.title)}</b></li>`, "None.")}</div>`;
 }
 
 // ---------- 📊 The parents' summary (📊 How are my kids doing?): per subject ⚪ · 🔴 · 🟢, the 🔴 topics first with ✏️ Practise ----------

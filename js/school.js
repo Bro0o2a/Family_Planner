@@ -796,7 +796,7 @@ function schoolSubjectHtml(s, isDad, u) {
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
   if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;
   if (stSec === "profile") return html + `<div class="card bd-card">${learnCardHtml(schoolKid, f) || `<p class="sc-empty">No checked worksheets yet: the profile starts with the first one.</p>`}</div>`;
-  if (stSec === "curr") return html + `<div class="card bd-card">${mapCardHtml(schoolKid, f)}</div>`;
+  if (stSec === "curr") return html + (s.map[f.id] ? `<div class="cur-wrap">${mapCardHtml(schoolKid, f)}</div>` : `<div class="card bd-card">${mapCardHtml(schoolKid, f)}</div>`);
   if (stSec === "files") {
     const files = filesOf(s, f.name), ex = exOf(schoolKid, f.name);
     html += `<div class="card bd-card"><h2>📂 Files (${files.length})</h2>${files.length ? `<ul class="list">${files.map(x => fileRowHtml(x, s, true)).join("")}</ul>` : `<p class="sc-empty">Nothing uploaded yet.</p>`}</div>`;

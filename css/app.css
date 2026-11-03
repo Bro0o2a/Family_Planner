@@ -1522,10 +1522,20 @@
   .cur-next span { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
   .cur-next b { font-size: 18px; }
   .cur-next small { font-weight: 700; opacity: .8; }
-  .cur-block { margin-top: 12px; padding-left: 12px; border-left: 5px solid #d1d5db; }
-  .cur-block.ok { border-color: #22c55e; } .cur-block.risk { border-color: #f59e0b; } .cur-block.later { border-color: #93c5fd; } .cur-block.extra { border-color: #c4b5fd; }
-  .cur-block h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 16px; }
-  .cur-block ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .cur-brief { display: grid; gap: 16px; }
+  .cur-wrap .cur-brief > h2, .cur-wrap .cur-sum, .cur-wrap .cur-bar { margin-inline: 4px; }
+  .cur-wrap .cur-tools { padding: 14px 16px; border-radius: 18px; background: #fff; border: 1px solid #e5e7eb; }
+  .cur-brief h2, .cur-brief .cur-sum { margin: 0; }
+  .cur-next { margin: 0; }
+  .cur-block { padding: 14px 16px; border-radius: 18px; background: #fff; border: 1px solid #e5e7eb; border-top: 6px solid #d1d5db; box-shadow: 0 2px 8px rgba(0, 0, 0, .04); }
+  .cur-block.ok { border-top-color: #22c55e; } .cur-block.risk { border-top-color: #f59e0b; } .cur-block.weak { border-top-color: #ef4444; } .cur-block.extra { border-top-color: #a78bfa; }
+  .cur-block h3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px; font-size: 18px; }
+  .cur-block ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .cur-block li { display: grid; gap: 1px; padding-bottom: 10px; border-bottom: 1px solid #f1f1f4; }
+  .cur-block li:last-child { padding-bottom: 0; border-bottom: 0; }
+  .cur-block li b { font-size: 16px; }
+  .cur-block li small { font-size: 13px; color: #6b7280; font-weight: 700; }
+  .cur-block .hint { margin: 0; }
   .st-units { display: grid; gap: 8px; margin-top: 6px; }
   .st-unit { border: 1px solid rgba(0, 0, 0, .08); border-radius: 16px; background: rgba(255, 255, 255, .7); }
   .st-unit.other { border-style: dashed; }
