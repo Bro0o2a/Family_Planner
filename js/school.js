@@ -778,15 +778,15 @@ function schoolSubjectHtml(s, isDad, u) {
   const secs = subjectSecs(parent).filter(x => x.id !== "files" || filesOf(s, f.name).length || exOf(schoolKid, f.name).length);
   if (stSec && !secs.some(x => x.id === stSec)) stSec = null;
   if (!stSec) {
+    const upTile = `<button class="kp-tile sj-go" data-stup="${safe(f.id)}"><span class="e" aria-hidden="true">⬆️</span><b>Upload topic</b><small>A photo or file from school</small></button>`;
     const line = (e, label, xs) => xs.length ? `<p class="ks-line"><span>${e} <b>${label}</b></span> ${safe(xs.join(", "))}</p>` : "";
     html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>📋 In short</h2>
         <span class="ks-avg">${sum.avg != null ? `${sum.avg}%` : "–"}<small>${sum.count} checked${sum.level ? ` · Level ${sum.level}/10` : ""}</small></span></div>
       ${line("💪", "Good at:", sum.good) + line("😕", "Weak at:", sum.weak) + line("🎯", "Practise:", sum.practise)
         || `<p class="sc-empty">Do a worksheet and the summary shows here.</p>`}</div>
       <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <button class="kp-tile sj-go" data-stup="${safe(f.id)}"><span class="e" aria-hidden="true">⬆️</span><b>Upload topic</b><small>A photo or file from school</small></button>
-      ${secs.map(x => `<button class="kp-tile" data-stsec="${x.id}"><span class="e" aria-hidden="true">${x.emoji}</span><b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
-        x.id === "ws" && todo ? `<span class="sc-badge">${todo}</span>` : ""}</button>`).join("")}</div>`;
+      ${secs.map((x, i) => (i === 1 ? upTile : "") + `<button class="kp-tile" data-stsec="${x.id}"><span class="e" aria-hidden="true">${x.emoji}</span><b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
+        x.id === "ws" && todo ? `<span class="sc-badge">${todo}</span>` : ""}</button>`).join("")}${secs.length < 2 ? upTile : ""}</div>`;
     return html;
   }
   const t = secs.find(x => x.id === stSec);
@@ -813,9 +813,11 @@ function schoolSubjectHtml(s, isDad, u) {
 // 🎒 The subject's big buttons (the kid: worksheets, topics, goal; parents: all)
 let stSec = null;
 function subjectSecs(parent) {
-  return [{ id: "ws", emoji: "✏️", label: "My worksheets" }, { id: "topics", emoji: "📚", label: "My topics" }, { id: "goal", emoji: "🎯", label: "Weekly goal" },
-    ...(parent ? [{ id: "study", emoji: "📊", label: "Study this week" }, { id: "profile", emoji: "🧠", label: "Learning profile" },
-      { id: "curr", emoji: "🌍", label: "Official curriculum" }, { id: "files", emoji: "📂", label: "Files" }, { id: "more", emoji: "🗂️", label: "More" }] : [])];
+  // (the order Broo2a chose: ✏️ worksheets, ⬆️ upload topic (drawn after the first), 🧠 profile, 🌍 curriculum, then topics, goal, study, files, more)
+  return [{ id: "ws", emoji: "✏️", label: "My worksheets" },
+    ...(parent ? [{ id: "profile", emoji: "🧠", label: "Learning profile" }, { id: "curr", emoji: "🌍", label: "Official curriculum" }] : []),
+    { id: "topics", emoji: "📚", label: "My topics" }, { id: "goal", emoji: "🎯", label: "Weekly goal" },
+    ...(parent ? [{ id: "study", emoji: "📊", label: "Study this week" }, { id: "files", emoji: "📂", label: "Files" }, { id: "more", emoji: "🗂️", label: "More" }] : [])];
 }
 function subjectSecLine(id, s, f, all, todo) {
   if (id === "ws") { const wait = all.filter(w => !w.check && w.answers.some(x => s.files[x])).length;
@@ -825,7 +827,9 @@ function subjectSecLine(id, s, f, all, todo) {
   if (id === "goal") return "Worksheets this week";
   if (id === "study") return "Planned and done hours";
   if (id === "profile") { const L = learnRead(schoolKid, f.name); return L ? `Level ${L.level}/10` : "Starts with the first check"; }
-  if (id === "curr") return "The school's official list";
+  if (id === "curr") { const m = s.map[f.id]; if (!m || !m.list.length) return "Get the official list";
+    const rows = topicRows(schoolKid, s, f).filter(r => r.info.results.length), n = m.list.filter(t => rows.some(r => curSame(r.title, t.title))).length;
+    return `${n} of ${m.list.length} practised · next lesson`; }
   if (id === "files") return `${filesOf(s, f.name).length} files`;
   return "Marks, homework, reviews, reports";
 }

@@ -1510,6 +1510,23 @@
   .wsg-tag { flex: none; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
   .wsg-tag.todo { background: #e0e7ff; color: #3730a3; } .wsg-tag.wait { background: #fef3c7; color: #92400e; }
   .wsg-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  /* 🌍 curriculum match */
+  .cur-tag { display: block; margin-top: 2px; font-weight: 800; }
+  .cur-tag.ok { color: #15803d; } .cur-tag.no { color: #b45309; }
+  .cur-brief h2 { margin-top: 0; }
+  .cur-bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+  .cur-bar i { display: block; height: 100%; background: #22c55e; border-radius: 999px; }
+  .cur-sum { margin: 8px 0; font-size: 15px; }
+  .cur-next { display: grid; gap: 2px; margin: 8px 0; padding: 12px 14px; border-radius: 16px; background: #eef2ff; color: #3730a3; }
+  .cur-next.now { background: #ecfeff; color: #155e75; }
+  .cur-next span { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+  .cur-next b { font-size: 18px; }
+  .cur-next small { font-weight: 700; opacity: .8; }
+  .cur-block { margin-top: 12px; padding-left: 12px; border-left: 5px solid #d1d5db; }
+  .cur-block.ok { border-color: #22c55e; } .cur-block.risk { border-color: #f59e0b; } .cur-block.later { border-color: #93c5fd; } .cur-block.extra { border-color: #c4b5fd; }
+  .cur-block h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 16px; }
+  .cur-block ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .cur-tools { margin-top: 10px; } .cur-tools summary { cursor: pointer; font-weight: 800; }
   .wsg-btns button { min-height: 38px; padding: 4px 14px; font-size: 14px; border-radius: 999px; }
   .td-row.done .td-what { opacity: .6; }
   /* 📰 The weekly newsletter reminder (a parent's home) */

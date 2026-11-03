@@ -77,7 +77,7 @@ function topicsCardHtml(s, f, parent) {
     const on = stPick.includes(t.id), n = t.info.list.length, last = t.info.results[t.info.results.length - 1];
     const meta = [t.added ? `Added ${dayMon(t.added)}` : "", t.src === "ws" ? WS_TOPIC_TAG : "", n ? `${n} ${n === 1 ? "worksheet" : "worksheets"}` : "", last ? `last ${last.pct}%` : ""].filter(Boolean).join(" · ");
     return `<li class="st-topic ${on ? "on" : ""}"><label class="st-tick"><input type="checkbox" data-sttick="${safe(t.id)}" ${on ? "checked" : ""} aria-label="Pick ${safe(t.title)}"></label>
-      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}</button>`
+      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}${curTagHtml(schoolKid, f.id, t.title)}</button>`
         : `<span class="st-name"><b>${safe(t.title)}</b>${t.src === "ws" ? `<small>${WS_TOPIC_TAG}</small>` : ""}</span>`}
       ${parent && stOpen === t.id ? topicHistoryHtml(t) : ""}</li>`;
   }).join("");
@@ -477,7 +477,7 @@ function mapCardHtml(kid, f) {
     <div class="btnrow"><button class="pill" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🌍 Get the official topics</button></div>`;
   const chip = t => { const on = stMapPick.includes(t); return `<button class="ph-chip ${on ? "on" : ""}" data-stmappick="${safe(encodeURIComponent(t))}" aria-pressed="${on}">${safe(t)}${on ? ` <b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; };
   const ul = list => list.length ? `<ul class="st-blist">${list.map(t => `<li>${safe(t)}</li>`).join("")}</ul>` : `<p class="hint">None.</p>`;
-  return `<p class="hint">${safe(sys)}${year ? ` · ${safe(year)}` : ""} · ${m.list.length} topics</p>
+  return `${curBriefHtml(kid, f)}<details class="cur-tools"><summary>🛠️ The full official list, 📊 Benchmark and 🌍 extra practice</summary><p class="hint">${safe(sys)}${year ? ` · ${safe(year)}` : ""} · ${m.list.length} topics</p>
     <div class="btnrow"><button class="pill" data-stbench="${safe(f.id)}" data-aiwait="bench|${safe(f.id)}">📊 Benchmark</button>
       <button class="linkbtn" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🔄 Again</button></div>
     ${b ? `<p class="st-bench"><b>✅ Covered ${b.covered.length}</b> · <b>⏳ Not yet ${b.not_yet.length}</b> · <b>🚀 Ahead ${b.ahead.length}</b></p>
@@ -487,7 +487,60 @@ function mapCardHtml(kid, f) {
     <p class="hint">Pick topics. The results go to the 🧠 profile as “${safe(label)} extra”, never into the school topics.</p>
     ${b && b.not_yet.length ? `<div class="btnrow"><button class="linkbtn" data-stmapnotyet="${safe(f.id)}">⏳ Pick the “Not yet” ones</button></div>` : ""}
     <div class="ph-chips">${m.list.map(t => chip(t.title)).join("")}</div>
-    <div class="btnrow"><button class="primary ${stMapPick.length ? "" : "off"}" data-stmapmake="${safe(f.id)}" data-aiwait="mapmake" aria-disabled="${!stMapPick.length}">✏️ Make ${safe(label)} practice${stMapPick.length ? ` (${stMapPick.length})` : ""}</button></div>`;
+    <div class="btnrow"><button class="primary ${stMapPick.length ? "" : "off"}" data-stmapmake="${safe(f.id)}" data-aiwait="mapmake" aria-disabled="${!stMapPick.length}">✏️ Make ${safe(label)} practice${stMapPick.length ? ` (${stMapPick.length})` : ""}</button></div></details>`;
+}
+
+// ---------- 🌍 v154: do the school topics MATCH the official curriculum? (no 🤖: word matching on the saved official list) ----------
+// Two titles match when they're the same topic (sameTopicTitle), or half of the shorter one's words are in the other
+// (words compared by their first 5 letters, so "digestion" = "digestive").
+const curStem = w => w.slice(0, 5);
+function curSame(a, b) {
+  if (sameTopicTitle(a, b)) return true;
+  const A = [...new Set(topicWords(a).filter(w => w.length > 2).map(curStem))], B = new Set(topicWords(b).filter(w => w.length > 2).map(curStem));
+  if (!A.length || !B.size) return false;
+  const both = A.filter(w => B.has(w)).length, small = Math.min(A.length, B.size);
+  return both >= 1 && both / small >= 0.5;
+}
+// The official topic a school topic matches (or null); no official list yet → undefined
+function curMatchOf(kid, sid, title) {
+  const m = schoolOf(kid).map[sid];
+  if (!m || !m.list.length) return undefined;
+  return m.list.find(t => curSame(title, t.title)) || null;
+}
+// The small tag on a topic (parents): "🌍 ✅ In the curriculum" · "🌍 ⚠️ Not in the curriculum" (nothing before the official list is loaded)
+function curTagHtml(kid, sid, title) {
+  const x = curMatchOf(kid, sid, title);
+  return x === undefined ? "" : x ? `<small class="cur-tag ok">🌍 ✅ In the curriculum${x.term ? ` · ${safe(x.term)}` : ""}</small>` : `<small class="cur-tag no">🌍 ⚠️ Not in the curriculum</small>`;
+}
+// 🌍 The brief: ✅ done and matched · ⏭️ the next lesson · ⚠️ the risks (behind / weak) · 🔜 coming later · ➕ extra (not in the curriculum)
+function curBriefHtml(kid, f) {
+  const s = schoolOf(kid), m = s.map[f.id];
+  if (!m || !m.list.length) return "";
+  const rows = topicRows(kid, s, f), done = r => r.info.results.length > 0;
+  const off = m.list.map((t, i) => { const mine = rows.filter(r => curSame(r.title, t.title)), tried = mine.filter(done);
+    const pct = tried.length ? Math.round(tried.reduce((n, r) => n + meanPct(r.info.results.slice(-3).map(x => x.pct)), 0) / tried.length) : null;
+    return { ...t, i, mine, practised: tried.length > 0, pct, weak: tried.some(r => r.st === "needs") || (pct != null && pct < 60) }; });
+  // Where the class is: the official "now" topics (else: the last topic he has). Before it and not practised = ⚠️ behind; after it = 🔜 later.
+  const lastNow = off.reduce((n, t) => t.now ? t.i : n, -1), firstNow = off.findIndex(t => t.now);
+  const lastDone = off.reduce((n, t) => t.practised || t.mine.length ? t.i : n, -1), cut = firstNow >= 0 ? firstNow : lastDone + 1, after = firstNow >= 0 ? lastNow : lastDone;
+  const matched = off.filter(t => t.practised), behind = off.filter(t => !t.practised && !t.mine.length && t.i < cut), later = off.filter(t => !t.mine.length && t.i > after);
+  const weak = off.filter(t => t.weak), inSchool = off.filter(t => t.mine.length && !t.practised && !t.now);
+  // 📍 now in class = the official "now" topics · ⏭️ the next lesson = the first topic after them that isn't practised yet
+  const nowList = off.filter(t => t.now), next = off.find(t => t.i > lastNow && !t.practised) || off.find(t => !t.practised);
+  const extra = rows.filter(r => !m.list.some(t => curSame(r.title, t.title)));
+  const pctAll = Math.round(matched.length / off.length * 100);
+  const li = (t, extra) => `<li><b>${safe(t.title)}</b>${t.term ? ` <small>${safe(t.term)}</small>` : ""}${extra || ""}</li>`;
+  const block = (cls, title, list, fn, empty) => `<div class="cur-block ${cls}"><h3>${title} <span class="wsg-n">${list.length}</span></h3>${list.length ? `<ul>${list.map(fn).join("")}</ul>` : `<p class="hint">${empty}</p>`}</div>`;
+  return `<div class="cur-brief"><h2>🌍 The brief</h2>
+    <div class="cur-bar" role="img" aria-label="${pctAll}% of the official topics practised"><i style="width:${pctAll}%"></i></div>
+    <p class="cur-sum"><b>${matched.length} of ${off.length}</b> official topics practised (${pctAll}%) · ${extra.length} extra topics not in the curriculum</p>
+    ${nowList.length ? `<div class="cur-next now"><span>📍 In class now</span><b>${safe(nowList.map(t => t.title).join(", "))}</b></div>` : ""}
+    ${next ? `<div class="cur-next"><span>⏭️ Next lesson</span><b>${safe(next.title)}</b>${next.term ? `<small>${safe(next.term)}</small>` : ""}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every official topic is practised</b></div>`}
+    ${block("ok", "✅ Done and matched", matched, t => li(t, t.pct != null ? ` · ${t.pct}%` : ""), "Nothing practised from the official list yet.")}
+    ${block("risk", "⚠️ Risk: not practised yet", [...behind, ...inSchool], t => li(t, t.mine.length ? " · in the topics, no worksheet yet" : " · should be done by now"), "No gaps so far. 👍")}
+    ${weak.length ? block("risk", "🔴 Risk: weak marks", weak, t => li(t, ` · ${t.pct}%`), "") : ""}
+    ${block("later", "🔜 Coming later", later, t => li(t), "Nothing left.")}
+    ${block("extra", "➕ Extra (not in the curriculum)", extra, t => `<li><b>${safe(t.title)}</b></li>`, "None.")}</div>`;
 }
 
 // ---------- 📊 The parents' summary (📊 How are my kids doing?): per subject ⚪ · 🔴 · 🟢, the 🔴 topics first with ✏️ Practise ----------
