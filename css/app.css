@@ -2641,3 +2641,23 @@
   .bk-tip { margin-top: 4px; }
   .bk-adv { margin-top: 12px; }
   .bk-adv summary { cursor: pointer; font-weight: 700; color: var(--muted); }
+/* v155 · 📝 "Clean exam" worksheets (templates A + C): header box, instructions, section bars, Q1 numbers, [marks]; black and white */
+  .ws-exam .ws-hbox { border: 1.5px solid #1f2133; border-radius: 10px; padding: 10px 14px; display: grid; gap: 8px; margin-bottom: 10px; }
+  .ws-exam .ws-htop { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; }
+  .ws-exam .ws-htop b { font-size: 1.2em; line-height: 1.25; }
+  .ws-exam .ws-htop small { color: #555; font-size: .85em; }
+  .ws-exam .ws-hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; font-size: .9em; }
+  .ws-exam .ws-hgrid u { text-decoration: none; border-bottom: 1px solid #888; padding: 0 4px; font-weight: 700; }
+  .ws-exam .ws-sub { margin: 0 0 8px; color: #555; }
+  .ws-exam .ws-ins { font-size: .85em; border-left: 3px solid #1f2133; background: #f4f4f7; padding: 7px 10px; margin: 0 0 10px; border-radius: 0 6px 6px 0; }
+  .ws-exam .ws-bar { list-style: none; margin: 12px 0 2px; }
+  .ws-exam .ws-part { display: flex; justify-content: space-between; gap: 10px; font-weight: 800; font-size: .9em; background: #ececf1; color: #1f2133; padding: 5px 10px; border-radius: 6px; }
+  .ws-exam .ws-bar + .ws-q { border-top: 0; }
+  .ws-exam .ws-num { width: auto; height: auto; border-radius: 0; background: none; color: #1f2133; font-weight: 800; display: block; place-items: initial; }
+  .ws-exam .ws-pts { border: 0; padding: 0; color: #444; font-weight: 700; }
+  .ws-exam .ws-q { grid-template-columns: 38px minmax(0, 1fr) auto; }
+  .ws-exam .ws-to-sheet { border-style: solid; border-width: 1.5px; font-weight: 700; }
+  .pdf-stage .ws-compact.ws-exam .ws-num { width: auto; height: auto; border: 0; font-size: 15px; }
+  .ws-answers.ws-exam .as-bar { grid-column: 1 / -1; margin-top: 4px; }
+  .ws-answers.ws-exam .as-num { min-width: 38px; }
+  .ai-print .ws-exam .ws-num { border: 0; }

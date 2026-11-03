@@ -742,8 +742,8 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
                                         ...langBody(kid, subject) }, key);   // (🇦🇪 Arabic / 🌐 translation)
   if (!r) return null;
   const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
-  const ws = cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
-                              at: new Date().toISOString(), answers: [], purpose: mode, ...(instant && found ? { part: found } : {}), ...keep });
+  const ws = wsExamOrder(cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
+                              at: new Date().toISOString(), answers: [], purpose: mode, ...(instant && found ? { part: found } : {}), ...keep }));
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
   delete ws.check;
   const id = newId();

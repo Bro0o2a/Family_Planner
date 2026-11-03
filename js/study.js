@@ -1006,9 +1006,9 @@ async function makeWorksheet() {
                                         notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsNamesNote(o.kid), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
-  const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
+  const ws = wsExamOrder(cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
                               ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
-                              answers: [], ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) });
+                              answers: [], ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
   if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
   delete ws.check;
   const id = newId();
@@ -1089,37 +1089,71 @@ function optFind(opts, ans) {
   const big = Math.max(...near.map(k => o[k].length), 0), top = near.filter(k => o[k].length === big);   // ("300 cm": "300", not "30")
   return near.length && top.length === 1 ? top[0] : -1;
 }
+// 📝 v155 "Clean exam" (Broo2a picked templates A + C): every worksheet = Section A choose (multiple choice, true / false, put in order,
+//   matching) → Section B short answer (fill the gap, short answers) → Section C explain (3+ writing lines). Q1, Q2 … through the
+//   whole paper, choices A) B) C) D), marks in [brackets], a section bar with its marks, a header box (Name · Date · Time · Total),
+//   an instructions box, and the ANSWER SHEET with the same sections (circles for choose, boxes for the rest).
+const WS_PARTS = { A: "Choose the answer", B: "Short answer", C: "Explain" };
+const wsPartOf = q => isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? "A" : (q.answer_lines || 0) >= 3 ? "C" : "B";
+const marksText = n => `[${num(n)}]`;
+// A NEW worksheet (never one with answers already): put the questions in A → B → C order and number them 1, 2, 3 …
+// (a study session's sheet with topic parts keeps its order: its parts are in order already)
+function wsExamOrder(ws) {
+  if (!ws || (ws.sections && ws.sections.length)) return ws;
+  const rank = { A: 0, B: 1, C: 2 };
+  ws.questions = ws.questions.map((q, i) => ({ q, i })).sort((a, b) => rank[wsPartOf(a.q)] - rank[wsPartOf(b.q)] || a.i - b.i)
+    .map(({ q }, i) => ({ ...q, number: i + 1 }));
+  return ws;
+}
+// The section bars: a new bar each time the part changes (only when the sheet has no topic parts). → { number: [letter, marks] }
+function wsPartBars(w) {
+  if (w.sections && w.sections.length) return {};
+  const out = {}; let cur = null, first = null, n = 0;
+  const end = () => { if (first != null) out[first] = [cur, n]; };
+  w.questions.forEach(q => { const p = wsPartOf(q); if (p !== cur) { end(); cur = p; first = q.number; n = 0; } n += q.points; });
+  end();
+  const letters = Object.keys(out).length;
+  return letters > 1 || w.questions.length > 3 ? out : {};
+}
+const wsBarNode = (bar, short) => h("div", { class: "ws-part" }, h("span", null, short ? `Section ${bar[0]}` : `Section ${bar[0]} · ${WS_PARTS[bar[0]]}`), h("span", null, short ? marksText(bar[1]) : `[${num(bar[1])} ${bar[1] === 1 ? "mark" : "marks"}]`));
+const wsBoxHead = (w, sheet) => h("div", { class: "ws-hbox", dir: "ltr" },
+  h("div", { class: "ws-htop" }, h("b", null, sheet ? "Answer sheet" : w.title), h("small", null, sheet ? w.title : [gradeOf(w.kid), w.subject].filter(Boolean).join(" · "))),
+  h("div", { class: "ws-hgrid" }, h("span", null, "Name: ", h("u", null, kidNameOf(w.kid))), h("span", null, "Date: ", h("u", null, wsDateText(w.date))),
+    sheet ? null : h("span", null, "Time: ", h("u", null, w.minutes ? `${w.minutes} min` : "______")),
+    sheet ? null : h("span", null, "Total: ", h("u", null, `____ / ${num(wsTotal(w))}`))));
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
-  const rtl = isArabicWs(w);
-  return h("div", { class: "ws-sheet" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
-    wsHeaderNode(w),
-    h("div", { class: "ws-title" }, w.title),
-    h("div", { class: "ws-sub" }, [w.subject, w.topics.join(", ")].filter(Boolean).join(" · ")),
+  const rtl = isArabicWs(w), bars = wsPartBars(w);
+  return h("div", { class: "ws-sheet ws-exam" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+    wsBoxHead(w),
+    w.topics.length ? h("div", { class: "ws-sub" }, w.topics.join(", ")) : null,
+    h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): fill the circle for a choose question. Marks are shown in [brackets]."
+      : "Answer all the questions. Marks are shown in [brackets]."),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
     h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
-      return [   // (📚 each part's title above its first question)
-      ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)), h("li", { class: "ws-q" },
-      h("span", { class: "ws-num" }, String(q.number)),
+      return [   // (📚 each part's title above its first question · or the exam's section bar)
+      ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)),
+      ...(bars[q.number] ? [h("li", { class: "ws-bar" }, wsBarNode(bars[q.number]))] : []), h("li", { class: "ws-q" },
+      h("span", { class: "ws-num" }, `Q${q.number}`),
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
           compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
-        compact && isOrderQ(q) ? h("div", { class: "ws-to-order" }, "✏️ On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …).") : null,
+        compact && isOrderQ(q) ? h("div", { class: "ws-to-order" }, "On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …).") : null,
         match || compact ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
-      h("span", { class: "ws-pts" }, ptsText(q.points)))]; })),
-    compact ? h("div", { class: "ws-to-sheet" }, "✏️ Write your answers on the ANSWER SHEET (the last page).")
-      : h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
+      h("span", { class: "ws-pts" }, marksText(q.points)))]; })),
+    compact ? h("div", { class: "ws-to-sheet" }, "Now write your answers on the ANSWER SHEET (the last page).")
+      : h("div", { class: "ws-total" }, "Total: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // ✏️ The ANSWER SHEET (the PDF's last page, always ONE page): each question's number + bubbles (choices), boxes (matching,
 // ordering) or 1–3 lines. The kid uploads only this page → fewer photos for ✅ Check now.
 function wsAnswerSheetNode(w) {
-  const rtl = isArabicWs(w);
+  const rtl = isArabicWs(w), bars = wsPartBars(w);
   const cell = q => {
-    const n = h("b", { class: "as-num" }, `${q.number}.`);
+    const n = h("b", { class: "as-num" }, `Q${q.number}`);
     if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
     if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
       return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, Array.from({ length: k }, (_, i) => h("span", { class: "as-pair" }, `${i + 1}→`, h("i", { class: "as-box" }))))); }
@@ -1129,12 +1163,11 @@ function wsAnswerSheetNode(w) {
     const lines = Math.max(1, Math.min(3, q.answer_lines || 1));
     return h("div", { class: "as-q as-wide" }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
   };
-  return h("div", { class: "ws-sheet ws-answers" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
-    h("div", { class: "as-title" }, "✏️ ANSWER SHEET"),
-    wsHeaderNode(w),
-    h("div", { class: "ws-sub" }, w.title),
-    h("div", { class: "as-grid" }, w.questions.map(cell)),
-    h("div", { class: "ws-total" }, "Total points: ", h("i"), ` / ${num(wsTotal(w))}`));
+  return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
+    wsBoxHead(w, true),
+    h("div", { class: "ws-ins" }, "Fill the circle for your answer. Write the other answers in the spaces. Take ONE clear photo of this page."),
+    h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), cell(q)])),
+    h("div", { class: "ws-total" }, "Score: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // 🔑 May the answers be seen? A parent's device: always. A kid (a kid's device, or a kid using the app): once the worksheet has a
 // check result, even if the answers file isn't in their Files any more (a parent typed the score, or the file was deleted).
