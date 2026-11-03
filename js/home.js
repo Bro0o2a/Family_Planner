@@ -87,12 +87,15 @@ function kidTodayLine(kid) {
   const next = items.find(x => !isDone(date, x.id, kid) && x.end > now && x.start >= 0);
   return `Today ${done} of ${items.length} done${next ? ` · next ${next.name} ${clock(next.start)}` : ""}`;
 }
+// 🌟 Star = last week's Shining Star (until the next announcement) · 🔥 Leading = the best score this week right now
+const kidCardTags = id => (stars().includes(id) ? ` <span class="kc-tag kc-star">🌟 Star</span>` : "") +
+  (leaders().includes(id) ? ` <span class="kc-tag kc-lead">🔥 Leading</span>` : "");
 // ONE CARD PER KID: the score ring, name + today's mood, today's line, 🎒 School · 📅 Calendar · 📊 Report. The card itself → the Kid page
 function kidCardHtml(k) {
   const c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
   return `<div class="card kid-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
     <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">${scoreRingHtml(sc.overall, c.color)}
-      <span class="kc-text"><b>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}</b>
+      <span class="kc-text"><b>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
         <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button>
     <div class="kc-btns"><button data-school="${safe(k.id)}">🎒 School</button><button data-viewcal="${safe(k.id)}">📅 Calendar</button><button data-kidreport="${safe(k.id)}">📊 Report</button></div></div>`;
 }
