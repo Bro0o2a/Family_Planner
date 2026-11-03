@@ -2588,3 +2588,20 @@
     :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine.pad { font-size: 12px; line-height: 18px; padding: 0 10px; }
     :is(.k-week.rows.one-day, .k-week.rows.v-grid) .k-routine.pad .r-who { font-size: 12px; }
   }
+
+/* 📅 v154: the calendar's simple top: people, then one row of big buttons */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#scr-mine .mine-actions { display: grid; gap: 8px; margin: 10px 0 4px; }
+.cal-main-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
+.cal-big { display: grid; justify-items: center; gap: 2px; min-height: 64px; padding: 8px 6px; border-radius: 18px; background: #fff; font-size: 15px; font-weight: 800; }
+.cal-big .e { font-size: 24px; line-height: 1; }
+.cal-big.on { background: var(--text); color: #fff; }
+.cal-plan { justify-self: stretch; min-height: 46px; }
+.cal-more { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border-radius: 18px; background: rgba(255, 255, 255, .7); }
+#scr-mine .lead:empty { display: none; }
+.subj-pick { width: 100%; min-height: 52px; padding: 8px 14px; border-radius: 16px; font-size: 17px; font-weight: 800; background: #fff; border: 2px solid #e5e7eb; }
+.cal-habits-btn { display: flex; align-items: center; gap: 12px; width: 100%; margin: 12px 0 8px; padding: 14px 16px; border-radius: 20px; background: #fff7d6; color: #78350f; text-align: left; min-height: 72px; }
+.cal-habits-btn .e { font-size: 32px; }
+.cal-habits-btn span:nth-child(2) { flex: 1; display: grid; }
+.cal-habits-btn b { font-size: 19px; }
+.cal-habits-btn small { font-size: 13px; font-weight: 700; opacity: .85; }

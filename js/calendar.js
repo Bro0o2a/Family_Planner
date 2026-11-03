@@ -221,7 +221,9 @@ function navHtml(dates) {
   return `<div class="k-nav"><div class="k-navrow">
       <div class="seg k-mode"><button class="${wholeWeek ? "" : "on"}" data-kmode="day">📆 Day</button>
         <button class="${wholeWeek ? "on" : ""}" data-kmode="week">📅 Week</button></div></div>
-    <div class="k-days"><button class="k-arrow" data-kprev aria-label="Previous day">‹</button>${dates.map((ds, i) => { const d = SHORT[weekdayOf(ds)];
+    <div class="k-days"><button class="k-arrow" data-kprev aria-label="Previous day">‹</button>${dates.map(ds => [ds, calDates().indexOf(ds)])
+      // (v154: Day = only the day before, the day, the day after · Week = the 7 days shown)
+      .filter(([, i]) => wholeWeek || Math.abs(i - viewDay) <= 1).map(([ds, i]) => { const d = SHORT[weekdayOf(ds)];
       return `<button class="k-dbtn ${i === viewDay && !wholeWeek ? "sel" : ""} ${ds === today ? "istoday" : ""} ${ds < today ? "past" : ""}" data-kday="${i}" data-date="${ds}"
         ${ds === today ? `aria-label="${d} (today)"` : ""}>${d}<small>${fromYmd(ds).getDate()}</small></button>`; }).join("")}<button class="k-arrow" data-knext aria-label="Next day">›</button></div></div>`;
 }
@@ -787,7 +789,7 @@ function closeCard() { $("kModal").hidden = true; }
 let calWho = null;   // "all", a person's id, or null = the first chip (kids: "Me", parents: "Everyone")
 const isParentDevice = () => isParentId(me) && !isKidDevice();
 function drawMine() {
-  $("calTools").innerHTML = calToolsHtml();   // ✏️ Add activities · 🖨️ Schedules to tick
+  $("calTools").innerHTML = "";   // (v154: the buttons are under the people now, see mineActions)
   scrollStripToToday();   // (after it's drawn)
   if (calWho !== "all" && calWho && !exists(calWho)) calWho = null;
   if (!calWho) calWho = isParentDevice() ? "all" : me;
@@ -800,20 +802,25 @@ function drawMine() {
   $("minePeople").innerHTML = chip(me, parent ? faceHtml(userById(me)) : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
     + (parent ? data.users.filter(x => x.id !== me).map(x => chip(x.id, faceHtml(x), x.name, colorsOf(x))).join("") : "");
   $("mineTitle").textContent = all ? "📅 Everyone's week" : mine ? `${u.emoji} My week` : `${u.emoji} ${u.name}'s week`;
-  $("mineSub").textContent = all ? "Each colour is one person. Tap a block to see more."
-    : !mine && !parent ? `Just looking 👀 Only ${u.name}${isParentId(who) ? "" : ` or ${dadName()}`} can tick these.`
-    : isParentId(who) ? "Your activities, plus the kids' lessons that need you." : "Tap a block to see more!";
+  $("mineSub").textContent = !mine && !parent && !all ? `Just looking 👀 Only ${u.name} or ${dadName()} can tick these.` : "";   // (v154: short)
   document.querySelector("#scr-mine .bar .cal-btn").classList.toggle("here", calWho === (parent ? "all" : me));
   // (real = this points week's plan, for the week's numbers; the calendar shows its 12 dates, routines even with no plan yet)
   const real = planDays(), days = calDays();
   const editing = editMode && isParentId(me) && !!real;
   // Buttons: ✏️ Add / edit activities (everyone: kids change only their own), and for parents ✏️ Edit calendar · ✨ Plan my week · ➕ My activity
-  $("mineActions").innerHTML = `<button class="pill" data-go="add">✏️ Add / edit activities</button>
-    ${isParentId(me) && real && !editMode ? `<button class="pill edit-cal-btn" data-editcal>✏️ Edit calendar</button>` : ""}
-    ${isParentId(me) && (!real || planIsOld()) ? `<button class="pill primary" data-plan>✨ Plan my week</button>` : ""}
-    ${parent ? `<button class="pill" data-pactnew>➕ My activity</button>` : ""}
-    ${parent && real ? `<button class="pill" data-newplan>🔄 Make a new plan</button>` : ""}
-    ${parent ? `<button class="pill" data-onedaynew>📌 One-day event</button>` : ""}`;
+  // v154: ONE row: ✏️ Edit calendar · ➕ Activities (add or change) · ☰ More (✨ plan, 🔄 new plan, 📌 one-day event, 👨‍👩‍👧 my own activity, 🖨️ print)
+  const needPlan = isParentId(me) && (!real || planIsOld());
+  $("mineActions").innerHTML = `<div class="cal-main-btns">
+      ${isParentId(me) && real && !editMode ? `<button class="cal-big edit-cal-btn" data-editcal><span class="e">✏️</span>Edit calendar</button>` : ""}
+      <button class="cal-big" data-go="add"><span class="e">➕</span>Activities</button>
+      ${parent ? `<button class="cal-big ${calMore ? "on" : ""}" data-calmore aria-expanded="${calMore}"><span class="e">☰</span>More</button>` : ""}</div>
+    ${needPlan ? `<button class="pill primary cal-plan" data-plan>✨ Plan my week</button>` : ""}
+    ${parent && calMore ? `<div class="cal-more">
+      ${real && !needPlan ? `<button class="pill" data-plan>✨ Plan my week</button>` : ""}
+      ${real ? `<button class="pill" data-newplan>🔄 Make a new plan</button>` : ""}
+      <button class="pill" data-onedaynew>📌 One-day event</button>
+      <button class="pill" data-pactnew>👨‍👩‍👧 My own activity (work, travel)</button>
+      ${isParentId(me) ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}</div>` : ""}`;
   // ⚠ The plan's notes (parents, on Everyone) / "not in the plan yet" (kids)
   let top = "";
   if (isParentId(me) && all && real) {
@@ -826,17 +833,26 @@ function drawMine() {
     : !isParentId(me) && planIsOld() ? `🕐 Some changes aren't in the plan yet. ${dadName()} will update it soon.` : "";
   $("mineNote").hidden = !note;
   $("mineNote").textContent = note;
-  $("mineBrief").innerHTML = who ? briefHtml(who, real) : "";
-  $("mineBrief").hidden = !who;
+  // (v154: the week's numbers box is off: the kid page and 📊 Report have them)
+  $("mineBrief").innerHTML = "";
+  $("mineBrief").hidden = true;
   if (who) $("mineBrief").style.cssText = `--c:${colorsOf(u).color}`;
   // Ticks: always drawn; each one only works for its owner and the parents. In edit mode (Bro2a): moving, no ticking.
   // 📚 The subject filter's kid: the kid whose calendar it is; a parent on Everyone / a parent's calendar: the kid picked under it; a kid: themselves
   const sk = subjFilterKid(who), subj = sk && calSubj !== "all" ? { kid: sk, name: calSubj } : null;
   keepCalScroll("mineWeek");
-  $("mineWeek").innerHTML = editBarHtml() + weekHtml(days, { only: who, readOnly: editing, drag: editing, subj });
+  // 📅 v154: the Week view = today and the next 6 days only (no past days); the Day view still reaches back with ‹
+  const keepDay = viewDay, wk = wholeWeek && !editing;
+  if (wk) viewDay = Math.max(0, viewDay - CAL_BACK);
+  try { $("mineWeek").innerHTML = editBarHtml() + weekHtml(wk ? days.slice(CAL_BACK) : days, { only: who, readOnly: editing, drag: editing, subj }); }
+  finally { viewDay = keepDay; }
   putCalScroll("mineWeek");   // (📅 opens with today in view; a tick or a tap keeps it where it was)
   $("mineSubj").innerHTML = sk ? subjFilterHtml(sk, who) : "";
-  $("mineHabits").innerHTML = who && !kidLockedOut(who) ? habitsCardHtml(who) : "";   // ⭐ good habits (a kid; 🔒 a kid's device: only their own; parents have none)
+  // ⭐ v154: one big button "Good habits today · 3 of 16"; tap → the habits card
+  const hb = who && !kidLockedOut(who) && habitsFor(who).length ? kidHabitsToday(who) : null;
+  $("mineHabits").innerHTML = hb ? `<button class="cal-habits-btn ${calHabits ? "on" : ""}" data-calhabits aria-expanded="${calHabits}"><span class="e">⭐</span>
+      <span><b>Good habits today</b><small>${hb.done} of ${hb.all} done · tap to ${calHabits ? "close" : "see them"}</small></span><span class="kc-go">${calHabits ? "⌄" : "›"}</span></button>
+    ${calHabits ? habitsCardHtml(who) : ""}` : "";   // ⭐ good habits (a kid; 🔒 a kid's device: only their own; parents have none)
 }
 
 // ---------- 📚 SUBJECT FILTER (bottom of the calendar): "All" + each subject of a kid; a subject → only its study sessions this
@@ -872,13 +888,24 @@ function subjFilterHtml(kid, who) {
   if (calSubj !== "all" && !subs.some(x => sameSubject(x.name, calSubj))) calSubj = "all";
   const kids = isParentDevice() && (!who || isParentId(who)) && kidsList().length > 1
     ? `<div class="chips subj-kids">${kidsList().map(k => `<button class="chip ${k.id === kid ? "on" : ""}" data-sfkid="${safe(k.id)}" aria-pressed="${k.id === kid}"><span class="e">${safe(k.emoji)}</span>${safe(k.name)}</button>`).join("")}</div>` : "";
-  const chip = (v, label) => `<button class="chip ${lowerT(calSubj) === lowerT(v) ? "on" : ""}" data-calsubj="${safe(v)}" aria-pressed="${lowerT(calSubj) === lowerT(v)}">${label}</button>`;
+  // (v154: one big "🔍 Find a subject" picker: pick one → only its sessions stand out on the calendar)
   const f = calSubj !== "all" && subs.find(x => sameSubject(x.name, calSubj));
-  return `<div class="card subj-filter"><h2>📚 Subjects${isParentDevice() ? ` · ${safe(userById(kid).name)}` : ""}</h2>${kids}
-    <div class="chips subj-chips">${chip("all", "All")}${subs.map(x => chip(x.name, `${safe(x.emoji)} ${safe(x.name)}`)).join("")}</div>
-    ${f ? subjSummaryHtml(kid, f) : ""}</div>`;
+  return `<div class="card subj-filter"><h2>🔍 Find a subject${isParentDevice() ? ` · ${safe(userById(kid).name)}` : ""}</h2>${kids}
+    <label class="sr-only" for="calSubjPick">Subject</label>
+    <select id="calSubjPick" class="subj-pick" data-calsubjpick><option value="all" ${f ? "" : "selected"}>📚 All subjects</option>${subs.map(x =>
+      `<option value="${safe(x.name)}" ${f && f.id === x.id ? "selected" : ""}>${safe(x.emoji)} ${safe(x.name)}</option>`).join("")}</select>
+    ${f ? subjSummaryHtml(kid, f) : `<p class="hint">Pick a subject to see its times on the calendar.</p>`}</div>`;
 }
+// v154: the calendar's ☰ More and ⭐ Good habits open / close (this device only)
+let calMore = false, calHabits = false;
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("[data-calsubjpick]")) return;
+  calSubj = e.target.value || "all";
+  render();
+});
 document.addEventListener("click", e => {
+  const t = e.target.closest && e.target.closest("[data-calmore], [data-calhabits]");
+  if (t) { if ("calmore" in t.dataset) calMore = !calMore; else calHabits = !calHabits; e.stopImmediatePropagation(); return render(); }
   const b = e.target.closest && e.target.closest("[data-calsubj], [data-sfkid]");
   if (!b) return;
   if (b.dataset.sfkid) { sfKid = b.dataset.sfkid; calSubj = "all"; }
