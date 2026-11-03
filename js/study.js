@@ -1003,7 +1003,7 @@ async function makeWorksheet() {
   $("wsoErr").textContent = "";
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
-                                        notes: MODE_NOTES[mode], mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
+                                        notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsNamesNote(o.kid), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
   const ws = cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
@@ -1069,10 +1069,25 @@ const isChoiceQ = q => q.options.length > 0 && q.kind !== "matching" && q.kind !
 // The key: the letters in the right order, from the answer's steps (split on ";" or new lines). Not found → null.
 const isOrderQ = q => q.kind === "ordering" && q.options.length > 1;
 function orderKey(q) {
-  const t = x => String(x || "").trim().toLowerCase().replace(/[.\s]+$/, ""), steps = String(q.answer || "").split(/\s*[;\n]\s*/).map(t).filter(Boolean);
+  const steps = String(q.answer || "").split(/\s*[;\n]\s*/).filter(x => optNorm(x));
   if (steps.length !== q.options.length) return null;
-  const idx = steps.map(st => q.options.findIndex(o => t(o) === st || t(o).startsWith(st) || st.startsWith(t(o))));
+  const idx = steps.map(st => optFind(q.options, st));
   return idx.some(i => i < 0) || new Set(idx).size !== idx.length ? null : idx.map(i => OPT_LETTERS[i] || String(i + 1));
+}
+// 🔤 Which choice is the answer? Same text first ("30cm" = "30 cm" = "A) 30 cm"), then an answer that is only a letter ("B", "B)"),
+// then a near match only when exactly ONE choice fits (never guess between two). Not found → -1.
+const optNorm = x => String(x || "").toLowerCase().replace(/^\s*\(?[a-j]\s*[).:\-]\s+|^\s*\(?[a-j]\)\s*/, "").replace(/[^\p{L}\p{N}]+/gu, "");
+function optFind(opts, ans) {
+  const a = optNorm(ans), o = opts.map(optNorm);
+  let i = a ? o.indexOf(a) : -1;
+  if (i >= 0) return i;
+  const L = String(ans || "").trim().match(/^\(?([A-Ja-j])(?:\)|\.|:|$)/);
+  if (L) { i = OPT_LETTERS.indexOf(L[1].toUpperCase()); if (i < opts.length) return i; }
+  if (!a) return -1;
+  const near = o.map((x, k) => x && (x.startsWith(a) || a.startsWith(x) || x.includes(a)) ? k : -1).filter(k => k >= 0);
+  if (near.length === 1) return near[0];
+  const big = Math.max(...near.map(k => o[k].length), 0), top = near.filter(k => o[k].length === big);   // ("300 cm": "300", not "30")
+  return near.length && top.length === 1 ? top[0] : -1;
 }
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
@@ -1352,13 +1367,17 @@ async function checkWorksheet(wsId) {
   catch (err) { return toast(aiFileError(err), 6000); }
   const lv = learnRead(w.kid, w.subject);   // (🧠 each question's skill and difficulty, and the level before this worksheet)
   // (✏️ the PDF's ANSWER SHEET: the kid writes the question number + the letter of a choice, so the key says the letter too)
+  // (each choice question also sends its choices WITH the letters printed on the paper, so the checker never has to guess them)
+  const lettered = q => q.options.map((o, i) => `${OPT_LETTERS[i] || i + 1}) ${o}`);
   const keyOf = q => { if (isOrderQ(q)) { const k = orderKey(q); return k ? `${k.join(", ")} (letters in order: ${q.answer})` : q.answer; }
-    if (!isChoiceQ(q)) return q.answer; const t = x => String(x || "").trim().toLowerCase(), a = t(q.answer);
-    const i = q.options.findIndex(o => t(o) === a || (a && (t(o).startsWith(a) || a.startsWith(t(o)))));
-    return i >= 0 ? `${OPT_LETTERS[i] || i + 1}) ${q.answer}` : q.answer; };
+    if (!isChoiceQ(q)) return q.answer; const i = optFind(q.options, q.answer);
+    return i >= 0 ? `${OPT_LETTERS[i] || i + 1}) ${q.options[i]}` : q.answer; };
+  const extraOf = q => { if (!isChoiceQ(q) && !isOrderQ(q)) return {};
+    const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
+    return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …)`,
-    answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), points: q.points,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself)`,
+    answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}) })), files }, "check|" + wsId);
   if (!r) return;
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));

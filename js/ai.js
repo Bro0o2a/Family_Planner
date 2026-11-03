@@ -234,6 +234,9 @@ function cleanWorksheet(d) {
     const kind = WS_KINDS.includes(q.kind) ? q.kind : "short_answer";
     let options = aiArr(q.options, 12).map(o => aiTxt(o, 200)).filter(Boolean), lines = aiInt(q.answer_lines, 0, 12, 0);
     if (kind === "true_false" && !options.length) options = ["True", "False"];
+    // (🔤 choices that came with their own "A)" "B." … : the paper adds the letters, so take them off, else it shows "A) A) 30 cm")
+    if (options.length > 1 && options.every((o, k) => new RegExp(`^\\(?${"ABCDEFGHIJKL"[k]}\\s*[).:\\-]\\s*\\S`, "i").test(o)))
+      options = options.map(o => o.replace(/^\(?[a-l]\s*[).:\-]\s*/i, ""));
     if (!options.length && !lines) lines = 1;   // always somewhere to write
     return { number: aiInt(q.number, 1, 99, i + 1), kind, prompt: aiTxt(q.prompt, 1000), options, answer_lines: lines,
              points: aiInt(q.points, 0, 100, 1), answer: aiTxt(q.answer, 1000),
@@ -407,6 +410,9 @@ function isNewTopic(s, kid, subject, title, workId) {
 // ---------- Every 🤖 worksheet: a mode + a short profile of the kid ----------
 //   mode: "level_check" (🧭 a new topic) | "practice" (🔁) | "week_review" (📰 the newsletter's week) | "challenge" (🚀)
 const LEVEL_COUNT = 8, PRACTICE_COUNT = 8, REVIEW_COUNT = 8;
+// 😊 Use the family's names in story, sentence and grammar questions: always kind, happy and safe (never someone hurt, sad or naughty)
+const wsNamesNote = kid => { const me = kidNameOf(kid), others = kidsList().map(u => u.name).filter(n => n && n !== me);
+  return ` Where it fits (stories, sentences, grammar, word problems), use the child's name ${me}${others.length ? ` and sometimes ${others.join(", ")}` : ""} in some questions. Keep these sentences kind, happy and safe: never a child who is hurt, sad, scared, rude or in trouble, and never jokes about anyone.`; };
 const MODE_NOTES = {
   level_check: "short level check to see what the child already knows",
   practice: "practice only these weak points",
@@ -729,7 +735,7 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
     if (made >= lim) { toast(`🌟 You've made today's ${lim} extra worksheets. Great work! More tomorrow 📚`, 5000); return null; }
   }
   const minutes = keep.minutes >= 5 && keep.minutes <= 240 ? Math.round(keep.minutes) : 0;
-  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: MODE_NOTES[mode],
+  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsNamesNote(kid),
                                         mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
                                         ...(sections && sections.length ? { sections } : {}), ...(instant ? { instant: true, files } : {}),
                                         ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus),   // (🧠 level, skills, focus)
