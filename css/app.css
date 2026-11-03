@@ -1526,6 +1526,18 @@
   .cur-block.ok { border-color: #22c55e; } .cur-block.risk { border-color: #f59e0b; } .cur-block.later { border-color: #93c5fd; } .cur-block.extra { border-color: #c4b5fd; }
   .cur-block h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 16px; }
   .cur-block ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .st-units { display: grid; gap: 8px; margin-top: 6px; }
+  .st-unit { border: 1px solid rgba(0, 0, 0, .08); border-radius: 16px; background: rgba(255, 255, 255, .7); }
+  .st-unit.other { border-style: dashed; }
+  .st-unit summary { display: flex; align-items: center; gap: 10px; padding: 12px; cursor: pointer; list-style: none; }
+  .st-unit summary::-webkit-details-marker { display: none; }
+  .st-unit summary::after { content: "›"; margin-left: auto; font-size: 24px; font-weight: 800; opacity: .5; transition: transform .2s; }
+  .st-unit[open] summary::after { transform: rotate(90deg); }
+  .st-unit-t { display: grid; min-width: 0; }
+  .st-unit-t b { font-size: 17px; line-height: 1.2; }
+  .st-unit-t small { font-size: 12.5px; font-weight: 700; opacity: .75; }
+  .st-unit .st-list { margin: 0; padding: 0 10px 8px; }
+  .cur-next b + b { margin-top: 2px; }
   .cur-tools { margin-top: 10px; } .cur-tools summary { cursor: pointer; font-weight: 800; }
   .wsg-btns button { min-height: 38px; padding: 4px 14px; font-size: 14px; border-radius: 999px; }
   .td-row.done .td-what { opacity: .6; }

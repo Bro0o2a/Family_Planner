@@ -73,17 +73,33 @@ function topicsCardHtml(s, f, parent) {
   stPick = stPick.filter(id => all.some(t => t.id === id));
   const shown = parent && stFilter !== "all" ? all.filter(t => t.st === stFilter) : all;
   const count = k => all.filter(t => t.st === k).length;
-  const rows = shown.map(t => {
+  const rowHtml = t => {
     const on = stPick.includes(t.id), n = t.info.list.length, last = t.info.results[t.info.results.length - 1];
     const meta = [t.added ? `Added ${dayMon(t.added)}` : "", t.src === "ws" ? WS_TOPIC_TAG : "", n ? `${n} ${n === 1 ? "worksheet" : "worksheets"}` : "", last ? `last ${last.pct}%` : ""].filter(Boolean).join(" · ");
     return `<li class="st-topic ${on ? "on" : ""}"><label class="st-tick"><input type="checkbox" data-sttick="${safe(t.id)}" ${on ? "checked" : ""} aria-label="Pick ${safe(t.title)}"></label>
-      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}${curTagHtml(schoolKid, f.id, t.title)}</button>`
+      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}</button>`
         : `<span class="st-name"><b>${safe(t.title)}</b>${t.src === "ws" ? `<small>${WS_TOPIC_TAG}</small>` : ""}</span>`}
       ${parent && stOpen === t.id ? topicHistoryHtml(t) : ""}</li>`;
-  }).join("");
+  }, rows = shown.map(rowHtml).join("");
+  // 🌍 v154: with the official list, the topics go under its BIG unit titles (each unit folds open); the rest under "Other topics"
+  const m = s.map[f.id], units = [];
+  let unitsHtml = "";
+  if (m && m.list.length && shown.length) {
+    shown.forEach(t => { const u = curMatchOf(schoolKid, f.id, t.title) || null;
+      let g = units.find(x => x.unit === u); if (!g) units.push(g = { unit: u, list: [] }); g.list.push(t); });
+    const at = g => g.unit ? m.list.indexOf(g.unit) : 999;   // (in the curriculum's order; "Other topics" last)
+    units.sort((a, b) => at(a) - at(b));
+    unitsHtml = units.map(g => { const res = g.list.filter(t => t.info.results.length), avg = res.length ? meanPct(res.map(t => meanPct(t.info.results.slice(-3).map(x => x.pct)))) : null;
+      const st = res.length ? (g.list.some(t => t.st === "needs") ? "needs" : g.list.every(t => t.st === "mastered") ? "mastered" : "practising") : "new";
+      return `<details class="st-unit ${g.unit ? "" : "other"}" ${g.list.some(t => stPick.includes(t.id) || stOpen === t.id) ? "open" : ""}><summary>${statusDot(st)}
+        <span class="st-unit-t"><b>${safe(g.unit ? g.unit.title : "Other topics")}</b><small>${g.list.length} ${g.list.length === 1 ? "topic" : "topics"}${avg != null ? ` · ${avg}%` : ""}${
+          g.unit ? g.unit.term ? ` · ${safe(g.unit.term)}` : "" : " · not in the official curriculum"}</small></span></summary>
+        <ul class="st-list">${g.list.map(rowHtml).join("")}</ul></details>`; }).join("");
+  }
   return `<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
     ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
-    ${all.length ? `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>
+    ${parent && all.length && !(m && m.list.length) ? `<p class="hint st-nounits">🌍 Tip: open 🌍 Official curriculum and get the official topics: then these are grouped into big units.</p>` : ""}
+    ${all.length ? `${unitsHtml ? `<div class="st-units">${unitsHtml}</div>` : `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>`}
       <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
       <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
       : `<p class="sc-empty">📂 No topics yet. Tap ⬆️ Upload topic and add a school file (a photo or PDF).</p>`}</div>`;
@@ -526,7 +542,8 @@ function curBriefHtml(kid, f) {
   const matched = off.filter(t => t.practised), behind = off.filter(t => !t.practised && !t.mine.length && t.i < cut), later = off.filter(t => !t.mine.length && t.i > after);
   const weak = off.filter(t => t.weak), inSchool = off.filter(t => t.mine.length && !t.practised && !t.now);
   // 📍 now in class = the official "now" topics · ⏭️ the next lesson = the first topic after them that isn't practised yet
-  const nowList = off.filter(t => t.now), next = off.find(t => t.i > lastNow && !t.practised) || off.find(t => !t.practised);
+  const nowList = off.filter(t => t.now), nextUp = off.filter(t => t.i > lastNow && !t.practised).slice(0, 3);
+  const next3 = nextUp.length ? nextUp : off.filter(t => !t.practised).slice(0, 3);
   const extra = rows.filter(r => !m.list.some(t => curSame(r.title, t.title)));
   const pctAll = Math.round(matched.length / off.length * 100);
   const li = (t, extra) => `<li><b>${safe(t.title)}</b>${t.term ? ` <small>${safe(t.term)}</small>` : ""}${extra || ""}</li>`;
@@ -535,11 +552,10 @@ function curBriefHtml(kid, f) {
     <div class="cur-bar" role="img" aria-label="${pctAll}% of the official topics practised"><i style="width:${pctAll}%"></i></div>
     <p class="cur-sum"><b>${matched.length} of ${off.length}</b> official topics practised (${pctAll}%) · ${extra.length} extra topics not in the curriculum</p>
     ${nowList.length ? `<div class="cur-next now"><span>📍 In class now</span><b>${safe(nowList.map(t => t.title).join(", "))}</b></div>` : ""}
-    ${next ? `<div class="cur-next"><span>⏭️ Next lesson</span><b>${safe(next.title)}</b>${next.term ? `<small>${safe(next.term)}</small>` : ""}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every official topic is practised</b></div>`}
+    ${next3.length ? `<div class="cur-next"><span>⏭️ Next ${next3.length === 1 ? "lesson" : `${next3.length} lessons`}</span>${next3.map(t => `<b>${safe(t.title)}</b>`).join("")}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every official topic is practised</b></div>`}
     ${block("ok", "✅ Done and matched", matched, t => li(t, t.pct != null ? ` · ${t.pct}%` : ""), "Nothing practised from the official list yet.")}
     ${block("risk", "⚠️ Risk: not practised yet", [...behind, ...inSchool], t => li(t, t.mine.length ? " · in the topics, no worksheet yet" : " · should be done by now"), "No gaps so far. 👍")}
     ${weak.length ? block("risk", "🔴 Risk: weak marks", weak, t => li(t, ` · ${t.pct}%`), "") : ""}
-    ${block("later", "🔜 Coming later", later, t => li(t), "Nothing left.")}
     ${block("extra", "➕ Extra (not in the curriculum)", extra, t => `<li><b>${safe(t.title)}</b></li>`, "None.")}</div>`;
 }
 
