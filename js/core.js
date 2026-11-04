@@ -484,6 +484,8 @@ function cleanData(d) {
                    ...(u.loves && typeof u.loves === "object" ? { loves: Object.fromEntries(LOVES.map(([k]) => [k, typeof u.loves[k] === "string" ? u.loves[k].trim().slice(0, 30) : ""]).filter(([, v]) => v)) } : {}),
                    // ✨ the Spark's own name (shown as "Spark"; the stored field stays "buddy")
                    ...(typeof u.sparkName === "string" && u.sparkName.trim() ? { sparkName: u.sparkName.trim().slice(0, 12) } : {}),
+                   // 🧸 v158: their 3D avatar picture (one of AVATAR_IDS; older data: none → their emoji)
+                   ...(typeof u.avatar === "string" && /^(boy|girl|parent)-\d{1,2}$/.test(u.avatar) ? { avatar: u.avatar } : {}),
                    // 🖼️ a parent's picture: a small square JPEG photo (about 160×160) instead of their emoji (newer: older data has none)
                    ...(typeof u.photo === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(u.photo) && u.photo.length <= 60000 ? { photo: u.photo } : {}),
                    // ⭐ a parent's chosen habits ("ph-" ids, as many as they like) + focusAt (when chosen: the newer choice wins, see mergeBuddies)
@@ -1357,8 +1359,14 @@ function usersText(ids) { return ids.map(whoText).join(", "); }
 function emojisOf(ids) { return ids.map(id => userById(id).emoji).join(""); }
 // 👤 A person's face on the screen (HTML): a parent's photo (picked in 👤 My profile) or, without one, their emoji.
 // (Text-only places — toasts, PDFs, screen-reader labels — keep the emoji.) Kids: their emoji (their ✨ Spark stays as it is).
+// 🧸 v158: the 3D avatars (icons/avatars/<id>.jpg), picked in 👤 My profile. Kids see boys + girls, parents see all.
+const AVATARS = { boys: ["boy-1", "boy-2", "boy-3", "boy-4", "boy-5"], girls: ["girl-1", "girl-2", "girl-3", "girl-4", "girl-5", "girl-6"], parents: ["parent-1", "parent-2"] };
+const AVATAR_IDS = [...AVATARS.boys, ...AVATARS.girls, ...AVATARS.parents];
+const avatarSrc = id => `icons/avatars/${id}.jpg`;
+const faceAvatar = u => u && AVATAR_IDS.includes(u.avatar) ? u.avatar : "";
 const facePhoto = u => u && isParentId(u.id) && typeof u.photo === "string" && u.photo.startsWith("data:image/jpeg;base64,") ? u.photo : "";
-const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
+const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">`
+  : faceAvatar(u) ? `<img class="face-img face-av" src="${avatarSrc(u.avatar)}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
 const facesHtml = ids => ids.map(id => faceHtml(userById(id))).join("");
 const whoHtml = id => { const u = userById(id); return `${faceHtml(u)} ${safe(u.name)}`; };   // ("👩 Mum" with her photo)
 // ✨ Only kids have a Spark (no Spark card, badge, levels or "pick your Spark" for parents)

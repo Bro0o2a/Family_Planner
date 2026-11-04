@@ -12,15 +12,27 @@ function drawKidHome(u) {
   $("homeNote").hidden = true;
   $("homeBig").hidden = false;
   $("homeBig").className = "kid-big";
-  $("homeBig").innerHTML = `<button class="kb kb-study" data-school="${safe(u.id)}"><span class="e">📚</span><b>STUDY</b><small>My school</small></button>
-    <button class="kb kb-cal" data-kidcal><span class="e">📅</span><b>CALENDAR</b><small>Today</small></button>`;
+  // 🧸 v158 clay home: a peach hello card · 4 big puffy tiles (Study · Calendar · Habits · Score) · Today's list
+  const left = today.length - doneToday, hb = kidHabitsToday(u.id), hr = Number(new Date().toLocaleString("en-GB", { timeZone: "Asia/Dubai", hour: "2-digit", hour12: false }));
+  const hi = hr < 12 ? "Good morning!" : hr < 17 ? "Good afternoon!" : "Good evening!";
+  const next = today.find(x => !isDone(todayYmd(), x.id, u.id));
+  const tile = (cls, attr, icon, label, big, sub) => `<button class="kt ${cls}" ${attr}><span class="kt-ico" aria-hidden="true">${icon}</span><span class="kt-label">${label}</span><b class="kt-big">${big}</b><small>${sub}</small></button>`;
+  $("homeBig").innerHTML = `<div class="k-hero">${faceAvatar(u) ? `<img class="k-hero-pic" src="${avatarSrc(u.avatar)}" alt="">` : `<span class="k-hero-pic k-hero-emoji">${safe(u.emoji)}</span>`}
+      <div class="k-hero-text"><h2>${hi}</h2><p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
+      ${next ? `<button class="k-go" data-kidcal>▶ ${safe(next.name.length > 18 ? next.name.slice(0, 17) + "…" : next.name)}</button>` : `<button class="k-go" data-kidcal>📅 My day</button>`}</div>
+      <svg class="k-plant" viewBox="0 0 120 140" aria-hidden="true"><path d="M60 100V45" stroke="#5e8f5a" stroke-width="5" fill="none"/><path d="M60 70C35 70 22 52 20 34c22 0 36 14 40 36z" fill="#7fae6e"/><path d="M60 60C85 60 98 42 100 22c-22 0-36 14-40 38z" fill="#8fbb7c"/><path d="M60 50C48 36 46 20 54 6c10 10 12 26 6 44z" fill="#9ec68a"/><path d="M28 96h64l-8 40H36z" fill="#ead7bd"/><rect x="24" y="90" width="72" height="14" rx="7" fill="#f3e4cf"/></svg></div>
+    <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, "📚", "Study", "My school", `${study} study points`)}
+      ${tile("kt-cal", "data-kidcal", "📅", "Calendar", `${doneToday} of ${today.length}`, "done today")}
+      ${tile("kt-habits", `data-kidpanel="habits"`, "⭐", "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
+      ${tile("kt-score", `data-go="points"`, "🏆", "Score this week", `${scoreOf(u.id).overall}`, `of ${scoreOf(u.id).max}`)}</div>
+    ${today.length ? `<div class="card k-today"><div class="k-today-top"><h2>Today</h2><button class="k-chip" data-kidcal>See my day</button></div>
+      ${today.slice(0, 5).map(x => { const done = isDone(todayYmd(), x.id, u.id);
+        return `<button class="k-row${done ? " done" : ""}" data-kidcal><span class="k-row-t"><b>${safe(x.name)}</b><small>${x.start >= 0 ? clock(x.start, true) : "Any time"}${done ? " · done" : ""}</small></span><span class="k-row-go" aria-hidden="true">${done ? "✓" : "▶"}</span></button>`; }).join("")}</div>` : ""}`;
   $("homeMenu").hidden = true;
   const bar = [["data-go=\"points\"", "🏆", "Points"], ["data-kidpanel=\"habits\"", "⭐", "Habits"], ...(feat("diary") ? [["data-go=\"diary\"", "📔", "My day"]] : []),
                ...(feat("meeting") ? [[`data-extra="meeting"`, "🏡", "Community"]] : []), ["data-profile", "👤", "Me"], ["data-homemore", "☰", "More"]];
   $("homeHabits").innerHTML = (u.buddy || !feat("buddy") ? "" : buddyCardHtml(me))
-    + `<div class="card kid-week" style="--c:${colorsOf(u).color}"><h2>📊 My week</h2><p>
-      <span>⭐ Score ${scoreText(scoreOf(u.id))}</span> · <span>✅ Tasks ${doneToday} of ${today.length} today</span> · <span>📚 Study ${study}</span>
-${feat("buddy") ? ` · <span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p>${free.count ? `<p class="kid-free">${freeLine(free)}</p>` : ""}</div>
+    + `${free.count || feat("buddy") ? `<div class="card kid-week" style="--c:${colorsOf(u).color}"><p>${feat("buddy") ? `<span>✨ Spark Lv ${L} (${pct}% to Lv ${L + 1})</span>` : ""}</p>${free.count ? `<p class="kid-free">${freeLine(free)}</p>` : ""}</div>` : ""}
     <nav class="kid-bar" aria-label="More">${bar.map(([attr, e, label]) => `<button ${attr} class="${(attr.includes("habits") && kidPanel === "habits") || (attr === "data-homemore" && homeMore) ? "on" : ""}"><span class="e">${e}</span><small>${label}</small></button>`).join("")}</nav>
     ${kidPanel === "habits" ? habitsCardHtml(me) + (feat("chores") ? choresTodayHtml(me) : "") || `<div class="card"><p class="sc-empty">No habits today.</p></div>` : ""}
     ${homeMore ? `<div class="menu kid-more">${moreTilesHtml()}</div>` : ""}`;
@@ -100,7 +112,7 @@ function kidCardHtml(k) {
   const c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
   return `<div class="card kid-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
     <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">${scoreRingHtml(sc.overall, c.color)}
-      <span class="kc-text"><b>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
+      <span class="kc-text"><b>${faceHtml(k)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
         <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button>
     <div class="kc-btns"><button data-school="${safe(k.id)}">School</button><button data-viewcal="${safe(k.id)}">Calendar</button><button data-kidreport="${safe(k.id)}">Report</button></div></div>`;
 }

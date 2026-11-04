@@ -2705,3 +2705,118 @@
 .sc-wslv { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #eef0f5; color: #3b3f55; }
 .sc-wslv-easy { background: #e3f6ea; color: #17663b; }
 .sc-wslv-hard { background: #fff0d1; color: #8a5400; border: 1.5px solid #e8a020; }
+
+/* =====================================================================
+   🧸 v158 CLAY THEME (Broo2a's new design, 2026-11-04): soft cream ground, puffy clay cards and buttons,
+   sage · peach · coral · butter yellow · dusty blue, Fredoka titles + Nunito text, 3D avatars.
+   It sits on top of everything above, so older screens get the new look too.
+   ===================================================================== */
+:root {
+  --bg: #f6eadc; --card: #fbf3e9; --text: #4a3426; --muted: #7d6150; --line: #eddcc8;
+  --accent: #ec8466; --accent-dark: #d96f51; --accent-soft: #fde3d8;
+  --sage: #bdd3c3; --sage-dk: #5f8f78; --peach: #f8cfb6; --coral: #ec8466; --butter: #f5cf74; --dusty: #a7bdd5;
+  --mint: #dfe9d5; --blush: #f7cbbf; --cream: #fdf0d8; --sky: #d6e0ea;
+  --shadow: 0 10px 18px rgba(150, 105, 70, .14);
+  --clay: 0 10px 18px rgba(150, 105, 70, .15), inset 0 2px 0 rgba(255, 255, 255, .85), inset 0 -5px 10px rgba(150, 105, 70, .09);
+  --puff: 0 6px 12px rgba(150, 105, 70, .2), inset 0 2px 0 rgba(255, 255, 255, .55), inset 0 -4px 6px rgba(0, 0, 0, .09);
+}
+body { font-family: Nunito, "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+h1, h2, h3, .big-title, .page-title, .home-date b, .kt-big, .k-hero h2 { font-family: Fredoka, "Baloo 2", Nunito, sans-serif; font-weight: 600; letter-spacing: 0; }
+.big-title { font-size: 34px; }
+.home-date b { font-size: 30px; font-weight: 600; }
+.home-date.kid b { font-size: 24px; }
+
+/* cards: soft puffy clay */
+.card { background: var(--card); border-radius: 28px; box-shadow: var(--clay); border: 0; }
+.tile { background: var(--card); border: 0; box-shadow: var(--clay); }
+.tile.primary { background: var(--coral); color: #fff; }
+/* buttons: rounded clay, coral for the main ones */
+button { border: 0; border-radius: 18px; background: var(--card); box-shadow: var(--clay); color: var(--text); }
+button:hover { background: #fff7ee; }
+button.primary { background: var(--coral); color: #fff; box-shadow: var(--puff); }
+button.primary:hover { background: var(--accent-dark); }
+button.x, button.kc-open, .hub-row, button.k-row { box-shadow: none; }
+.pill { background: var(--card); border: 0; box-shadow: var(--clay); }
+input[type=text], input[type=number], input[type=time], input[type=email], input[type=password], input[type=date], select, textarea {
+  border: 0; background: #fffaf3; box-shadow: inset 0 2px 5px rgba(150, 105, 70, .14); border-radius: 16px; }
+input:focus, select:focus, textarea:focus { box-shadow: inset 0 2px 5px rgba(150, 105, 70, .14), 0 0 0 3px var(--accent-soft); }
+
+/* the hello: the face in a cream ring */
+.hello-face { border: 5px solid #fdf6ec; box-shadow: var(--clay); overflow: hidden; }
+.hello-face > .face-av, .hello-face > .face-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; vertical-align: 0; }
+.face-img.face-av { background: var(--cream); }
+.bu-in .bu-av { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto -2px; }
+
+/* 👨‍👩‍👧 parent's home: kid cards = soft clay tiles with the avatar, the list = one clay card */
+.kid-card { border-left: 0; background: var(--card); color: var(--text); box-shadow: var(--clay); padding: 10px 12px; border-radius: 26px; }
+.kid-card:nth-child(3n+1) { background: var(--mint); } .kid-card:nth-child(3n+2) { background: var(--blush); } .kid-card:nth-child(3n) { background: var(--cream); }
+.kc-text b .face-av { width: 42px; height: 42px; vertical-align: middle; margin-right: 4px; box-shadow: var(--puff); }
+.kc-btns button { background: rgba(255, 255, 255, .7); box-shadow: var(--puff); }
+.hub-list { background: var(--card); border: 0; border-radius: 26px; box-shadow: var(--clay); }
+.hub-row { border-color: var(--line) !important; }
+.hub-row.hub-main { background: var(--sage); color: #2f4a3d; }
+.hub-row.hub-main small, .hub-row.hub-main .hub-go { color: #3f5c4e; }
+.hub-h { color: var(--muted); }
+
+/* 🧒 kid's home (v158 clay): hello card · 4 tiles · today list · bottom bar */
+.kid-home .kid-big { display: flex; flex-direction: column; gap: 14px; }
+.k-hero { position: relative; overflow: hidden; display: flex; align-items: center; gap: 14px; min-height: 170px; padding: 16px 70px 22px 16px;
+  border-radius: 30px; background: var(--peach); box-shadow: var(--clay); }
+.k-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: #f2bfa2; }
+.k-hero-pic { flex: none; width: 112px; height: 128px; border-radius: 24px; object-fit: cover; box-shadow: 0 8px 16px rgba(150, 90, 60, .25); background: var(--cream); }
+.k-hero-emoji { display: grid; place-items: center; font-size: 64px; }
+.k-hero-text { position: relative; z-index: 1; min-width: 0; }
+.k-hero h2 { margin: 0; font-size: 22px; color: #6b3a22; }
+.k-hero p { margin: 4px 0 10px; font-size: 15px; font-weight: 700; color: #8a5137; }
+.k-go { min-height: 44px; padding: 6px 16px; background: var(--coral); color: #fff; font-weight: 800; font-size: 15px; box-shadow: var(--puff); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-go:hover { background: var(--accent-dark); }
+.k-plant { position: absolute; right: -4px; bottom: 8px; width: 78px; height: 92px; }
+.kt-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.kt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-height: 140px; padding: 14px; border-radius: 26px; text-align: left; }
+.kt-ico { width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; font-size: 24px; box-shadow: var(--puff); margin-bottom: 4px; }
+.kt-label { font-size: 15px; font-weight: 800; }
+.kt-big { font-size: 26px; line-height: 1; }
+.kt small { font-size: 13px; font-weight: 700; color: var(--muted); }
+.kt-study { background: var(--mint); } .kt-study .kt-ico { background: #6fa78a; }
+.kt-cal { background: var(--sky); } .kt-cal .kt-ico { background: #7d9cc2; }
+.kt-habits { background: var(--blush); } .kt-habits .kt-ico { background: var(--coral); }
+.kt-score { background: var(--cream); } .kt-score .kt-ico { background: #eebd4e; }
+.k-today { padding: 16px; }
+.k-today-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.k-today h2 { font-size: 20px; }
+.k-chip { min-height: 36px; padding: 4px 14px; font-size: 13px; font-weight: 800; border-radius: 14px; }
+.k-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 6px 0; background: none; border-radius: 0; border-bottom: 1px solid var(--line); text-align: left; }
+.k-row:last-child { border-bottom: 0; }
+.k-row:hover { background: none; }
+.k-row-t { flex: 1; min-width: 0; display: grid; }
+.k-row-t b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-row-t small { font-size: 13px; font-weight: 700; color: var(--muted); }
+.k-row-go { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card); color: #5b7fa8; box-shadow: var(--clay); font-size: 14px; }
+.k-row.done b { color: var(--muted); text-decoration: line-through; }
+.k-row.done .k-row-go { background: #6fa78a; color: #fff; font-size: 18px; box-shadow: var(--puff); }
+.kid-bar { background: var(--card); border-radius: 26px; padding: 6px; box-shadow: var(--clay); }
+.kid-bar button { box-shadow: none; background: none; }
+.kid-bar button.on { background: var(--sage); color: #2f4a3d; box-shadow: var(--puff); }
+
+/* 🧸 Choose your picture (My profile) */
+.av-pick { margin: 4px 0 14px; }
+.av-group { margin: 8px 2px 6px; font-size: 14px; font-weight: 800; color: var(--muted); }
+.av-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.av-opt { position: relative; padding: 0; aspect-ratio: 1; min-height: 0; border-radius: 22px; border: 4px solid #fbf3e9; background: var(--cream); overflow: visible; }
+.av-opt img { width: 100%; height: 100%; border-radius: 18px; object-fit: cover; display: block; }
+.av-opt.on { border-color: var(--coral); }
+.av-opt.on::after { content: "✓"; position: absolute; right: -6px; bottom: -6px; width: 26px; height: 26px; border-radius: 50%; background: var(--coral); color: #fff;
+  font-size: 14px; font-weight: 900; display: grid; place-items: center; border: 3px solid #fbf3e9; }
+.av-none.on { background: var(--sage); }
+.me-face .face-av { width: 1em; height: 1em; }
+.hello-face.has-buddy { border: 0; box-shadow: none; overflow: visible; }
+.kid-home .hello { margin-bottom: 14px; }
+.kid-home .bu-hello { width: 92px; height: 92px; }
+.kid-home .big-title { font-size: 32px; }
+.bu-in .bu-av { width: 54px; height: 54px; }
+.k-hero-pic { width: 100px; height: 120px; }
+/* v158: the Calendar button and the big Upload button in clay colours */
+.cal-btn { background: var(--sage); color: #2f4a3d; box-shadow: var(--puff); }
+.cal-btn:hover { background: #adc8b6; }
+.cal-btn.here, .cal-btn.here:hover { background: var(--card); color: var(--sage-dk); box-shadow: inset 0 2px 6px rgba(150, 105, 70, .16); }
+.sc-addbig.st-up { background: var(--coral) !important; box-shadow: var(--puff); border: 0; color: #fff; }
