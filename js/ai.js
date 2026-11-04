@@ -255,7 +255,7 @@ function cleanWorksheet(d) {
            topics: aiArr(d.topics, 12).map(t => aiTxt(t, 60)).filter(Boolean), count: aiInt(d.count, 1, 40, questions.length),
            questions, youtube_searches: aiSearches(d.youtube_searches), printable_searches: aiSearches(d.printable_searches),
            answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}),
-           ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}),
+           ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}), ...(["easy", "hard"].includes(d.pick) ? { pick: d.pick } : {}),
            // 📚 made for a study session: its key "date|actId|person", its minutes and the AI's estimate
            ...(/^\d{4}-\d{2}-\d{2}\|[^|]+\|[^|]+$/.test(aiTxt(d.session, 100)) ? { session: aiTxt(d.session, 100) } : {}),
            ...(d.minutes != null ? { minutes: aiInt(d.minutes, 5, 240, 30) } : {}), ...(d.estimated_minutes != null ? { estimated_minutes: aiInt(d.estimated_minutes, 1, 600, 30) } : {}),
@@ -282,7 +282,9 @@ function cleanCheck(c, fallbackMax) {
                                                                ...(aiTxt(q.explanation, 600) ? { explanation: aiTxt(q.explanation, 600) } : {}),
                                                                ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
                                                                ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}),
-                                                               ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}) })),
+                                                               ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}),
+                                                               // (👨‍👩‍👧 a parent's fix: "right" | "wrong" · 🙋 the kid asked a parent to check it)
+                                                               ...(["right", "wrong"].includes(q.fixed) ? { fixed: q.fixed } : {}), ...(q.ask === true ? { ask: true } : {}) })),
                 at: isYmd(c.at) ? c.at : todayYmd() };
   if (c.aiScore != null && Number.isFinite(Number(c.aiScore))) out.aiScore = aiNum(c.aiScore, 0, 1000, 0);
   if (aiTxt(c.dadNote, 400)) out.dadNote = aiTxt(c.dadNote, 400);
@@ -413,6 +415,33 @@ const LEVEL_COUNT = 8, PRACTICE_COUNT = 8, REVIEW_COUNT = 8;
 // 😊 Use the family's names in story, sentence and grammar questions: always kind, happy and safe (never someone hurt, sad or naughty)
 const wsNamesNote = kid => { const me = kidNameOf(kid), others = kidsList().map(u => u.name).filter(n => n && n !== me);
   return ` Where it fits (stories, sentences, grammar, word problems), use the child's name ${me}${others.length ? ` and sometimes ${others.join(", ")}` : ""} in some questions. Keep these sentences kind, happy and safe: never a child who is hurt, sad, scared, rude or in trouble, and never jokes about anyone.`; };
+// 💛 The kid's likes (👤 Kid profile): the questions' stories and examples use them (the school topic stays the same)
+const wsLikesNote = kid => { const likes = (schoolOf(kid).profile.likes || "").trim(), me = kidNameOf(kid);
+  return likes ? ` Make it fun for ${me}: use things ${me} likes in the stories, examples and word problems (${likes}). Keep the school topic and skills exactly the same.`
+    : ` Make it fun: use examples children of this age enjoy (games, animals, sport, food, space). Keep the school topic and skills exactly the same.`; };
+// 🎚️ Worksheet level, set by a parent per kid per subject: Easy · Normal · Hard (kept until they change it; Normal when never set)
+const WS_PICKS = [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"]];
+const wsPickOf = (kid, subject) => { const L = learnRead(kid, subject); return (L && L.pick) || "normal"; };
+const WS_PICK_TEXT = {
+  easy: " LEVEL CHOSEN BY THE PARENTS: EASY. The child finds this subject hard: make every question easier than usual. Short sentences, simple words, one step at a time, small numbers, and a hint where it helps. Start very easy.",
+  hard: " LEVEL CHOSEN BY THE PARENTS: HARD. The child finds the usual questions too easy: make them harder. More steps, bigger numbers, reasoning and 'explain why' questions, a little above the year level."
+};
+const wsPickNote = (kid, subject, mode) => mode === "placement" || mode === "level_check" ? "" : WS_PICK_TEXT[wsPickOf(kid, subject)] || "";
+// Everything extra the AI gets about the kid: 😊 names · 💛 likes · 🎚️ level
+const WS_KEY_NOTE = " For every explain question, the answer is the 2 or 3 KEY IDEAS a good answer needs, short and separated by ' · ' (so marking is fair to a child who explains in their own words).";
+const wsKidNote = (kid, subject, mode) => wsNamesNote(kid) + wsLikesNote(kid) + wsPickNote(kid, subject, mode) + WS_KEY_NOTE;
+const wsPickHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : `<div class="ws-pick" role="radiogroup" aria-label="Worksheet level"><b>Worksheet level</b>
+  ${WS_PICKS.map(([k, w]) => `<button type="button" class="pill${wsPickOf(kid, subject) === k ? " on" : ""}" role="radio" aria-checked="${wsPickOf(kid, subject) === k}" data-wspick="${safe(kid)}|${safe(encodeURIComponent(subject))}|${k}">${w}</button>`).join("")}</div>`;
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wspick]");
+  if (!b || !isParentDevice()) return;
+  const [kid, sub, k] = b.dataset.wspick.split("|"), subject = decodeURIComponent(sub), L = learnFor(kid, subject);
+  if (!L) return;
+  if (k === "normal") delete L.pick; else L.pick = k;
+  writeData();
+  document.querySelectorAll(`[data-wspick^="${CSS.escape(kid)}|${CSS.escape(sub)}|"]`).forEach(x => { const on = x.dataset.wspick.endsWith("|" + k); x.classList.toggle("on", on); x.setAttribute("aria-checked", on); });
+  toast(`🎚️ New ${subject} worksheets for ${kidNameOf(kid)}: ${WS_PICKS.find(x => x[0] === k)[1]}.`, 3000);
+});
 const MODE_NOTES = {
   level_check: "short level check to see what the child already knows",
   practice: "practice only these weak points",
@@ -556,7 +585,8 @@ const strongSkills = L => skillList(L).filter(x => x.mastery >= 80).sort((a, b) 
 function learnBody(kid, subject, focus) {
   const L = learnRead(kid, subject);
   if (!L) return {};
-  return { level: L.level, skills: skillList(L).sort((a, b) => b.tries - a.tries).slice(0, 30).map(x => ({ skill: x.skill, mastery: x.mastery })),
+  const lv = Math.max(1, Math.min(10, L.level + (L.pick === "easy" ? -2 : L.pick === "hard" ? 2 : 0)));
+  return { level: lv, skills: skillList(L).sort((a, b) => b.tries - a.tries).slice(0, 30).map(x => ({ skill: x.skill, mastery: x.mastery })),
            focus: focus && focus.length ? focus : weakSkills(L).slice(0, 3).map(x => x.skill) };
 }
 // After a checked worksheet: skills, level and history (a worksheet checked again only updates its % in the history)
@@ -735,7 +765,7 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
     if (made >= lim) { toast(`🌟 You've made today's ${lim} extra worksheets. Great work! More tomorrow 📚`, 5000); return null; }
   }
   const minutes = keep.minutes >= 5 && keep.minutes <= 240 ? Math.round(keep.minutes) : 0;
-  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsNamesNote(kid),
+  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsKidNote(kid, subject, mode),
                                         mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
                                         ...(sections && sections.length ? { sections } : {}), ...(instant ? { instant: true, files } : {}),
                                         ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus),   // (🧠 level, skills, focus)
@@ -743,7 +773,7 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
   if (!r) return null;
   const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
   const ws = wsExamOrder(cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
-                              at: new Date().toISOString(), answers: [], purpose: mode, ...(instant && found ? { part: found } : {}), ...keep }));
+                              at: new Date().toISOString(), answers: [], purpose: mode, ...(wsPickNote(kid, subject, mode) ? { pick: wsPickOf(kid, subject) } : {}), ...(instant && found ? { part: found } : {}), ...keep }));
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
   delete ws.check;
   const id = newId();

@@ -875,14 +875,14 @@ async function makePdf(node, fileName, opts = {}) {
   if (pdfBusy) return;
   pdfBusy = true;
   toast("⏳ Making your PDF…", 20000);
-  const stage = h("div", { class: "pdf-stage", "aria-hidden": "true" }, h("div", { class: "ai-print" }, node), opts.header ? h("div", { class: "ai-print" }, opts.header) : null);
+  const stage = h("div", { class: "pdf-stage" + (opts.big ? " pdf-big" : ""), "aria-hidden": "true" }, h("div", { class: "ai-print" }, node), opts.header ? h("div", { class: "ai-print" }, opts.header) : null);
   document.body.appendChild(stage);
   try {
     await Promise.all([loadScript(JSPDF_URL, () => window.jspdf && window.jspdf.jsPDF), loadScript(HTML2CANVAS_URL, () => window.html2canvas)]);
     // The parts: each question of a list on its own, everything else as it is
     const sheet = node, parts = [];
     [...sheet.children].forEach(el => { if (el.matches("ol, ul") && el.children.length) parts.push(...el.children); else parts.push(el); });
-    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4" }), W = 210, H = 297, M = 12, FOOT = 10, GAP = 2.5;
+    const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4" }), W = 210, H = 297, M = 12, FOOT = 10, GAP = opts.big ? 0.8 : 2.5;   // (📄 worksheets: the questions close together)
     const mmPerPx = (W - 2 * M) / sheet.getBoundingClientRect().width;
     // The header on every page (drawn once, put on each page)
     let head = null;
@@ -891,24 +891,46 @@ async function makePdf(node, fileName, opts = {}) {
       head = { url: hc.toDataURL("image/jpeg", 0.92), w: r.width * mmPerPx, h: r.height * mmPerPx };
     }
     const top = () => { if (!head) return M; pdf.addImage(head.url, "JPEG", M, M, head.w, head.h); return M + head.h + GAP; };
-    let y = top();
-    for (const el of parts) {
-      if (el.classList && el.classList.contains("pdf-break")) { pdf.addPage(); y = top(); continue; }   // (✏️ the answer sheet: a new page)
-      if (!el.getBoundingClientRect().height) continue;
-      // ✏️ the answer sheet fills its whole page (the rows and writing lines grow), so it's never small on a big empty page
-      if (el.classList && el.classList.contains("ws-answers")) {
-        const roomPx = (H - M - FOOT - M - (head ? head.h + GAP : 0)) / mmPerPx;
-        el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
-        if (el.getBoundingClientRect().height > roomPx + 1) el.classList.remove("as-fill");   // (many questions: the normal sizes, so it still fits)
-        if (el.getBoundingClientRect().height > roomPx + 1) el.classList.add("as-tight");     // (still too many: 2 writing lines, closer)
-      }
+    const room = H - M - FOOT - M - (head ? head.h + GAP : 0), roomPx = room / mmPerPx, firstY = head ? M + head.h + GAP : M;
+    const place = async el => {   // one part on the page (a new page when it doesn't fit)
       const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: "#ffffff", logging: false, useCORS: true });
       let w = el.getBoundingClientRect().width * mmPerPx, hgt = el.getBoundingClientRect().height * mmPerPx;
-      const room = H - M - FOOT - M - (head ? head.h + GAP : 0);
       if (hgt > room) { w *= room / hgt; hgt = room; }   // (a very tall part: made smaller to fit one page)
-      if (y + hgt > H - M - FOOT && y > (head ? M + head.h + GAP : M)) { pdf.addPage(); y = top(); }
+      if (y + hgt > H - M - FOOT && y > firstY) { pdf.addPage(); y = top(); }
       pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", M, y, w, hgt);
       y += hgt + GAP;
+    };
+    let y = top();
+    for (let i = 0; i < parts.length; i++) {
+      const el = parts[i];
+      if (el.classList && el.classList.contains("pdf-break")) { if (y > firstY) { pdf.addPage(); y = top(); } continue; }   // (✏️ the answer sheet: a new page)
+      if (!el.getBoundingClientRect().height) continue;
+      // 📏 a section bar never sits alone at the bottom: it goes to the next page with its first question
+      const nx = parts[i + 1];
+      if (el.classList && (el.classList.contains("ws-bar") || el.classList.contains("ws-sec")) && nx && nx.getBoundingClientRect) {
+        const both = (el.getBoundingClientRect().height + nx.getBoundingClientRect().height) * mmPerPx + GAP;
+        if (y + both > H - M - FOOT && y > firstY) { pdf.addPage(); y = top(); }
+      }
+      // ✏️ the answer sheet: never made smaller. It fills its page, and when it's too long it goes on over more pages.
+      if (el.classList && el.classList.contains("ws-answers")) {
+        el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
+        if (el.getBoundingClientRect().height <= roomPx + 1) { await place(el); continue; }
+        el.classList.remove("as-fill"); el.style.minHeight = "";
+        // 📏 SMART FIT: one page whenever it can. Step by step a little less room (never tiny, the text never smaller):
+        // fit1 explain 3 lines · short 2 → fit2 short answers in 2 columns → fit3 explain 2 lines → fit4 explain in 2 columns too
+        let fitted = false;
+        for (const k of ["fit1", "fit2", "fit3", "fit4"]) {
+          el.classList.add(k);
+          if (el.getBoundingClientRect().height <= roomPx + 8) { fitted = true; break; }
+        }
+        if (fitted) { await place(el); continue; }
+        el.classList.remove("fit3", "fit4");   // (very long: short answers in 2 columns, explain 3 lines, over 2 pages or more)
+        for (const pg of splitAnswerSheet(el, roomPx)) { if (y > firstY) { pdf.addPage(); y = top(); } await place(pg); }
+        continue;
+      }
+      // (the "Now write your answers on the ANSWER SHEET" note never gets a page of its own)
+      if (el.classList && el.classList.contains("ws-to-sheet") && y + el.getBoundingClientRect().height * mmPerPx > H - M - FOOT) continue;
+      await place(el);
     }
     const n = pdf.getNumberOfPages();
     for (let i = 1; i <= n; i++) { pdf.setPage(i); pdf.setFontSize(9); pdf.setTextColor(120); pdf.text(`${i} / ${n}`, W / 2, H - 7, { align: "center" }); }
@@ -921,6 +943,28 @@ async function makePdf(node, fileName, opts = {}) {
     stage.remove();
     pdfBusy = false;
   }
+}
+// ✏️ A long answer sheet → several full-size pages (the header on each; the questions in order; the score on the last)
+function splitAnswerSheet(el, roomPx) {
+  const grid = el.querySelector(".as-grid"), total = el.querySelector(".ws-total"), headNode = el.firstElementChild;
+  const cells = [...grid.children], pages = [el];
+  grid.innerHTML = "";
+  if (total) total.remove();
+  let page = el, g = grid;
+  for (const c of cells) {
+    g.appendChild(c);
+    if (page.getBoundingClientRect().height > roomPx + 8 && g.children.length > 1) {   // (+8px: a hair smaller is fine)
+      c.remove();
+      page = el.cloneNode(false); page.append(headNode.cloneNode(true), g = grid.cloneNode(false));
+      page.firstElementChild.querySelector("b") && (page.firstElementChild.querySelector("b").textContent = "Answer sheet (continued)");
+      pages[pages.length - 1].after(page); pages.push(page);
+      g.appendChild(c);
+    }
+  }
+  if (total) { page.appendChild(total); if (page.getBoundingClientRect().height > roomPx) { total.remove();
+    const last = el.cloneNode(false); last.append(total); page.after(last); pages.push(last); } }
+  if (pages.length > 1) { const ins = el.querySelector(".ws-ins"); if (ins) ins.textContent = `Fill the circle for your answer. Write the other answers in the spaces. Take a clear photo of each answer page (${pages.filter(x => x.querySelector(".as-grid")).length} pages).`; }
+  return pages;
 }
 // The share sheet when the phone can share files, otherwise a download. (Some phones only share right after a tap: then a small "📤 Share" bar.)
 async function sharePdf(file) {
@@ -955,8 +999,8 @@ function pdfReadyBar(file) {
 // 📄 The questions (compact) + ✏️ the ANSWER SHEET on its own last page
 const worksheetPdf = w => { const node = wsSheetNode(w, false, true);
   node.append(h("div", { class: "pdf-break" }), wsAnswerSheetNode(w));
-  return makePdf(node, pdfName(kidNameOf(w.kid), w.subject, w.title)); };
-const answerKeyPdf = w => makePdf(wsKeyNode(w), pdfName(kidNameOf(w.kid), w.subject, `${w.title} answer key`));   // 🔑 (only the answers)
+  return makePdf(node, pdfName(kidNameOf(w.kid), w.subject, w.title), { big: true }); };
+const answerKeyPdf = w => makePdf(wsKeyNode(w), pdfName(kidNameOf(w.kid), w.subject, `${w.title} answer key`), { big: true });   // 🔑 (only the answers)
 const briefPdf = kid => { const b = schoolOf(kid).brief; if (b) makePdf(briefNode(kid, b), pdfName(kidNameOf(kid), "Brief for parents", b.date)); };
 
 function printAi(node) {
@@ -982,7 +1026,7 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
     h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
-  $("wsoTr").innerHTML = translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
+  $("wsoTr").innerHTML = wsPickHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
   $("wsoMake").focus();
 }
@@ -1003,12 +1047,12 @@ async function makeWorksheet() {
   $("wsoErr").textContent = "";
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
-                                        notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsNamesNote(o.kid), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
+                                        notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsKidNote(o.kid, o.subject, mode), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
   const ws = wsExamOrder(cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
                               ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
-                              answers: [], ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
+                              answers: [], ...(wsPickNote(o.kid, o.subject, mode) ? { pick: wsPickOf(o.kid, o.subject) } : {}), ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
   if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
   delete ws.check;
   const id = newId();
@@ -1121,6 +1165,11 @@ const wsBoxHead = (w, sheet) => h("div", { class: "ws-hbox", dir: "ltr" },
   h("div", { class: "ws-hgrid" }, h("span", null, "Name: ", h("u", null, kidNameOf(w.kid))), h("span", null, "Date: ", h("u", null, wsDateText(w.date))),
     sheet ? null : h("span", null, "Time: ", h("u", null, w.minutes ? `${w.minutes} min` : "______")),
     sheet ? null : h("span", null, "Total: ", h("u", null, `____ / ${num(wsTotal(w))}`))));
+// ✅ How the AI marks written answers (sent with every check): right only when the MEANING is right (any words), wrong = 0, spelling never costs marks (but is shown)
+const CHECK_RULES = "MARKING RULES for written answers (short answer, fill in, explain): be a fair but strict teacher. An answer is RIGHT only when its meaning is scientifically correct and answers the question: the child may use their own words, simple sentences or a different correct way of saying it (do not ask for the exact words of the key). An answer whose idea is wrong, off-topic, missing or only guessed is WRONG with 0 points, even if it uses some words from the key. Do not give points for wrong answers. SPELLING: never take marks off for spelling or grammar when the meaning is right (unless the question itself is about spelling), but in the note of that question add 'Spelling: wrong word → right word' for each misspelled science or key word, so the child can learn it.";
+const MARK_EXPLAIN = "Right only when the meaning is correct (the key ideas, in any words). A wrong idea is wrong: 0 points.";
+const MARK_SHORT = "Right when the meaning is correct (other words or a spelling mistake are fine). A wrong answer is wrong: 0 points.";
+const SOLVE_Q = /\b(solve|work out|calculate|show (your )?work|how many|how much|explain|why|describe|find the)\b|\d\s*[+\-×x÷*/]\s*\d/i;
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
   const rtl = isArabicWs(w), bars = wsPartBars(w);
@@ -1160,8 +1209,9 @@ function wsAnswerSheetNode(w) {
     if (q.kind === "ordering") return h("div", { class: "as-q as-wide" }, n, h("div", null,
       h("div", { class: "as-how" }, "Write the letters in order:"),
       h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
-    const lines = Math.max(1, Math.min(3, q.answer_lines || 1));
-    return h("div", { class: "as-q as-wide" }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
+    // (✍️ room to write: 🅲 explain = 4 lines · a problem to solve = 3 · a short answer = 2)
+    const lines = wsPartOf(q) === "C" ? 4 : SOLVE_Q.test(q.prompt || "") ? 3 : 2;
+    return h("div", { class: "as-q as-wide " + (wsPartOf(q) === "C" ? "as-c" : "as-s") }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
@@ -1218,6 +1268,7 @@ function wsViewNode(w, id, s, isDad) {
       h("button", { data: { wsact: "key" } }, open ? "📄 Answer key PDF" : "🔒 Answer key PDF"),
       h("button", { data: { wsact: "again" } }, "🔁 Make another"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
+    wsLevelNode(w),
     wsSheetNode(w, show),
     // ✅ Upload the answers → 🤖 Check
     h("div", { class: "card bd-card ai-narrow" },
@@ -1264,15 +1315,45 @@ function mistakesNode(w, c) {
   if (wsMist.done) return h("div", { class: "btnrow" }, h("button", { data: { wsact: "mistagain" } }, `❌ See my mistakes again (${wrong.length})`));
   const i = Math.min(wsMist.i, wrong.length - 1), q = wrong[i], wq = w.questions.find(x => x.number === q.number) || {}, rtl = isArabicWs(w);
   return h("div", { class: "card mist-card" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null },
-    h("div", { class: "mist-head", dir: "ltr" }, h("b", null, `❌ Mistake ${i + 1} of ${wrong.length}`), h("small", null, `Question ${q.number}`)),
+    h("div", { class: "mist-head", dir: "ltr" }, h("b", null, q.points > 0 ? `🟡 Almost! ${i + 1} of ${wrong.length}` : `❌ Mistake ${i + 1} of ${wrong.length}`),
+      h("small", null, `Question ${q.number}${q.points > 0 && wq.points ? ` · ${num(q.points)}/${num(wq.points)}` : ""}`)),
     h("p", { class: "mist-q" }, wq.prompt || `Question ${q.number}`),
     wq.question_ar && !rtl ? h("p", { class: "ws-ar", dir: "rtl", lang: "ar" }, wq.question_ar) : null,
     h("div", { class: "mist-row bad" }, h("span", null, "Your answer"), h("b", null, q.your_answer || "—")),
     h("div", { class: "mist-row ok" }, h("span", null, "Correct answer"), h("b", null, wq.answer || "—")),
     q.explanation || q.note ? h("p", { class: "mist-why" }, "💡 " + (q.explanation || q.note)) : null,
+    q.fixed ? h("p", { class: "ws-fixed" }, `✓ Checked by ${dadName()}`)
+      : isParentDevice() ? null : q.ask ? h("p", { class: "ws-fixed" }, `⏳ ${dadName()} will check this answer`)
+      : h("div", { class: "btnrow", dir: "ltr" }, h("button", { data: { wsqask: String(q.number) } }, `🙋 Ask ${dadName()} to check`)),
     h("div", { class: "btnrow", dir: "ltr" },
       i < wrong.length - 1 ? h("button", { class: "primary", data: { wsact: "mistnext" } }, `Next mistake ➡️ (${i + 2} of ${wrong.length})`) : null,
       h("button", { data: { wsact: "mistdone" } }, "Done")));
+}
+// ✏️ Words to spell right (from the check notes "Spelling: wrong → right"): shown with the result; no marks were taken off
+const spellsOf = c => c.questions.flatMap(q => [...String(q.note || "").replace(/->/g, "→").matchAll(/Spelling:\s*([^.;\n]+)/gi)].flatMap(m => m[1].split(/,\s*(?=[^,]*→)/)))
+  .map(x => x.trim()).filter(x => x.includes("→")).filter((x, i, a) => a.indexOf(x) === i).slice(0, 12);
+function spellingNode(c) {
+  const list = spellsOf(c);
+  return list.length ? h("div", { class: "card spell-card" }, h("b", null, "✏️ Spelling to practise"), h("small", null, "No marks were taken off. Learn these words:"),
+    h("ul", null, list.map(x => { const [bad, good] = x.split("→").map(t => t.trim()); return h("li", null, h("s", null, bad), " → ", h("b", null, good)); }))) : null;
+}
+// 🎚️ The worksheet's level (chosen by the parents) + ⭐ the Hard bonus (a kid's own extra worksheet)
+const HARD_BONUS = 5;
+function wsLevelNode(w) {
+  const k = w.pick || "normal", name = { easy: "Easy", normal: "Normal", hard: "Hard" }[k];
+  if (["placement", "level_check"].includes(w.purpose)) return null;
+  return h("div", { class: "card ws-level ws-level-" + k }, h("b", null, `🎚️ Level: ${name}`), h("span", null, w.pick ? " · chosen by your parents" : ""),
+    k === "hard" && isFreeStudy(w) && !w.check ? h("p", null, `⭐ Bonus! Get 50% or more on this Hard worksheet for +${HARD_BONUS} extra points.`) : null);
+}
+// 🚀 After a good mark (85%+): go up a level for more points (the parents choose it) · ⭐ the Hard bonus that came
+function levelUpNode(w, pct) {
+  const k = w.pick || "normal";
+  if (["placement", "level_check"].includes(w.purpose)) return null;
+  if (k === "hard") return pct >= 50 && isFreeStudy(w) ? h("p", { class: "ai-note ws-lvl-tip" }, `⭐ Hard level bonus: +${HARD_BONUS} points!`) : null;
+  if (pct < 85 || wsPickOf(w.kid, w.subject) !== k) return null;
+  const next = k === "easy" ? "Normal" : "Hard";
+  return h("p", { class: "ai-note ws-lvl-tip" }, isParentDevice() ? `🚀 ${kidNameOf(w.kid)} got ${pct}%! Time to move up to ${next} in ${w.subject}?`
+    : `🚀 Great mark! You're ready for ${next}. Ask your parents to move you up to ${next} in ${w.subject}${next === "Hard" ? ": Hard worksheets give bonus points!" : " to earn more points!"}`);
 }
 // The score big, the notes, then the mistakes one by one (parents: "See all answers" for ✓ / ✗ on every question)
 function resultNode(w) {
@@ -1280,17 +1361,64 @@ function resultNode(w) {
   return h("div", null,
     h("div", { class: "ai-score" }, `${num(c.score)} / ${num(c.max_score)}`, h("small", null, `${pct}%`)),
     c.overall_note ? h("p", { class: "ai-note" }, c.overall_note) : null,
+    levelUpNode(w, pct),
     c.dadNote ? h("p", { class: "ai-note dad" }, `${userById(DAD).emoji} ${dadName()}: ${c.dadNote}`) : null,
     c.strong_points && c.strong_points.length ? h("p", { class: "ai-note" }, "Strong: " + c.strong_points.join(" · ")) : null,
     c.weak_points && c.weak_points.length ? h("p", { class: "ai-note" }, "Practise: " + c.weak_points.join(" · ")) : null,
     c.coach_tip ? h("p", { class: "ai-note" }, "Coach tip: " + c.coach_tip) : null,
+    spellingNode(c),
     c.questions.length ? mistakesNode(w, c) : null,
     parent && c.questions.length ? h("div", { class: "btnrow" }, h("button", { data: { wsact: "allans" }, "aria-expanded": String(wsAllAns) }, wsAllAns ? "Hide all answers" : "📋 See all answers")) : null,
-    parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", null,
+    fixedNode(c),
+    parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", { class: q.ask && !q.fixed ? "ws-asked" : null },
       h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
       h("div", { class: "what" }, `Question ${q.number}`,
-        h("small", null, `${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}`))))) : null);
+        h("small", null, `${q.ask && !q.fixed ? `🙋 ${kidNameOf(w.kid)} asks you to check this · ` : ""}${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}${q.fixed ? " · ✓ changed by you" : ""}`)),
+      h("button", { class: "pill", data: { wsqfix: `${q.number}|${q.correct ? "wrong" : "right"}` } }, q.correct ? "Mark wrong" : "Mark right")))) : null);
 }
+// 👨‍👩‍👧 What a parent changed (the kid sees it too): "✓ Dad checked Q4: right"
+function fixedNode(c) {
+  const list = c.questions.filter(q => q.fixed);
+  return list.length ? h("p", { class: "ai-note ws-fixed" }, `✓ Checked by ${dadName()}: ` + list.map(q => `Q${q.number} ${q.fixed === "right" ? "is right" : "is wrong"}`).join(" · ")) : null;
+}
+// ✓ / ✗ A parent marks ONE question right or wrong (the AI's check stays as it is everywhere else) → the score, %, mark and learning update
+function fixQuestion(wsId, number, to) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w || !w.check || !isParentDevice()) return;
+  const wq = w.questions.find(x => x.number === number), full = wq ? wq.points : 0;
+  const qs = w.check.questions.map(q => ({ ...q })), q = qs.find(x => x.number === number);
+  if (!q) return;
+  const pts = to === "right" ? full : 0, score = Math.max(0, Math.min(w.check.max_score, w.check.score + pts - (q.points || 0)));
+  Object.assign(q, { correct: to === "right", points: pts, fixed: to });
+  delete q.ask;
+  const c = { ...w.check, questions: qs, score };
+  aiSave("worksheets", wsId, { ...w, check: c, status: "Checked ✓" });
+  learnAfterCheck(w, c, wsId);   // 🧠 (its % in the history)
+  saveWsMark(w.kid, wsId, w, c);
+  schoolFresh = true;
+  render();
+  toast(`✓ Q${number} is now ${to}. Score: ${num(score)} / ${num(c.max_score)}`, 3000);
+}
+// 🙋 A kid asks a parent to check one answer (the parent sees it in "Needs you")
+function askQuestion(wsId, number) {
+  const w = aiDocs.worksheets[wsId];
+  if (!w || !w.check) return;
+  const qs = w.check.questions.map(q => q.number === number ? { ...q, ask: true } : q);
+  aiSave("worksheets", wsId, { ...w, check: { ...w.check, questions: qs } });
+  schoolFresh = true;
+  render();
+  toast(`🙋 Sent! ${dadName()} will check Q${number}.`, 3000);
+}
+// 🙋 Worksheets with an answer a kid asked about (for the parents' "Needs you") → [{ id, w, nums }]
+const askedWs = () => Object.entries(aiDocs.worksheets).filter(([, w]) => w && w.check && w.check.questions.some(q => q.ask && !q.fixed))
+  .map(([id, w]) => ({ id, w, nums: w.check.questions.filter(q => q.ask && !q.fixed).map(q => q.number) }));
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wsqfix], [data-wsqask], [data-wsaskopen]");
+  if (!b) return;
+  if (b.dataset.wsqfix) { const [n, to] = b.dataset.wsqfix.split("|"); return fixQuestion(schoolDoc, Number(n), to); }
+  if (b.dataset.wsqask) return askQuestion(schoolDoc, Number(b.dataset.wsqask));
+  if (b.dataset.wsaskopen) { openAiDoc("worksheet", b.dataset.wsaskopen); wsAllAns = true; schoolFresh = true; return render(); }
+});
 // ✏️ Bro2a changes the score / adds his own note
 function fixFormNode(w) {
   const c = w.check;
@@ -1409,8 +1537,9 @@ async function checkWorksheet(wsId) {
     const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
     return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself)`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
+                                       ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}) })), files }, "check|" + wsId);
   if (!r) return;
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));

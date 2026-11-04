@@ -487,6 +487,8 @@ function schoolProfileHtml(s, isDad, u) {
         <label class="small" for="sph-${id}">Finds hard…</label><input type="text" id="sph-${id}" maxlength="150" value="${safe(x.hard || "")}" placeholder="Long division"></div>
       <p class="sc-know-test" id="spt-${id}" ${unsure ? "" : "hidden"}>🧪 <b>Placement test</b><small>${safe(testStatusText(x))}</small></p>
       </fieldset>`; }).join("")}
+    <label class="small" for="spLikes">What do they like?</label>
+    <input type="text" id="spLikes" maxlength="200" value="${safe(p.likes || "")}" placeholder="Football, cats, Minecraft, space">
     <label class="small" for="spOther">Anything else?</label>
     <textarea id="spOther" rows="3" maxlength="400" placeholder="Loves animals. Gets tired after 20 minutes.">${safe(p.other)}</textarea>
     <div class="btnrow"><button class="primary" data-profsave>💾 Save</button><button data-profskip>${first ? "Skip for now" : "Cancel"}</button></div></div>`;
@@ -521,7 +523,7 @@ function saveProfile(skip) {
       const level = Number((document.querySelector(`input[name="spl-${f.id}"]:checked`) || {}).value) || 0;
       if (level || good || hard) subjects[f.id] = { level, good, hard };
     });
-    Object.assign(p, { subjects, other: $("spOther").value.trim().slice(0, 400) });
+    Object.assign(p, { subjects, other: $("spOther").value.trim().slice(0, 400), likes: $("spLikes").value.trim().slice(0, 200) });
     // 🏫 📚 🎓 kept on the kid (shared family data, like 👨‍👩‍👧 Family)
     const u = data.users.find(x => x.id === kid), about = schoolFieldsValue("sp");
     if (u) { Object.assign(u, about); Object.keys(about).forEach(k => { if (!u[k]) delete u[k]; }); }
@@ -653,7 +655,7 @@ function briefProfile(kid) {
              const level = x.level ? `${x.level} of 3 stars (${LEVEL_WORDS[x.level]})${x.unsure ? ", from the placement test" : ", from the parents"}`
                : x.unsure ? "not sure yet (placement test pending)" : "not given";
              return { subject: f.name, level, good_at: x.good || "", finds_hard: x.hard || "" };
-           }), other: p.other || "" };
+           }), other: p.other || "", likes: p.likes || "" };
 }
 async function makeBrief(kid, auto) {
   if (!isParentId(me) || isKidDevice() || !exists(kid)) return;
@@ -791,7 +793,7 @@ function schoolSubjectHtml(s, isDad, u) {
   }
   const t = secs.find(x => x.id === stSec);
   html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.label}</h1></div>`;
-  if (stSec === "ws") return html + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
+  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
   if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
   if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;

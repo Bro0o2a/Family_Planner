@@ -1089,7 +1089,7 @@ function cleanSchool(s) {
     // 👤 Kid profile, 📌 school dates, 📰 this week
     const p = k.profile && typeof k.profile === "object" ? k.profile : {};
     // (skip: the 🏫 📚 🎓 basics a parent answered "Not now" to: never asked again)
-    c.profile = { asked: p.asked === true, other: txt(p.other, 400), skip: Array.isArray(p.skip) ? BASIC_KEYS.filter(b => p.skip.includes(b)) : [], subjects: list(p.subjects, x => {
+    c.profile = { asked: p.asked === true, other: txt(p.other, 400), likes: txt(p.likes, 200), skip: Array.isArray(p.skip) ? BASIC_KEYS.filter(b => p.skip.includes(b)) : [], subjects: list(p.subjects, x => {
       const level = [1, 2, 3].includes(Number(x.level)) ? Number(x.level) : 0, good = txt(x.good, 150), hard = txt(x.hard, 150);
       const unsure = x.unsure === true, test = unsure && okKey(String(x.test || "")) ? { test: x.test } : {};
       return level || good || hard || unsure ? { level, good, hard, ...(unsure ? { unsure } : {}), ...test } : null;
@@ -1119,7 +1119,7 @@ function cleanSchool(s) {
                           .map(r => ({ date: r.date, ws: okKey(String(r.ws || "")) ? r.ws : "", pct: lnum(r.pct, 100) })),
                         skills: skillsIn(t.skills) };
       });
-      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics };
+      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics, ...(["easy", "hard"].includes(x.pick) ? { pick: x.pick } : {}) };
     });
     // 📄 Syllabus and 📋 Brief for parents (newer: older data has none)
     const sy = k.syllabus;

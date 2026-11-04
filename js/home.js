@@ -58,6 +58,11 @@ function needsItems() {
   if (isParentId(me) && (!hasPlan() || planIsOld())) out.push({ key: "plan", text: !hasPlan() ? "🗓️ No plan yet" : "🗓️ Things changed: plan again",
     html: `<div class="card"><p>${!hasPlan() ? "🗓️ No plan yet. Add activities, then press ✨ Plan my week." : "⚠ Things changed since your last plan. Press ✨ Plan my week to update it."}</p>
       <div class="btnrow"><button class="primary" data-plan>✨ Plan my week</button><button data-go="add">✏️ Add activities</button></div></div>` });
+  // 🙋 a kid asked a parent to check an answer
+  const asked = isParentId(me) && !isKidDevice() ? askedWs() : [];
+  if (asked.length) out.push({ key: "ask", text: asked.length === 1 ? `🙋 ${kidNameOf(asked[0].w.kid)} asks you to check ${asked[0].nums.map(n => "Q" + n).join(", ")} in ${asked[0].w.subject}` : `🙋 ${asked.length} answers to check`,
+    html: `<div class="card">${asked.map(x => `<p>🙋 <b>${safe(kidNameOf(x.w.kid))}</b> asks you to check ${x.nums.map(n => "Q" + n).join(", ")} in ${safe(x.w.subject)} (${safe(x.w.title)})</p>
+      <div class="btnrow"><button class="primary" data-wsaskopen="${safe(x.id)}">Check it</button></div>`).join("")}</div>` });
   const nl = newsletterDue();
   if (nl.length) out.push({ key: "nl", text: `📰 Newsletter for ${nl.map(k => k.name).join(", ")}`, html: newsletterNudgeHtml() });
   return out;
