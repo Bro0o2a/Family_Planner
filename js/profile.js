@@ -47,7 +47,8 @@ function drawMe() {
           <button type="button" class="pill" data-menophoto ${(mePhoto !== null ? mePhoto : facePhoto(u)) ? "" : "hidden"}>😀 Use my emoji instead</button></div>
         <input type="file" id="mePhotoFile" accept="image/*" hidden>
         <p class="hint">Or tap an emoji below. A photo is cut to a square and kept small.</p>` : ""}
-      <label class="small">😀 ${my} emoji</label><div class="emoji-pick me-emojis">${[...new Set([u.emoji, ...EMOJIS])].map(e => `<button type="button" class="${e === u.emoji ? "on" : ""}" data-meemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("")}</div>
+      <label class="small">🧸 ${my} picture</label>${avatarPickHtml(u)}
+      <label class="small">😀 ${my} emoji ${faceAvatar(u) ? `<small>(shown when no picture is picked)</small>` : ""}</label><div class="emoji-pick me-emojis">${[...new Set([u.emoji, ...EMOJIS])].map(e => `<button type="button" class="${e === u.emoji ? "on" : ""}" data-meemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("")}</div>
       <label class="small">🎨 ${my} colour</label><div class="swatches me-colors">${Object.entries(PALETTE).map(([key, x]) => `<label title="${key}"><input type="radio" name="meColor" value="${key}" ${u.color === key ? "checked" : ""}><span style="background:${x.color}"></span></label>`).join("")}</div>
       <label class="small" for="meBirthday">🎂 Birthday</label><input type="date" id="meBirthday" value="${safe(u.birthday || "")}">
       ${hasSpark(u.id) ? `<h3 class="ph-group">✨ ${my} Spark</h3>
@@ -183,6 +184,14 @@ document.addEventListener("click", e => {
 });
 // Who changes a profile: the person themselves (kids too), or a parent for any kid
 const canEditProfile = id => exists(id) && (id === me || (isParentViewer() && !isParentId(id)));
+// 🧸 v158: Choose your picture: the 3D avatars (kids: boys + girls · parents: parents too) + "No picture" (= the emoji)
+function avatarPickHtml(u) {
+  const groups = [["Boys", AVATARS.boys], ["Girls", AVATARS.girls], ...(isParentId(u.id) ? [["Parents", AVATARS.parents]] : [])];
+  const cur = faceAvatar(u);
+  return `<div class="av-pick" id="avPick">${groups.map(([name, ids]) => `<p class="av-group">${name}</p><div class="av-grid">${ids.map(id =>
+      `<button type="button" class="av-opt ${id === cur ? "on" : ""}" data-meavatar="${id}" aria-label="Use this picture"><img src="${avatarSrc(id)}" alt=""></button>`).join("")}</div>`).join("")}
+    <div class="btnrow"><button type="button" class="pill av-none ${cur ? "" : "on"}" data-meavatar="">😀 No picture, use my emoji</button></div></div>`;
+}
 // 🖼️ A parent's picture while editing: null = as saved · "" = use the emoji · a new photo (a small JPEG, see takePhoto)
 let mePhoto = null;
 const mePicHtml = u => { const p = mePhoto !== null ? mePhoto : facePhoto(u);
@@ -215,6 +224,9 @@ function saveMe() {
   u.name = name;
   const em = ($("meBody").querySelector("[data-meemoji].on") || {}).dataset;
   if (em && em.meemoji) u.emoji = em.meemoji;
+  // 🧸 the avatar picked (none = the emoji). Picking one also drops a parent's photo (see the tap below).
+  const av = $("meBody").querySelector("[data-meavatar].on");
+  if (av) { if (AVATAR_IDS.includes(av.dataset.meavatar)) u.avatar = av.dataset.meavatar; else delete u.avatar; }
   const col = ($("meBody").querySelector('input[name="meColor"]:checked') || {}).value;
   if (col && hasOwn(PALETTE, col)) u.color = col;
   const b = $("meBirthday").value;
@@ -259,6 +271,12 @@ document.addEventListener("click", e => {
   // 🖼️ a parent: 📷 take or choose a photo · 😀 use my emoji instead (tapping an emoji picks the emoji too)
   if ("mephoto" in ds) { $("mePhotoFile").value = ""; return $("mePhotoFile").click(); }
   if ("menophoto" in ds) { mePhoto = ""; $("mePicNow").innerHTML = mePicHtml(userById(meWho)); b.hidden = true; return; }
+  if ("meavatar" in ds) {
+    $("meBody").querySelectorAll("[data-meavatar]").forEach(x => x.classList.toggle("on", x === b));
+    if (ds.meavatar && $("mePicNow")) { mePhoto = ""; $("mePicNow").innerHTML = `<img class="face-img me-pic-img" src="${avatarSrc(ds.meavatar)}" alt="">`;
+      const np = $("meBody").querySelector("[data-menophoto]"); if (np) np.hidden = true; }
+    return;
+  }
   if (ds.meemoji) {
     $("meBody").querySelectorAll("[data-meemoji]").forEach(x => x.classList.toggle("on", x === b));
     if ($("mePicNow")) { mePhoto = ""; const u = { ...userById(meWho), emoji: ds.meemoji }; $("mePicNow").innerHTML = mePicHtml(u);
@@ -863,7 +881,7 @@ function drawHome() {
   if (buddy) {
     const p = lifetimePoints(me), L = levelOf(p), pct = levelPct(p);
     $("homeFace").innerHTML = `<span class="bu-ring bu-hello" role="img" aria-label="Level ${L}, ${pct}% to level ${L + 1}" style="--c:${c.color}">${buddyRingSvg(pct)}
-      <span class="bu-in"><span class="e">${buddyFace(me, L)}</span><b>Lv ${L}</b></span>${starBadge(me)}</span><small class="bu-under">${pct}% to Lv ${L + 1}</small>`;
+      <span class="bu-in">${faceAvatar(u) ? `<img class="bu-av" src="${avatarSrc(u.avatar)}" alt="">` : `<span class="e">${buddyFace(me, L)}</span>`}<b>Lv ${L}</b></span>${starBadge(me)}</span><small class="bu-under">${pct}% to Lv ${L + 1}</small>`;
   }
   // (🧒 a kid's numbers are in 📊 My week; 👨‍👩‍👧 a parent has no points or score any more)
   $("homePoints").hidden = !parent || isParentId(me);
