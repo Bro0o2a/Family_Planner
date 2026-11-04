@@ -428,7 +428,9 @@ const WS_PICK_TEXT = {
 };
 const wsPickNote = (kid, subject, mode) => mode === "placement" || mode === "level_check" ? "" : WS_PICK_TEXT[wsPickOf(kid, subject)] || "";
 // Everything extra the AI gets about the kid: 😊 names · 💛 likes · 🎚️ level
-const WS_KEY_NOTE = " For every explain question, the answer is the 2 or 3 KEY IDEAS a good answer needs, short and separated by ' · ' (so marking is fair to a child who explains in their own words).";
+// 📚 v157 topic names: "Big topic › small topic" (so the topics of one unit sit together, see topicsCardHtml)
+const TOPIC_NAME_RULE = "name every topic as 'Big topic › small topic', 2 to 5 words, capital first letter, for example 'Fractions › Adding', 'Plants › Life cycle', 'Grammar › Pronouns'. No lesson numbers or dates. Use the same big topic name for topics of the same unit, and keep an existing topic's name when it is the same topic";
+const WS_KEY_NOTE = " Each question's topic: " + TOPIC_NAME_RULE + "." + " For every explain question, the answer is the 2 or 3 KEY IDEAS a good answer needs, short and separated by ' · ' (so marking is fair to a child who explains in their own words).";
 const wsKidNote = (kid, subject, mode) => wsNamesNote(kid) + wsLikesNote(kid) + wsPickNote(kid, subject, mode) + WS_KEY_NOTE;
 const wsPickHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : `<div class="ws-pick" role="radiogroup" aria-label="Worksheet level"><b>Worksheet level</b>
   ${WS_PICKS.map(([k, w]) => `<button type="button" class="pill${wsPickOf(kid, subject) === k ? " on" : ""}" role="radio" aria-checked="${wsPickOf(kid, subject) === k}" data-wspick="${safe(kid)}|${safe(encodeURIComponent(subject))}|${k}">${w}</button>`).join("")}</div>`;

@@ -11,6 +11,9 @@
 const ST = { new: ["⚪", "New"], practising: ["🟡", "Practising"], needs: ["🔴", "Needs work"], mastered: ["🟢", "Mastered"] };
 const ST_FILTERS = [["all", "All"], ["new", "⚪ Not practised"], ["needs", "🔴 Needs work"], ["mastered", "🟢 Mastered"]];
 const KIND_OF = { needs: "needs_work", new: "new", practising: "practising", mastered: "review" };
+// "Fractions › Adding" → the big topic "Fractions" and the small "Adding" (also "Fractions > Adding")
+const topicUnitOf = title => { const m = String(title || "").match(/^(.{2,40}?)\s*[›>]\s*(.+)$/); return m ? m[1].trim() : ""; };
+const topicShort = title => { const m = String(title || "").match(/^(.{2,40}?)\s*[›>]\s*(.+)$/); return m ? m[2].trim() : String(title || ""); };
 const lowerT = t => String(t || "").trim().toLowerCase();
 const meanPct = list => list.length ? Math.round(list.reduce((n, x) => n + x, 0) / list.length) : null;   // (the average of some %)
 const dayMon = d => { const x = fromYmd(String(d).slice(0, 10)); return `${x.getDate()} ${MONTHS[x.getMonth()]}`; };
@@ -77,13 +80,24 @@ function topicsCardHtml(s, f, parent) {
     const on = stPick.includes(t.id), n = t.info.list.length, last = t.info.results[t.info.results.length - 1];
     const meta = [t.added ? `Added ${dayMon(t.added)}` : "", t.src === "ws" ? WS_TOPIC_TAG : "", n ? `${n} ${n === 1 ? "worksheet" : "worksheets"}` : "", last ? `last ${last.pct}%` : ""].filter(Boolean).join(" · ");
     return `<li class="st-topic ${on ? "on" : ""}"><label class="st-tick"><input type="checkbox" data-sttick="${safe(t.id)}" ${on ? "checked" : ""} aria-label="Pick ${safe(t.title)}"></label>
-      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(t.title)}</b>${meta ? `<small>${safe(meta)}</small>` : ""}</button>`
-        : `<span class="st-name"><b>${safe(t.title)}</b>${t.src === "ws" ? `<small>${WS_TOPIC_TAG}</small>` : ""}</span>`}
+      ${statusDot(t.st)}${parent ? `<button class="st-name" data-sthist="${safe(t.id)}" aria-expanded="${stOpen === t.id}"><b>${safe(topicShort(t.title))}</b>${meta ? `<small>${safe(meta)}</small>` : ""}</button>`
+        : `<span class="st-name"><b>${safe(topicShort(t.title))}</b>${t.src === "ws" ? `<small>${WS_TOPIC_TAG}</small>` : ""}</span>`}
       ${parent && stOpen === t.id ? topicHistoryHtml(t) : ""}</li>`;
   }, rows = shown.map(rowHtml).join("");
   // 🌍 v154: with the official list, the topics go under its BIG unit titles (each unit folds open); the rest under "Other topics"
   const m = s.map[f.id], units = [];
   let unitsHtml = "";
+  // 📚 v157 no official list: the topics named "Big topic › small topic" go under their big topic (each folds open)
+  if (!(m && m.list.length) && shown.some(t => topicUnitOf(t.title))) {
+    const groups = [];
+    shown.forEach(t => { const u = topicUnitOf(t.title) || ""; let g = groups.find(x => lowerT(x.unit) === lowerT(u)); if (!g) groups.push(g = { unit: u, list: [] }); g.list.push(t); });
+    groups.sort((a, b) => (!a.unit) - (!b.unit) || a.unit.localeCompare(b.unit));
+    unitsHtml = groups.map(g => { const res = g.list.filter(t => t.info.results.length), avg = res.length ? meanPct(res.map(t => meanPct(t.info.results.slice(-3).map(x => x.pct)))) : null;
+      const st = res.length ? (g.list.some(t => t.st === "needs") ? "needs" : g.list.every(t => t.st === "mastered") ? "mastered" : "practising") : "new";
+      return `<details class="st-unit ${g.unit ? "" : "other"}" ${g.list.some(t => stPick.includes(t.id) || stOpen === t.id) || groups.length === 1 ? "open" : ""}><summary>${statusDot(st)}
+        <span class="st-unit-t"><b>${safe(g.unit || "Other topics")}</b><small>${g.list.length} ${g.list.length === 1 ? "topic" : "topics"}${avg != null ? ` · ${avg}%` : ""}</small></span></summary>
+        <ul class="st-list">${g.list.map(rowHtml).join("")}</ul></details>`; }).join("");
+  }
   if (m && m.list.length && shown.length) {
     shown.forEach(t => { const u = curMatchOf(schoolKid, f.id, t.title) || null;
       let g = units.find(x => x.unit === u); if (!g) units.push(g = { unit: u, list: [] }); g.list.push(t); });
@@ -98,7 +112,7 @@ function topicsCardHtml(s, f, parent) {
   }
   return `<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
     ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
-    ${parent && all.length && !(m && m.list.length) ? `<p class="hint st-nounits">🌍 Tip: open 🌍 Official curriculum and get the official topics: then these are grouped into big units.</p>` : ""}
+    ${parent && all.length && !(m && m.list.length) && !unitsHtml ? `<p class="hint st-nounits">🌍 Tip: open 🌍 Official curriculum and get the official topics: then these are grouped into big units.</p>` : ""}
     ${all.length ? `${unitsHtml ? `<div class="st-units">${unitsHtml}</div>` : `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>`}
       <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
       <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
@@ -286,7 +300,7 @@ async function findCurriculum() {
   const files = await uploadFilesForAi(box);
   if (!files) return;
   const r = await callAi("curriculum", { files, ...kidInfo(box.kid), today: todayYmd(),
-    subjects: subs.map(x => ({ id: x.id, name: x.name, existing: topicsOf(s, x.id).map(t => t.title).slice(0, 80) })), ...(box.sid ? { only: box.sid } : {}) }, "curriculum");
+    subjects: subs.map(x => ({ id: x.id, name: `${x.name} (${TOPIC_NAME_RULE})`, existing: topicsOf(s, x.id).map(t => t.title).slice(0, 80) })), ...(box.sid ? { only: box.sid } : {}) }, "curriculum");
   if (!r || aw !== box) return;
   box.result = cleanCurriculum(s, subs, r);
   box.err = "";
@@ -916,15 +930,7 @@ async function makePdf(node, fileName, opts = {}) {
         el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
         if (el.getBoundingClientRect().height <= roomPx + 1) { await place(el); continue; }
         el.classList.remove("as-fill"); el.style.minHeight = "";
-        // 📏 SMART FIT: one page whenever it can. Step by step a little less room (never tiny, the text never smaller):
-        // fit1 explain 3 lines · short 2 → fit2 short answers in 2 columns → fit3 explain 2 lines → fit4 explain in 2 columns too
-        let fitted = false;
-        for (const k of ["fit1", "fit2", "fit3", "fit4"]) {
-          el.classList.add(k);
-          if (el.getBoundingClientRect().height <= roomPx + 8) { fitted = true; break; }
-        }
-        if (fitted) { await place(el); continue; }
-        el.classList.remove("fit3", "fit4");   // (very long: short answers in 2 columns, explain 3 lines, over 2 pages or more)
+        // (v157: no squeezing at all. A long answer sheet simply goes on over more pages, with BIG writing space)
         for (const pg of splitAnswerSheet(el, roomPx)) { if (y > firstY) { pdf.addPage(); y = top(); } await place(pg); }
         continue;
       }
@@ -955,7 +961,10 @@ function splitAnswerSheet(el, roomPx) {
     g.appendChild(c);
     if (page.getBoundingClientRect().height > roomPx + 8 && g.children.length > 1) {   // (+8px: a hair smaller is fine)
       c.remove();
+      const bar = g.lastElementChild && g.lastElementChild.classList.contains("as-bar") && g.children.length > 1 ? g.lastElementChild : null;   // (a section bar goes with its question)
+      if (bar) bar.remove();
       page = el.cloneNode(false); page.append(headNode.cloneNode(true), g = grid.cloneNode(false));
+      if (bar) g.appendChild(bar);
       page.firstElementChild.querySelector("b") && (page.firstElementChild.querySelector("b").textContent = "Answer sheet (continued)");
       pages[pages.length - 1].after(page); pages.push(page);
       g.appendChild(c);
@@ -1166,9 +1175,17 @@ const wsBoxHead = (w, sheet) => h("div", { class: "ws-hbox", dir: "ltr" },
     sheet ? null : h("span", null, "Time: ", h("u", null, w.minutes ? `${w.minutes} min` : "______")),
     sheet ? null : h("span", null, "Total: ", h("u", null, `____ / ${num(wsTotal(w))}`))));
 // ✅ How the AI marks written answers (sent with every check): right only when the MEANING is right (any words), wrong = 0, spelling never costs marks (but is shown)
-const CHECK_RULES = "MARKING RULES for written answers (short answer, fill in, explain): be a fair but strict teacher. An answer is RIGHT only when its meaning is scientifically correct and answers the question: the child may use their own words, simple sentences or a different correct way of saying it (do not ask for the exact words of the key). An answer whose idea is wrong, off-topic, missing or only guessed is WRONG with 0 points, even if it uses some words from the key. Do not give points for wrong answers. SPELLING: never take marks off for spelling or grammar when the meaning is right (unless the question itself is about spelling), but in the note of that question add 'Spelling: wrong word → right word' for each misspelled science or key word, so the child can learn it.";
+const CHECK_RULES = "MARKING RULES for written answers (short answer, fill in, explain): be a fair but strict teacher. An answer is RIGHT only when its meaning is scientifically correct and answers the question: the child may use their own words, simple sentences or a different correct way of saying it (do not ask for the exact words of the key). An answer whose idea is wrong, off-topic, missing or only guessed is WRONG with 0 points, even if it uses some words from the key. Do not give points for wrong answers. FULL SENTENCES: if the question asks for one word or part (a pronoun, a noun, a verb, a number, a name …) and the child writes a whole sentence, look INSIDE the sentence: when the right word is there and clearly used as the answer (for example underlined, circled, or the sentence copies the original one with the right word in it), it is RIGHT. Only mark it wrong when the right word is missing, or the child also gives a wrong answer for the same thing. Never mark an answer wrong only because of its form (a sentence instead of one word, capital letters, no full stop). SPELLING: never take marks off for spelling or grammar when the meaning is right (unless the question itself is about spelling), but in the note of that question add 'Spelling: wrong word → right word' for each misspelled science or key word, so the child can learn it.";
 const MARK_EXPLAIN = "Right only when the meaning is correct (the key ideas, in any words). A wrong idea is wrong: 0 points.";
 const MARK_SHORT = "Right when the meaning is correct (other words or a spelling mistake are fine). A wrong answer is wrong: 0 points.";
+// A question with parts "a) … b) … c) …" (or "(a)", "a." at a line start, "i) ii)") → ["a", "b", "c"]  ([] when it has no parts)
+function qPartsOf(text) {
+  const t = String(text || ""), found = [];
+  for (const m of t.matchAll(/(?:^|[\s(\n])\(?([a-h]|i{1,3}|iv|v)[).](?=\s)/gim)) { const k = m[1].toLowerCase(); if (!found.includes(k)) found.push(k); }
+  const abc = found.filter(k => /^[a-h]$/.test(k)), rom = found.filter(k => /^(i{1,3}|iv|v)$/.test(k));
+  const run = list => list.length >= 2 && list[0] === (list === abc ? "a" : "i") ? list : [];
+  return run(abc).length ? abc : run(rom);
+}
 const SOLVE_Q = /\b(solve|work out|calculate|show (your )?work|how many|how much|explain|why|describe|find the)\b|\d\s*[+\-×x÷*/]\s*\d/i;
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
@@ -1210,13 +1227,18 @@ function wsAnswerSheetNode(w) {
       h("div", { class: "as-how" }, "Write the letters in order:"),
       h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
     // (✍️ room to write: 🅲 explain = 4 lines · a problem to solve = 3 · a short answer = 2)
-    const lines = wsPartOf(q) === "C" ? 4 : SOLVE_Q.test(q.prompt || "") ? 3 : 2;
-    return h("div", { class: "as-q as-wide " + (wsPartOf(q) === "C" ? "as-c" : "as-s") }, n, h("div", { class: "as-lines" }, Array.from({ length: lines }, () => h("div", { class: "as-line" }))));
+    // ✍️ v157 lots of room: explain 5 lines · a problem to solve 4 · a short answer 3 · a question with parts a), b), c): each part its own space
+    const lines = wsPartOf(q) === "C" ? 5 : SOLVE_Q.test(q.prompt || "") ? 4 : 3, parts = qPartsOf(q.prompt);
+    const lineBox = k => h("div", { class: "as-lines" }, Array.from({ length: k }, () => h("div", { class: "as-line" })));
+    // (each part is its own row, so a long question can go on over the next page)
+    if (parts.length > 1) return parts.map((p, i) => h("div", { class: "as-q as-wide as-part" + (i ? " as-pnext" : "") },
+      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(wsPartOf(q) === "C" ? 4 : 3)));
+    return h("div", { class: "as-q as-wide " + (wsPartOf(q) === "C" ? "as-c" : "as-s") }, n, lineBox(lines));
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
     h("div", { class: "ws-ins" }, "Fill the circle for your answer. Write the other answers in the spaces. Take ONE clear photo of this page."),
-    h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), cell(q)])),
+    h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), ...[cell(q)].flat()])),
     h("div", { class: "ws-total" }, "Score: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
 // 🔑 May the answers be seen? A parent's device: always. A kid (a kid's device, or a kid using the app): once the worksheet has a
