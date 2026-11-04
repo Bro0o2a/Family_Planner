@@ -442,15 +442,31 @@ function drawDiary() {
     : `<p class="sc-empty">🔒 Just for ${safe(u.name)}.</p>`}</div>`;
   $("diaryBody").innerHTML = `${chips}<div class="card dy-strip-card"><h2>📅 ${mine ? "My days" : `${safe(u.name)}'s days`}</h2><div class="dy-strip">${strip}</div></div>${body}`;
 }
+// 📝 What's typed in 📔 My day is kept as it's typed (this device), so a tap by mistake or a screen refresh never loses it.
+// (cleared when it's saved; only today's, only this person's)
+const DY_DRAFT_KEY = SAVE_KEY + ".diaryDraft";
+function diaryDraft() {
+  try { const d = JSON.parse(localStorage.getItem(DY_DRAFT_KEY) || "null"); return d && d.who === me && d.date === todayYmd() ? d : null; } catch (e) { return null; }
+}
+function keepDiaryDraft() {
+  const d = { who: me, date: todayYmd(), lines: {} };
+  DIARY_LINES.forEach(([k]) => { const el = $("dy-" + k); if (el) d.lines[k] = el.value.slice(0, 120); });
+  if ($("dyPrivate")) d.private = $("dyPrivate").checked;
+  try { localStorage.setItem(DY_DRAFT_KEY, JSON.stringify(d)); } catch (e) {}
+}
+const dropDiaryDraft = () => { try { localStorage.removeItem(DY_DRAFT_KEY); } catch (e) {} };
+document.addEventListener("input", e => { if (e.target && e.target.closest && e.target.closest(".dy-form")) keepDiaryDraft(); });
+document.addEventListener("change", e => { if (e.target && e.target.id === "dyPrivate") keepDiaryDraft(); });
 function diaryFormHtml(e) {
-  const mood = diaryMood || (e && e.mood), parent = isParentId(me);
+  const mood = diaryMood || (e && e.mood), parent = isParentId(me), dr = diaryDraft();
+  const val = k => dr && dr.lines[k] != null ? dr.lines[k] : (e && e[k]) || "", priv = dr && dr.private != null ? dr.private : !!(e && e.private);
   return `<div class="card sc-form dy-form"><h2>How do you feel today?</h2>
     <div class="dy-moods" role="radiogroup" aria-label="My mood">${MOODS.map(([k, face, word]) => `<button class="dy-mood ${mood === k ? "on" : ""}" data-dymood="${k}"
       role="radio" aria-checked="${mood === k}"><span class="e">${face}</span><small>${word}</small></button>`).join("")}</div>
     <p class="hint">All optional, one line each. 🎤 Tip: tap the mic on your keyboard to talk instead of typing.</p>
     ${DIARY_LINES.map(([k, emoji, label]) => `<label class="small" for="dy-${k}">${emoji} ${label}</label>
-      <input type="text" id="dy-${k}" maxlength="120" value="${safe((e && e[k]) || "")}" placeholder="🎤 ${label}…">`).join("")}
-    ${parent ? `<p class="hint">🔒 Your days are just for you.</p>` : `<label class="checkline"><input type="checkbox" id="dyPrivate" ${e && e.private ? "checked" : ""}> 🔒 Just for me (your parents still see the face)</label>`}
+      <input type="text" id="dy-${k}" maxlength="120" value="${safe(val(k))}" placeholder="🎤 ${label}…">`).join("")}
+    ${parent ? `<p class="hint">🔒 Your days are just for you.</p>` : `<label class="checkline"><input type="checkbox" id="dyPrivate" ${priv ? "checked" : ""}> 🔒 Just for me (your parents still see the face)</label>`}
     <div class="err" id="dyErr"></div>
     <div class="btnrow"><button class="primary" data-dysave>💾 Save${e && e.pts ? "" : ` (+${DIARY_POINTS} ⭐)`}</button></div></div>`;
 }
@@ -467,6 +483,7 @@ function saveDiary(button) {
   if (!isParentId(me) && HARD_MOODS.includes(mood) && (!old || old.mood !== mood))
     addNews([newsItem("school", `${u.name} is feeling ${moodWord(mood).toLowerCase()} today 💛`, `${moodFace(mood)} feeling ${moodWord(mood).toLowerCase()}`, me)]);
   keepNow();
+  dropDiaryDraft();   // (saved: the typed copy isn't needed any more)
   const r = button.getBoundingClientRect();
   celebrate(r.left + r.width / 2, r.top + r.height / 2, colorsOf(u).color, false);
   toast(old && old.pts ? "📔 Saved!" : `📔 Saved! +${DIARY_POINTS} ⭐`, 2400, colorsOf(u).color);

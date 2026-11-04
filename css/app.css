@@ -632,7 +632,7 @@
   .pdf-stage .ai-print { width: 703px; }
   /* 📄 Worksheets: drawn narrower, so on the A4 page everything is about 25% bigger (easy to read and write for the kids) */
   .pdf-stage.pdf-big, .pdf-stage.pdf-big .ai-print { width: 560px; }
-  .pdf-big .as-line { height: 38px; }
+  .pdf-big .as-line { height: 42px; }
   .pdf-big .as-q { padding: 6px 0; }
   .pdf-stage.pdf-big .ws-compact .ws-opts { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   /* 📄 A worksheet PDF: compact questions (no writing lines, choices with letters) + ✏️ the ANSWER SHEET page */
@@ -2698,3 +2698,10 @@
 /* 👨‍👩‍👧 v156 a parent's fix · 🙋 a kid's question */
 .ws-fixed { font-weight: 700; color: #1a7f4b; }
 .ws-asked { background: #fff4d6; border-radius: 12px; }
+/* ✍️ v157 a question with parts a), b), c): one row per part ("Q11 a)", then "b)", "c)") */
+.as-q.as-part .as-num { min-width: 62px; white-space: pre; }
+.as-q.as-pnext { border-top: 0; }
+/* 🎚️ v157 the worksheet level on each subject tile */
+.sc-wslv { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #eef0f5; color: #3b3f55; }
+.sc-wslv-easy { background: #e3f6ea; color: #17663b; }
+.sc-wslv-hard { background: #fff0d1; color: #8a5400; border: 1.5px solid #e8a020; }

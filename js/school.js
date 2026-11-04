@@ -702,10 +702,12 @@ function briefNode(kid, b) {
       items("💪", "Strong", x.strong_points), items("🎯", "To work on", x.weak_points), items("➡️", "Next steps", x.next_steps))),
     b.home_tips.length ? h("section", { class: "bf-sub bf-home" }, h("h3", null, "Home tips"), h("ul", null, b.home_tips.map(t => h("li", null, t)))) : null);
 }
+// 🎚️ The worksheet level on a subject tile: "Easy" · "Normal" · "Hard" (set by a parent inside the subject)
+const wsLevelTag = (kid, subject) => { const k = wsPickOf(kid, subject); return `<span class="sc-wslv sc-wslv-${k}">Worksheet level: ${{ easy: "Easy", normal: "Normal", hard: "Hard" }[k]}</span>`; };
 function subjectTileHtml(s, x) {
   const avg = avgPct(checkedOf(schoolKid, x.name)), level = (s.profile.subjects[x.id] || {}).level;
   return `<button class="sc-tile" data-scgo="subject|${safe(x.id)}" style="--c:${subjectColors(x).color}">
-    <span class="e">${safe(x.emoji)}</span><b>${safe(x.name)}</b><span class="sc-stars sc-lvstars ${level ? "" : "none"}" aria-label="${level ? `Level ${level} of 3` : "No level yet"}">${level ? "★".repeat(level) + "☆".repeat(3 - level) : "☆☆☆"}</span>
+    <span class="e">${safe(x.emoji)}</span><b>${safe(x.name)}</b>${wsLevelTag(schoolKid, x.name)}<span class="sc-stars sc-lvstars ${level ? "" : "none"}" aria-label="${level ? `Level ${level} of 3` : "No level yet"}">${level ? "★".repeat(level) + "☆".repeat(3 - level) : "☆☆☆"}</span>
     ${avg == null ? `<span class="sc-pct none" aria-label="No checked worksheets yet">–</span>` : `<span class="sc-pct lv-${pctLevel(avg)}">${avg}%</span>`}</button>`;
 }
 
