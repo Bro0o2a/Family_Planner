@@ -119,7 +119,7 @@ const freeCapText = sub => `🌟 Great work! You've earned today's free study po
 function giveFreeBonus(w, wsId, c) {
   const k = isFreeStudy(w) && freeKeyOf(wsId, w.kid), x = k && data.points.free[k];
   if (!x || x.capped || x.checked || (isKidDevice() && w.kid !== kidDeviceId()) || !(c.max_score > 0)) return null;
-  const pct = Math.round(c.score / c.max_score * 100), bonus = pct >= 80 ? FREE_POINTS.top : pct >= 50 ? FREE_POINTS.mid : 0;
+  const pct = Math.round(c.score / c.max_score * 100), bonus = (pct >= 80 ? FREE_POINTS.top : pct >= 50 ? FREE_POINTS.mid : 0) + (w.pick === "hard" && pct >= 50 ? HARD_BONUS : 0);   // (🎚️ Hard: +5 more)
   data.points.free[k] = { ...x, bonus, checked: true };
   return { bonus, pct };
 }

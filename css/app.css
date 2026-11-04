@@ -630,6 +630,11 @@
   .fs-end ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; }
   .fs-close { margin: 6px 0 2px; text-align: center; font-size: 20px; font-weight: 800; }
   .pdf-stage .ai-print { width: 703px; }
+  /* 📄 Worksheets: drawn narrower, so on the A4 page everything is about 25% bigger (easy to read and write for the kids) */
+  .pdf-stage.pdf-big, .pdf-stage.pdf-big .ai-print { width: 560px; }
+  .pdf-big .as-line { height: 38px; }
+  .pdf-big .as-q { padding: 6px 0; }
+  .pdf-stage.pdf-big .ws-compact .ws-opts { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   /* 📄 A worksheet PDF: compact questions (no writing lines, choices with letters) + ✏️ the ANSWER SHEET page */
   .pdf-stage .ws-compact { font-size: 15px; padding: 0; box-shadow: none; }
   .pdf-stage .ws-compact .ws-q { padding: 6px 0; gap: 8px; }
@@ -653,7 +658,6 @@
   .as-lines { flex: 1; }
   .as-line { height: 30px; border-bottom: 1.5px solid #888; }
   .as-tight .as-line { height: 26px; }
-  .as-tight .as-line:nth-child(n+3) { display: none; }
   .as-tight .as-q { padding: 3px 0; }
   .ws-answers.as-fill { display: flex; flex-direction: column; font-size: 17px; }
   .as-fill .as-grid { flex: 1; align-content: stretch; }
@@ -1578,6 +1582,9 @@
   .ws-ar { margin: 3px 0 2px; font-size: .85em; color: #6b7280; direction: rtl; text-align: right; }
   .ws-head { flex-wrap: wrap; gap: 4px 18px; }
   .tr-toggle { margin: 8px 0 4px; }
+  .ws-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 6px; }
+  .ws-pick b { flex-basis: 100%; }
+  .ws-pick .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
   /* 📸 answer photos before the check: thumbnails with 🗑 */
   .ans-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
   .ans-thumb { position: relative; width: 110px; }
@@ -2661,3 +2668,33 @@
   .ws-answers.ws-exam .as-bar { grid-column: 1 / -1; margin-top: 4px; }
   .ws-answers.ws-exam .as-num { min-width: 38px; }
   .ai-print .ws-exam .ws-num { border: 0; }
+/* 📄 v156 worksheet PDF (questions pages): close together, the marks on the same line, a kid-size font (any phone width) */
+.pdf-stage.pdf-big .ws-compact { font-size: 16px; line-height: 1.35; }
+.pdf-stage.pdf-big .ws-compact .ws-q { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; padding: 5px 0; }
+.pdf-stage.pdf-big .ws-compact .ws-pts { grid-column: auto; justify-self: end; font-size: 14px; }
+.pdf-stage.pdf-big .ws-compact .ws-opts { margin-top: 3px; }
+.pdf-stage.pdf-big .ws-compact .ws-sub, .pdf-stage.pdf-big .ws-compact .ws-ins { margin-top: 4px; margin-bottom: 4px; }
+/* 📏 v156 answer sheet SMART FIT (see makePdf): fit1 → fit4, each a little closer, so it stays ONE page */
+.ws-answers.fit1 .as-c .as-line:nth-child(n+4), .ws-answers.fit1 .as-s .as-line:nth-child(n+3) { display: none; }
+.pdf-big .ws-answers.fit1 .as-line { height: 34px; }
+.pdf-big .ws-answers.fit1 .as-q { padding: 4px 0; }
+.ws-answers.fit2 .as-q.as-s { grid-column: auto; }
+.pdf-big .ws-answers.fit2 .as-line { height: 32px; }
+.ws-answers.fit3 .as-c .as-line:nth-child(n+3) { display: none; }
+.pdf-big .ws-answers.fit3 .as-q { padding: 2px 0; }
+.ws-answers.fit4 .as-q.as-c { grid-column: auto; }
+.pdf-big .ws-answers.fit4 .as-line { height: 30px; }
+/* ✏️ v156 Spelling to practise (after a check) */
+.spell-card { margin: 10px 0; padding: 14px 16px; }
+.spell-card small { display: block; color: #666; margin: 2px 0 6px; }
+.spell-card ul { margin: 0; padding-left: 1.2em; font-size: 18px; }
+.spell-card s { color: #b42318; }
+/* 🎚️ v156 worksheet level banner + 🚀 level up */
+.ws-level { margin: 10px 0; padding: 12px 16px; font-size: 17px; }
+.ws-level p { margin: 6px 0 0; font-weight: 700; }
+.ws-level-hard { background: #fff4d6; border: 2px solid #e8a020; }
+.ws-level-easy { background: #e8f6ee; }
+.ws-lvl-tip { background: #fff4d6; font-weight: 700; }
+/* 👨‍👩‍👧 v156 a parent's fix · 🙋 a kid's question */
+.ws-fixed { font-weight: 700; color: #1a7f4b; }
+.ws-asked { background: #fff4d6; border-radius: 12px; }
