@@ -3100,3 +3100,10 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .st-left { border: 2px solid #e8a020; background: #fff8e6; }
 .st-left ul { margin: 6px 0; padding-left: 1.1em; }
 .st-left li { margin: 4px 0; }
+
+/* v162: 📖 This year's topics (simple screen) */
+.cur-go { width: 100%; font-size: 17px; }
+.cur-fold { border-radius: 16px; background: rgba(255,255,255,.7); padding: 10px 14px; }
+.cur-fold summary { font-weight: 800; cursor: pointer; }
+.cur-fold ul { margin: 8px 0 0; padding-left: 18px; }
+.cur-fold li small { display: block; opacity: .75; }

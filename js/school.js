@@ -827,7 +827,7 @@ let stSec = null;
 function subjectSecs(parent) {
   // (the order Broo2a chose: ✏️ worksheets, ⬆️ upload topic (drawn after the first), 🧠 profile, 🌍 curriculum, then topics, goal, study, files, more)
   return [{ id: "ws", emoji: "✏️", label: "My worksheets" },
-    ...(parent ? [{ id: "profile", emoji: "🧠", label: "Learning profile" }, { id: "curr", emoji: "🌍", label: "Official curriculum" }] : []),
+    ...(parent ? [{ id: "profile", emoji: "🧠", label: "Learning profile" }, { id: "curr", emoji: "📖", label: "This year's topics" }] : []),
     { id: "topics", emoji: "📚", label: "My topics" }, { id: "goal", emoji: "🎯", label: "Weekly goal" },
     ...(parent ? [{ id: "study", emoji: "📊", label: "Study this week" }, { id: "files", emoji: "📂", label: "Files" }, { id: "more", emoji: "🗂️", label: "More" }] : [])];
 }
