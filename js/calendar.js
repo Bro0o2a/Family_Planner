@@ -361,9 +361,11 @@ function weekHtml(days, opts) {
       // Fixed or shared: just the colored dots, not everyone's names (tap the card for the full details).
       const subject = findSubject(b.name), te = actTypeInfo(b.type || "activity")[1];
       // (as HTML: a parent's 🖼️ photo instead of their emoji)
-      const shortHtml = b.fixed || b.users.length > 1 ? info.titleHtml : `${facesHtml(b.users)} ${safe(`${te} ${subject ? subject.name : b.name}`)}`;
+      // (🫧 v160: the 3D icon is the only picture: no type emoji next to it)
+      const nm = safe(b.fixed || !subject ? b.name : subject.name);
+      const shortHtml = b.fixed || b.users.length > 1 ? nm : `${facesHtml(b.users)} ${safe(subject ? subject.name : b.name)}`;
       // Line 2 = time, then the dots (shared) or the type + name, then 🤝 with the helping parent ("🤝 helping" on their own calendar)
-      const whatHtml = [info.dots ? "" : safe(`${te} ${subject ? subject.name : b.name}`), helping ? "🤝 helping" : b.helper ? withHtml(b) : ""].filter(Boolean).join(" · ");
+      const whatHtml = [info.dots ? "" : safe(`${subject ? subject.name : b.name}`), helping ? "🤝 helping" : b.helper ? withHtml(b) : ""].filter(Boolean).join(" · ");
       // 📚 A study session: its result ("✅ 85%", "⏳ 👩 Mum rates it"), or 📖 "📚 Start session" (today only, not while moving cards)
       const sess = b.type === "study" && !opts.drag ? b.acts.map(a => sessOf(a.user).find(x => x.date === ds && x.actId === a.actId)).filter(Boolean) : [];
       const sessHtml = sess.map(x => { const tag = sessionTagText(x), who = sess.length > 1 ? userById(x.person).emoji + " " : "";
@@ -386,7 +388,7 @@ function weekHtml(days, opts) {
       parts.push({ start: b.start, end: b.end, padIds: padIdsOf(b), html: `<div class="k-block ${b.fixed ? "fixed" : ""} ${checks && b.acts.length > 1 ? "many" : ""} ${drag ? "draggable editable" : ""} ${opts.drag && (b.fixed || past) ? "locked" : ""} ${faded ? "faded" : ""} ${done ? "done" : ""}" data-kblock="${n}" role="button" tabindex="0" ${drag}
                  style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}">
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>
-        <span class="who">${sameBtn}${actIcon3d(b.name, b.type)}<span class="t-full">${info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
+        <span class="who">${sameBtn}${actIcon3d(b.name, b.type)}<span class="t-full">${b.fixed || b.users.length > 1 ? nm : info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
         <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatHtml
           ? ` <span class="what">${whatHtml}</span>` : ""}</span>${sessHtml ? `<span class="k-sessrow">${sessHtml}</span>` : ""}${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
     });
@@ -829,13 +831,13 @@ function drawMine() {
       ${real ? `<button class="pill" data-newplan>🔄 Make a new plan</button>` : ""}
       <button class="pill" data-onedaynew>📌 One-day event</button>
       <button class="pill" data-pactnew>👨‍👩‍👧 My own activity (work, travel)</button>
-      ${isParentId(me) ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}</div>` : ""}`;
+      ${isParentId(me) ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}<button class="pill" data-printcal>🖨️ Print this calendar</button></div>` : ""}`;
   // ⚠ The plan's notes (parents, on Everyone) / "not in the plan yet" (kids)
   let top = "";
   if (isParentId(me) && all && real) {
     const w = data.plan.warnings;
     if (planIsOld()) top += `<div class="msg warn"><b>⚠ Things changed since this plan was made.</b> Tap ✨ Plan my week.</div>`;
-    if (w.length) top += `<div class="msg warn"><b>⚠ Some things need your attention:</b><ul>${w.map(x => `<li>${safe(x)}</li>`).join("")}</ul></div>`;
+    if (w.length) top += `<details class="msg warn cal-warn"><summary><b>⚠ ${w.length} ${w.length === 1 ? "thing needs" : "things need"} your attention</b> <small>tap to see</small></summary><ul>${w.map(x => `<li>${safe(x)}</li>`).join("")}</ul></details>`;
   }
   $("calTop").innerHTML = top;
   const note = !real ? (isParentId(me) ? "🗓️ No plan yet. Add activities, then tap ✨ Plan my week." : `🗓️ No plan yet. ${dadName()} will plan the week soon.`)

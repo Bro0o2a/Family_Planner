@@ -38,8 +38,12 @@ function drawMe() {
   const loves = LOVES.map(([key, e, label]) => { const v = (u.loves || {})[key]; return v ? `<li><span>${e} ${label}</span><b>${safe(v)}</b></li>` : ""; }).join("");
   // ⚙️ My settings: each person changes ALL their own things (kids too, from their own account); a parent also every kid's
   const canEdit = canEditProfile(u.id), canBirthday = canEdit, s = kid ? schoolOf(u.id) : null, my = mine ? "My" : `${safe(u.name)}'s`;
-  const form = meEdit && canEdit ? `<div class="card sc-form me-form"><h2>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</h2>
-      <h3 class="ph-group">👤 ${mine ? "Me" : safe(u.name)}</h3>
+  // ⚙️ v160: My settings = big folded buttons (one opens at a time), not one long page
+  const grp = (tone, icon, title, sub, body, open) => `<details class="hub-group hub-${tone} me-grp" name="megrp"${open ? " open" : ""}>
+      <summary class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d(icon, "hub-3d")}</span><span class="hub-t"><b>${title}</b><small>${sub}</small></span><span class="hub-go" aria-hidden="true">›</span></summary>
+      <div class="me-grp-in">${body}</div></details>`;
+  const form = meEdit && canEdit ? `<div class="card sc-form me-form"><h2>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</h2><div class="hub-groups">
+      ${grp("sage", "palette", mine ? "Me" : safe(u.name), "Name, picture, colour, birthday", `
       <label class="small" for="meName">📝 Name</label><input type="text" id="meName" maxlength="30" value="${safe(u.name)}">
       ${isParentId(u.id) ? `<label class="small">🖼️ ${my} picture: an emoji or a photo</label>
         <div class="me-pic"><span class="me-pic-now" id="mePicNow">${mePicHtml(u)}</span>
@@ -50,27 +54,27 @@ function drawMe() {
       <label class="small">🧸 ${my} picture</label>${avatarPickHtml(u)}
       <label class="small">😀 ${my} emoji ${faceAvatar(u) ? `<small>(shown when no picture is picked)</small>` : ""}</label><div class="emoji-pick me-emojis">${[...new Set([u.emoji, ...EMOJIS])].map(e => `<button type="button" class="${e === u.emoji ? "on" : ""}" data-meemoji="${e}" aria-label="Use ${e}">${e}</button>`).join("")}</div>
       <label class="small">🎨 ${my} colour</label><div class="swatches me-colors">${Object.entries(PALETTE).map(([key, x]) => `<label title="${key}"><input type="radio" name="meColor" value="${key}" ${u.color === key ? "checked" : ""}><span style="background:${x.color}"></span></label>`).join("")}</div>
-      <label class="small" for="meBirthday">🎂 Birthday</label><input type="date" id="meBirthday" value="${safe(u.birthday || "")}">
-      ${hasSpark(u.id) ? `<h3 class="ph-group">✨ ${my} Spark</h3>
+      <label class="small" for="meBirthday">🎂 Birthday</label><input type="date" id="meBirthday" value="${safe(u.birthday || "")}">`, true)}
+      ${hasSpark(u.id) ? grp("butter", "goal", `${my} Spark`, "The little buddy that levels up", `
         <div class="btnrow"><button type="button" class="pill" data-mespark>✨ ${u.buddy ? "Change the Spark" : "Pick a Spark"}</button></div>
         <p class="hint">Change it any time: the level and points stay.</p>
-        ${u.buddy ? `<label class="small" for="meSpark">✨ Spark's name</label><input type="text" id="meSpark" maxlength="12" value="${safe(u.sparkName || "")}" placeholder="Zozo">` : ""}` : ""}
-      ${kid ? `<h3 class="ph-group">🏫 School</h3>${schoolFieldsHtml("me", u)}
-        <h3 class="ph-group">📘 ${my} subjects</h3><p class="hint">The same subjects as in 🎒 School. Untick "Show" to hide one (its work is kept).</p>
+        ${u.buddy ? `<label class="small" for="meSpark">✨ Spark's name</label><input type="text" id="meSpark" maxlength="12" value="${safe(u.sparkName || "")}" placeholder="Zozo">` : ""}`) : ""}
+      ${kid ? grp("peach", "school", "School", "School, curriculum, year", schoolFieldsHtml("me", u)) : ""}
+      ${kid ? grp("dusty", "read", `${my} subjects`, "Show, hide, rename or add", `<p class="hint">The same subjects as in 🎒 School. Untick "Show" to hide one (its work is kept).</p>
         ${subjectList(s, true).map(f => `<div class="me-subrow"><span class="e">${safe(f.emoji)}</span>
           <input type="text" id="mesub-${safe(f.id)}" maxlength="30" value="${safe(f.name)}" aria-label="Subject name">
           <label class="checkline"><input type="checkbox" id="meshow-${safe(f.id)}" ${f.hidden ? "" : "checked"}> 👁️ Show</label></div>`).join("")}
-        <label class="small" for="meSubNew">➕ Add a subject</label><input type="text" id="meSubNew" maxlength="30" placeholder="French, Computing…">` : ""}
-      <h3 class="ph-group">❤️ Things ${mine ? "I" : "they"} love</h3>${LOVES.map(([key, e, label]) => `<label class="small" for="meLove-${key}">${e} ${label}</label>
-        <input type="text" id="meLove-${key}" maxlength="30" value="${safe((u.loves || {})[key] || "")}">`).join("")}
-      ${mine ? `<div class="btnrow"><button type="button" class="pill" data-go="settings">🕌 Prayer times</button></div>` : ""}
-      <div class="err" id="meErr"></div>
+        <label class="small" for="meSubNew">➕ Add a subject</label><input type="text" id="meSubNew" maxlength="30" placeholder="French, Computing…">`) : ""}
+      ${grp("peach", "consistency", `Things ${mine ? "I" : "they"} love`, "Food, colour, game, dream job", LOVES.map(([key, e, label]) => `<label class="small" for="meLove-${key}">${e} ${label}</label>
+        <input type="text" id="meLove-${key}" maxlength="30" value="${safe((u.loves || {})[key] || "")}">`).join(""))}
+      ${mine ? grp("sage", "time", "Prayer times", "Prayer city and times", `<div class="btnrow"><button type="button" class="pill" data-go="settings">🕌 Open prayer times &amp; more</button></div>`) : ""}
+      </div><div class="err" id="meErr"></div>
       <div class="btnrow"><button class="primary" data-mesave>💾 Save</button><button data-mecancel>Cancel</button></div></div>` : "";
-  // 👨‍👩‍👧 Family settings (parents only, at the bottom of their own profile): people & codes, features, prayer city, backup
-  const famSettings = mine && parent ? `<div class="card me-card me-family"><h2>👨‍👩‍👧 Family settings</h2><div class="me-famlinks">
-      ${isParentId(me) ? `<button class="pill" data-go="family">👨‍👩‍👧 Add a kid or parent · 🔑 Codes</button>` : ""}
-      <button class="pill" data-setupopen>⚙️ Features on / off</button>
-      <button class="pill" data-go="settings">🕌 Prayer city · ⏰ My day · 💾 Backup</button></div></div>` : "";
+  // 👨‍👩‍👧 Family settings (parents only, at the bottom of their own profile): people & codes, features
+  const famSettings = mine && parent ? `<div class="card me-card me-family"><h2>👨‍👩‍👧 Family settings</h2><div class="hub-groups">
+      ${isParentId(me) ? `<button class="hub-group hub-sage me-famgo" data-go="family"><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("heart", "hub-3d")}</span><span class="hub-t"><b>Family members</b><small>Add a kid or parent · Codes</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>` : ""}
+      <button class="hub-group hub-butter me-famgo" data-setupopen><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("idea", "hub-3d")}</span><span class="hub-t"><b>Features on / off</b><small>Pick what the app shows</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
+      </div></div>` : "";
   // 👤 Who this device is signed in as (a parent on the family's main login can say "Not you?": the picker again; kids never)
   const meU = userById(me), notYou = !isKidDevice() && isParentId(me) && isMainLogin(cloudMeta().member) && parentsList().length > 1;
   const signedIn = exists(me) ? `<p class="me-signed">Signed in as: <b>${whoHtml(me)}</b>${notYou ? `<button class="linkbtn" data-menotyou>Not you?</button>` : ""}</p>` : "";

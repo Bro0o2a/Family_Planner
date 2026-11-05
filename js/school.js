@@ -790,14 +790,15 @@ function schoolSubjectHtml(s, isDad, u) {
   if (stSec && !secs.some(x => x.id === stSec)) stSec = null;
   if (!stSec) {
     const upTile = `<button class="ip-item sj-go" data-stup="${safe(f.id)}">${ico3d("pin")}<b>Upload topic</b><small>From school</small></button>`;
-    const SEC_ICON = { ws: "paper", profile: "notebook2", curr: "milestone", topics: "read", goal: "goal", study: "study", files: "briefcase", more: "lunchbox" };
-    html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>In short</h2>
+    const SEC_ICON = { ws: "paper", profile: "idea", curr: "milestone", topics: "read", goal: "goal", study: "study", files: "briefcase", more: "lunchbox" };
+    // (v160: the subject corner buttons first, "In short" under them)
+    html += `<section class="ip-sec"><span class="ip-rib ip-lilac">${safe(f.name)} corner <i>🎀</i></span><div class="ip-panel ip-3">
+      ${secs.map((x, i) => (i === 1 ? upTile : "") + `<button class="ip-item" data-stsec="${x.id}">${ico3d(SEC_ICON[x.id] || "homework")}<b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
+        x.id === "ws" && todo ? `<span class="sc-badge">${todo}</span>` : ""}</button>`).join("")}${secs.length < 2 ? upTile : ""}</div></section>
+      <div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>In short</h2>
         <span class="ks-avg">${sum.avg != null ? `${sum.avg}%` : "–"}<small>${sum.count} checked${sum.level ? ` · Level ${sum.level}/10` : ""}</small></span></div>
       ${sumLinesHtml(sum)
-        || `<p class="sc-empty">Do a worksheet and the summary shows here.</p>`}</div>
-      <section class="ip-sec"><span class="ip-rib ip-lilac">${safe(f.name)} corner <i>🎀</i></span><div class="ip-panel ip-3">
-      ${secs.map((x, i) => (i === 1 ? upTile : "") + `<button class="ip-item" data-stsec="${x.id}">${ico3d(SEC_ICON[x.id] || "homework")}<b>${x.label}</b><small>${safe(subjectSecLine(x.id, s, f, all, todo))}</small>${
-        x.id === "ws" && todo ? `<span class="sc-badge">${todo}</span>` : ""}</button>`).join("")}${secs.length < 2 ? upTile : ""}</div></section>`;
+        || `<p class="sc-empty">Do a worksheet and the summary shows here.</p>`}</div>`;
     return html;
   }
   const t = secs.find(x => x.id === stSec);
