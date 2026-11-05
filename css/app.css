@@ -3049,3 +3049,35 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 #scr-me .card:nth-of-type(n), .card.sj-sum, #ptsList .pt-row, .hub-group[open] { background-image: url("../icons/bg/waves.svg"), url("../icons/bg/dots.svg") !important;
   background-size: 100% 34px, 160px 160px !important; background-repeat: no-repeat, repeat !important; background-position: top left, 0 0 !important; }
 .card.sj-sum { padding-top: 44px; }
+
+/* ✨ v160 SIMPLER CALENDAR (Broo2a: "too many details"): the calendar starts near the top.
+   1 one small top row (Back · Home · round icon buttons) · 2 no big Calendar button here · 3 no tip line here
+   4 people = one sliding row of round avatars · 5 one small tools row · 6 a small banner · 7 the date once · 9 warnings folded */
+#scr-mine .bar { flex-wrap: nowrap; align-items: center; gap: 8px; }
+#scr-mine .bar .cal-btn { display: none !important; }
+#scr-mine .bar-right { display: flex; gap: 8px; margin-left: auto; flex-wrap: nowrap; }
+#scr-mine .bar [data-printcal], #scr-mine .bar .bell-btn, #scr-mine .bar .signout-btn { position: relative; width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; }
+#scr-mine .bar [data-printcal]::before { content: "🖨️"; font-size: 20px; }
+#scr-mine .bar .bell-btn::before { content: "🔔"; font-size: 20px; }
+#scr-mine .bar .signout-btn span[aria-hidden] { font-size: 20px; } #scr-mine .bar .signout-word { display: none; }
+#scr-mine .bar .bell-num { position: absolute; top: -4px; right: -4px; font-size: 11px; }
+#scr-mine .enc-line { display: none !important; }
+#minePeople { display: flex !important; flex-wrap: nowrap !important; gap: 10px; overflow-x: auto; padding: 6px 2px 8px; scrollbar-width: none; }
+#minePeople::-webkit-scrollbar { display: none; }
+#minePeople .chip { flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 62px; padding: 4px 2px; border: 0 !important;
+  background: transparent !important; box-shadow: none !important; font-size: 13px; font-weight: 700; color: var(--text) !important; }
+#minePeople .chip .e { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; background: #fff8f1; overflow: hidden;
+  box-shadow: 0 4px 8px rgba(150, 105, 140, .2); border: 3px solid #fff; }
+#minePeople .chip .e img, #minePeople .chip .e .face-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+#minePeople .chip.on .e { border-color: #f28ca0; box-shadow: 0 0 0 3px #f7c6cf, 0 4px 8px rgba(150, 105, 140, .25); }
+#mineActions .cal-main-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+#mineActions .cal-big { display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 8px 14px; font-size: 14px; border-radius: 999px; flex: none; }
+#mineActions .cal-big .e { font-size: 16px; }
+#mineTitle.puff-banner { padding: 12px 16px 12px !important; margin: 10px 2px 12px; }
+#mineTitle .pb-deco, #mineTitle .pb-st, #mineTitle .bub-pill { display: none !important; }
+#mineTitle .bub { font-size: 30px !important; }
+.k-daynum { display: none !important; }
+.k-dayname { padding-left: 10px !important; }
+.cal-warn summary { cursor: pointer; list-style: none; } .cal-warn summary::-webkit-details-marker { display: none; }
+.cal-warn summary small { color: var(--muted); font-weight: 600; }
+.cal-warn ul { margin: 8px 0 0; }
