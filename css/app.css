@@ -3082,7 +3082,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .cal-warn summary small { color: var(--muted); font-weight: 600; }
 .cal-warn ul { margin: 8px 0 0; }
 
-/* ⚙️ v161 MY SETTINGS = big folded buttons; Family settings = 2 big buttons (no prayer/backup here) */
+/* ⚙️ v160 MY SETTINGS = big folded buttons; Family settings = 2 big buttons (no prayer/backup here) */
 .me-form .hub-groups, .me-family .hub-groups { margin-top: 10px; }
 .me-grp-in { padding: 4px 16px 16px; }
 .me-grp-in > .small:first-child { margin-top: 0; }

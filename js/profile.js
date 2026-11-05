@@ -38,7 +38,7 @@ function drawMe() {
   const loves = LOVES.map(([key, e, label]) => { const v = (u.loves || {})[key]; return v ? `<li><span>${e} ${label}</span><b>${safe(v)}</b></li>` : ""; }).join("");
   // ⚙️ My settings: each person changes ALL their own things (kids too, from their own account); a parent also every kid's
   const canEdit = canEditProfile(u.id), canBirthday = canEdit, s = kid ? schoolOf(u.id) : null, my = mine ? "My" : `${safe(u.name)}'s`;
-  // ⚙️ v161: My settings = big folded buttons (one opens at a time), not one long page
+  // ⚙️ v160: My settings = big folded buttons (one opens at a time), not one long page
   const grp = (tone, icon, title, sub, body, open) => `<details class="hub-group hub-${tone} me-grp" name="megrp"${open ? " open" : ""}>
       <summary class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d(icon, "hub-3d")}</span><span class="hub-t"><b>${title}</b><small>${sub}</small></span><span class="hub-go" aria-hidden="true">›</span></summary>
       <div class="me-grp-in">${body}</div></details>`;
