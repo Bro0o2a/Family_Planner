@@ -3081,3 +3081,13 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .cal-warn summary { cursor: pointer; list-style: none; } .cal-warn summary::-webkit-details-marker { display: none; }
 .cal-warn summary small { color: var(--muted); font-weight: 600; }
 .cal-warn ul { margin: 8px 0 0; }
+
+/* ⚙️ v161 MY SETTINGS = big folded buttons; Family settings = 2 big buttons (no prayer/backup here) */
+.me-form .hub-groups, .me-family .hub-groups { margin-top: 10px; }
+.me-grp-in { padding: 4px 16px 16px; }
+.me-grp-in > .small:first-child { margin-top: 0; }
+.hub-ic .hub-3d { width: 40px; height: 40px; object-fit: contain; }
+.me-famgo { display: block; width: 100%; text-align: left; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.me-famgo .hub-big { width: 100%; }
+.me-famgo .hub-t { flex: 1; } .me-grp .hub-t { flex: 1; }
+.hub-t small { display: block; color: var(--muted); font-weight: 600; }
