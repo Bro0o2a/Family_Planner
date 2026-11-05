@@ -3091,3 +3091,12 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .me-famgo .hub-big { width: 100%; }
 .me-famgo .hub-t { flex: 1; } .me-grp .hub-t { flex: 1; }
 .hub-t small { display: block; color: var(--muted); font-weight: 600; }
+/* 🙋 v161 a kid picks which parent checks an answer */
+.ws-askrow { flex-wrap: wrap; align-items: center; }
+.ws-askq { flex-basis: 100%; font-weight: 700; font-size: 15px; }
+/* ✍️ v161 handwriting + photo tip */
+.ws-hand { margin: 6px 0; padding: 8px 12px; border-radius: 10px; background: #fff7d6; border: 1.5px dashed #e8a020; font-weight: 700; font-size: 15px; }
+/* 📌 v161 left-behind topics (the class moved on) */
+.st-left { border: 2px solid #e8a020; background: #fff8e6; }
+.st-left ul { margin: 6px 0; padding-left: 1.1em; }
+.st-left li { margin: 4px 0; }

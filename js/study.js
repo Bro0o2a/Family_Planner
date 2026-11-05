@@ -71,6 +71,27 @@ function topicWeak(info) {
 const topicRows = (kid, s, f) => topicsOf(s, f.id).map(t => { const info = topicInfo(kid, f, t.title, t.links); return { ...t, info, st: topicStatus(info) }; });
 
 // ---------- 📚 The topics card: ☐ tick · 🚦 dot · the title (parents: date · worksheets · last score; tap → its history) ----------
+// 📌 v161 LEFT BEHIND: the class moved on to another unit, but these school topics never got a worksheet.
+// The unit = "Big topic ›" in its name, or the official topic it matches. The class's unit now = the unit of the newest topic.
+// (a topic with no unit: left behind when it's 14+ days older than the newest topic)
+function leftBehind(kid, s, f, all) {
+  const m = s.map[f.id], unitOf = t => topicUnitOf(t.title) || (m && m.list.length ? ((curMatchOf(kid, f.id, t.title) || {}).title || "") : "");
+  const newest = [...all].sort((a, b) => (b.added || "").localeCompare(a.added || ""))[0];
+  if (!newest) return { unit: "", list: [] };
+  const nowUnit = unitOf(newest), nowDate = newest.added || todayYmd();
+  const old = t => { if (!t.added) return false; const d = (fromYmd(nowDate) - fromYmd(t.added)) / 864e5; return d >= 14; };
+  const list = all.filter(t => !t.info.list.length && t.id !== newest.id && (nowUnit && unitOf(t) ? lowerT(unitOf(t)) !== lowerT(nowUnit) : old(t)));
+  return { unit: nowUnit, list };
+}
+function leftBehindHtml(kid, s, f, all) {
+  const lb = leftBehind(kid, s, f, all);
+  if (!lb.list.length) return "";
+  const ids = lb.list.slice(0, 4).map(t => t.id).join(",");
+  return `<div class="card st-left"><h3>📌 Left behind <span class="wsg-n">${lb.list.length}</span></h3>
+    <p class="hint">${lb.unit ? `The class is on <b>${safe(lb.unit)}</b> now, but` : "These are older, and"} these topics never had a worksheet:</p>
+    <ul>${lb.list.map(t => `<li>${statusDot(t.st)} <b>${safe(t.title)}</b>${t.added ? ` <small>added ${dayMon(t.added)}</small>` : ""}</li>`).join("")}</ul>
+    <div class="btnrow"><button class="primary" data-stleft="${safe(ids)}" data-aiwait="stmake">✏️ Practise ${lb.list.length > 4 ? "4 of them" : lb.list.length === 1 ? "it" : "them"}</button></div></div>`;
+}
 function topicsCardHtml(s, f, parent) {
   const all = topicRows(schoolKid, s, f);
   stPick = stPick.filter(id => all.some(t => t.id === id));
@@ -110,7 +131,7 @@ function topicsCardHtml(s, f, parent) {
           g.unit ? g.unit.term ? ` · ${safe(g.unit.term)}` : "" : " · not in the official curriculum"}</small></span></summary>
         <ul class="st-list">${g.list.map(rowHtml).join("")}</ul></details>`; }).join("");
   }
-  return `<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
+  return `${leftBehindHtml(schoolKid, s, f, all)}<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
     ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
     ${parent && all.length && !(m && m.list.length) && !unitsHtml ? `<p class="hint st-nounits">🌍 Tip: open 🌍 Official curriculum and get the official topics: then these are grouped into big units.</p>` : ""}
     ${all.length ? `${unitsHtml ? `<div class="st-units">${unitsHtml}</div>` : `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>`}
@@ -593,6 +614,7 @@ document.addEventListener("click", e => {
   if (ds.stfilter) { stFilter = ds.stfilter; stOpen = null; return render(); }
   if (ds.sthist) { stOpen = stOpen === ds.sthist ? null : ds.sthist; return render(); }
   if ("stmake" in ds) return makeFromTopics();
+  if (ds.stleft) { stPick = ds.stleft.split(",").filter(Boolean).slice(0, 4); return makeFromTopics(); }   // (📌 left behind: practise them)
   if (ds.sessmore) return moreQuestions(ds.sessmore);
   if (ds.sessdone) return sessionDone(ds.sessdone);
   if (ds.stmapload) return loadMap(schoolKid, ds.stmapload);
@@ -1186,6 +1208,8 @@ function qPartsOf(text) {
   const run = list => list.length >= 2 && list[0] === (list === abc ? "a" : "i") ? list : [];
   return run(abc).length ? abc : run(rom);
 }
+// ✍️ For every kid (answer sheet + before uploading): clear writing and a good photo → the checker reads it right
+const HAND_TIP = "✍️ Write clearly and big, with a dark pen or pencil. 📸 Take the photo in good light, straight from above, with the whole page in it.";
 const SOLVE_Q = /\b(solve|work out|calculate|show (your )?work|how many|how much|explain|why|describe|find the)\b|\d\s*[+\-×x÷*/]\s*\d/i;
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"];
 function wsSheetNode(w, showAns, compact = false) {
@@ -1228,16 +1252,18 @@ function wsAnswerSheetNode(w) {
       h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
     // (✍️ room to write: 🅲 explain = 4 lines · a problem to solve = 3 · a short answer = 2)
     // ✍️ v157 lots of room: explain 5 lines · a problem to solve 4 · a short answer 3 · a question with parts a), b), c): each part its own space
-    const lines = wsPartOf(q) === "C" ? 5 : SOLVE_Q.test(q.prompt || "") ? 4 : 3, parts = qPartsOf(q.prompt);
+    // (v161: the BIG room only for explain questions; a problem to solve 3 lines, a short answer 2 lines in 2 columns)
+    const lines = wsPartOf(q) === "C" ? 5 : SOLVE_Q.test(q.prompt || "") ? 3 : 2, parts = qPartsOf(q.prompt);
     const lineBox = k => h("div", { class: "as-lines" }, Array.from({ length: k }, () => h("div", { class: "as-line" })));
     // (each part is its own row, so a long question can go on over the next page)
     if (parts.length > 1) return parts.map((p, i) => h("div", { class: "as-q as-wide as-part" + (i ? " as-pnext" : "") },
-      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(wsPartOf(q) === "C" ? 4 : 3)));
-    return h("div", { class: "as-q as-wide " + (wsPartOf(q) === "C" ? "as-c" : "as-s") }, n, lineBox(lines));
+      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(wsPartOf(q) === "C" ? 4 : 2)));
+    return h("div", { class: "as-q " + (wsPartOf(q) === "C" || lines > 2 ? "as-wide as-c" : "as-s") }, n, lineBox(lines));
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
     h("div", { class: "ws-ins" }, "Fill the circle for your answer. Write the other answers in the spaces. Take ONE clear photo of this page."),
+    h("div", { class: "ws-hand" }, HAND_TIP),
     h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), ...[cell(q)].flat()])),
     h("div", { class: "ws-total" }, "Score: ", h("i"), ` / ${num(wsTotal(w))}`));
 }
@@ -1298,6 +1324,7 @@ function wsViewNode(w, id, s, isDad) {
       done ? resultNode(w) : h("p", { class: "hint" }, files.length
         ? "The answers are uploaded. Tap ✅ Check now!"
         : "Do the worksheet on paper, then upload a photo (or PDF) of your answers."),
+      done || files.length ? null : h("p", { class: "ws-hand" }, HAND_TIP),
       // 📸 Before the check: each answer photo as a thumbnail with 🗑 (remove a wrong or blurry one, then take it again).
       // After the check they're locked: just the list.
       files.length && !done ? h("div", { class: "ans-thumbs" }, files.map(fid => { const f = s.files[fid];
@@ -1344,9 +1371,9 @@ function mistakesNode(w, c) {
     h("div", { class: "mist-row bad" }, h("span", null, "Your answer"), h("b", null, q.your_answer || "—")),
     h("div", { class: "mist-row ok" }, h("span", null, "Correct answer"), h("b", null, wq.answer || "—")),
     q.explanation || q.note ? h("p", { class: "mist-why" }, "💡 " + (q.explanation || q.note)) : null,
-    q.fixed ? h("p", { class: "ws-fixed" }, `✓ Checked by ${dadName()}`)
-      : isParentDevice() ? null : q.ask ? h("p", { class: "ws-fixed" }, `⏳ ${dadName()} will check this answer`)
-      : h("div", { class: "btnrow", dir: "ltr" }, h("button", { data: { wsqask: String(q.number) } }, `🙋 Ask ${dadName()} to check`)),
+    q.fixed ? h("p", { class: "ws-fixed" }, `✓ Checked by ${fixerName(q)}`)
+      : isParentDevice() ? null : q.ask ? h("p", { class: "ws-fixed" }, `⏳ ${askNames(q)} will check this answer`)
+      : askButtonsNode(q.number),
     h("div", { class: "btnrow", dir: "ltr" },
       i < wrong.length - 1 ? h("button", { class: "primary", data: { wsact: "mistnext" } }, `Next mistake ➡️ (${i + 2} of ${wrong.length})`) : null,
       h("button", { data: { wsact: "mistdone" } }, "Done")));
@@ -1395,13 +1422,13 @@ function resultNode(w) {
     parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", { class: q.ask && !q.fixed ? "ws-asked" : null },
       h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
       h("div", { class: "what" }, `Question ${q.number}`,
-        h("small", null, `${q.ask && !q.fixed ? `🙋 ${kidNameOf(w.kid)} asks you to check this · ` : ""}${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}${q.fixed ? " · ✓ changed by you" : ""}`)),
+        h("small", null, `${q.ask && !q.fixed ? `🙋 ${kidNameOf(w.kid)} asks ${askedMe(q) ? "you" : askNames(q)} to check this · ` : ""}${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}${q.fixed ? ` · ✓ changed by ${q.fixedBy === me ? "you" : fixerName(q)}` : ""}`)),
       h("button", { class: "pill", data: { wsqfix: `${q.number}|${q.correct ? "wrong" : "right"}` } }, q.correct ? "Mark wrong" : "Mark right")))) : null);
 }
 // 👨‍👩‍👧 What a parent changed (the kid sees it too): "✓ Dad checked Q4: right"
 function fixedNode(c) {
   const list = c.questions.filter(q => q.fixed);
-  return list.length ? h("p", { class: "ai-note ws-fixed" }, `✓ Checked by ${dadName()}: ` + list.map(q => `Q${q.number} ${q.fixed === "right" ? "is right" : "is wrong"}`).join(" · ")) : null;
+  return list.length ? h("p", { class: "ai-note ws-fixed" }, list.map(q => `✓ ${fixerName(q)} checked Q${q.number}: ${q.fixed === "right" ? "right" : "wrong"}`).join(" · ")) : null;
 }
 // ✓ / ✗ A parent marks ONE question right or wrong (the AI's check stays as it is everywhere else) → the score, %, mark and learning update
 function fixQuestion(wsId, number, to) {
@@ -1411,8 +1438,8 @@ function fixQuestion(wsId, number, to) {
   const qs = w.check.questions.map(q => ({ ...q })), q = qs.find(x => x.number === number);
   if (!q) return;
   const pts = to === "right" ? full : 0, score = Math.max(0, Math.min(w.check.max_score, w.check.score + pts - (q.points || 0)));
-  Object.assign(q, { correct: to === "right", points: pts, fixed: to });
-  delete q.ask;
+  Object.assign(q, { correct: to === "right", points: pts, fixed: to, fixedBy: me });
+  delete q.ask; delete q.askTo;
   const c = { ...w.check, questions: qs, score };
   aiSave("worksheets", wsId, { ...w, check: c, status: "Checked ✓" });
   learnAfterCheck(w, c, wsId);   // 🧠 (its % in the history)
@@ -1422,23 +1449,37 @@ function fixQuestion(wsId, number, to) {
   toast(`✓ Q${number} is now ${to}. Score: ${num(score)} / ${num(c.max_score)}`, 3000);
 }
 // 🙋 A kid asks a parent to check one answer (the parent sees it in "Needs you")
-function askQuestion(wsId, number) {
+// (to = one parent's id, or "all": the kid picks who checks it)
+function askQuestion(wsId, number, to) {
   const w = aiDocs.worksheets[wsId];
   if (!w || !w.check) return;
-  const qs = w.check.questions.map(q => q.number === number ? { ...q, ask: true } : q);
+  const ids = to && to !== "all" && isParentId(to) ? [to] : parentsList().map(u => u.id);
+  const qs = w.check.questions.map(q => q.number === number ? { ...q, ask: true, askTo: ids } : q);
   aiSave("worksheets", wsId, { ...w, check: { ...w.check, questions: qs } });
   schoolFresh = true;
   render();
-  toast(`🙋 Sent! ${dadName()} will check Q${number}.`, 3000);
+  toast(`🙋 Sent! ${askNames({ askTo: ids })} will check Q${number}.`, 3000);
 }
+// 🙋 The buttons on a mistake: "Ask Dad" · "Ask Mum" · "Ask both" (one button when there's only one parent)
+function askButtonsNode(number) {
+  const ps = parentsList();
+  return h("div", { class: "btnrow ws-askrow", dir: "ltr" }, h("span", { class: "ws-askq" }, "🙋 Not fair? Ask a parent to check:"),
+    ps.map(u => h("button", { data: { wsqask: `${number}|${u.id}` } }, `${u.emoji || ""} Ask ${u.name}`)),
+    ps.length > 1 ? h("button", { data: { wsqask: `${number}|all` } }, "👨‍👩‍👧 Ask both") : null);
+}
+const askNames = q => { const ids = q.askTo && q.askTo.length ? q.askTo : parentsList().map(u => u.id);
+  return ids.map(id => (userById(id) || {}).name).filter(Boolean).join(" or ") || dadName(); };
+const fixerName = q => (q.fixedBy && userById(q.fixedBy) && userById(q.fixedBy).name) || dadName();
+// Is this question waiting for ME (a parent)? (no list = asked before v161: every parent)
+const askedMe = q => q.ask && !q.fixed && (!q.askTo || !q.askTo.length || q.askTo.includes(me));
 // 🙋 Worksheets with an answer a kid asked about (for the parents' "Needs you") → [{ id, w, nums }]
-const askedWs = () => Object.entries(aiDocs.worksheets).filter(([, w]) => w && w.check && w.check.questions.some(q => q.ask && !q.fixed))
-  .map(([id, w]) => ({ id, w, nums: w.check.questions.filter(q => q.ask && !q.fixed).map(q => q.number) }));
+const askedWs = () => Object.entries(aiDocs.worksheets).filter(([, w]) => w && w.check && w.check.questions.some(askedMe))
+  .map(([id, w]) => ({ id, w, nums: w.check.questions.filter(askedMe).map(q => q.number) }));
 document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-wsqfix], [data-wsqask], [data-wsaskopen]");
   if (!b) return;
   if (b.dataset.wsqfix) { const [n, to] = b.dataset.wsqfix.split("|"); return fixQuestion(schoolDoc, Number(n), to); }
-  if (b.dataset.wsqask) return askQuestion(schoolDoc, Number(b.dataset.wsqask));
+  if (b.dataset.wsqask) { const [n, to] = b.dataset.wsqask.split("|"); return askQuestion(schoolDoc, Number(n), to); }
   if (b.dataset.wsaskopen) { openAiDoc("worksheet", b.dataset.wsaskopen); wsAllAns = true; schoolFresh = true; return render(); }
 });
 // ✏️ Bro2a changes the score / adds his own note
