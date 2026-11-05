@@ -133,7 +133,7 @@ function topicsCardHtml(s, f, parent) {
   }
   return `${leftBehindHtml(schoolKid, s, f, all)}<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
     ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
-    ${parent && all.length && !(m && m.list.length) && !unitsHtml ? `<p class="hint st-nounits">🌍 Tip: open 🌍 Official curriculum and get the official topics: then these are grouped into big units.</p>` : ""}
+    ${parent && all.length && !(m && m.list.length) && !unitsHtml ? `<p class="hint st-nounits">📖 Tip: open 📖 This year's topics and get the official list: then these are grouped into big units.</p>` : ""}
     ${all.length ? `${unitsHtml ? `<div class="st-units">${unitsHtml}</div>` : `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>`}
       <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
       <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
@@ -493,7 +493,10 @@ $("aiWorkModal").addEventListener("change", e => {
 
 // ---------- 🌍 The official curriculum (parents only, never mixed with the school topics): the 🤖 /topics list for the kid's school
 // system and year, 📊 Benchmark (🤖 /benchmark: covered · not yet · ahead), 🌍 extra practice (its results: the 🧠 profile only) ----------
-const mapLabel = kid => /igcse|british/i.test(curriculumOf(kid) || "") || !curriculumOf(kid) ? "IGCSE" : curriculumOf(kid);
+// (v162: "IGCSE" only from Year 10 up; younger kids on the British / IGCSE track get "British")
+const mapLabel = kid => { const c = curriculumOf(kid) || "", y = parseInt(String(gradeOf(kid) || "").replace(/\D+/g, " ").trim(), 10);
+  if (c && !/igcse|british/i.test(c)) return c;
+  return y >= 10 ? "IGCSE" : "British"; };
 async function loadMap(kid, sid) {
   const s = schoolOf(kid), f = s.subjects[sid];
   if (!f || !isParentDevice()) return;
@@ -524,11 +527,11 @@ async function mapPractice(kid, sid) {
 }
 function mapCardHtml(kid, f) {
   const s = schoolOf(kid), m = s.map[f.id], b = s.bench[f.id], sys = curriculumOf(kid) || "the school's", year = gradeOf(kid) || "", label = mapLabel(kid);
-  if (!m) return `<p class="hint">The official ${safe(sys)} ${safe(f.name)} topics${year ? ` for ${safe(year)}` : ""}. Kept apart from the school topics.</p>
-    <div class="btnrow"><button class="pill" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🌍 Get the official topics</button></div>`;
+  if (!m) return `<p class="hint">Everything ${safe(kidNameOf(kid))} should learn in ${safe(f.name)}${year ? ` in ${safe(year)}` : " this year"} (${safe(label)} curriculum). Get it once, then you see what's done and what's left.</p>
+    <div class="btnrow"><button class="primary" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">📖 Get this year's topics</button></div>`;
   const chip = t => { const on = stMapPick.includes(t); return `<button class="ph-chip ${on ? "on" : ""}" data-stmappick="${safe(encodeURIComponent(t))}" aria-pressed="${on}">${safe(t)}${on ? ` <b class="ph-tick" aria-hidden="true">✓</b>` : ""}</button>`; };
   const ul = list => list.length ? `<ul class="st-blist">${list.map(t => `<li>${safe(t)}</li>`).join("")}</ul>` : `<p class="hint">None.</p>`;
-  return `${curBriefHtml(kid, f)}<details class="cur-tools"><summary>🛠️ The full official list, 📊 Benchmark and 🌍 extra practice</summary><p class="hint">${safe(sys)}${year ? ` · ${safe(year)}` : ""} · ${m.list.length} topics</p>
+  return `${curBriefHtml(kid, f)}<details class="cur-tools"><summary>🛠️ More: the full list, 📊 Benchmark, pick your own topics</summary><p class="hint">${safe(sys)}${year ? ` · ${safe(year)}` : ""} · ${m.list.length} topics</p>
     <div class="btnrow"><button class="pill" data-stbench="${safe(f.id)}" data-aiwait="bench|${safe(f.id)}">📊 Benchmark</button>
       <button class="linkbtn" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🔄 Again</button></div>
     ${b ? `<p class="st-bench"><b>✅ Covered ${b.covered.length}</b> · <b>⏳ Not yet ${b.not_yet.length}</b> · <b>🚀 Ahead ${b.ahead.length}</b></p>
@@ -581,18 +584,23 @@ function curBriefHtml(kid, f) {
   const next3 = nextUp.length ? nextUp : off.filter(t => !t.practised).slice(0, 3);
   const extra = rows.filter(r => !m.list.some(t => curSame(r.title, t.title)));
   const pctAll = Math.round(matched.length / off.length * 100);
-  // (v154: simple rows: the name big, one short grey line under it)
+  // (v162: one simple screen: the bar, where the class is, what's not done yet + ONE button; the rest folded)
+  const notDone = [...behind, ...inSchool, ...nowList.filter(t => !t.practised && !behind.includes(t) && !inSchool.includes(t))];
+  const toDo = (notDone.length ? notDone : next3).slice(0, 4).map(t => t.title);
   const li = (t, extra) => `<li><b>${safe(t.title)}</b>${extra || t.term ? `<small>${safe([String(extra || "").replace(/^ · /, ""), t.term].filter(Boolean).join(" · "))}</small>` : ""}</li>`;
   const block = (cls, title, list, fn, empty) => `<div class="cur-block ${cls}"><h3>${title} <span class="wsg-n">${list.length}</span></h3>${list.length ? `<ul>${list.map(fn).join("")}</ul>` : `<p class="hint">${empty}</p>`}</div>`;
+  const fold = (cls, title, list, fn) => list.length ? `<details class="cur-fold ${cls}"><summary>${title} <span class="wsg-n">${list.length}</span></summary><ul>${list.map(fn).join("")}</ul></details>` : "";
   return `<div class="cur-brief">
-    <div class="cur-bar" role="img" aria-label="${pctAll}% of the official topics practised"><i style="width:${pctAll}%"></i></div>
-    <p class="cur-sum"><b>${matched.length} of ${off.length}</b> official topics practised (${pctAll}%) · ${extra.length} extra ${extra.length === 1 ? "topic" : "topics"}</p>
+    <h2>📖 This year's topics</h2>
+    <div class="cur-bar" role="img" aria-label="${pctAll}% done"><i style="width:${pctAll}%"></i></div>
+    <p class="cur-sum"><b>${matched.length} of ${off.length}</b> done (${pctAll}%)</p>
     ${nowList.length ? `<div class="cur-next now"><span>📍 In class now</span><b>${safe(nowList.map(t => t.title).join(", "))}</b></div>` : ""}
-    ${next3.length ? `<div class="cur-next"><span>⏭️ Next ${next3.length === 1 ? "lesson" : `${next3.length} lessons`}</span>${next3.map(t => `<b>${safe(t.title)}</b>`).join("")}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every official topic is practised</b></div>`}
-    ${block("ok", "✅ Done and matched", matched, t => li(t, t.pct != null ? `${t.pct}%` : ""), "Nothing practised from the official list yet.")}
-    ${block("risk", "⚠️ Not practised yet", [...behind, ...inSchool], t => li(t, t.mine.length ? "No worksheet yet" : "Should be done by now"), "No gaps so far. 👍")}
+    ${next3.length ? `<div class="cur-next"><span>⏭️ Coming next</span>${next3.map(t => `<b>${safe(t.title)}</b>`).join("")}</div>` : `<div class="cur-next"><span>🎉 All done</span><b>Every topic of the year is practised</b></div>`}
+    ${block("risk", "⚠️ Not done yet", notDone, t => li(t, t.now ? "In class now" : t.mine.length ? "No worksheet yet" : "Should be done by now"), "No gaps so far. 👍")}
+    ${toDo.length ? `<div class="btnrow"><button class="primary cur-go" data-stnotdone="${safe(f.id)}" data-stnotdonet="${safe(toDo.map(encodeURIComponent).join("|"))}" data-aiwait="mapmake">✏️ Practise what's not done yet${toDo.length > 1 ? ` (${toDo.length})` : ""}</button></div>` : ""}
     ${weak.length ? block("weak", "🔴 Weak marks", weak, t => li(t, `${t.pct}%`), "") : ""}
-    ${block("extra", "➕ Extra, not in the curriculum", extra, t => `<li><b>${safe(t.title)}</b></li>`, "None.")}</div>`;
+    ${fold("ok", "✅ Done", matched, t => li(t, t.pct != null ? `${t.pct}%` : ""))}
+    ${fold("extra", "➕ Extra, not in this year's list", extra, t => `<li><b>${safe(t.title)}</b></li>`)}</div>`;
 }
 
 // ---------- 📊 The parents' summary (📊 How are my kids doing?): per subject ⚪ · 🔴 · 🟢, the 🔴 topics first with ✏️ Practise ----------
@@ -622,6 +630,7 @@ document.addEventListener("click", e => {
   if (ds.stmappick) { const t = decodeURIComponent(ds.stmappick); stMapPick = stMapPick.includes(t) ? stMapPick.filter(x => x !== t) : [...stMapPick, t].slice(0, 8); return render(); }
   if (ds.stmapnotyet) { const bn = schoolOf(schoolKid).bench[ds.stmapnotyet]; stMapPick = bn ? bn.not_yet.slice(0, 8) : []; return render(); }
   if (ds.stmapmake) return mapPractice(schoolKid, ds.stmapmake);
+  if (ds.stnotdone) { stMapPick = (ds.stnotdonet || "").split("|").filter(Boolean).map(decodeURIComponent); return mapPractice(schoolKid, ds.stnotdone); }
 });
 $("scr-school").addEventListener("change", e => {
   const id = e.target.dataset && e.target.dataset.sttick;
