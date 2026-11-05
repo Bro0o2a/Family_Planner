@@ -4,7 +4,56 @@
 //   then a small bottom bar for the rest: 🏆 Points · ⭐ Habits · 📔 My day · 🏡 Community · 👤 Me · ☰ More.
 //   (⭐ Habits opens my habits and 🧹 duties right here. The 🧩 riddle still pops up when the app opens.)
 // =====================================================================
-let kidPanel = null;   // the part opened from the bottom bar on the home: "habits" | null
+let kidPanel = null;
+// 🫧 v159 THE PUFFY BANNER (Broo2a's "Daily Planner" picture): a cream puffy board, the title in 3D bubble letters
+//   (the last word purple, the rest pink), a soft pill under it, and cute 3D friends (icons/deco) around it.
+//   Every page title (h1.page-title) becomes one after each render; the home's date is one too (see drawHome).
+const PUFF_PILLS = { home: "plan your day, make it happen!", mine: "plan your week, make it happen!", school: "learn, explore, grow!", points: "every star counts!",
+  me: "this is me!", add: "what's on this week?", settings: "make it just right", family: "together is better", diary: "how was your day?", report: "look how you grow!",
+  kidswork: "busy little bees!", kid: "all about them", extra: "have fun together!", setup: "make the app yours" };
+const SUBJECT_PILLS = [[/math/i, "practice makes perfect!"], [/science/i, "ask, try, discover!"], [/english/i, "read, write, shine!"], [/arabic/i, "every word counts!"],
+  [/islam|quran/i, "learn with your heart"], [/ssa|social|humanit/i, "explore the world!"]];
+const puffDeco = (l = "bunny", r = "bear") => `<img class="pb-deco pb-l" src="icons/deco/${l}.png" alt=""><img class="pb-deco pb-r" src="icons/deco/${r}.png" alt="">
+  <i class="pb-st pb-s1">★</i><i class="pb-st pb-s2">★</i><i class="pb-st pb-s3">♥</i>`;
+const plainWords = t => String(t || "").replace(/[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u200D\uFE0F⬅️➡️›‹·]/gu, "").replace(/\s+/g, " ").trim();
+function puffBannerHtml(title, pill, deco = ["bunny", "bear"]) {
+  const w = plainWords(title).split(" "), last = w.pop();
+  return `${puffDeco(...deco)}<span class="pb-t">${w.length ? `<span class="bub bub-pink">${safe(w.join(" "))}</span> ` : ""}<span class="bub ${w.length ? "bub-lilac" : "bub-pink"}">${safe(last)}</span></span>
+    ${pill ? `<span class="bub-pill">${safe(pill)} <i>♥</i></span>` : ""}`;
+}
+const DECOS = [["bunny", "bear"], ["bunny2", "tulip"], ["cloud", "star"], ["bunny", "carrot"]];
+function puffTitles() {
+  const scr = document.querySelector(".screen:not([hidden])"); if (!scr) return;
+  scr.querySelectorAll("h1.page-title").forEach(h => {
+    const raw = h.dataset.puffed && h.querySelector(".pb-t") ? h.dataset.puffed : h.textContent, t = plainWords(raw);
+    if (!t || (h.dataset.puffed === raw && h.querySelector(".pb-t"))) return;
+    const sub = screen === "school" && schoolView === "subject" ? (SUBJECT_PILLS.find(([re]) => re.test(t)) || [0, "you can do it!"])[1] : PUFF_PILLS[screen] || "";
+    const deco = DECOS[[...t].reduce((n, c) => n + c.charCodeAt(0), 0) % DECOS.length];
+    h.classList.add("puff-banner"); h.innerHTML = puffBannerHtml(raw, sub, deco); h.dataset.puffed = raw;
+  });
+}
+// 🧸 v159 planner style (Broo2a's "Daily Planner" picture): 3D icons (icons/3d/<name>.png, cut from their icon set),
+//   ribbon titles, lined paper cards: ❤️ Top 3 (must-do habits first, then what's next) · 🕒 My schedule (+ a sticky note) · 💧 Habit tracker · a kind quote
+const ico3d = (n, cls = "") => `<img class="i3d ${cls}" src="icons/3d/${n}.png" alt="">`;
+const ribbon = (txt, tone) => `<span class="pl-rib pl-rib-${tone}">${txt}</span>`;
+const KID_QUOTES = ["Small steps every day lead to big changes", "You are braver than you think", "Mistakes help you learn", "Try your best, that is enough", "Every day is a fresh start"];
+function kidPlannerHtml(u, today, hb) {
+  const d = todayYmd(), done = x => isDone(d, x.id, u.id);
+  const musts = habitsFor(u.id).filter(h => h.must).map(h => ({ name: h.name, ok: habitDone(h, data.habitMarks[habitKey(d, h.id, u.id)]), attr: `data-kidpanel="habits"` }));
+  const top = [...musts, ...today.filter(x => !done(x)).map(x => ({ name: x.name, ok: false, attr: "data-kidcal" }))].slice(0, 3);
+  const cups = Math.min(hb.all, 10), full = hb.all ? Math.round(hb.done * cups / hb.all) : 0;
+  const cup = on => `<svg class="pl-cup${on ? " on" : ""}" viewBox="0 0 30 38" aria-hidden="true"><path d="M3 3h24l-3 32H6z" class="g"/>${on ? `<path d="M5.2 13h19.6l-2.1 20H7.3z" class="w"/>` : ""}<path d="M7 6h3" class="s"/></svg>`;
+  const quote = KID_QUOTES[(new Date(d + "T12:00:00Z").getUTCDate()) % KID_QUOTES.length];
+  return `${top.length ? `<div class="pl-card pl-pink">${ribbon("Top 3 today", "pink")}
+      ${top.map((t, i) => `<button class="pl-line${t.ok ? " done" : ""}" ${t.attr}><span class="pl-heart">${i + 1}</span><b>${safe(t.name)}</b>${t.ok ? `<span class="pl-tick">✓</span>` : ""}</button>`).join("")}</div>` : ""}
+    ${today.length ? `<div class="pl-card pl-lilac">${ribbon("My schedule", "lilac")}${ico3d("time", "pl-clock")}
+      <div class="pl-note">you can<br>do it!</div>
+      ${today.slice(0, 7).map(x => `<button class="pl-line pl-time${done(x) ? " done" : ""}" data-kidcal><span class="pl-t">${x.start >= 0 ? clock(x.start, true) : "Any"}</span><b>${safe(x.name)}</b><span class="pl-box">${done(x) ? "✓" : ""}</span></button>`).join("")}
+      ${today.length > 7 ? `<button class="pl-more" data-kidcal>See all ${today.length}</button>` : ""}</div>` : ""}
+    ${hb.all ? `<button class="pl-card pl-blue pl-track" data-kidpanel="habits">${ribbon("Habit tracker", "blue")}
+      <span class="pl-cups">${Array.from({ length: cups }, (_, i) => cup(i < full)).join("")}</span><small>${hb.done} of ${hb.all} good habits today</small></button>` : ""}
+    <div class="pl-quote">${ico3d("idea", "pl-qi")}<p>${quote}</p></div>`;
+}   // the part opened from the bottom bar on the home: "habits" | null
 function drawKidHome(u) {
   const p = lifetimePoints(u.id), L = levelOf(p), pct = levelPct(p), from = data.points.week, to = weekEnd();
   const today = todayItems(u.id), doneToday = today.filter(x => isDone(todayYmd(), x.id, u.id)).length;
@@ -21,13 +70,11 @@ function drawKidHome(u) {
       <div class="k-hero-text"><h2>${hi}</h2><p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
       ${next ? `<button class="k-go" data-kidcal>▶ ${safe(next.name.length > 18 ? next.name.slice(0, 17) + "…" : next.name)}</button>` : `<button class="k-go" data-kidcal>📅 My day</button>`}</div>
       <svg class="k-plant" viewBox="0 0 120 140" aria-hidden="true"><path d="M60 100V45" stroke="#5e8f5a" stroke-width="5" fill="none"/><path d="M60 70C35 70 22 52 20 34c22 0 36 14 40 36z" fill="#7fae6e"/><path d="M60 60C85 60 98 42 100 22c-22 0-36 14-40 38z" fill="#8fbb7c"/><path d="M60 50C48 36 46 20 54 6c10 10 12 26 6 44z" fill="#9ec68a"/><path d="M28 96h64l-8 40H36z" fill="#ead7bd"/><rect x="24" y="90" width="72" height="14" rx="7" fill="#f3e4cf"/></svg></div>
-    <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, "📚", "Study", "My school", `${study} study points`)}
-      ${tile("kt-cal", "data-kidcal", "📅", "Calendar", `${doneToday} of ${today.length}`, "done today")}
-      ${tile("kt-habits", `data-kidpanel="habits"`, "⭐", "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
-      ${tile("kt-score", `data-go="points"`, "🏆", "Score this week", `${scoreOf(u.id).overall}`, `of ${scoreOf(u.id).max}`)}</div>
-    ${today.length ? `<div class="card k-today"><div class="k-today-top"><h2>Today</h2><button class="k-chip" data-kidcal>See my day</button></div>
-      ${today.slice(0, 5).map(x => { const done = isDone(todayYmd(), x.id, u.id);
-        return `<button class="k-row${done ? " done" : ""}" data-kidcal><span class="k-row-t"><b>${safe(x.name)}</b><small>${x.start >= 0 ? clock(x.start, true) : "Any time"}${done ? " · done" : ""}</small></span><span class="k-row-go" aria-hidden="true">${done ? "✓" : "▶"}</span></button>`; }).join("")}</div>` : ""}`;
+    <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
+      ${tile("kt-cal", "data-kidcal", ico3d("calendar"), "Calendar", `${doneToday} of ${today.length}`, "done today")}
+      ${tile("kt-habits", `data-kidpanel="habits"`, ico3d("goal"), "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
+      ${tile("kt-score", `data-go="points"`, ico3d("achieve"), "Score this week", `${scoreOf(u.id).overall}`, `of ${scoreOf(u.id).max}`)}</div>
+    ${kidPlannerHtml(u, today, hb)}`;
   $("homeMenu").hidden = true;
   const bar = [["data-go=\"points\"", "🏆", "Points"], ["data-kidpanel=\"habits\"", "⭐", "Habits"], ...(feat("diary") ? [["data-go=\"diary\"", "📔", "My day"]] : []),
                ...(feat("meeting") ? [[`data-extra="meeting"`, "🏡", "Community"]] : []), ["data-profile", "👤", "Me"], ["data-homemore", "☰", "More"]];
@@ -142,9 +189,17 @@ function familyRowHtml() {
       ...(dad ? [{ attr: "data-backup", label: "Backup", sub: "Keep a safe copy of the family's data" }] : []),
       { attr: "data-setupopen", label: "Edit my home", sub: "Turn features on or off" },
       { ...PRIVACY_TILE, sub: "Who can see your data" }, { ...TOUR_TILE, sub: "How the app works" }]]];
-  return groups.filter(g => g[1].length).map(([title, rows]) => `<section class="hub-group"><h2 class="hub-h">${title}</h2>
-    <div class="hub-list">${rows.map(hubRowHtml).join("")}</div></section>`).join("");
+  // v159 (Broo2a): each group = ONE big button; tap it and its rows open under it (only one open at a time)
+  const look = { "Plan the week": [ico3d("calendar"), "sage", "Calendar, activities, plan"], "The kids": [ico3d("excellent"), "peach", "Reports, scores, work today"],
+    "Family": [ico3d("heart"), "butter", "Community, home duties"], "Settings": [ico3d("paper"), "dusty", "Profile, backup, privacy, help"] };
+  return `<div class="hub-groups">` + groups.filter(g => g[1].length).map(([title, rows]) => {
+    const [icon, tone, sub] = look[title] || ["•", "sage", ""], badge = rows.some(r => r.badge);
+    return `<details class="hub-group hub-${tone}" name="hubg" data-hubg="${title}"${hubOpen === title ? " open" : ""}>
+    <summary class="hub-big"><span class="hub-ic" aria-hidden="true">${icon}</span><span class="hub-t"><b>${title}${badge ? ` <i class="hub-new">new</i>` : ""}</b><small>${sub}</small></span><span class="hub-go" aria-hidden="true">›</span></summary>
+    <div class="hub-list">${rows.map(hubRowHtml).join("")}</div></details>`; }).join("") + `</div>`;
 }
+let hubOpen = "";   // which big button is open (kept when the home redraws)
+document.addEventListener("toggle", e => { const d = e.target; if (d && d.dataset && d.dataset.hubg) { if (d.open) hubOpen = d.dataset.hubg; else if (hubOpen === d.dataset.hubg) hubOpen = ""; } }, true);
 // ✏️ Add / Plan: Add activities · ✨ Plan my week · 📌 One-day event · 🔄 Make a new plan
 function addPlanMenuHtml() {
   return [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },

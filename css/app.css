@@ -2820,3 +2820,232 @@ input:focus, select:focus, textarea:focus { box-shadow: inset 0 2px 5px rgba(150
 .cal-btn:hover { background: #adc8b6; }
 .cal-btn.here, .cal-btn.here:hover { background: var(--card); color: var(--sage-dk); box-shadow: inset 0 2px 6px rgba(150, 105, 70, .16); }
 .sc-addbig.st-up { background: var(--coral) !important; box-shadow: var(--puff); border: 0; color: #fff; }
+
+/* =====================================================================
+   ☁️ v159 (Broo2a, 2026-11-05): pastel sky background (clouds, sun, rainbow) behind every screen,
+   see-through frosted cards so the sky shows, parent home = 4 big buttons that open their rows
+   ===================================================================== */
+html { background: #fbe3ea; }
+body { background: #fbe3ea url("../icons/bg/sky.png") center top / cover fixed no-repeat; }
+.card, .hub-list, .tile, .kid-card { background: rgba(255, 255, 255, .72) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.hub-groups { display: grid; gap: 12px; margin-top: 18px; }
+.hub-group { margin: 0; border-radius: 26px; background: rgba(255, 255, 255, .6); box-shadow: var(--clay); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); overflow: hidden; }
+.hub-big { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; list-style: none; }
+.hub-big::-webkit-details-marker { display: none; }
+.hub-big .hub-t b { font-family: Fredoka, "Baloo 2", Nunito, sans-serif; font-size: 20px; font-weight: 600; }
+.hub-ic { width: 52px; height: 52px; border-radius: 18px; display: grid; place-items: center; font-size: 26px; flex: none; box-shadow: var(--puff); }
+.hub-sage .hub-ic { background: var(--sage); } .hub-peach .hub-ic { background: var(--peach); }
+.hub-butter .hub-ic { background: var(--butter); } .hub-dusty .hub-ic { background: var(--dusty); }
+.hub-big .hub-go { transition: transform .2s; }
+.hub-group[open] .hub-big .hub-go { transform: rotate(90deg); }
+.hub-group[open] { background: rgba(255, 255, 255, .82); }
+.hub-group .hub-list { margin: 0 10px 10px; border-radius: 20px; box-shadow: none; background: rgba(255, 255, 255, .9) !important; }
+
+/* 🧸 v159 PLANNER STYLE (Broo2a's "Daily Planner" + "Kids planner icon set" pictures):
+   3D icons, ribbon titles, lined pastel paper cards, heart numbers, checkboxes, water-glass habit tracker, sticky note, quote card */
+:root { --pl-pink: #fbe0e4; --pl-pink-dk: #f28ca0; --pl-lilac: #f3ecfb; --pl-lilac-dk: #b9a2e6; --pl-butter: #fff3d6; --pl-butter-dk: #f2c55c;
+  --pl-blue: #e6f0fb; --pl-blue-dk: #8fb3e6; --pl-mint: #e8f3df; --pl-mint-dk: #9cc78b; --pl-line: rgba(160, 120, 140, .25); }
+.i3d { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+.kt-ico { background: #fbf3ea !important; padding: 0; overflow: hidden; width: 54px; height: 54px; border-radius: 18px; }
+.hub-ic { background: #fbf3ea !important; overflow: hidden; padding: 0; }
+.pl-card { position: relative; display: block; width: 100%; margin-top: 22px; padding: 26px 16px 12px; border-radius: 26px; text-align: left;
+  box-shadow: 0 10px 18px rgba(150, 105, 140, .14), inset 0 2px 0 rgba(255, 255, 255, .9), inset 0 -5px 10px rgba(150, 105, 140, .08); }
+.pl-pink { background: var(--pl-pink); } .pl-lilac { background: var(--pl-lilac); } .pl-blue { background: var(--pl-blue); }
+.pl-butter { background: var(--pl-butter); } .pl-mint { background: var(--pl-mint); }
+.pl-rib { position: absolute; top: -14px; left: 16px; padding: 5px 16px; border-radius: 999px; font: 700 14px/1.2 Fredoka, Nunito, sans-serif;
+  letter-spacing: .06em; text-transform: uppercase; color: #5b3b48; box-shadow: 0 4px 8px rgba(150, 105, 140, .2), inset 0 2px 0 rgba(255, 255, 255, .6), inset 0 -3px 5px rgba(0, 0, 0, .07); }
+.pl-rib::after { content: "★"; margin-left: 8px; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .15); }
+.pl-rib-pink { background: #f7b9c6; } .pl-rib-lilac { background: #d3c3f1; } .pl-rib-blue { background: #b9d1f1; }
+.pl-rib-butter { background: #f8d97f; } .pl-rib-mint { background: #c3dfb5; }
+button.pl-line, .pl-line { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 2px; background: transparent; box-shadow: none; border-radius: 0;
+  border-bottom: 2px dashed var(--pl-line); text-align: left; font-size: 16px; color: var(--text); }
+.pl-line:last-of-type { border-bottom: 0; }
+.pl-line b { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-line.done b { text-decoration: line-through; opacity: .55; }
+.pl-heart { width: 32px; height: 30px; flex: none; display: grid; place-items: center; color: #fff; font: 700 15px Fredoka, sans-serif; background: var(--pl-pink-dk);
+  clip-path: path("M16 29C7 22 1 16.5 1 10A7.5 7.5 0 0 1 16 6.5 7.5 7.5 0 0 1 31 10c0 6.5-6 12-15 19z"); padding-bottom: 4px; }
+.pl-tick { color: #5f8f78; font-weight: 800; font-size: 18px; }
+.pl-t { width: 62px; flex: none; color: var(--muted); font-size: 14px; font-weight: 700; }
+.pl-box { width: 24px; height: 24px; flex: none; border-radius: 8px; background: #fff; box-shadow: inset 0 2px 4px rgba(150, 105, 140, .25); display: grid; place-items: center; color: #5f8f78; font-weight: 900; }
+.pl-time { padding-right: 0; }
+.pl-clock { position: absolute; top: -20px; left: 168px; width: 40px; height: 40px; border-radius: 50%; }
+.pl-lilac { padding-top: 40px; }
+.pl-note { position: absolute; top: -22px; right: 16px; width: 70px; padding: 8px 4px; text-align: center; background: #c9b6ee; color: #4b3470; font: 600 13px/1.25 Fredoka, sans-serif;
+  border-radius: 6px; transform: rotate(3deg); box-shadow: 0 6px 10px rgba(110, 80, 150, .25); z-index: 1; }
+.pl-note::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: #f28ca0; box-shadow: 0 2px 3px rgba(0, 0, 0, .2); }
+.pl-more { margin: 6px 0 2px; padding: 6px 14px; font-size: 14px; background: #fff; }
+.pl-track { cursor: pointer; }
+.pl-track small { display: block; margin-top: 6px; color: var(--muted); font-size: 14px; }
+.pl-cups { display: flex; gap: 6px; flex-wrap: wrap; }
+.pl-cup { width: 26px; height: 34px; }
+.pl-cup .g { fill: rgba(255, 255, 255, .85); stroke: #9bb6d8; stroke-width: 2; stroke-linejoin: round; }
+.pl-cup .w { fill: #8fc0f0; } .pl-cup .s { stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.pl-quote { display: flex; align-items: center; gap: 12px; margin: 22px 0 8px; padding: 14px 16px; border-radius: 22px; background: var(--pl-pink);
+  box-shadow: 0 10px 18px rgba(150, 105, 140, .14), inset 0 2px 0 rgba(255, 255, 255, .9); }
+.pl-quote p { margin: 0; font: 600 16px/1.3 Fredoka, Nunito, sans-serif; color: #7a4a5a; }
+.pl-qi { width: 46px; height: 46px; flex: none; border-radius: 14px; }
+.hub-sage { background: rgba(232, 243, 223, .85); } .hub-peach { background: rgba(251, 224, 228, .85); }
+.hub-butter { background: rgba(255, 243, 214, .85); } .hub-dusty { background: rgba(230, 240, 251, .85); }
+.hub-group[open].hub-sage { background: var(--pl-mint); } .hub-group[open].hub-peach { background: var(--pl-pink); }
+.hub-group[open].hub-butter { background: var(--pl-butter); } .hub-group[open].hub-dusty { background: var(--pl-blue); }
+
+/* 📅 v159 calendar in the "School activity calendar" style: rainbow bubble title, a pastel color per weekday,
+   paper day cards with a number badge, a 3D icon on each activity */
+:root { --wd0: #f7c6cf; --wd1: #f9cfae; --wd2: #f8e19a; --wd3: #c9e2b8; --wd4: #d6c6f1; --wd5: #f7c6cf; --wd6: #f9cfae; }
+.k-dbtn.wd-0 { --wd: var(--wd0); } .k-dbtn.wd-1 { --wd: var(--wd1); } .k-dbtn.wd-2 { --wd: var(--wd2); } .k-dbtn.wd-3 { --wd: var(--wd3); }
+.k-dbtn.wd-4 { --wd: var(--wd4); } .k-dbtn.wd-5 { --wd: var(--wd5); } .k-dbtn.wd-6 { --wd: var(--wd6); }
+.k-dbtn { background: var(--wd, #fff); border: 0; color: #5b3b48; font-family: Fredoka, Nunito, sans-serif; font-weight: 600;
+  box-shadow: 0 6px 10px rgba(150, 105, 140, .18), inset 0 2px 0 rgba(255, 255, 255, .7), inset 0 -4px 6px rgba(0, 0, 0, .06); }
+.k-dbtn.sel { background: var(--wd, #fff); color: #4a2c38; border: 0; box-shadow: 0 0 0 4px #fff, 0 0 0 7px #f28ca0, 0 8px 14px rgba(150, 105, 140, .25); }
+.k-dbtn.sel.istoday { box-shadow: 0 0 0 4px #fff, 0 0 0 7px #f28ca0, 0 8px 14px rgba(150, 105, 140, .25); }
+.k-day { background: rgba(255, 250, 246, .88) !important; border: 0 !important; box-shadow: 0 10px 18px rgba(150, 105, 140, .14), inset 0 2px 0 #fff; }
+.k-dayname { position: relative; border-radius: 16px; padding: 8px 10px 8px 46px; font-family: Fredoka, Nunito, sans-serif; font-weight: 600; color: #5b3b48; }
+.k-dayname.wd-0 { background: var(--wd0) !important; } .k-dayname.wd-1 { background: var(--wd1) !important; } .k-dayname.wd-2 { background: var(--wd2) !important; }
+.k-dayname.wd-3 { background: var(--wd3) !important; } .k-dayname.wd-4 { background: var(--wd4) !important; } .k-dayname.wd-5 { background: var(--wd5) !important; }
+.k-dayname.wd-6 { background: var(--wd6) !important; }
+.k-daynum { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 10px; background: rgba(255, 255, 255, .8);
+  display: grid; place-items: center; font-size: 16px; color: #c26a80; box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .06); }
+.k-block { border-radius: 20px !important; box-shadow: 0 6px 12px rgba(150, 105, 140, .14), inset 0 2px 0 rgba(255, 255, 255, .8); }
+.k-ic { display: inline-block; width: 34px; height: 34px; border-radius: 11px; margin-right: 8px; vertical-align: middle; box-shadow: 0 3px 6px rgba(150, 105, 140, .2); }
+.r-ic { display: inline-block; width: 20px; height: 20px; border-radius: 6px; vertical-align: -5px; margin-right: 6px; }
+.k-week.rows .narrow .k-ic { width: 26px; height: 26px; border-radius: 8px; margin-right: 4px; }
+.k-week.rows .narrow .who { white-space: normal; }
+/* 🎒 v159 school tiles: a 3D icon, pastel paper per subject · every page title = the rainbow bubble title */
+.sc-ic { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 6px; box-shadow: 0 6px 10px rgba(150, 105, 140, .2); }
+.sc-tile { border-top: 0 !important; border-radius: 26px !important; box-shadow: 0 10px 18px rgba(150, 105, 140, .14), inset 0 2px 0 #fff, inset 0 -5px 10px rgba(150, 105, 140, .07) !important; }
+.sc-tile::before { display: none !important; }
+.sc-tile:nth-of-type(5n+1) { background: var(--pl-pink) !important; } .sc-tile:nth-of-type(5n+2) { background: var(--pl-butter) !important; }
+.sc-tile:nth-of-type(5n+3) { background: var(--pl-mint) !important; } .sc-tile:nth-of-type(5n+4) { background: var(--pl-lilac) !important; }
+.sc-tile:nth-of-type(5n) { background: var(--pl-blue) !important; }
+/* 🏆 v159 points: each kid's row = a pastel paper card, 1st/2nd/3rd = puffy ribbon badges, a 3D trophy on the Hall of Stars */
+#ptsList { background: transparent !important; box-shadow: none !important; backdrop-filter: none; padding: 0; }
+.pt-row { border-radius: 26px; margin: 0 0 14px; padding: 14px 12px; border: 0 !important;
+  box-shadow: 0 10px 18px rgba(150, 105, 140, .14), inset 0 2px 0 #fff, inset 0 -5px 10px rgba(150, 105, 140, .07); }
+.pt-row:nth-child(3n+1) { background: var(--pl-butter); } .pt-row:nth-child(3n+2) { background: var(--pl-pink); } .pt-row:nth-child(3n) { background: var(--pl-blue); }
+.pt-row.is-star { background: var(--pl-butter); outline: 3px solid #f2c55c; }
+.pt-rank { font: 700 15px Fredoka, sans-serif; color: #fff; background: #f28ca0; border-radius: 999px; padding: 4px 10px; box-shadow: var(--puff); }
+.pt-row:nth-child(1) .pt-rank { background: #e9b330; } .pt-row:nth-child(2) .pt-rank { background: #a9b6c9; } .pt-row:nth-child(3) .pt-rank { background: #d99a6c; }
+.hall-card h2::before { content: ""; display: inline-block; width: 40px; height: 40px; margin-right: 8px; vertical-align: middle; border-radius: 12px;
+  background: url("../icons/3d/achieve.png") center / cover; box-shadow: 0 3px 6px rgba(150, 105, 140, .2); }
+.hall-card { background: var(--pl-lilac) !important; }
+/* 👤 v159 profile: pastel paper cards in turn (butter · pink · mint · lilac · blue) */
+#scr-me .card:nth-of-type(5n+1) { background: rgba(255, 243, 214, .9) !important; } #scr-me .card:nth-of-type(5n+2) { background: rgba(251, 224, 228, .9) !important; }
+#scr-me .card:nth-of-type(5n+3) { background: rgba(232, 243, 223, .9) !important; } #scr-me .card:nth-of-type(5n+4) { background: rgba(243, 236, 251, .9) !important; }
+#scr-me .card:nth-of-type(5n) { background: rgba(230, 240, 251, .9) !important; }
+
+/* 🫧 v159 puffy 3D bubble letters (Broo2a's "Daily Planner" title): pastel letters, thick white outline, soft drop.
+   Every page title gets it; My week gets two colors + the soft pill under it. The calendar: a thick puffy cream frame,
+   puffy day buttons and time pills. */
+.bub-pink { color: #f39bb6; } .bub-lilac { color: #b99be8; }
+.bub-pill { display: table; margin: 8px auto 0; padding: 6px 18px; border-radius: 999px; background: #fff8f1; color: #5b3b48;
+  font: 600 15px/1.2 Nunito, sans-serif; letter-spacing: 0; -webkit-text-stroke: 0; text-shadow: none;
+  box-shadow: 0 5px 10px rgba(150, 105, 140, .2), inset 0 2px 0 #fff, inset 0 -3px 5px rgba(150, 105, 140, .1); }
+.bub-pill i { font-style: normal; color: #f28ca0; }
+/* the calendar board: thick puffy cream frame */
+#mineWeek { background: #fdf3ea; border: 9px solid #fffaf5; border-radius: 34px; padding: 10px 8px 12px;
+  box-shadow: 0 14px 26px rgba(150, 105, 140, .2), inset 0 3px 8px rgba(150, 105, 140, .16), 0 0 0 2px #f1e2d6; }
+.k-day { border: 4px solid #fff !important; }
+/* day buttons: puffy candy, white rim */
+.k-dbtn { border: 3px solid #fff !important; border-radius: 20px !important; font-size: 17px; }
+.k-arrow { border: 3px solid #fff !important; background: #fff8f1 !important; box-shadow: 0 5px 10px rgba(150, 105, 140, .2), inset 0 -3px 5px rgba(150, 105, 140, .1) !important; }
+/* times: soft pills like "plan your day, make it happen!" */
+.k-time { background: transparent !important; }
+.k-time:not(:empty) { display: flex; align-items: flex-start; justify-content: center; }
+.k-time:not(:empty)::before { content: none; }
+.k-time { color: #7a5160 !important; font-family: Fredoka, Nunito, sans-serif; font-weight: 600 !important; }
+.k-tpill { display: inline-block; padding: 3px 8px; border-radius: 999px; background: #fff8f1; white-space: nowrap;
+  box-shadow: 0 3px 6px rgba(150, 105, 140, .18), inset 0 2px 0 #fff, inset 0 -2px 4px rgba(150, 105, 140, .1); }
+.k-dayname { border: 3px solid #fff; box-shadow: 0 4px 8px rgba(150, 105, 140, .15), inset 0 -3px 5px rgba(0, 0, 0, .05); }
+.k-corner { background: transparent !important; }
+.k-dayname { padding-left: 46px !important; padding-right: 10px !important; }
+
+/* 🫧 v159 THE PUFFY BANNER on every screen (Broo2a's "Daily Planner" title board):
+   a cream puffy board, 3D bubble letters (pink + purple, thick white outline, soft drop), a soft pill, cute 3D friends + tiny stars */
+.puff-banner { position: relative; display: block; text-align: center; margin: 16px 2px 18px; padding: 22px 62px 16px;
+  background: linear-gradient(180deg, #fffaf5, #f8ebe1); border: 6px solid #fffdfa; border-radius: 32px;
+  box-shadow: 0 14px 24px rgba(150, 105, 140, .2), inset 0 -6px 12px rgba(150, 105, 140, .1), 0 0 0 2px #f1e2d6;
+  font-size: inherit; -webkit-text-stroke: 0; text-shadow: none; color: inherit; }
+.pb-t { display: block; line-height: 1.05; }
+.bub { font: 700 40px/1.05 Fredoka, "Baloo 2", sans-serif; letter-spacing: .01em; -webkit-text-stroke: 7px #fff; paint-order: stroke fill;
+  text-shadow: 0 4px 0 #ecd3db, 0 9px 12px rgba(150, 105, 140, .3); overflow-wrap: anywhere; }
+.bub-sm { font-size: 30px; }
+.bub-pink { color: #f39bb6; } .bub-lilac { color: #b99be8; }
+.puff-banner .bub-pill { margin-top: 10px; }
+.pb-deco { position: absolute; width: 64px; height: 64px; object-fit: cover; border-radius: 50%;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 72%, transparent 100%); mask-image: radial-gradient(circle closest-side, #000 72%, transparent 100%); }
+.pb-l { left: -4px; top: -16px; width: 76px; height: 76px; }
+.pb-r { right: -2px; bottom: -12px; width: 58px; height: 58px; }
+.pb-st { position: absolute; font-style: normal; font-size: 16px; color: #f5cf74; text-shadow: 0 2px 3px rgba(150, 105, 140, .25); }
+.pb-s1 { left: 74px; top: 8px; } .pb-s2 { right: 18px; top: 10px; color: #c9b6ee; font-size: 20px; } .pb-s3 { left: 26px; bottom: 12px; color: #f7a8c0; }
+.home-date.puff-banner b, .home-date.puff-banner > span:not(.pb-t):not(.bub-pill) { all: unset; }
+.pb-home .bub-pink { font-size: 44px; }
+@media (max-width: 380px) { .bub { font-size: 32px; } .bub-sm { font-size: 24px; } .puff-banner { padding: 20px 50px 14px; } }
+.puff-banner .bub { font: 700 40px/1.05 Fredoka, "Baloo 2", sans-serif !important; display: inline; margin: 0; }
+.puff-banner .bub-pink { color: #f39bb6 !important; } .puff-banner .bub-lilac { color: #b99be8 !important; }
+.puff-banner .bub-sm { font-size: 30px !important; }
+.pb-home .bub-pink { font-size: 46px !important; }
+.puff-banner .bub-pill { display: table !important; margin: 10px auto 0 !important; font: 600 14px/1.2 Nunito, sans-serif !important; color: #5b3b48 !important; white-space: nowrap; }
+@media (max-width: 380px) { .puff-banner .bub { font-size: 32px !important; } .puff-banner .bub-sm { font-size: 24px !important; } }
+.puff-banner { padding: 24px 40px 18px !important; }
+.puff-banner .bub { font-size: 38px !important; }
+.pb-home .bub-pink { font-size: 46px !important; }
+.pb-r { right: -10px; bottom: -22px; width: 54px; height: 54px; }
+.pb-l { left: -10px; top: -20px; width: 70px; height: 70px; }
+.pb-s1 { left: 66px; }
+.puff-banner .bub-pink + .bub-lilac { margin-left: .18em; }
+/* v159: Broo2a's own Canva friends (transparent PNGs): no circle mask */
+.pb-deco { -webkit-mask-image: none !important; mask-image: none !important; border-radius: 0 !important; object-fit: contain !important; filter: drop-shadow(0 4px 5px rgba(150, 105, 140, .25)); }
+.i3d { object-fit: contain; }
+.kt-ico, .hub-ic, .sc-ic, .k-ic, .pl-qi { background: transparent !important; box-shadow: none !important; }
+.kt-ico .i3d, .hub-ic .i3d { filter: drop-shadow(0 4px 5px rgba(150, 105, 140, .25)); }
+/* 🎀 v159 ICON-SET PANELS (Broo2a's "Kids planner icon set" picture): a curvy ribbon title with a bow, a cream puffy panel,
+   3D icons in rows with their names under them */
+.ip-sec { position: relative; margin: 30px 0 8px; }
+.ip-rib { position: absolute; z-index: 1; top: -17px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 6px 22px 6px 20px;
+  font: 700 17px/1.2 Fredoka, "Baloo 2", sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #5b3b48;
+  border-radius: 999px 999px 999px 999px / 999px 999px 999px 999px;
+  box-shadow: 0 5px 10px rgba(150, 105, 140, .22), inset 0 2px 0 rgba(255, 255, 255, .7), inset 0 -3px 5px rgba(0, 0, 0, .07); }
+.ip-rib::before, .ip-rib::after { content: ""; position: absolute; top: 50%; width: 18px; height: 22px; margin-top: -11px; background: inherit; z-index: -1; }
+.ip-rib::before { left: -11px; clip-path: polygon(0 0, 100% 15%, 100% 85%, 0 100%, 35% 50%); }
+.ip-rib::after { right: -11px; clip-path: polygon(100% 0, 0 15%, 0 85%, 100% 100%, 65% 50%); }
+.ip-rib i { font-style: normal; margin-left: 6px; font-size: 15px; color: #fff; }
+.ip-pink { background: #f7b9c6; } .ip-butter { background: #f8d97f; } .ip-lilac { background: #d3c3f1; } .ip-mint { background: #c3dfb5; } .ip-blue { background: #b9d1f1; }
+.ip-panel { display: grid; gap: 6px 4px; padding: 28px 10px 14px; border-radius: 28px; background: rgba(253, 246, 238, .92);
+  border: 5px solid #fffdfa; box-shadow: 0 12px 22px rgba(150, 105, 140, .18), inset 0 -5px 10px rgba(150, 105, 140, .08), 0 0 0 2px #f1e2d6; }
+.ip-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+button.ip-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 10px; background: transparent; box-shadow: none;
+  border-radius: 20px; text-align: center; color: var(--text); min-width: 0; }
+button.ip-item:hover { background: rgba(255, 255, 255, .7); }
+.ip-item .i3d { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 5px 6px rgba(150, 105, 140, .25)); margin-bottom: 4px; }
+.ip-item b { font: 600 15px/1.15 Fredoka, Nunito, sans-serif; }
+.ip-item small { font-size: 12px; color: var(--muted); line-height: 1.2; }
+.ip-item .sc-stars { color: #e9b330; font-size: 13px; letter-spacing: 1px; } .ip-item .sc-stars.none { color: #d8c9bd; }
+.ip-tag { display: inline-block; margin-top: 2px; padding: 1px 8px; border-radius: 999px; background: #fff; font-weight: 700; }
+.ip-tag-easy { background: #e3f6ea; color: #17663b !important; } .ip-tag-hard { background: #fff0d1; color: #8a5400 !important; }
+.ip-item .sc-badge { position: absolute; top: 4px; right: 12px; }
+.ip-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* the subject's own name is in the banner now: no second big title */
+#scr-school .bd-folder-head h2, #scr-school .bd-folder-head h1 { display: none; }
+#scr-school .bd-folder-head:not(:has(button)) { display: none; }
+#scr-school .bd-folder-head { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+/* "In short" = a ribbon panel too */
+.card.sj-sum { position: relative; margin-top: 34px; padding-top: 30px; border-radius: 28px; background: rgba(253, 246, 238, .92) !important;
+  border: 5px solid #fffdfa; box-shadow: 0 12px 22px rgba(150, 105, 140, .18), inset 0 -5px 10px rgba(150, 105, 140, .08), 0 0 0 2px #f1e2d6 !important; }
+.sj-sum .ks-head h2 { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; padding: 6px 24px;
+  font: 700 17px/1.2 Fredoka, sans-serif; letter-spacing: .07em; text-transform: uppercase; color: #3f5c4e; background: #c3dfb5; border-radius: 999px;
+  box-shadow: 0 5px 10px rgba(150, 105, 140, .22), inset 0 2px 0 rgba(255, 255, 255, .7), inset 0 -3px 5px rgba(0, 0, 0, .07); }
+.sj-sum .ks-head h2::after { content: " ★"; color: #fff; }
+/* 🌈 v159 (Broo2a's card picture): every card / panel gets soft confetti dots, the big ones a wavy pastel top (blue · pink · yellow) */
+.card, .ip-panel, .pl-card, .hub-group, .kt, .pt-row, .k-day, .k-hero, .sc-tile2 { background-image: url("../icons/bg/dots.svg") !important; background-size: 160px 160px !important; background-repeat: repeat !important; }
+.card, .ip-panel, .pl-card, .hub-group, .k-day, .pt-row { background-image: url("../icons/bg/waves.svg"), url("../icons/bg/dots.svg") !important;
+  background-size: 100% 34px, 160px 160px !important; background-repeat: no-repeat, repeat !important; background-position: top left, 0 0 !important; }
+.card, .pl-card, .pt-row { padding-top: max(var(--card-pt, 0px), 40px); }
+.hub-group > .hub-big { padding-top: 30px; }
+.ip-panel { padding-top: 42px; }
+.k-day { padding-top: 30px !important; }
+.sc-tile2 { background-image: none !important; }
+/* (no waves on popups, the banner, little message boxes) */
+.modal .card, .popup .card, .msg { background-image: none; }
+#scr-me .card:nth-of-type(n), .card.sj-sum, #ptsList .pt-row, .hub-group[open] { background-image: url("../icons/bg/waves.svg"), url("../icons/bg/dots.svg") !important;
+  background-size: 100% 34px, 160px 160px !important; background-repeat: no-repeat, repeat !important; background-position: top left, 0 0 !important; }
+.card.sj-sum { padding-top: 44px; }

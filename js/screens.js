@@ -154,6 +154,7 @@ function render() {
   updateSaveBars();
   drawNews();
   maybeAskPrayer();   // 🕌 the first time after this update: "Show prayer times on your calendar?"
+  puffTitles();   // 🫧 v159: every page title = the puffy "Daily Planner" banner
 }
 // A change on "Add activities" or "Settings": it's only a draft until you tap 💾 Save.
 function changed() { render(); }
