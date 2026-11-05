@@ -790,7 +790,7 @@ function schoolSubjectHtml(s, isDad, u) {
   if (stSec && !secs.some(x => x.id === stSec)) stSec = null;
   if (!stSec) {
     const upTile = `<button class="ip-item sj-go" data-stup="${safe(f.id)}">${ico3d("pin")}<b>Upload topic</b><small>From school</small></button>`;
-    const SEC_ICON = { ws: "paper", profile: "notebook2", curr: "milestone", topics: "read", goal: "goal", study: "study", files: "briefcase", more: "lunchbox" };
+    const SEC_ICON = { ws: "paper", profile: "idea", curr: "milestone", topics: "read", goal: "goal", study: "study", files: "briefcase", more: "lunchbox" };
     html += `<div class="card sj-sum" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><div class="ks-head"><h2>In short</h2>
         <span class="ks-avg">${sum.avg != null ? `${sum.avg}%` : "–"}<small>${sum.count} checked${sum.level ? ` · Level ${sum.level}/10` : ""}</small></span></div>
       ${sumLinesHtml(sum)
