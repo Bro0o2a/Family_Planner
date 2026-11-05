@@ -224,10 +224,19 @@ function navHtml(dates) {
     <div class="k-days"><button class="k-arrow" data-kprev aria-label="Previous day">‹</button>${dates.map(ds => [ds, calDates().indexOf(ds)])
       // (v154: Day = only the day before, the day, the day after · Week = the 7 days shown)
       .filter(([, i]) => wholeWeek || Math.abs(i - viewDay) <= 1).map(([ds, i]) => { const d = SHORT[weekdayOf(ds)];
-      return `<button class="k-dbtn ${i === viewDay && !wholeWeek ? "sel" : ""} ${ds === today ? "istoday" : ""} ${ds < today ? "past" : ""}" data-kday="${i}" data-date="${ds}"
+      return `<button class="k-dbtn wd-${weekdayOf(ds)} ${i === viewDay && !wholeWeek ? "sel" : ""} ${ds === today ? "istoday" : ""} ${ds < today ? "past" : ""}" data-kday="${i}" data-date="${ds}"
         ${ds === today ? `aria-label="${d} (today)"` : ""}>${d}<small>${fromYmd(ds).getDate()}</small></button>`; }).join("")}<button class="k-arrow" data-knext aria-label="Next day">›</button></div></div>`;
 }
 
+// 🧸 v159: a 3D icon for an activity, from words in its name (icons/3d, see ico3d in home.js); unknown → by its type
+const ACT_ICONS = [[/break|get ready|lunch|dinner|breakfast|meal|bed|sleep|shower/i, "time"], [/quran|read|book|story|library|arabic|english|reading/i, "read"], [/math|maths|number/i, "class"], [/science|research|lab/i, "research"],
+  [/music|piano|sing/i, "music"], [/art|draw|paint|craft/i, "palette"], [/homework|worksheet/i, "homework"], [/exam|test|quiz/i, "exam"], [/bus/i, "bus"], [/school|class/i, "school"],
+  [/football|sport|gym|swim|karate|run|exercise|club|basket|tennis/i, "basketball"],
+  [/study|revision|revise|practi[cs]e|lesson|tutor/i, "study"], [/pray|salah/i, "consistency"]];
+function actIcon3d(name, type, cls = "k-ic") {
+  const hit = ACT_ICONS.find(([re]) => re.test(name || "")), n = hit ? hit[1] : type === "study" ? "study" : type === "routine" ? "time" : "goal";
+  return ico3d(n, cls);
+}
 // What a block shows: big title, colors, and a smaller line underneath.
 function blockInfo(b) {
   const withDad = b.helper ? ` · ${withText(b)}` : "";   // (🤝 with the helping parent)
@@ -289,7 +298,7 @@ function weekHtml(days, opts) {
       const faded = (opts.fade && opts.fade !== "all" && !s.users.includes(opts.fade)) || !!opts.subj;   // (📚 a subject picked: faded)
       const n = blocks.push({ ...s, day: ds, soft: "#f1f2f6", ink: "#6b7280" }) - 1;
       parts.push({ start: s.start, end: s.end, strip: true, padId: s.pad ? s.id : null, html: `<div class="k-routine ${s.pad ? "pad" : ""} ${faded ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0"
-          title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${safe(s.emoji)} ${safe(s.name)}</span>${
+          title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${actIcon3d(s.name, "routine", "r-ic")}${safe(s.name)}</span>${
           !opts.only && !isEveryone(s.users) ? `<span class="r-who">${facesHtml(s.users)}</span>` : ""}</div>` });
     });
     // 📌 School dates with a time: a strip at that time (all-day ones are under the day name). Never planned around.
@@ -377,7 +386,7 @@ function weekHtml(days, opts) {
       parts.push({ start: b.start, end: b.end, padIds: padIdsOf(b), html: `<div class="k-block ${b.fixed ? "fixed" : ""} ${checks && b.acts.length > 1 ? "many" : ""} ${drag ? "draggable editable" : ""} ${opts.drag && (b.fixed || past) ? "locked" : ""} ${faded ? "faded" : ""} ${done ? "done" : ""}" data-kblock="${n}" role="button" tabindex="0" ${drag}
                  style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}">
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>
-        <span class="who">${sameBtn}<span class="t-full">${info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
+        <span class="who">${sameBtn}${actIcon3d(b.name, b.type)}<span class="t-full">${info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
         <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatHtml
           ? ` <span class="what">${whatHtml}</span>` : ""}</span>${sessHtml ? `<span class="k-sessrow">${sessHtml}</span>` : ""}${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
     });
@@ -389,7 +398,7 @@ function weekHtml(days, opts) {
   const bars = travelBars(opts.only || null, dates).map(x => ({ ...x, html: travelBarHtml(x, opts) }));
   // opts.whole = always all the days, without the Day / Week switch (View all plan → "🗓️ Full week")
   return (opts.whole ? "" : navHtml(dates)) + weekRowsHtml(dayParts, d => { const ds = dates[d];
-    return `<div class="k-dayname" ${ds === today ? `title="Today"` : ""}>${ds === today ? "📍 " : ""}${dayHead(ds)}</div>${examTagsHtml(ds, opts.only || null)}${
+    return `<div class="k-dayname wd-${weekdayOf(ds)}" ${ds === today ? `title="Today"` : ""}><span class="k-daynum">${fromYmd(ds).getDate()}</span>${ds === today ? "Today · " : ""}${dayHead(ds)}</div>${examTagsHtml(ds, opts.only || null)}${
       eventsOn(ds, opts.only || null).filter(e => !e.time).map(e => eventHtml(e, opts.only || null)).join("")}${
       pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, ds, opts)).join("")}`; }, opts.whole || wholeWeek, bars, dates);
 }
@@ -520,7 +529,7 @@ function weekRowsHtml(dayParts, headHtml, whole = wholeWeek, bars = [], dates = 
   // The time labels (on the phone's one-day view: only the times that day has)
   rows.forEach((t, r) => {
     const used = (days[viewDay] || { items: [] }).items.some(it => it.r0 === r);
-    html += `<div class="k-time ${used ? "" : "not-sel"}" style="grid-row:${r + 2 + B}">${t === null ? "" : rowTime(t)}</div>`;
+    html += `<div class="k-time ${used ? "" : "not-sel"}" style="grid-row:${r + 2 + B}">${t === null ? "" : `<span class="k-tpill">${rowTime(t)}</span>`}</div>`;
   });
   return html + `</div></div>`;
 }
@@ -801,7 +810,7 @@ function drawMine() {
     ${calWho === id ? `aria-current="true"` : ""}><span class="e">${face}</span>${safe(label)}</button>`;
   $("minePeople").innerHTML = chip(me, parent ? faceHtml(userById(me)) : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
     + (parent ? data.users.filter(x => x.id !== me).map(x => chip(x.id, faceHtml(x), x.name, colorsOf(x))).join("") : "");
-  $("mineTitle").textContent = all ? "📅 Everyone's week" : mine ? `${u.emoji} My week` : `${u.emoji} ${u.name}'s week`;
+  $("mineTitle").textContent = all ? "Everyone's Week" : mine ? "My Week" : `${u.name}'s Week`;   // (🫧 the puffy banner: see puffTitles)
   $("mineSub").textContent = !mine && !parent && !all ? `Just looking 👀 Only ${u.name} or ${dadName()} can tick these.` : "";   // (v154: short)
   document.querySelector("#scr-mine .bar .cal-btn").classList.toggle("here", calWho === (parent ? "all" : me));
   // (real = this points week's plan, for the week's numbers; the calendar shows its 12 dates, routines even with no plan yet)

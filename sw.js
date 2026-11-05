@@ -9,7 +9,7 @@
 
 // The name of our saved copy. Change the number (v2 → v3 …) whenever the app changes,
 // so phones throw away the old copy and get the new version.
-const CACHE = "family-planner-v158";
+const CACHE = "family-planner-v159";
 
 // 🤖 The family's AI helper (School: read school work, worksheets, explanations, checking): NEVER saved or touched here.
 // Every call must go straight to the internet (the app says so when there's no internet).
@@ -26,7 +26,7 @@ function isFirebase(url) {
 const APP_FILES = ["./", "index.html", "manifest.json", "icons/icon-192.png", "icons/icon-512.png", "css/app.css",
   "js/core.js", "js/screens.js", "js/points.js", "js/fun.js", "js/reports.js", "js/profile.js", "js/home.js", "js/activities.js", "js/calendar.js", "js/school.js", "js/ai.js", "js/study.js", "js/settings.js", "js/taps.js", "js/cloud.js", "js/news.js", "js/start.js",
   // 🧸 v158: the 3D avatars (👤 My profile → My picture)
-  ...["boy-1", "boy-2", "boy-3", "boy-4", "boy-5", "girl-1", "girl-2", "girl-3", "girl-4", "girl-5", "girl-6", "parent-1", "parent-2"].map(id => `icons/avatars/${id}.jpg`)];
+  ...["boy-1", "boy-2", "boy-3", "boy-4", "boy-5", "girl-1", "girl-2", "girl-3", "girl-4", "girl-5", "girl-6", "parent-1", "parent-2"].map(id => `icons/avatars/${id}.jpg`), "icons/bg/sky.png", "icons/bg/waves.svg", "icons/bg/dots.svg", ...["achieve", "apple", "basketball", "briefcase", "bus", "calendar", "class", "consistency", "exam", "excellent", "focus", "goal", "heart", "homework", "idea", "lesson", "lunchbox", "milestone", "music", "palette", "paper", "pin", "practice", "rainbow", "read", "research", "school", "study", "time"].map(n => `icons/3d/${n}.png`), ...["bunny", "bear", "star", "tulip", "cloud", "bunny2", "carrot", "heart"].map(n => `icons/deco/${n}.png`)];  // ☁️ v159 the sky background
 // 🕌 The prayer-times library (from another website). The version is in the address, so it never changes:
 // once it's saved here, it's always used from here (the prayer times then work without internet).
 const ADHAN_URL = "https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js";

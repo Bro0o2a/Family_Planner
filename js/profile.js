@@ -869,7 +869,10 @@ function drawHome() {
   // 📅 Today, big: "Thursday" / "22 October 2026" (Dubai time; a bit smaller on a kid's home)
   const dn = new Date(), dz = o => dn.toLocaleDateString("en-GB", { timeZone: "Asia/Dubai", ...o });
   $("homeDate").className = "home-date" + (isParentDevice() ? "" : " kid");
-  $("homeDate").innerHTML = `<b>${dz({ weekday: "long" })}</b><span>${dz({ day: "numeric", month: "long", year: "numeric" })}</span>`;
+  // 🫧 v159: the date in the middle, in the puffy banner: "Thursday" (pink) · "5 November" (purple) · a soft pill
+  $("homeDate").className += " puff-banner pb-home";
+  $("homeDate").innerHTML = `${puffDeco("bunny", "bear")}<span class="pb-t"><span class="bub bub-pink">${dz({ weekday: "long" })}</span><br><span class="bub bub-lilac bub-sm">${dz({ day: "numeric", month: "long" })}</span></span>
+    <span class="bub-pill">${PUFF_PILLS.home} <i>♥</i></span>`;
   const myPoints = pointsByUser()[me], myFair = scoreText(scoreOf(me));
   $("homePoints").textContent = (stars().includes(me) ? `🌟 Shining Star of the Week · ⭐ Score ${myFair} · ${myPoints} points` : `⭐ Score ${myFair} · ${myPoints} points this week`)
     + ` · ${kindsText(weekKinds(me))}`;
