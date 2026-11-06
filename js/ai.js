@@ -81,6 +81,9 @@ function aiStopBox(code) {
 }
 $("asOk").onclick = () => { $("aiStopModal").hidden = true; };
 $("aiStopModal").addEventListener("click", e => { if (e.target === $("aiStopModal")) $("aiStopModal").hidden = true; });
+// ⚠️ The last AI problem, kept so the page can show it under the button (a toast is easy to miss): { key, text, at }
+let aiFail = null;
+const aiFailFor = key => aiFail && aiFail.key === key && Date.now() - aiFail.at < 15 * 60 * 1000 ? aiFail.text : "";
 async function callAi(action, body, key, auto = false) {
   // 🧒 A kid's device asks 🤖 itself for KID_AI (the server allows the same list); 📋 brief and 📰 newsletter: parents only
   if (isKidDevice() && !KID_AI.includes(action)) { toast("Ask your parent 🙂", 3000); return null; }
@@ -102,7 +105,7 @@ async function callAi(action, body, key, auto = false) {
     try { out = await res.json(); } catch (e) {}
     // 🤖 A family with a monthly limit: the server says how many are used ("🤖 AI this month: 3 of 15")
     if (out && Number.isFinite(out.used) && Number.isFinite(out.limit)) saveAiUsage(out.used, out.limit);
-    if (res.ok && out && out.result && typeof out.result === "object" && !out.error) return out.result;
+    if (res.ok && out && out.result && typeof out.result === "object" && !out.error) { aiFail = null; return out.result; }
     // 💳 / 📅 (an older server: 402, or 429 with used ≥ limit)
     const code = out && out.code === "no_credit" || res.status === 402 ? "no_credit"
       : out && (out.code === "limit" || (res.status === 429 && Number.isFinite(out.used) && out.used >= out.limit)) ? "limit" : "";
@@ -111,9 +114,12 @@ async function callAi(action, body, key, auto = false) {
     const why = out && out.code !== "ai_error" && res.status >= 400 && res.status < 500 && res.status !== 429 && typeof out.error === "string" && out.error.trim()
       ? "🤖 " + out.error.trim().slice(0, 200) : "⚠️ The AI helper didn't answer. Please try again.";
     if (!auto) toast(why, 5500);
+    aiFail = { key: key || action, text: `${why} (${res.status}${out && out.error && why.startsWith("⚠️") ? ": " + String(out.error).slice(0, 120) : ""})`, at: Date.now() };
   } catch (e) {
-    if (!auto) toast(e && e.name === "AbortError" ? "⏳ The AI is taking too long. Please try again."
-      : navigator.onLine ? "⚠️ The AI helper didn't answer. Please try again." : "🔌 " + AI_OFF, 5500);
+    const why = e && e.name === "AbortError" ? "⏳ The AI is taking too long. Please try again."
+      : navigator.onLine ? "⚠️ The AI helper didn't answer. Please try again." : "🔌 " + AI_OFF;
+    if (!auto) toast(why, 5500);
+    aiFail = { key: key || action, text: why + (e && e.name !== "AbortError" && e.message ? ` (${String(e.message).slice(0, 120)})` : ""), at: Date.now() };
   } finally {
     clearTimeout(timer);
     aiWait = null;
