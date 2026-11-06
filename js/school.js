@@ -324,7 +324,11 @@ function allWorksheetsOf(kid) {
                   ...(c ? { checked: true, score: c.score, total: c.max_score, pct: wsPct(w) } : k ? { checked: true, score: k.score, total: k.total, pct: k.pct } : { checked: false }) });
   });
   Object.entries(kept).forEach(([id, k]) => { if (!out.has(id)) out.set(id, { id, title: k.title || "Worksheet", topics: [], subject: k.subject, date: k.date || String(k.at).slice(0, 10),
-    kind: k.kind || "📝 Worksheet", open: false, checked: true, score: k.score, total: k.total, pct: k.pct }); });
+    kind: k.kind || "📝 Worksheet", open: false, checked: true, score: k.score, total: k.total, pct: k.pct, ...(aiDocs.hiddenWs[id] ? { hidden: true } : {}) }); });
+  // 🙈 hidden ("deleted") worksheets that have no kept score: listed too, so they can be brought back
+  Object.entries(aiDocs.hiddenWs).forEach(([id, w]) => { if (w.kid !== kid || out.has(id)) return;
+    out.set(id, { id, title: w.title, topics: w.topics || [], subject: w.subject || "", date: w.date || "", kind: wsKindOf(w), open: false, hidden: true,
+                  ...(w.check ? { checked: true, score: w.check.score, total: w.check.max_score, pct: wsPct(w) } : { checked: false }) }); });
   return [...out.values()].sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.id.localeCompare(a.id));
 }
 // Checked worksheets that have no kept copy yet (made before the copies existed): copied once, quietly
@@ -348,8 +352,9 @@ function schoolAllWsHtml(s) {
     const what = [x.topics.length ? x.topics.join(", ") : "", x.date ? shortDate(x.date) : "", x.kind].filter(Boolean).join(" · ");
     const score = x.checked ? `<span class="ai-status lv-${awLevel(x.pct)}">${num(x.score)}/${num(x.total)} · ${x.pct}%</span>` : `<span class="ai-status">⏳ Not checked yet</span>`;
     const inner = `<span class="e">${safe(subjectEmoji(s, x.subject) || "📝")}</span>
-      <span class="what">${x.subject ? `<b>${safe(x.subject)}</b> · ` : ""}${safe(x.title)}<small>${safe(what)}${x.open ? "" : " · (the worksheet itself isn't here any more: its score is kept)"}</small></span>${score}`;
-    return `<li>${x.open ? `<button class="bd-file aw-row" data-aiopen="worksheet|${safe(x.id)}">${inner}</button>` : `<div class="bd-file aw-row">${inner}</div>`}</li>`;
+      <span class="what">${x.subject ? `<b>${safe(x.subject)}</b> · ` : ""}${safe(x.title)}<small>${safe(what)}${x.open ? "" : x.hidden ? " · 🙈 deleted (still saved)" : " · (the worksheet itself isn't here any more: its score is kept)"}</small></span>${score}`;
+    const back = x.hidden && isDadNow() ? `<button class="chip aw-back" data-wsback="${safe(x.id)}">♻️ Bring back</button>` : "";
+    return `<li>${x.open ? `<button class="bd-file aw-row" data-aiopen="worksheet|${safe(x.id)}">${inner}</button>` : `<div class="bd-file aw-row">${inner}${back}</div>`}</li>`;
   }).join("");
   return `<div class="card bd-card aw-card"><h2>📝 All the worksheets ${safe(u.name)} did</h2>
     <div class="chips aw-chips">${chip("all", "All")}${subs.map(([k, name]) => chip(k, `${safe(subjectEmoji(s, name) || "📘")} ${safe(name)}`)).join("")}${chip("todo", "⏳ Not checked")}</div>
@@ -1465,6 +1470,7 @@ $("scr-school").addEventListener("click", e => {
   if (ds.sckid) { if (kidLockedOut(ds.sckid)) return lockedToast(ds.sckid); schoolKid = ds.sckid; return goSchool("home"); }
   if (ds.scgo) { const [view, id, tab] = ds.scgo.split("|"); if (view === "allws") awFilter = "all"; return goSchool(view, id, tab); }
   if (ds.awfilter) { awFilter = ds.awfilter; schoolFresh = true; return render(); }   // 📝 All my worksheets: All · a subject · ⏳ Not checked
+  if (ds.wsback) return unhideWorksheet(ds.wsback);   // ♻️ a deleted worksheet back
   if (ds.sctab) { schoolTab = schoolTab === ds.sctab ? "" : ds.sctab; scMakeOpen = false; schoolOlder = false; schoolEdit = schoolEditId = null; schoolFresh = true; return render(); }
   // 👨‍👩‍👧 ⚙️ For parents · ✏️ Edit subjects (↑ ↓ · ✏️ rename · 🙈 hide · 🗑️ delete, or hide when it has work) · ➕ a suggested subject
   if ("scparents" in ds) { scParents = !scParents; schoolFresh = true; return render(); }
