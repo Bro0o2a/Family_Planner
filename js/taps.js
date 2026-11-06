@@ -68,6 +68,7 @@ document.addEventListener("click", e => {
   if ("homemore" in ds) { homeMore = !homeMore; homeAddPlan = false; return render(); }
   if ("tour" in ds) { homeMore = false; render(); return showTour(); }
   // ⭐ ✏️ Kids' habits (parents): Settings → the kids' habits card
+  if ("starset" in ds) { go("settings"); return setTimeout(() => $("starCard").scrollIntoView({ block: "start" }), 300); }   // 🌟 v171
   if ("kidhabits" in ds) { go("settings"); return requestAnimationFrame(() => $("kidHabitsCard").scrollIntoView({ behavior: "smooth", block: "start" })); }
   if ("calall" in ds) { calWho = "all"; return go("mine"); }
   // ✨ Make the app yours (parents)

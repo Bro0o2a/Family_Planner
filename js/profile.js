@@ -74,6 +74,7 @@ function drawMe() {
   const famSettings = mine && parent ? `<div class="card me-card me-family"><h2>👨‍👩‍👧 Family settings</h2><div class="hub-groups">
       ${isParentId(me) ? `<button class="hub-group hub-sage me-famgo" data-go="family"><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("heart", "hub-3d")}</span><span class="hub-t"><b>Family members</b><small>Add a kid or parent · Codes</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>` : ""}
       <button class="hub-group hub-butter me-famgo" data-setupopen><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("idea", "hub-3d")}</span><span class="hub-t"><b>Features on / off</b><small>Pick what the app shows</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
+      <button class="hub-group hub-peach me-famgo" data-starset><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("achieve", "hub-3d")}</span><span class="hub-t"><b>Shining Star time</b><small>${safe(starWhenText())}</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
       </div></div>` : "";
   // 👤 Who this device is signed in as (a parent on the family's main login can say "Not you?": the picker again; kids never)
   const meU = userById(me), notYou = !isKidDevice() && isParentId(me) && isMainLogin(cloudMeta().member) && parentsList().length > 1;
