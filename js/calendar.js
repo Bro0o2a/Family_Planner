@@ -792,7 +792,7 @@ function openRoutineCard(b) {
   $("kModal").hidden = false;
   $("kOk").focus();
 }
-function closeCard() { $("kModal").hidden = true; }
+function closeCard() { $("kModal").hidden = true; $("kModal").classList.remove("star-pop"); }   // (🌟 star-pop = the big Shining Star message)
 
 // ---------- 📅 Calendar: the one calendar page ----------
 // Chips: "Me" · "Everyone" · one per person. Everyone (kids too) can see everyone's week. The ✅ ticks work only for

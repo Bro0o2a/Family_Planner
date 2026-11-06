@@ -274,3 +274,8 @@ window.addEventListener("popstate", e => {
   try { history.pushState({ screen }, ""); } catch (err) {}   // stay on this page until they answer
   leaveDraft(() => go(target));
 });
+
+// ⭐ v171: the Shining Star is announced on time even when the app is just left open (checks every 30 seconds)
+setInterval(() => {
+  try { if (document.hidden || typeof data === "undefined" || !data || hasDraft()) return; maybeDecideStar(); maybeShowStar(); } catch (e) {}
+}, 30000);
