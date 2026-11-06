@@ -941,7 +941,10 @@ function subjectFilesHtml(s, f, title = "📁 Files", status = false) {
 }
 // ✅ / ⏳ for an uploaded file: 🤖 read it (a school work card) or its worksheet is checked · waiting for a parent's phone or the check
 function fileStatus(f, s) {
-  if (f.worksheet) { const w = aiDocs.worksheets[f.worksheet]; return w && w.check ? "✅ Checked" : "⏳ Waiting for check"; }
+  if (f.worksheet) {   // (a deleted worksheet: its kept score says it was checked; no score and no worksheet → no label)
+    const w = aiDocs.worksheets[f.worksheet], kept = s.wsScores && s.wsScores[f.worksheet];
+    return (w && w.check) || kept ? "✅ Checked" : w ? "⏳ Waiting for check" : "";
+  }
   if (f.work && s.work[f.work]) return "✅ Read";
   if (Object.values(s.requests).some(q => q.kind === "work" && (q.files || []).includes(f.id))) return "⏳ Waiting";
   return "";
