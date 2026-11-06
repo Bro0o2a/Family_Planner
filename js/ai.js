@@ -70,7 +70,7 @@ const KID_AI = ["analyze", "worksheet", "explain", "check", "topics", "riddles",
 // ⏳ no answer in 90 seconds → "taking too long"; anything else → "didn't answer" (a few server replies keep their own words, e.g. files too big).
 // auto = a call the app makes by itself (🧩 riddles, ✏️ a subject's topics): after no_credit / limit it isn't made again on this device
 // until the app is opened again, and it never shows the box.
-const AI_TIMEOUT = 90 * 1000;
+const AI_TIMEOUT = 180 * 1000;   // (the opus model can take over a minute to check photos of a long worksheet)
 let aiStop = null;   // "no_credit" | "limit" once the server said so (this session)
 function aiStopBox(code) {
   $("asText").textContent = isKidDevice() ? "😴 The AI helper is resting. Ask your parent."
@@ -89,7 +89,7 @@ async function callAi(action, body, key, auto = false) {
   if (aiWait) { toast("🤖 Still thinking… one moment, please.", 2500); return null; }
   aiWait = key || action;
   showAiWait();
-  const stop = new AbortController(), timer = setTimeout(() => stop.abort(), AI_TIMEOUT);   // ⏳ 90 seconds
+  const stop = new AbortController(), timer = setTimeout(() => stop.abort(), AI_TIMEOUT);   // ⏳ 3 minutes
   try {
     const token = await cloud.user.getIdToken();
     const res = await fetch(AI_URL + "/" + action, {
