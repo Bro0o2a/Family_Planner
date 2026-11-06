@@ -1586,7 +1586,16 @@ function removeAnswerFile(fid) {
   render();
 }
 // 🤖 Check: the answer photos + the answer key → the score. Saved on the worksheet AND as a "Worksheet" mark (+10 ⭐ the first time).
+// ✅ Check: any problem (also an unexpected one) is kept and shown under the button (see aiFailFor)
 async function checkWorksheet(wsId) {
+  try { await checkWorksheetNow(wsId); }
+  catch (err) {
+    console.error("Check:", err);
+    aiFail = { key: "check|" + wsId, text: "⚠️ Something went wrong while checking: " + String(err && err.message || err).slice(0, 160), at: Date.now() };
+    schoolFresh = true; render();
+  }
+}
+async function checkWorksheetNow(wsId) {
   const w = aiDocs.worksheets[wsId];
   if (!w) return;
   if (w.check && !isDadNow()) return toast(`It's checked already. Ask ${dadName()} 🙂`);
@@ -1619,7 +1628,7 @@ async function checkWorksheet(wsId) {
                                        ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
   if (!r) { schoolFresh = true; return render(); }   // (⚠️ the reason shows under the button)
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
-  if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);
+  if (!c) { aiFail = { key: "check|" + wsId, text: "🤖 The check came back empty. Please try again.", at: Date.now() }; schoolFresh = true; render(); return toast("🤖 The check came back empty. Please try again.", 4000); }
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;
   aiSave("worksheets", wsId, { ...now, check: c, status: "Checked ✓" });   // (with its subject and part, and 💪 🎯 🦉)
