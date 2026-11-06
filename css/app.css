@@ -3107,3 +3107,9 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .cur-fold summary { font-weight: 800; cursor: pointer; }
 .cur-fold ul { margin: 8px 0 0; padding-left: 18px; }
 .cur-fold li small { display: block; opacity: .75; }
+
+/* 🖼️ Picture questions (pictures.js): a small drawing under the question, black on white like the paper */
+.ws-pic { margin: 10px 0 6px; display: block; max-width: 100%; }
+.ws-pic img { display: block; max-width: 100%; height: auto; background: #fff; }
+.ws-pic figcaption { font-size: .85em; color: #444; margin-top: 4px; }
+.mist-card .ws-pic { margin: 6px 0 10px; }

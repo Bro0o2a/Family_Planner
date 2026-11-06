@@ -17,6 +17,7 @@ The owner is a programming beginner. Keep answers short and simple. Never deploy
   9. `calendar.js` — 📌 one-day events, the week calendar, ✏️ edit calendar, print
   10. `school.js` — 🎒 School binder, school files, photos
   11. `ai.js` — 🤖 AI help (worksheets, explain, check) — talks to the family-plan-ai server
+  11b. `pictures.js` — 🖼️ picture questions: draws a worksheet question's picture (clock, number line, fractions, chart, shapes …)
   12. `study.js` — 📚 study topics, curriculum, sessions, learning profile
   13. `settings.js` — ⚙️ settings, 👨‍👩‍👧 family setup
   14. `taps.js` — the one click listener for most buttons
