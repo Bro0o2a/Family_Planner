@@ -1349,6 +1349,7 @@ function wsViewNode(w, id, s, isDad) {
         canAct ? h("button", { data: { wsact: "upload" } }, "⬆ Upload my answers") : null,
         canAct && files.length ? h("button", { class: "primary", data: { wsact: "check", aiwait: "check|" + id } }, done ? "🤖 Check again" : "✅ Check now") : null,
         isDad ? h("button", { data: { wsact: "fix" } }, done ? "✏️ Change score" : "✏️ Add score") : null),
+      aiFailFor("check|" + id) ? h("p", { class: "ai-failnote" }, aiFailFor("check|" + id)) : null,   // (⚠️ why the last check didn't work)
       isDad && wsFix ? fixFormNode(w) : null),
     sessionBarNode(w, id),
     aiLinksNode(w));
@@ -1616,7 +1617,7 @@ async function checkWorksheet(wsId) {
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),
                                        ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
-  if (!r) return;
+  if (!r) { schoolFresh = true; return render(); }   // (⚠️ the reason shows under the button)
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
   if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);
   c.aiScore = c.score;

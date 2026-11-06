@@ -975,7 +975,8 @@ function wsRowNode(s, w) {
       h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"),   // (📄 worksheets are PDF only: never with the answers)
       canAct ? h("button", { data: { wsrow: "upload|" + w.id } }, "📸 Upload my answers") : null,
       canAct && files.length ? h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, done ? "🤖 Check again" : "✅ Check now") : null,
-      h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Show answers" : "🔒 Show answers")));
+      h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Show answers" : "🔒 Show answers")),
+    aiFailFor("check|" + w.id) ? h("p", { class: "ai-failnote" }, aiFailFor("check|" + w.id)) : null);
 }
 function wsRowAction(v) {
   const [act, id] = v.split("|"), w = aiDocs.worksheets[id];
