@@ -1237,7 +1237,7 @@ function wsSheetNode(w, showAns, compact = false) {
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
-        q.picture ? wsPicNode(q.picture) : null,   // (🖼️)
+        q.picture && typeof wsPicNode === "function" ? wsPicNode(q.picture) : null,   // (🖼️)
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
           compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
@@ -1378,7 +1378,7 @@ function mistakesNode(w, c) {
       h("small", null, `Question ${q.number}${q.points > 0 && wq.points ? ` · ${num(q.points)}/${num(wq.points)}` : ""}`)),
     h("p", { class: "mist-q" }, wq.prompt || `Question ${q.number}`),
     wq.question_ar && !rtl ? h("p", { class: "ws-ar", dir: "rtl", lang: "ar" }, wq.question_ar) : null,
-    wq.picture ? wsPicNode(wq.picture) : null,
+    wq.picture && typeof wsPicNode === "function" ? wsPicNode(wq.picture) : null,
     h("div", { class: "mist-row bad" }, h("span", null, "Your answer"), h("b", null, q.your_answer || "—")),
     h("div", { class: "mist-row ok" }, h("span", null, "Correct answer"), h("b", null, wq.answer || "—")),
     q.explanation || q.note ? h("p", { class: "mist-why" }, "💡 " + (q.explanation || q.note)) : null,
