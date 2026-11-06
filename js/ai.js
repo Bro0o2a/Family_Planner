@@ -14,7 +14,7 @@ const AI_OFF = "AI needs internet and the family sign-in";
 const AI_MAX = 4 * 1024 * 1024;   // all the files of one AI call together (the server takes about 4.5 MB)
 const WS_COUNTS = [5, 10, 15];
 const WS_KINDS = ["multiple_choice", "true_false", "fill_blank", "short_answer", "matching", "ordering"];
-const aiDocs = { worksheets: {}, explanations: {} };   // id → document, kept up to date from the cloud
+const aiDocs = { worksheets: {}, explanations: {}, hiddenWs: {} };   // id → document, kept up to date from the cloud (🙈 hiddenWs: worksheets Dad deleted: kept in the cloud, can be brought back)
 let aiWait = null;    // the AI button that's waiting for an answer ("🤖 Thinking…")
 let aiPick = null;    // what the next chosen files are for: "work" (📥 Add school work) or { ws: id } (the answers)
 let aiMounts = [];    // the AI parts of the School page, built after its HTML (see fillAiMounts)
@@ -256,6 +256,7 @@ function cleanWorksheet(d) {
            topics: aiArr(d.topics, 12).map(t => aiTxt(t, 60)).filter(Boolean), count: aiInt(d.count, 1, 40, questions.length),
            questions, youtube_searches: aiSearches(d.youtube_searches), printable_searches: aiSearches(d.printable_searches),
            answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}),
+           ...(d.hidden === true ? { hidden: true } : {}),   // (🙈 "deleted": kept, only hidden)
            ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}), ...(["easy", "hard"].includes(d.pick) ? { pick: d.pick } : {}),
            // 📚 made for a study session: its key "date|actId|person", its minutes and the AI's estimate
            ...(/^\d{4}-\d{2}-\d{2}\|[^|]+\|[^|]+$/.test(aiTxt(d.session, 100)) ? { session: aiTxt(d.session, 100) } : {}),
@@ -328,9 +329,12 @@ function aiListen() {
   ["worksheets", "explanations"].forEach(name => {
     aiDocs[name] = {};
     cloud.unsub.push(fb.onSnapshot(fb.collection(cloud.db, "families", uid, name), snap => {
-      const all = {};
-      snap.forEach(d => { const x = (name === "worksheets" ? cleanWorksheet : cleanExplain)(d.data()); if (x && okId(d.id)) all[d.id] = x; });
+      const all = {}, hid = {};
+      snap.forEach(d => { let x = null;
+        try { x = (name === "worksheets" ? cleanWorksheet : cleanExplain)(d.data()); } catch (err) { console.warn("AI " + name + " " + d.id, err); }   // (one odd document never hides the others)
+        if (x && okId(d.id)) (x.hidden ? hid : all)[d.id] = x; });
       aiDocs[name] = all;
+      if (name === "worksheets") aiDocs.hiddenWs = hid;
       if (name === "worksheets") topicsFromAllWorksheets();   // 📚 (worksheets made before, or on another phone: their topics too)
       if (screen === "school") render();
     }, err => console.warn("AI " + name + ":", err)));

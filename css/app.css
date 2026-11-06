@@ -3113,3 +3113,4 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .ws-pic img { display: block; max-width: 100%; height: auto; background: #fff; }
 .ws-pic figcaption { font-size: .85em; color: #444; margin-top: 4px; }
 .mist-card .ws-pic { margin: 6px 0 10px; }
+.aw-row .aw-back { margin-left: auto; flex: none; }

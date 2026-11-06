@@ -1679,12 +1679,25 @@ function deleteWorksheet(id) {
   const w = aiDocs.worksheets[id];
   if (!w) return;
   if (!isDadNow()) return toast(`Ask ${dadName()} 🙂`);
-  if (!confirm(`Delete this worksheet?\n\n“${w.title}”\n\nIts answer files and its mark are kept.`)) return;
-  const s = schoolFor(w.kid);
-  Object.values(s.files).forEach(f => { if (f.worksheet === id) delete f.worksheet; });
-  writeData();
-  aiDelete("worksheets", id);
+  if (!confirm(`Delete this worksheet?\n\n“${w.title}”\n\nIt goes out of the lists, but it stays saved: you can bring it back from “All the worksheets”.`)) return;
+  // 🙈 Never really deleted: kept in the cloud with hidden = true (its answer files keep pointing to it)
+  const doc = { ...w, hidden: true };
+  aiSave("worksheets", id, doc);
+  delete aiDocs.worksheets[id];
+  aiDocs.hiddenWs[id] = doc;
   leaveAiDoc();
+}
+// ♻️ Bring a hidden worksheet back
+function unhideWorksheet(id) {
+  const w = aiDocs.hiddenWs[id];
+  if (!w) return;
+  if (!isDadNow()) return toast(`Ask ${dadName()} 🙂`);
+  const { hidden, ...back } = w;
+  delete aiDocs.hiddenWs[id];
+  aiSave("worksheets", id, back);
+  schoolFresh = true;
+  render();
+  toast("♻️ The worksheet is back.", 2500);
 }
 
 // ---------- 📖 Explain ----------
