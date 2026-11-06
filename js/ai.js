@@ -244,6 +244,7 @@ function cleanWorksheet(d) {
              ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
              ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}), ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}),
              ...(aiTxt(q.question_ar, 1000) ? { question_ar: aiTxt(q.question_ar, 1000) } : {}),   // (🌐 its Arabic translation, when asked for)
+             ...(cleanPic(q.picture) ? { picture: cleanPic(q.picture) } : {}),   // (🖼️ a picture the question needs, see pictures.js)
              // (🔗 matching: column 1, numbered, and column 2, lettered: see matchNode)
              ...(aiArr(q.left, 8).map(x => aiTxt(x, 200)).filter(Boolean).length ? { left: aiArr(q.left, 8).map(x => aiTxt(x, 200)).filter(Boolean) } : {}),
              ...(aiArr(q.right, 9).map(x => aiTxt(x, 200)).filter(Boolean).length ? { right: aiArr(q.right, 9).map(x => aiTxt(x, 200)).filter(Boolean) } : {}) };

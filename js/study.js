@@ -1237,6 +1237,7 @@ function wsSheetNode(w, showAns, compact = false) {
       h("div", null,
         h("div", { class: "ws-prompt" }, q.prompt),
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
+        q.picture ? wsPicNode(q.picture) : null,   // (🖼️)
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
           compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
@@ -1377,6 +1378,7 @@ function mistakesNode(w, c) {
       h("small", null, `Question ${q.number}${q.points > 0 && wq.points ? ` · ${num(q.points)}/${num(wq.points)}` : ""}`)),
     h("p", { class: "mist-q" }, wq.prompt || `Question ${q.number}`),
     wq.question_ar && !rtl ? h("p", { class: "ws-ar", dir: "rtl", lang: "ar" }, wq.question_ar) : null,
+    wq.picture ? wsPicNode(wq.picture) : null,
     h("div", { class: "mist-row bad" }, h("span", null, "Your answer"), h("b", null, q.your_answer || "—")),
     h("div", { class: "mist-row ok" }, h("span", null, "Correct answer"), h("b", null, wq.answer || "—")),
     q.explanation || q.note ? h("p", { class: "mist-why" }, "💡 " + (q.explanation || q.note)) : null,
@@ -1612,7 +1614,8 @@ async function checkWorksheet(wsId) {
     title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
-                                       ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}) })), files }, "check|" + wsId);
+                                       ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),
+                                       ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
   if (!r) return;
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
   if (!c) return toast("🤖 The check came back empty. Please try again.", 4000);
