@@ -74,6 +74,8 @@ function drawMe() {
   const famSettings = mine && parent ? `<div class="card me-card me-family"><h2>👨‍👩‍👧 Family settings</h2><div class="hub-groups">
       ${isParentId(me) ? `<button class="hub-group hub-sage me-famgo" data-go="family"><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("heart", "hub-3d")}</span><span class="hub-t"><b>Family members</b><small>Add a kid or parent · Codes</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>` : ""}
       <button class="hub-group hub-butter me-famgo" data-setupopen><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("idea", "hub-3d")}</span><span class="hub-t"><b>Features on / off</b><small>Pick what the app shows</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
+      <button class="hub-group hub-peach me-famgo" data-starset><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("achieve", "hub-3d")}</span><span class="hub-t"><b>Shining Star time</b><small>${safe(starWhenText())}</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
+      <button class="hub-group hub-dusty me-famgo" data-extraset><span class="hub-big"><span class="hub-ic" aria-hidden="true">${ico3d("paper", "hub-3d")}</span><span class="hub-t"><b>Extra worksheets</b><small>${data.extraLimit || 3} per kid per day</small></span><span class="hub-go" aria-hidden="true">›</span></span></button>
       </div></div>` : "";
   // 👤 Who this device is signed in as (a parent on the family's main login can say "Not you?": the picker again; kids never)
   const meU = userById(me), notYou = !isKidDevice() && isParentId(me) && isMainLogin(cloudMeta().member) && parentsList().length > 1;
@@ -505,7 +507,7 @@ function wantChipHtml(id, isStar) {
 // data.points.prizeMsg = "monday" → { star: "id", at, reminded? }   (reminded = the parents got the Saturday-evening reminder)
 const STAR_HOUR = 18, GIFT_REMIND_HOUR = 18;
 // ⭐ The announce moment: the LAST day of this points week (its weekday = data.starAt.day) at data.starAt.time (Dubai)
-const starTime = () => data.starAt || { day: 4, time: "18:00" };
+const starTime = () => data.starAt || { day: 4, time: "15:30" };
 const starMinutes = () => { const [h, m] = starTime().time.split(":").map(Number); return h * 60 + m; };
 function starDecided() {
   const d = dubaiNow(), last = addDaysYmd(data.points.week, 6);
@@ -542,14 +544,17 @@ function maybeShowStar() {
   try { localStorage.setItem("starSeen", w); } catch (e) { return; }   // (no storage: never pop up again and again)
   const win = stars(w), medal = i => ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
   const rows = rec.board.filter(x => exists(x.id)).map((x, i) => { const u = userById(x.id);
-    return `<div class="k-row" style="display:flex;justify-content:space-between;gap:12px;padding:6px 4px;font-size:1.1em${win.includes(x.id) ? ";font-weight:800" : ""}">
-      <span>${medal(i)} ${safe(u.emoji)} ${safe(u.name)}</span><b>${x.s}</b></div>`; }).join("");
+    return `<div class="sp-row${win.includes(x.id) ? " win" : ""}"><span>${medal(i)} ${safe(u.emoji)} ${safe(u.name)}</span><b>${x.s}</b></div>`; }).join("");
+  // 📣 v171: one BIG full-screen message, the same for every parent and kid
   $("kCard").style.cssText = "--soft:#fef3c7;--ink:#92400e";
-  $("kCard").innerHTML = `<div class="k-card-top"><div class="big">🌟</div><div class="nm">Shining Star of the Week!</div></div>
-    <p style="text-align:center;font-size:1.3em;margin:6px 12px"><b>${win.map(id => `${safe(userById(id).emoji)} ${safe(userById(id).name)}`).join(" & ")}</b> 🎉</p>
-    <div style="margin:8px 16px">${rows}</div>
-    <p class="hint" style="text-align:center;margin:6px 16px">A new week starts at midnight. Good luck everyone! 💪${win.includes(me) ? "<br>🎁 Choose your gift in ⭐ Points!" : ""}</p>
+  $("kCard").innerHTML = `<div class="sp-confetti" aria-hidden="true">🎉 ✨ 🎊 ✨ 🎉</div>
+    <div class="sp-star" aria-hidden="true">🌟</div>
+    <div class="sp-title">Shining Star of the Week!</div>
+    <div class="sp-names">${win.map(id => `<div>${safe(userById(id).emoji)} ${safe(userById(id).name)}</div>`).join("")}</div>
+    <div class="sp-board">${rows}</div>
+    <p class="sp-note">Well done everyone! A new week starts at midnight. Good luck! 💪${win.includes(me) ? "<br><b>🎁 Choose your gift in ⭐ Points!</b>" : ""}</p>
     <button class="k-ok" id="kOk">Yay! 🎉</button>`;
+  $("kModal").classList.add("star-pop");
   $("kModal").hidden = false;
 }
 // 🎁 Choose my gift (only the ⭐ star, from Friday 6 PM): big option buttons (kids' / parents'), or ✏️ type my own (40 letters).

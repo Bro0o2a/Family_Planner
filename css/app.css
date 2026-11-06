@@ -3115,3 +3115,20 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .mist-card .ws-pic { margin: 6px 0 10px; }
 .aw-row .aw-back { margin-left: auto; flex: none; }
 .ai-failnote { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; background: #fdecea; color: #8a1c13; font-size: .9em; }
+
+/* 🌟 v171: the big Shining Star message (full screen, for everyone) */
+.k-modal.star-pop { padding: 0; background: rgba(120, 53, 15, .55); }
+.k-modal.star-pop > .k-card { max-width: none; width: 100%; height: 100%; max-height: none; border-radius: 0;
+  background: linear-gradient(180deg, #fff7d6 0%, #fde68a 55%, #fbbf24 100%); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 24px 16px; overflow-y: auto; }
+.star-pop .sp-confetti { font-size: 34px; letter-spacing: 6px; }
+.star-pop .sp-star { font-size: 140px; line-height: 1; margin: 14px 0 22px; animation: spPulse 1.4s ease-in-out infinite; }
+@keyframes spPulse { 0%, 100% { transform: scale(1) rotate(-6deg); } 50% { transform: scale(1.15) rotate(6deg); } }
+.star-pop .sp-title { font-size: clamp(32px, 8vw, 56px); font-weight: 900; color: #92400e; line-height: 1.1; }
+.star-pop .sp-names { font-size: clamp(36px, 10vw, 64px); font-weight: 900; color: #78350f; margin: 14px 0 10px; line-height: 1.15; }
+.star-pop .sp-board { width: 100%; max-width: 460px; background: rgba(255, 255, 255, .75); border-radius: 24px; padding: 8px 16px; margin: 8px 0; }
+.star-pop .sp-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 4px; font-size: 22px; color: #78350f; }
+.star-pop .sp-row.win { font-weight: 900; font-size: 26px; }
+.star-pop .sp-note { font-size: 20px; color: #78350f; margin: 10px 8px; max-width: 520px; }
+.k-modal.star-pop > .k-card > .k-ok { position: static; box-shadow: none; font-size: 26px; padding: 16px 48px; margin: 10px 0 0; }
+@media (prefers-reduced-motion: reduce) { .star-pop .sp-star { animation: none; } }
