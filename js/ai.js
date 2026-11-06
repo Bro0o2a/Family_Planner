@@ -293,8 +293,8 @@ function cleanCheck(c, fallbackMax) {
                                                                ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}),
                                                                // (👨‍👩‍👧 a parent's fix: "right" | "wrong" · 🙋 the kid asked a parent to check it)
                                                                ...(["right", "wrong"].includes(q.fixed) ? { fixed: q.fixed } : {}), ...(q.ask === true ? { ask: true } : {}),
-                                                               ...(Array.isArray(q.askTo) ? { askTo: q.askTo.filter(x => okKey(String(x || ""))).slice(0, 4) } : {}),
-                                                               ...(okKey(String(q.fixedBy || "")) ? { fixedBy: q.fixedBy } : {}) })),
+                                                               ...(Array.isArray(q.askTo) ? { askTo: q.askTo.filter(x => okId(String(x || ""))).slice(0, 4) } : {}),
+                                                               ...(okId(String(q.fixedBy || "")) ? { fixedBy: q.fixedBy } : {}) })),
                 at: isYmd(c.at) ? c.at : todayYmd() };
   if (c.aiScore != null && Number.isFinite(Number(c.aiScore))) out.aiScore = aiNum(c.aiScore, 0, 1000, 0);
   if (aiTxt(c.dadNote, 400)) out.dadNote = aiTxt(c.dadNote, 400);
