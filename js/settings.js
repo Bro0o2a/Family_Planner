@@ -17,6 +17,7 @@ function drawSettings() {
   $("acctInfo").textContent = cloud.user ? `Signed in as ${cloud.user.email}. Everyone's phones share this family's data.`
     : cloud.enabled ? "Not signed in." : "Opened from a file: the cloud only works from a web address (http://…).";
   $("signOutBtn").hidden = !cloud.user;
+  $("delAcctBtn").hidden = !cloud.user || !cloud.user.email || isKidDevice();   // (🗑️ parents with an email login only)
   $("setNotify").innerHTML = notifyHtml();
 }
 

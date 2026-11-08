@@ -1,0 +1,32 @@
+/* StudyCal website (site/): the home page, privacy policy and delete-account page. Not part of the app. */
+:root { --bg: #fff6e5; --card: #fff; --text: #2e2a5a; --muted: #6b6190; --line: #efe3cc; --accent: #5b5bd6; --accent-dark: #4646c0; --soft: #eeeefc; --danger: #b91c1c; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent-dark); font-weight: 700; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+header.top { padding: 18px 0; }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-size: 24px; font-weight: 800; }
+.brand img { width: 44px; height: 44px; border-radius: 12px; }
+nav a { margin-left: 14px; text-decoration: none; color: var(--muted); }
+nav a:hover { color: var(--accent-dark); }
+.hero { text-align: center; padding: 40px 0 28px; }
+.hero h1 { font-size: clamp(34px, 7vw, 54px); line-height: 1.1; margin: 0 0 12px; }
+.hero p { font-size: 20px; color: var(--muted); max-width: 600px; margin: 0 auto 26px; }
+.btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 999px; font-size: 19px; box-shadow: 0 6px 18px rgba(80,60,20,.12); }
+.btn:hover { background: var(--accent-dark); }
+.small { font-size: 15px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 18px 0 40px; }
+.card { background: var(--card); border: 2px solid var(--line); border-radius: 22px; padding: 20px 22px; box-shadow: 0 6px 18px rgba(80,60,20,.06); }
+.card h3 { margin: 0 0 6px; font-size: 21px; }
+.card p { margin: 0; color: var(--muted); }
+.card .ico { font-size: 34px; }
+.doc { background: var(--card); border: 2px solid var(--line); border-radius: 22px; padding: 26px 28px; margin: 10px 0 40px; }
+.doc h1 { margin-top: 0; line-height: 1.2; }
+.doc h2 { margin: 28px 0 6px; font-size: 22px; }
+.doc li { margin: 4px 0; }
+.note { background: var(--soft); border-radius: 16px; padding: 14px 18px; }
+.warn { color: var(--danger); font-weight: 700; }
+footer { text-align: center; padding: 10px 16px 40px; color: var(--muted); font-size: 15px; }
+footer a { margin: 0 8px; }
+@media (max-width: 520px) { .doc { padding: 20px 18px; } nav a { margin: 0 12px 0 0; } }
