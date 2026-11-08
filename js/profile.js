@@ -703,6 +703,7 @@ const hallUser = name => data.users.find(u => u.name.trim().toLowerCase() === St
 const hallEntry = u => ({ id: u.id, name: u.name, emoji: u.emoji || "", gift: "", by: "" });
 // The known winners → saved in the hall (once: a parent's fix is never overwritten). → true when something was saved
 function seedHall() {
+  if (cloud.familyId !== OLD_FAMILY_UID) return false;   // (only our first family's real winners: never another family's)
   let changed = false;
   HALL_KNOWN.forEach(([wk, name]) => {
     if (data.points.hall[wk]) return;
@@ -721,7 +722,10 @@ function hallSave(week, id, gift) {
 }
 function hallWeeks() {
   const out = [];
-  for (let dt = fromYmd(HALL_START); ymd(dt) <= data.points.week; dt.setDate(dt.getDate() + 7)) out.push(ymd(dt));
+  // Week 1 = the family's first saved star week (our first family: HALL_START), or the week they started
+  const saved = Object.keys(data.points.hall || {}).filter(isYmd).sort();
+  const first = saved.length ? saved[0] : isYmd(data.points.since) ? pointsWeekOf(fromYmd(data.points.since)) : data.points.week;
+  for (let dt = fromYmd(first); ymd(dt) <= data.points.week; dt.setDate(dt.getDate() + 7)) out.push(ymd(dt));
   return out;   // (oldest first: Week 1, Week 2 …)
 }
 // That week's star: { name, emoji, id?, gift? } or null ("⭐ ?"). (👨‍👩‍👧 an older parent star isn't shown: "⭐ ?")

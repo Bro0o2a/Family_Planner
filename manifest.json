@@ -1,7 +1,7 @@
 {
-  "name": "Hani's Family Plan",
-  "short_name": "Hani's Plan",
-  "description": "Plan your family's week: fixed activities, flexible activities and free hours.",
+  "name": "StudyCal",
+  "short_name": "StudyCal",
+  "description": "Your family's planner: the week's calendar, study and school work, habits and stars.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
