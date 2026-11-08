@@ -1,3 +1,35 @@
+// ---------- ⚠️ APP PROBLEMS: JavaScript errors on this device (they go to the family's cloud: sendAppError in cloud.js) ----------
+// Only the error itself: its words, the file and line, the app version, the screen and parent | kid, when and how often.
+// NEVER names, emails, codes or anything the family typed. Parents see them in ⚙️ Settings → Backup → App problems.
+const ERR_KEY = "weeklyPlanner.v1.errors", ERR_MAX = 30, ERR_SEND_MAX = 20;
+const APP_V = (() => { try { return (document.currentScript.src.match(/[?&]v=(\d+)/) || [])[1] || "?"; } catch (e) { return "?"; } })();
+let appErrors = (() => { try { const a = JSON.parse(localStorage.getItem(ERR_KEY)); return Array.isArray(a) ? a.slice(0, ERR_MAX) : []; } catch (e) { return []; } })();
+let errSent = 0;   // sent to the cloud since the app was opened (at most ERR_SEND_MAX, so an error in a loop can't fill the cloud)
+const errHash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = (h * 33 + t.charCodeAt(i)) >>> 0; return "e" + h.toString(36); };
+const errWhere = stack => { const m = String(stack || "").match(/([A-Za-z0-9_-]+\.js)(?:\?[^:\s)]*)?:(\d+):(\d+)/); return m ? `${m[1]}:${m[2]}:${m[3]}` : ""; };
+function noteAppError(message, where, where2) {
+  try {
+    const msg = String(message || "Unknown error").replace(/\s+/g, " ").trim().slice(0, 200);
+    const at = errWhere(where) || errWhere(where2);   // "school.js:120:5" (never the whole web address)
+    let scr = "", role = "";
+    try { scr = String(screen); } catch (e) {}                              // (not known yet while the app is starting)
+    try { role = isKidDevice() ? "kid" : "parent"; } catch (e) {}
+    const id = errHash(msg + "|" + at + "|" + APP_V), now = new Date().toISOString();
+    const old = appErrors.find(x => x.id === id);
+    const item = old ? { ...old, n: (old.n || 1) + 1, last: now, screen: scr || old.screen }
+      : { id, msg, at, v: APP_V, screen: scr, role, first: now, last: now, n: 1 };
+    appErrors = [item, ...appErrors.filter(x => x.id !== id)].slice(0, ERR_MAX);
+    try { localStorage.setItem(ERR_KEY, JSON.stringify(appErrors)); } catch (e) {}
+    if (typeof sendAppError === "function") sendAppError(item);
+  } catch (e) {}   // (reporting a problem must never cause one)
+}
+window.addEventListener("error", e => { if (e && e.message) noteAppError(e.message, e.error && e.error.stack, `${e.filename || ""}:${e.lineno}:${e.colno}`); });
+window.addEventListener("unhandledrejection", e => { const r = e && e.reason; noteAppError("Promise: " + (r && r.message || r), r && r.stack); });
+// (the app's own "console.error" for a problem it caught, e.g. "Check: …", counts too)
+(() => { const orig = console.error.bind(console);
+  console.error = (...a) => { orig(...a); const err = a.find(x => x instanceof Error);
+    noteAppError(a.map(x => x instanceof Error ? x.message : typeof x === "string" ? x : "").filter(Boolean).join(" "), err && err.stack); }; })();
+
 // ---------- Basic settings ----------
 const DAYS  = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

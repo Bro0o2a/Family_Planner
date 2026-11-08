@@ -27,9 +27,9 @@ const FAKE_WS = { kid: "mody", subject: "Math", date: "2026-11-01", by: "dad", a
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-page.on("pageerror", e => errors.push(`[${step}] ${e.message}`));
+page.on("pageerror", e => { if (!e.message.includes("TEST-BOOM")) errors.push(`[${step}] ${e.message}`); });
 // (a website that can't be reached is the internet, not the app: not counted)
-page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push(`[${step}] console: ${m.text().slice(0, 300)}`); });
+page.on("console", m => { if (m.type() === "error" && !/Failed to load resource|TEST-BOOM/.test(m.text())) errors.push(`[${step}] console: ${m.text().slice(0, 300)}`); });
 page.on("dialog", d => d.accept());   // (a "Replace everything?" box: yes)
 // No real internet services: Firebase blocked; the AI server answers with the fake check
 await page.route("**/*", route => {
@@ -75,6 +75,19 @@ try {
   });
   if (checked === false) errors.push("[pretend AI check] the app did not understand the AI's answer");
 
+  // ⚠️ App problems: a pretend error is written down and shows in Settings → Backup → App problems
+  await run("make a pretend error", () => { setTimeout(() => { throw new Error("TEST-BOOM thrown"); }); console.error("Check:", new Error("TEST-BOOM caught")); });
+  await page.waitForTimeout(300);
+  const shown = await run("show app problems", async () => {
+    me = DAD; go("settings"); render();
+    const box = document.getElementById("errBox"); box.open = true;
+    await drawAppErrors();
+    const text = document.getElementById("errList").textContent;
+    await clearAppErrors();
+    return text.includes("TEST-BOOM thrown") && text.includes("TEST-BOOM caught") && appErrors.length === 0;
+  });
+  if (shown === false) errors.push("[app problems] the pretend errors were not listed in Settings");
+
   // Every screen, as the parent and as a kid
   for (const who of ["dad", "mody"]) {
     for (const s of SCREENS) {
@@ -86,7 +99,7 @@ try {
   await browser.close();
 }
 
-if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, pretend AI check)`); process.exit(0); }
+if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, pretend AI check, app problems list)`); process.exit(0); }
 for (const e of errors) console.error("❌ " + e);
 console.error(`\n${errors.length} problem(s) found.`);
 process.exit(1);

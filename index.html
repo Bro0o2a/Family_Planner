@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=171">
+<link rel="stylesheet" href="css/app.css?v=173">
 </head>
 <body>
 <!-- ============================================================
@@ -367,6 +367,15 @@
           <div class="btnrow">
             <button id="exampleBtn">Load the example week</button>
             <button id="clearBtn" class="danger-text">Delete everything</button>
+          </div>
+        </details>
+        <!-- ⚠️ App problems: errors from every phone (only the error, never the family's data), see noteAppError -->
+        <details class="bk-adv" id="errBox"><summary>App problems</summary>
+          <p class="hint">When something in the app breaks on any of the family's phones, it is written here. Only the error, never your family's data. Tap Copy and send it to Claude.</p>
+          <div id="errList" class="err-list"></div>
+          <div class="btnrow">
+            <button id="errCopy">Copy</button>
+            <button id="errClear" class="danger-text">Clear</button>
           </div>
         </details>
         <!-- Hidden file picker: the "Import backup" button opens it -->
@@ -797,23 +806,23 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=171"></script>
-<script src="js/screens.js?v=171"></script>
-<script src="js/points.js?v=171"></script>
-<script src="js/fun.js?v=171"></script>
-<script src="js/reports.js?v=171"></script>
-<script src="js/profile.js?v=171"></script>
-<script src="js/home.js?v=171"></script>
-<script src="js/activities.js?v=171"></script>
-<script src="js/calendar.js?v=171"></script>
-<script src="js/school.js?v=171"></script>
-<script src="js/ai.js?v=171"></script>
-<script src="js/pictures.js?v=171"></script>
-<script src="js/study.js?v=171"></script>
-<script src="js/settings.js?v=171"></script>
-<script src="js/taps.js?v=171"></script>
-<script src="js/cloud.js?v=171"></script>
-<script src="js/news.js?v=171"></script>
-<script src="js/start.js?v=171"></script>
+<script src="js/core.js?v=173"></script>
+<script src="js/screens.js?v=173"></script>
+<script src="js/points.js?v=173"></script>
+<script src="js/fun.js?v=173"></script>
+<script src="js/reports.js?v=173"></script>
+<script src="js/profile.js?v=173"></script>
+<script src="js/home.js?v=173"></script>
+<script src="js/activities.js?v=173"></script>
+<script src="js/calendar.js?v=173"></script>
+<script src="js/school.js?v=173"></script>
+<script src="js/ai.js?v=173"></script>
+<script src="js/pictures.js?v=173"></script>
+<script src="js/study.js?v=173"></script>
+<script src="js/settings.js?v=173"></script>
+<script src="js/taps.js?v=173"></script>
+<script src="js/cloud.js?v=173"></script>
+<script src="js/news.js?v=173"></script>
+<script src="js/start.js?v=173"></script>
 </body>
 </html>

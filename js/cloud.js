@@ -285,6 +285,7 @@ async function cloudSignedIn(user) {
   setCloudMeta({ role: cloud.role, kidId: cloud.kidId, member: { uid: user.uid, familyId: m.familyId, role: cloud.role, kidId: cloud.kidId,
                  ...(typeof m.person === "string" ? { person: m.person } : {}), ...(typeof m.name === "string" ? { name: m.name } : {}) } });   // (👤 who this account is)
   applyRole();
+  appErrors.forEach(sendAppError);   // ⚠️ problems from before the sign-in
   // 🆕 A new family: this device starts with only the parent (then "Add your kids")
   if (cloud.fresh) {
     data = freshFamilyData(cloud.fresh.parentName);
@@ -702,4 +703,25 @@ async function signOutDevice() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(CLOUD_META); } catch (e) {}
   try { await fb.terminate(cloud.db); await fb.clearIndexedDbPersistence(cloud.db); } catch (e) {}
   location.reload();   // → the first screen
+}
+
+// ---------- ⚠️ APP PROBLEMS → the family's own cloud: families/{familyId}/state/errors = { items: { id: problem } } ----------
+// (see noteAppError in core.js: only the error, never the family's data; no outside company gets it)
+const errRef = () => cloud.fb.doc(cloud.db, "families", cloud.familyId, "state", "errors");
+function sendAppError(item) {
+  if (!cloud.fb || !cloud.db || !cloud.familyId || !item || errSent >= ERR_SEND_MAX) return;
+  errSent++;
+  cloud.fb.setDoc(errRef(), { items: { [item.id]: item } }, { merge: true }).catch(() => {});
+}
+// Every phone's problems (newest first), or only this phone's when there's no cloud
+async function allAppErrors() {
+  let items = {};
+  try { if (cloud.fb && cloud.db && cloud.familyId) { const snap = await cloud.fb.getDoc(errRef()); items = (snap.exists() && snap.data().items) || {}; } } catch (e) {}
+  appErrors.forEach(x => { if (!items[x.id] || String(items[x.id].last) < x.last) items[x.id] = x; });
+  return Object.values(items).filter(x => x && x.id).sort((a, b) => String(b.last).localeCompare(String(a.last))).slice(0, ERR_MAX);
+}
+async function clearAppErrors() {
+  appErrors = [];
+  try { localStorage.removeItem(ERR_KEY); } catch (e) {}
+  try { if (cloud.fb && cloud.db && cloud.familyId) await cloud.fb.setDoc(errRef(), { items: {} }); } catch (e) {}
 }
