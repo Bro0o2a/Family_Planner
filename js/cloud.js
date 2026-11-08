@@ -351,6 +351,19 @@ function cloudSnap(name, snap) {
   showSync();
   if (!cloud.ready) return cloudFirstSync();
   if (snap.exists()) cloudApply(name, snap.data());
+  else if (name === "plan" && !snap.metadata.fromCache && !snap.metadata.hasPendingWrites) familyMaybeGone();
+}
+// 🗑️ The family's plan vanished while this phone was open: was the family account deleted (on another phone)?
+// Then this phone forgets everything too (and a kid's code login is removed), instead of putting the data back.
+async function familyMaybeGone() {
+  if (!cloud.user || cloud.user.uid === OLD_FAMILY_UID) return;
+  let gone = false;
+  try { gone = !(await cloud.fb.getDoc(cloud.fb.doc(cloud.db, "members", cloud.user.uid))).exists(); } catch (e) { return; }
+  if (!gone) return;
+  cloud.unsub.forEach(stop => stop()); cloud.unsub = []; cloud.ready = false;
+  if (cloud.user.isAnonymous) await cloud.fb.deleteUser(cloud.user).catch(() => {});
+  try { await cloud.fb.signOut(cloud.auth); } catch (e) {}
+  accountGone("🗑️ This family account was deleted. Thank you for using StudyCal.");
 }
 
 // ---------- The first time (on this device, since opening the app): match up the cloud and this device ----------
@@ -706,6 +719,78 @@ async function signOutDevice() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(CLOUD_META); } catch (e) {}
   try { await fb.terminate(cloud.db); await fb.clearIndexedDbPersistence(cloud.db); } catch (e) {}
   location.reload();   // → the first screen
+}
+
+// ---------- 🗑️ DELETE THE FAMILY ACCOUNT (the stores ask for this; ⚙️ Settings → ☁️ Family account, parents only) ----------
+// The family's main login (it made the family: its uid is the family id) deletes EVERYTHING: families/{id} and all of its
+// documents (state/*: plan, points, habits, news, photos, errors, reports · files/* · worksheets/* · explanations/*), the kids'
+// codes, every member's "who is who" (members/*, so no phone can open the family any more) and then its own login.
+// Another parent deletes only their own login (the family stays). Needs the password (Firebase asks for a fresh sign-in)
+// and the word DELETE. Nothing is sent anywhere else.
+const FAMILY_COLS = ["state", "files", "worksheets", "explanations"];
+const delMain = () => !!cloud.user && cloud.user.uid === cloud.familyId;
+function openDeleteAccount() {
+  if (!cloud.user || !cloud.user.email || isKidDevice()) return;
+  $("daHint").textContent = delMain()
+    ? "This deletes your WHOLE family account: the calendar, plans, points, stars, school files, photos, worksheets, " +
+      "explanations, the kids' codes and every login of the family. All phones are signed out. This can't be undone. " +
+      "Tip: tap Backup → Save a copy first."
+    : "This deletes YOUR login only (" + cloud.user.email + "). The family's data stays for the other parent. " +
+      "This can't be undone.";
+  $("daPass").value = ""; $("daWord").value = ""; $("daErr").textContent = "";
+  $("daDel").disabled = true;
+  $("delAcctModal").hidden = false;
+  $("daPass").focus();
+}
+const delReady = () => !!$("daPass").value && $("daWord").value.trim().toUpperCase() === "DELETE";
+["daPass", "daWord"].forEach(id => $(id).addEventListener("input", () => $("daDel").disabled = !delReady()));
+const closeDeleteAccount = () => { $("delAcctModal").hidden = true; $("daPass").value = ""; };
+$("daCancel").onclick = closeDeleteAccount;
+$("delAcctModal").addEventListener("click", e => { if (e.target === $("delAcctModal")) closeDeleteAccount(); });
+$("delAcctBtn").onclick = openDeleteAccount;
+$("daDel").onclick = async () => {
+  if (!delReady() || !cloud.user) return;
+  if (!navigator.onLine) return $("daErr").textContent = "🔌 Deleting needs the internet.";
+  $("daDel").disabled = true; $("daErr").textContent = "One moment…";
+  const fb = cloud.fb, user = cloud.user;
+  try { await fb.reauthenticateWithCredential(user, fb.EmailAuthProvider.credential(user.email, $("daPass").value)); }
+  catch (err) { $("daDel").disabled = false; return $("daErr").textContent = /wrong-password|invalid-credential|invalid-login/.test(err.code || "") ? "That password isn't right." : loginError(err); }
+  try { await deleteAccountNow(); }
+  catch (err) {
+    console.warn("Delete account:", err);
+    $("daDel").disabled = false;
+    return $("daErr").textContent = "⚠ Not everything was deleted (" + (err.code || err.message || "error") + "). Please try again, or email us.";
+  }
+  closeDeleteAccount();
+  accountGone("🗑️ Your account was deleted. Thank you for using StudyCal.");
+};
+// The deleting itself (after the password). Throws if a step fails, so it can be tried again: each step can run twice.
+async function deleteAccountNow() {
+  const fb = cloud.fb, db = cloud.db, fid = cloud.familyId, uid = cloud.user.uid, main = delMain();
+  errSent = ERR_SEND_MAX;   // (⚠️ no more App problems sent: they would make state/errors again)
+  // Stop listening and saving first, so this phone never puts anything back
+  cloud.unsub.forEach(stop => stop()); cloud.unsub = []; cloud.ready = false;
+  const del = async refs => { for (let i = 0; i < refs.length; i += 400) { const b = fb.writeBatch(db); refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit(); } };
+  if (main) {
+    for (const col of FAMILY_COLS) { const snap = await fb.getDocs(fb.collection(db, "families", fid, col)); const refs = []; snap.forEach(d => refs.push(d.ref)); await del(refs); }
+    // Who is in the family (to remove their codes and their "who is who"), then the codes, the others, the family, and me last
+    const ms = await fb.getDocs(fb.query(fb.collection(db, "members"), fb.where("familyId", "==", fid))), others = [], codes = new Set();
+    ms.forEach(d => { if (d.id !== uid) others.push(d.ref); const c = d.data().code; if (typeof c === "string" && c) codes.add(c); });
+    data.users.forEach(u => { if (u.code) codes.add(u.code); });
+    if (famParentCode) codes.add(famParentCode);
+    for (const c of codes) await fb.deleteDoc(fb.doc(db, "codes", c)).catch(() => {});   // (a code already used up is gone already)
+    await del(others);
+    await fb.deleteDoc(fb.doc(db, "families", fid));
+  }
+  await fb.deleteDoc(fb.doc(db, "members", uid));
+  await fb.deleteUser(cloud.user);
+}
+// Done: forget everything on this phone, then the first screen
+async function accountGone(text) {
+  try { Object.keys(localStorage).filter(k => k.startsWith(SAVE_KEY)).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+  try { await cloud.fb.terminate(cloud.db); await cloud.fb.clearIndexedDbPersistence(cloud.db); } catch (e) {}
+  alert(text);
+  location.reload();
 }
 
 // ---------- ⚠️ APP PROBLEMS → the family's own cloud: families/{familyId}/state/errors = { items: { id: problem } } ----------

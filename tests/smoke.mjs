@@ -108,6 +108,32 @@ try {
   });
   if (shown === false) errors.push("[app problems] the pretend errors were not listed in Settings");
 
+  // 🗑️ Delete family account: with a pretend cloud, everything of this family goes, another family's data stays
+  const deleted = await run("delete family account", async () => {
+    const store = new Map(), path = a => a.join("/");
+    const put = (p, v) => store.set(p, v);
+    ["state/plan", "state/points", "state/photo-a", "files/f1", "worksheets/w1", "explanations/e1"].forEach(x => put("families/fam1/" + x, {}));
+    put("families/fam1", { name: "Test" }); put("families/fam2/state/plan", {}); put("codes/KID111", { familyId: "fam1" }); put("codes/OTHER1", { familyId: "fam2" });
+    put("members/fam1", { familyId: "fam1", role: "parent" }); put("members/kidA", { familyId: "fam1", role: "kid", code: "KID111" }); put("members/x", { familyId: "fam2" });
+    let userGone = false;
+    const ref = p => ({ path: p, id: p.split("/").pop() });
+    const docs = (pre, f) => [...store.keys()].filter(k => k.startsWith(pre + "/") && k.split("/").length === pre.split("/").length + 1 && (!f || f(store.get(k))))
+      .map(k => ({ id: k.split("/").pop(), ref: ref(k), data: () => store.get(k) }));
+    const keep = { fb: cloud.fb, db: cloud.db, user: cloud.user, familyId: cloud.familyId };
+    cloud.fb = {
+      doc: (db, ...a) => ref(path(a)), collection: (db, ...a) => ({ col: path(a) }), where: (k, op, v) => ({ k, v }),
+      query: (c, w) => ({ col: c.col, w }), getDocs: async q => { const list = docs(q.col, q.w && (d => d[q.w.k] === q.w.v)); return { forEach: f => list.forEach(f) }; },
+      deleteDoc: async r => { store.delete(r.path); }, writeBatch: () => { const l = []; return { delete: r => l.push(r), commit: async () => l.forEach(r => store.delete(r.path)) }; },
+      deleteUser: async () => { userGone = true; } };
+    cloud.db = {}; cloud.user = { uid: "fam1", email: "p@x.com" }; cloud.familyId = "fam1";
+    data.users.forEach(u => { if (u.id === "ex-kid1") u.code = "KID111"; });
+    await deleteAccountNow();
+    Object.assign(cloud, keep);
+    const left = [...store.keys()].sort().join(",");
+    return left === "codes/OTHER1,families/fam2/state/plan,members/x" && userGone ? "ok" : left + " · login gone " + userGone;
+  });
+  if (deleted !== "ok") errors.push("[delete family account] left: " + deleted);
+
   // 🆕 A new family starts with only its parent: no other family's kids, names or past stars
   const fresh = await run("new family", () => {
     const d = cleanData(freshFamilyData("Sam")), keep = data;
@@ -128,7 +154,7 @@ try {
   await browser.close();
 }
 
-if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, AI OK, report box, pretend AI check, app problems list, new family)`); process.exit(0); }
+if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, AI OK, report box, pretend AI check, app problems list, delete account, new family)`); process.exit(0); }
 for (const e of errors) console.error("❌ " + e);
 console.error(`\n${errors.length} problem(s) found.`);
 process.exit(1);

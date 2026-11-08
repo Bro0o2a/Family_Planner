@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=175">
+<link rel="stylesheet" href="css/app.css?v=176">
 </head>
 <body>
 <!-- ============================================================
@@ -387,6 +387,7 @@
         <p class="hint" id="acctInfo">Not signed in.</p>
         <div class="btnrow">
           <button id="signOutBtn" class="danger-text">Sign out</button>
+          <button id="delAcctBtn" class="danger-text" hidden>Delete family account</button>
         </div>
       </div>
       <!-- 🔔 Notifications: each device decides for itself (kept on this device, not in the cloud) -->
@@ -519,6 +520,22 @@
   </div>
 </div>
 
+<!-- 🗑️ Delete the family account (⚙️ Settings → ☁️ Family account, parents only): the password + type DELETE -->
+<div class="k-modal" id="delAcctModal" hidden>
+  <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="daTitle" aria-describedby="daHint">
+    <div class="print-title" id="daTitle">🗑️ Delete family account</div>
+    <p class="print-hint" id="daHint"></p>
+    <label class="small" for="daPass">Your password</label>
+    <input type="password" id="daPass" autocomplete="current-password">
+    <label class="small" for="daWord">Type DELETE to confirm</label>
+    <input type="text" id="daWord" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <p class="print-hint" id="daErr" role="alert"></p>
+    <div class="btnrow">
+      <button class="danger-fill" id="daDel" disabled>🗑️ Delete forever</button>
+      <button id="daCancel">Cancel</button>
+    </div>
+  </div>
+</div>
 <!-- 🗑️ Reset a kid's study data (👨‍👩‍👧 Family, parents' devices only): type the kid's name, then Delete -->
 <div class="k-modal" id="resetModal" hidden>
   <div class="k-card sc-seesaw-card" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
@@ -800,9 +817,10 @@
       <li>The app owner can technically open the database to fix problems. We promise not to look at your family's data unless you ask us to help.</li>
       <li>🤖 AI helper: when you use it, the school work you send goes to Anthropic (the company that makes Claude) only to make the answer. We don't keep these files on our server, and Anthropic does not use them to train its AI.</li>
       <li>Inside the family: parents can see the kids' plans and moods. A kid can tick "🔒 Just for me" on My day so the text stays private (the mood still shows).</li>
-      <li>Want your family's data deleted? Ask us and we will delete all of it.</li>
+      <li>🗑️ Want your family's data deleted? A parent can delete the whole family account in ⚙️ Settings → ☁️ Family account → Delete family account. It deletes everything at once and can't be undone. You can also email us and we will delete it for you.</li>
       <li>📊 On parents' phones we count how many people use the app and which pages they open (no names, no family data), to make the app better. Never on kids' phones.</li>
     </ol>
+    <p class="pv-foot"><a href="site/privacy.html" target="_blank" rel="noopener">Read the full privacy policy</a></p>
     <p class="pv-foot" id="privacyContact" hidden></p>
     <p class="pv-foot" id="privacyDate"></p>
     <button class="k-ok" data-privacyclose>OK</button>
@@ -832,23 +850,23 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=175"></script>
-<script src="js/screens.js?v=175"></script>
-<script src="js/points.js?v=175"></script>
-<script src="js/fun.js?v=175"></script>
-<script src="js/reports.js?v=175"></script>
-<script src="js/profile.js?v=175"></script>
-<script src="js/home.js?v=175"></script>
-<script src="js/activities.js?v=175"></script>
-<script src="js/calendar.js?v=175"></script>
-<script src="js/school.js?v=175"></script>
-<script src="js/ai.js?v=175"></script>
-<script src="js/pictures.js?v=175"></script>
-<script src="js/study.js?v=175"></script>
-<script src="js/settings.js?v=175"></script>
-<script src="js/taps.js?v=175"></script>
-<script src="js/cloud.js?v=175"></script>
-<script src="js/news.js?v=175"></script>
-<script src="js/start.js?v=175"></script>
+<script src="js/core.js?v=176"></script>
+<script src="js/screens.js?v=176"></script>
+<script src="js/points.js?v=176"></script>
+<script src="js/fun.js?v=176"></script>
+<script src="js/reports.js?v=176"></script>
+<script src="js/profile.js?v=176"></script>
+<script src="js/home.js?v=176"></script>
+<script src="js/activities.js?v=176"></script>
+<script src="js/calendar.js?v=176"></script>
+<script src="js/school.js?v=176"></script>
+<script src="js/ai.js?v=176"></script>
+<script src="js/pictures.js?v=176"></script>
+<script src="js/study.js?v=176"></script>
+<script src="js/settings.js?v=176"></script>
+<script src="js/taps.js?v=176"></script>
+<script src="js/cloud.js?v=176"></script>
+<script src="js/news.js?v=176"></script>
+<script src="js/start.js?v=176"></script>
 </body>
 </html>
