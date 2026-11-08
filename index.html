@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=174">
+<link rel="stylesheet" href="css/app.css?v=175">
 </head>
 <body>
 <!-- ============================================================
@@ -746,6 +746,32 @@
     <div class="btnrow"><button class="primary" id="asOk">OK</button></div>
   </div>
 </div>
+<!-- 🤖 Before the first AI use: a parent says OK for the family (the stores ask for this) -->
+<div class="k-modal" id="aiOkModal" hidden>
+  <div class="k-card wp-card" role="dialog" aria-modal="true" aria-labelledby="aokTitle" aria-describedby="aiOkText">
+    <div class="print-title" id="aokTitle">🤖 Turn on the AI helper?</div>
+    <p class="print-hint" id="aiOkText">To make worksheets, explain lessons and check answers, the app sends the school work (photos, files and answers) and the child's first name, year and school to Anthropic, the AI company. It is used only to make the answer and is never used to train AI.</p>
+    <p class="print-hint" id="aiOkKid" hidden>👨‍👩‍👧 Ask your parent to turn on the AI helper on their phone.</p>
+    <div class="btnrow"><button class="primary" id="aiOkYes">I agree</button><button id="aiOkNo">Not now</button></div>
+  </div>
+</div>
+<!-- 🚩 Report an AI answer -->
+<div class="k-modal" id="aiReportModal" hidden>
+  <div class="k-card wp-card" role="dialog" aria-modal="true" aria-labelledby="arTitle">
+    <div class="print-title" id="arTitle">🚩 Report this AI answer</div>
+    <p class="print-hint">Tell us what is wrong. We read every report.</p>
+    <label class="small" for="arWhy">What is wrong?</label>
+    <select id="arWhy">
+      <option value="wrong">❌ The answer is wrong</option>
+      <option value="child">🧒 Not right for a child</option>
+      <option value="unsafe">⚠️ Unsafe or upsetting</option>
+      <option value="other">💬 Something else</option>
+    </select>
+    <label class="small" for="arNote">More details (optional)</label>
+    <textarea id="arNote" rows="3" maxlength="300" placeholder="What did you see?"></textarea>
+    <div class="btnrow"><button class="primary" id="arSend">Send</button><button id="arCancel">Cancel</button></div>
+  </div>
+</div>
 <div class="k-modal" id="sparkNameModal" hidden>
   <div class="k-card sn-card" role="dialog" aria-modal="true" aria-labelledby="snTitle">
     <div class="sn-face" id="snFace" aria-hidden="true"></div>
@@ -775,7 +801,7 @@
       <li>🤖 AI helper: when you use it, the school work you send goes to Anthropic (the company that makes Claude) only to make the answer. We don't keep these files on our server, and Anthropic does not use them to train its AI.</li>
       <li>Inside the family: parents can see the kids' plans and moods. A kid can tick "🔒 Just for me" on My day so the text stays private (the mood still shows).</li>
       <li>Want your family's data deleted? Ask us and we will delete all of it.</li>
-      <li>📊 We count how many people use the app and which pages they open (no names, no family data), to make the app better.</li>
+      <li>📊 On parents' phones we count how many people use the app and which pages they open (no names, no family data), to make the app better. Never on kids' phones.</li>
     </ol>
     <p class="pv-foot" id="privacyContact" hidden></p>
     <p class="pv-foot" id="privacyDate"></p>
@@ -806,23 +832,23 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=174"></script>
-<script src="js/screens.js?v=174"></script>
-<script src="js/points.js?v=174"></script>
-<script src="js/fun.js?v=174"></script>
-<script src="js/reports.js?v=174"></script>
-<script src="js/profile.js?v=174"></script>
-<script src="js/home.js?v=174"></script>
-<script src="js/activities.js?v=174"></script>
-<script src="js/calendar.js?v=174"></script>
-<script src="js/school.js?v=174"></script>
-<script src="js/ai.js?v=174"></script>
-<script src="js/pictures.js?v=174"></script>
-<script src="js/study.js?v=174"></script>
-<script src="js/settings.js?v=174"></script>
-<script src="js/taps.js?v=174"></script>
-<script src="js/cloud.js?v=174"></script>
-<script src="js/news.js?v=174"></script>
-<script src="js/start.js?v=174"></script>
+<script src="js/core.js?v=175"></script>
+<script src="js/screens.js?v=175"></script>
+<script src="js/points.js?v=175"></script>
+<script src="js/fun.js?v=175"></script>
+<script src="js/reports.js?v=175"></script>
+<script src="js/profile.js?v=175"></script>
+<script src="js/home.js?v=175"></script>
+<script src="js/activities.js?v=175"></script>
+<script src="js/calendar.js?v=175"></script>
+<script src="js/school.js?v=175"></script>
+<script src="js/ai.js?v=175"></script>
+<script src="js/pictures.js?v=175"></script>
+<script src="js/study.js?v=175"></script>
+<script src="js/settings.js?v=175"></script>
+<script src="js/taps.js?v=175"></script>
+<script src="js/cloud.js?v=175"></script>
+<script src="js/news.js?v=175"></script>
+<script src="js/start.js?v=175"></script>
 </body>
 </html>

@@ -1325,6 +1325,7 @@ function wsViewNode(w, id, s, isDad) {
       h("button", { data: { wsact: "pdf" } }, "📄 Download PDF"),
       h("button", { data: { wsact: "key" } }, open ? "📄 Answer key PDF" : "🔒 Answer key PDF"),
       h("button", { data: { wsact: "again" } }, "🔁 Make another"),
+      h("button", { data: { aireport: "worksheet|" + id } }, "🚩 Report"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
     wsLevelNode(w),
     wsSheetNode(w, show),
@@ -1732,6 +1733,7 @@ function schoolExplainHtml(s, isDad) {
     h("div", { class: "ai-toolbar" },
       h("button", { class: "primary", data: { exact: "print" } }, "🖨️ Print"),
       h("button", { data: { exact: "ws" } }, "📝 Worksheet on this"),
+      h("button", { data: { aireport: "explanation|" + schoolDoc } }, "🚩 Report"),
       isDad ? h("button", { class: "danger-text", data: { exact: "delete" } }, "🗑️ Delete") : null),
     exSheetNode(x), gotItNode(x), aiLinksNode(x))) : notHere();
 }

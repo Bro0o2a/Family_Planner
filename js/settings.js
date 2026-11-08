@@ -625,17 +625,20 @@ $("clearBtn").onclick = () => {
 
 // ⚠️ App problems (⚙️ Settings → Backup): every phone's errors, newest first (see noteAppError / allAppErrors)
 const errLine = x => `v${x.v} · ${x.at || "?"} · ${x.screen || "?"} · ${x.role || "?"} · ${x.n || 1}× · ${String(x.last).slice(0, 16).replace("T", " ")} UTC — ${x.msg}`;
+const WHY_TEXT = { wrong: "Wrong answer or marking", child: "Not right for a child", unsafe: "Hurtful or unsafe", other: "Something else" };
+const reportLine = r => `🚩 AI report · ${r.kind} ${r.doc || ""} · ${WHY_TEXT[r.why] || r.why} · ${r.role} · ${String(r.at).slice(0, 16).replace("T", " ")} UTC${r.note ? " — " + r.note : ""}`;
 async function drawAppErrors() {
-  const list = await allAppErrors();
+  const [errs, reps] = await Promise.all([allAppErrors(), allAiReports()]);
+  const lines = [...reps.map(reportLine), ...errs.map(errLine)];
   $("errList").textContent = "";
-  if (!list.length) { $("errList").textContent = "No problems. 👍"; return list; }
-  list.forEach(x => { const p = document.createElement("p"); p.textContent = errLine(x); $("errList").append(p); });
-  return list;
+  if (!lines.length) { $("errList").textContent = "No problems. 👍"; return lines; }
+  lines.forEach(t => { const p = document.createElement("p"); p.textContent = t; $("errList").append(p); });
+  return lines;
 }
 $("errBox").addEventListener("toggle", () => { if ($("errBox").open) drawAppErrors(); });
 $("errCopy").onclick = async () => {
   const list = await drawAppErrors();
-  const text = list.length ? `App problems (${APP_NAME}):\n` + list.map(errLine).join("\n") : "No problems.";
+  const text = list.length ? `App problems (${APP_NAME}):\n` + list.join("\n") : "No problems.";
   try { await navigator.clipboard.writeText(text); toast("📋 Copied. Paste it to Claude.", 3000); }
   catch (e) { toast("Couldn't copy. Take a screenshot instead.", 4000); }
 };

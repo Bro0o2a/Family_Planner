@@ -53,7 +53,7 @@ const ANALYTICS_SCREENS = { home: "Today", mine: "Calendar", school: "School", p
                             setup: "Setup", start: "Who are you" };
 let an = null, anScreen = null;   // { mod, a } once it's ready · the last screen sent
 async function startAnalytics(app) {
-  if (location.protocol !== "https:" || an) return;
+  if (location.protocol !== "https:" || an || isKidDevice()) return;   // (👧 never on a kid's device)
   try {
     const mod = await import(FIREBASE_URL + "firebase-analytics.js");
     if (!(await mod.isSupported())) return;
@@ -96,7 +96,7 @@ async function startCloud() {
   }
   cloud.loading = false;
   const fb = cloud.fb, app = fb.initializeApp(firebaseConfig);
-  startAnalytics(app);            // 📊 counting visits (https only; see ANALYTICS)
+  cloud.app = app;                // (📊 Analytics starts once we know this is a parent's device: see applyRole)
   cloud.auth = fb.getAuth(app);   // remembers the login on this device (until "Sign out")
   try {
     // Offline persistence: Firestore keeps a copy on the device and queues changes until you're online again
@@ -322,7 +322,10 @@ function freshFamilyData(parentName) {
 // 🧒 / 👨‍👩‍👧 The device's role: a kid's device hides Settings, Switch user, backups and deleting (see the kid-device CSS)
 function applyRole() {
   document.body.classList.toggle("kid-device", isKidDevice());
-  sendAnalyticsRole();   // 📊 role = parent | kid (nothing else about the person)
+  // 📊 Analytics: parents' devices only, never a kid's (kids' privacy). A device that becomes a kid's stops counting.
+  if (!isKidDevice() && cloud.app) startAnalytics(cloud.app);
+  if (isKidDevice() && an) { try { an.mod.setAnalyticsCollectionEnabled(an.a, false); } catch (e) {} an = null; }
+  sendAnalyticsRole();   // 📊 role = parent (nothing else about the person)
   if (isKidDevice() && exists(kidDeviceId())) { me = kidDeviceId(); if (screen === "start") go("home"); }
 }
 function cloudSignedOut() {
