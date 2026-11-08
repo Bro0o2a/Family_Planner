@@ -655,7 +655,8 @@ $("exampleBtn").onclick = () => {
   const fx = (name, users, days, start, end) => data.fixed.push({ id: newId(), name, days, start, end, overlapWith: [], users, helper: "", type: defaultActType({ name }), ...autoPads(name) });
   const fl = (id, name, user, duration, times, needsDad, overlapWith) => data.flexible.push({ id, name, duration, times, overlapWith: overlapWith || [], users: [user], helper: needsDad ? DAD : "", type: "activity", ...autoPads(name) });
   const rt = (name, emoji, start, duration, users) => data.routines.push({ id: newId(), name, emoji, start, duration, days: [0, 1, 2, 3, 4, 5, 6], users, custom: false });
-  const everyone = data.users.map(u => u.id), kids = ["mody", "bana", "jawad"];
+  data.users.push(...EXAMPLE_KIDS.map(k => ({ ...k })));   // (🧪 pretend kids, never a real family's)
+  const everyone = data.users.map(u => u.id), kids = EXAMPLE_KIDS.map(k => k.id);
   fx("Work", [DAD], [0, 1, 2, 3, 4], "09:00", "17:00");
   fx("School", kids, [0, 1, 2, 3, 4], "07:30", "14:00");   // one activity for all three kids (15 min to get ready)
   // Routines: nothing gets planned on top of them
@@ -663,13 +664,13 @@ $("exampleBtn").onclick = () => {
   rt("Lunch", "🍽️", "14:15", 30, everyone);
   rt("Dinner", "🍲", "19:00", 30, everyone);
   rt("Bedtime routine", "🌙", "20:30", 20, kids);
-  // Mody's math and Bana's Arabic are allowed together (Dad can teach both at once).
-  fl("ex-math", "Math", "mody", 45, 3, true, ["ex-arabic"]);
-  fl("ex-arabic", "Arabic", "bana", 45, 3, true, ["ex-math"]);
-  fl(newId(), "English", "jawad", 30, 4, true);
-  fl(newId(), "Reading", "bana", 30, 3, false);
-  fl(newId(), "Science", "mody", 45, 2, true);
-  fl(newId(), "Quran", "jawad", 30, 3, true);
+  // Omar's math and Sara's Arabic are allowed together (Dad can teach both at once).
+  fl("ex-math", "Math", "ex-kid1", 45, 3, true, ["ex-arabic"]);
+  fl("ex-arabic", "Arabic", "ex-kid2", 45, 3, true, ["ex-math"]);
+  fl(newId(), "English", "ex-kid3", 30, 4, true);
+  fl(newId(), "Reading", "ex-kid2", 30, 3, false);
+  fl(newId(), "Science", "ex-kid1", 45, 2, true);
+  fl(newId(), "Quran", "ex-kid3", 30, 3, true);
   fl(newId(), "Gym", DAD, 60, 3, false);  makeAndKeepPlan();
   writeData("replace");
   go("all");

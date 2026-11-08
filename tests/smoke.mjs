@@ -20,7 +20,7 @@ const FAKE_CHECK = { score: 4, max_score: 5, overall_note: "Good work!", strong_
   coach_tip: "Practise carrying.", questions: [
     { number: 1, correct: true, points: 3, note: "Right", your_answer: "12", askTo: ["dad"], fixedBy: "dad" },
     { number: 2, correct: false, points: 1, note: "Almost", your_answer: "8", ask: true }] };
-const FAKE_WS = { kid: "mody", subject: "Math", date: "2026-11-01", by: "dad", at: "test", title: "Adding practice", intro: "Add the numbers.",
+const FAKE_WS = { kid: "ex-kid1", subject: "Math", date: "2026-11-01", by: "dad", at: "test", title: "Adding practice", intro: "Add the numbers.",
   topics: ["Adding"], count: 2, answers: ["ans1"], check: FAKE_CHECK, questions: [
     { number: 1, kind: "short_answer", prompt: "7 + 5 = ?", answer: "12", points: 3, topic: "Adding", skill: "carrying", difficulty: 3 },
     { number: 2, kind: "multiple_choice", prompt: "4 + 5 = ?", options: ["8", "9", "10"], answer: "9", points: 2 }] };
@@ -88,8 +88,17 @@ try {
   });
   if (shown === false) errors.push("[app problems] the pretend errors were not listed in Settings");
 
+  // 🆕 A new family starts with only its parent: no other family's kids, names or past stars
+  const fresh = await run("new family", () => {
+    const d = cleanData(freshFamilyData("Sam")), keep = data;
+    data = d; const hall = hallWeeks().length, seeded = seedHall(); data = keep;
+    const names = d.users.map(u => u.name).join(",");
+    return names === "Sam" && hall <= 1 && !seeded && !/Mody|Bana|Jawad|Bro2a|Hani/.test(JSON.stringify(d)) ? "ok" : `${names} · ${hall} weeks · seeded ${seeded}`;
+  });
+  if (fresh !== "ok") errors.push("[new family] " + fresh);
+
   // Every screen, as the parent and as a kid
-  for (const who of ["dad", "mody"]) {
+  for (const who of ["dad", "ex-kid1"]) {
     for (const s of SCREENS) {
       await run(`${who} → ${s}`, ([w, sc]) => { me = w; go(sc); render(); }, [who, s]);
       await page.waitForTimeout(150);
@@ -99,7 +108,7 @@ try {
   await browser.close();
 }
 
-if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, pretend AI check, app problems list)`); process.exit(0); }
+if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, pretend AI check, app problems list, new family)`); process.exit(0); }
 for (const e of errors) console.error("❌ " + e);
 console.error(`\n${errors.length} problem(s) found.`);
 process.exit(1);

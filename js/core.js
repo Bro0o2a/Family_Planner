@@ -47,7 +47,7 @@ const PRAYER_AMMAN = { city: "Amman, Jordan", lat: 31.9539, lng: 35.9106 };   //
 const PRAYERS_LIST = [["fajr", "Fajr"], ["dhuhr", "Dhuhr"], ["asr", "Asr"], ["maghrib", "Maghrib"], ["isha", "Isha"]];
 const PRAYER_MIN = 15;                            // the reminder shows during the first 15 minutes
 const SAVE_KEY = "weeklyPlanner.v1";             // the name we save our data under in the browser
-const APP_NAME = "Hani's Family Plan";
+const APP_NAME = "StudyCal";
 const CONTACT = "";                              // 🔒 Privacy: who to ask (an email, …). Empty = the "Questions?" line is hidden.
 const PRIVACY_UPDATED = "21 October 2026";       // 🔒 Privacy: change this when the text changes
 const DAD = "dad";                               // Dad's id. Dad can't be removed. (Only the shown name can change.)
@@ -58,7 +58,7 @@ function isParentId(id) {
   try { return !!id && !!data && Array.isArray(data.users) && data.users.some(u => u.id === id && u.role === "parent"); }
   catch (e) { return false; }   // (before the family's data is loaded)
 }
-const DAD_NAME = "Bro2a";                        // the name Dad is shown with
+const DAD_NAME = "Parent";                       // the first parent's name until they pick their own (a new family types it at sign-up)
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
 // 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
 const OLD_FAMILY_UID = "Hk3ZPk0xkTYLpLVBXrR8BUn3hfJ3";   // our first shared family account (its familyId = its uid)
@@ -337,15 +337,18 @@ const EMOJIS = ["🦸‍♂️", "👩", "🚀", "🦄", "🦊", "🐼", "🐯",
 // 👤 My profile: ❤️ things I love (each a short box the person fills themselves)
 const LOVES = [["food", "🍕", "Favourite food"], ["color", "🎨", "Favourite colour"], ["game", "🎮", "Favourite game"], ["job", "🚀", "Dream job"]];
 
-// The people you start with
+// The people you start with: only the parent (each family adds its own kids)
 function defaultUsers() {
   return [
-    { id: DAD,     name: DAD_NAME, emoji: "🦸‍♂️", color: "blue" },
-    { id: "mody",  name: "Mody",  emoji: "🚀", color: "green" },
-    { id: "bana",  name: "Bana",  emoji: "🦄", color: "pink" },
-    { id: "jawad", name: "Jawad", emoji: "🦊", color: "orange" }
+    { id: DAD, name: DAD_NAME, emoji: "🦸‍♂️", color: "blue" }
   ];
 }
+// 🧪 The example week's pretend kids (⚙️ Settings → Load the example week)
+const EXAMPLE_KIDS = [
+  { id: "ex-kid1", name: "Omar", emoji: "🚀", color: "green" },
+  { id: "ex-kid2", name: "Sara", emoji: "🦄", color: "pink" },
+  { id: "ex-kid3", name: "Adam", emoji: "🦊", color: "orange" }
+];
 
 // Common school subjects and their emoji. The subject is found from the activity's name.
 // (Islamic comes before Reading, so "Quran reading" counts as Islamic.)
