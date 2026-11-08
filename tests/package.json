@@ -1,0 +1,16 @@
+{
+  "name": "family-plan-tests",
+  "private": true,
+  "description": "Automatic checks for Hani's Family Plan. Not part of the app itself.",
+  "type": "module",
+  "scripts": {
+    "check": "node check-code.mjs",
+    "smoke": "node smoke.mjs",
+    "test": "node check-code.mjs && node smoke.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "globals": "^15.15.0",
+    "playwright": "1.63.0"
+  }
+}

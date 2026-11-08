@@ -33,3 +33,4 @@ The owner is a programming beginner. Keep answers short and simple. Never deploy
 4. After every change: bump `CACHE` in `sw.js` (e.g. family-planner-v144 → v145) AND the `?v=` number on every `<script>`/`<link>` in `index.html` to the same number.
 5. Check syntax: `node --check` on every changed .js file. Give a short summary of what changed.
 6. Function names must be unique across ALL files (two functions with the same name silently replace each other).
+7. Run the automatic checks before every pull request: `cd tests && npm install && npm test` (GitHub also runs them on every pull request: a red ❌ means don't merge). They never touch the family's real data.
