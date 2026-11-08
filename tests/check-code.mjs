@@ -15,6 +15,13 @@ const html = readFileSync(join(ROOT, "index.html"), "utf8");
 const files = [...html.matchAll(/<script[^>]+src="(js\/[^"?]+)/g)].map(m => m[1]);
 if (files.length < 10) { console.error("❌ Could not find the js/ files in index.html"); process.exit(1); }
 
+// 🔢 The version: sw.js CACHE and every ?v= in index.html must be the same number (else phones keep the old copy)
+const cacheV = (readFileSync(join(ROOT, "sw.js"), "utf8").match(/family-planner-v(\d+)/) || [])[1];
+const htmlVs = [...new Set([...html.matchAll(/\?v=(\d+)/g)].map(m => m[1]))];
+if (!cacheV || htmlVs.length !== 1 || htmlVs[0] !== cacheV) {
+  console.error(`❌ Version numbers don't match: sw.js CACHE = v${cacheV}, index.html ?v= ${htmlVs.join(", ")}`); process.exit(1);
+}
+
 // Join the files, remembering where each one starts (to report "file:line")
 let code = "", starts = [];
 for (const f of files) {
@@ -38,7 +45,7 @@ const problems = new Linter().verify(code, {
   },
 });
 
-if (!problems.length) { console.log(`✅ Code check passed (${files.length} files)`); process.exit(0); }
+if (!problems.length) { console.log(`✅ Code check passed (${files.length} files, version v${cacheV})`); process.exit(0); }
 for (const p of problems) console.error(`❌ ${where(p.line)}  ${p.message}`);
 console.error(`\n${problems.length} problem(s) found.`);
 process.exit(1);

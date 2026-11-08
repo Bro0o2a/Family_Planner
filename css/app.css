@@ -3132,3 +3132,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .star-pop .sp-note { font-size: 20px; color: #78350f; margin: 10px 8px; max-width: 520px; }
 .k-modal.star-pop > .k-card > .k-ok { position: static; box-shadow: none; font-size: 26px; padding: 16px 48px; margin: 10px 0 0; }
 @media (prefers-reduced-motion: reduce) { .star-pop .sp-star { animation: none; } }
+
+/* ⚠️ App problems list (Settings → Backup) */
+.err-list { max-height: 260px; overflow-y: auto; font-size: 12px; line-height: 1.4; word-break: break-word; }
+.err-list p { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,.08); }
