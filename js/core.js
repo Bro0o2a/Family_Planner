@@ -48,7 +48,7 @@ const PRAYERS_LIST = [["fajr", "Fajr"], ["dhuhr", "Dhuhr"], ["asr", "Asr"], ["ma
 const PRAYER_MIN = 15;                            // the reminder shows during the first 15 minutes
 const SAVE_KEY = "weeklyPlanner.v1";             // the name we save our data under in the browser
 const APP_NAME = "StudyCal";
-const CONTACT = "";                              // 🔒 Privacy: who to ask (an email, …). Empty = the "Questions?" line is hidden.
+const CONTACT = "studycalapp.help@gmail.com";                           // 🔒 Privacy: who to ask (an email, …). Empty = the "Questions?" line is hidden.
 const PRIVACY_UPDATED = "21 October 2026";       // 🔒 Privacy: change this when the text changes
 const DAD = "dad";                               // Dad's id. Dad can't be removed. (Only the shown name can change.)
 // 👨‍👩‍👧 A parent: the family's first parent (DAD), or another parent (a person with role: "parent", e.g. one who joined with a
