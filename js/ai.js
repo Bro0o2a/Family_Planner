@@ -84,7 +84,28 @@ $("aiStopModal").addEventListener("click", e => { if (e.target === $("aiStopModa
 // ⚠️ The last AI problem, kept so the page can show it under the button (a toast is easy to miss): { key, text, at }
 let aiFail = null;
 const aiFailFor = key => aiFail && aiFail.key === key && Date.now() - aiFail.at < 15 * 60 * 1000 ? aiFail.text : "";
+// 🤖 Before the AI helper is used the first time, a parent says OK for the family (the stores ask for this):
+// what goes to Anthropic, that it isn't kept or used to train. Kids' devices can't say OK: they're asked to get a parent.
+const aiOkNow = () => !!(data && data.aiOk && data.aiOk.at);
+function askAiOk() {
+  const parent = isParentDevice();
+  $("aiOkText").hidden = false;
+  $("aiOkKid").hidden = parent;
+  $("aiOkYes").hidden = !parent;
+  $("aiOkModal").hidden = false;
+  (parent ? $("aiOkYes") : $("aiOkNo")).focus();
+}
+$("aiOkYes").onclick = () => {
+  if (!isParentDevice()) return;
+  data.aiOk = { by: me || "", at: new Date().toISOString() };
+  writeData("auto");
+  $("aiOkModal").hidden = true;
+  toast("🤖 AI helper turned on. Tap the button again.", 3500);
+};
+$("aiOkNo").onclick = () => { $("aiOkModal").hidden = true; };
+$("aiOkModal").addEventListener("click", e => { if (e.target === $("aiOkModal")) $("aiOkModal").hidden = true; });
 async function callAi(action, body, key, auto = false) {
+  if (!aiOkNow()) { if (!auto) askAiOk(); return null; }   // (🤖 no OK yet: nothing is sent)
   // 🧒 A kid's device asks 🤖 itself for KID_AI (the server allows the same list); 📋 brief and 📰 newsletter: parents only
   if (isKidDevice() && !KID_AI.includes(action)) { toast("Ask your parent 🙂", 3000); return null; }
   if (auto && aiStop) return null;   // (💳 / 📅: the app doesn't try again by itself)
@@ -826,3 +847,38 @@ $("aiFile").addEventListener("change", e => {
   if (target === "syllabus") return addSyllabus(files);
   if (target.ws) return addAnswerFiles(target.ws, files);
 });
+
+// ---------- 🚩 REPORT AN AI ANSWER (the stores ask for this): families/{familyId}/state/reports = { items: { id: report } } ----------
+// Only: which answer (worksheet | explanation + its id), why, the short note, when, parent | kid and the app version. Parents
+// see them in ⚙️ Settings → Backup → App problems.
+let aiReportOf = null;   // "worksheet|<id>" while the box is open
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-aireport]");
+  if (!b) return;
+  aiReportOf = b.dataset.aireport;
+  $("arWhy").value = "wrong";
+  $("arNote").value = "";
+  $("aiReportModal").hidden = false;
+  $("arWhy").focus();
+});
+$("arCancel").onclick = () => { $("aiReportModal").hidden = true; };
+$("aiReportModal").addEventListener("click", e => { if (e.target === $("aiReportModal")) $("aiReportModal").hidden = true; });
+$("arSend").onclick = () => {
+  const [kind, doc] = String(aiReportOf || "").split("|");
+  if (!cloud.fb || !cloud.db || !cloud.familyId) return toast("🔌 Reporting needs internet and the family sign-in.", 4000);
+  const id = "r" + Date.now().toString(36);
+  const item = { id, kind: ["worksheet", "explanation"].includes(kind) ? kind : "other", doc: okId(doc || "") ? doc : "",
+                 why: $("arWhy").value, note: $("arNote").value.trim().slice(0, 300), at: new Date().toISOString(),
+                 role: isKidDevice() ? "kid" : "parent", v: APP_V };
+  cloud.fb.setDoc(cloud.fb.doc(cloud.db, "families", cloud.familyId, "state", "reports"), { items: { [id]: item } }, { merge: true })
+    .then(() => toast("🚩 Thank you! The report was sent.", 3000)).catch(() => toast("⚠️ The report wasn't sent. Please try again.", 4000));
+  $("aiReportModal").hidden = true;
+};
+// The family's reports (newest first) for ⚙️ Settings
+async function allAiReports() {
+  try {
+    if (!cloud.fb || !cloud.db || !cloud.familyId) return [];
+    const snap = await cloud.fb.getDoc(cloud.fb.doc(cloud.db, "families", cloud.familyId, "state", "reports"));
+    return Object.values((snap.exists() && snap.data().items) || {}).filter(x => x && x.id).sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 30);
+  } catch (e) { return []; }
+}

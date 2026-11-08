@@ -65,6 +65,26 @@ try {
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 
+  // 🤖 No parent OK yet: the AI helper asks first and sends nothing
+  const asked = await run("AI asks for OK first", async () => {
+    data.aiOk = null;
+    const r = await callAi("check", { title: "test" }, "check|test");
+    const shown = !document.getElementById("aiOkModal").hidden;
+    document.getElementById("aiOkYes").click();
+    return r === null && shown && !!data.aiOk && document.getElementById("aiOkModal").hidden;
+  });
+  if (asked === false) errors.push("[AI OK] the AI helper did not ask the parent first, or the OK was not saved");
+
+  // 🚩 The Report button on a worksheet opens the report box
+  const reported = await run("report an AI answer", () => {
+    const b = document.createElement("button"); b.dataset.aireport = "worksheet|testws"; document.body.appendChild(b);
+    b.click(); b.remove();
+    const m = document.getElementById("aiReportModal"), open = !m.hidden;
+    document.getElementById("arCancel").click();
+    return open && m.hidden;
+  });
+  if (reported === false) errors.push("[report] the Report box did not open");
+
   // 🤖 Pretend AI check: the app asks the (fake) server and cleans its answer
   const checked = await run("pretend AI check", async () => {
     cloud.enabled = true; cloud.user = { getIdToken: async () => "test-token" }; cloud.db = {};
@@ -108,7 +128,7 @@ try {
   await browser.close();
 }
 
-if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, pretend AI check, app problems list, new family)`); process.exit(0); }
+if (!errors.length) { console.log(`✅ Screen test passed (${SCREENS.length} screens × parent + kid, AI OK, report box, pretend AI check, app problems list, new family)`); process.exit(0); }
 for (const e of errors) console.error("❌ " + e);
 console.error(`\n${errors.length} problem(s) found.`);
 process.exit(1);
