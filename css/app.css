@@ -632,7 +632,7 @@
   .pdf-stage .ai-print { width: 703px; }
   /* 📄 Worksheets: drawn narrower, so on the A4 page everything is about 25% bigger (easy to read and write for the kids) */
   .pdf-stage.pdf-big, .pdf-stage.pdf-big .ai-print { width: 560px; }
-  .pdf-big .as-line { height: 42px; }
+  .pdf-big .as-line { height: 36px; }
   .pdf-big .as-q { padding: 6px 0; }
   .pdf-stage.pdf-big .ws-compact .ws-opts { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   /* 📄 A worksheet PDF: compact questions (no writing lines, choices with letters) + ✏️ the ANSWER SHEET page */

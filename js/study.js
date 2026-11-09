@@ -956,11 +956,10 @@ async function makePdf(node, fileName, opts = {}) {
         const both = (el.getBoundingClientRect().height + nx.getBoundingClientRect().height) * mmPerPx + GAP;
         if (y + both > H - M - FOOT && y > firstY) { pdf.addPage(); y = top(); }
       }
-      // ✏️ the answer sheet: never made smaller. It fills its page, and when it's too long it goes on over more pages.
+      // ✏️ the answer sheet: its own size (v178: no longer stretched to fill the page: Broo2a found the spaces too big),
+      // and when it's too long it goes on over more pages.
       if (el.classList && el.classList.contains("ws-answers")) {
-        el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
         if (el.getBoundingClientRect().height <= roomPx + 1) { await place(el); continue; }
-        el.classList.remove("as-fill"); el.style.minHeight = "";
         // (v157: no squeezing at all. A long answer sheet simply goes on over more pages, with BIG writing space)
         for (const pg of splitAnswerSheet(el, roomPx)) { if (y > firstY) { pdf.addPage(); y = top(); } await place(pg); }
         continue;
@@ -1295,12 +1294,13 @@ function wsAnswerSheetNode(w) {
     // (✍️ room to write: 🅲 explain = 4 lines · a problem to solve = 3 · a short answer = 2)
     // ✍️ v157 lots of room: explain 5 lines · a problem to solve 4 · a short answer 3 · a question with parts a), b), c): each part its own space
     // (v161: the BIG room only for explain questions; a problem to solve 3 lines, a short answer 2 lines in 2 columns)
-    const lines = wsPartOf(q) === "C" ? 5 : SOLVE_Q.test(q.prompt || "") ? 3 : 2, parts = qPartsOf(q.prompt);
+    // (v178 shorter, Broo2a: explain 3 lines · a problem to solve 2 · a short answer 1 · each part a) b) 2)
+    const lines = wsPartOf(q) === "C" ? 3 : SOLVE_Q.test(q.prompt || "") ? 2 : 1, parts = qPartsOf(q.prompt);
     const lineBox = k => h("div", { class: "as-lines" }, Array.from({ length: k }, () => h("div", { class: "as-line" })));
     // (each part is its own row, so a long question can go on over the next page)
     if (parts.length > 1) return parts.map((p, i) => h("div", { class: "as-q as-wide as-part" + (i ? " as-pnext" : "") },
-      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(wsPartOf(q) === "C" ? 4 : 2)));
-    return h("div", { class: "as-q " + (wsPartOf(q) === "C" || lines > 2 ? "as-wide as-c" : "as-s") }, n, lineBox(lines));
+      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(2)));
+    return h("div", { class: "as-q " + (wsPartOf(q) === "C" || lines > 1 ? "as-wide as-c" : "as-s") }, n, lineBox(lines));
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
