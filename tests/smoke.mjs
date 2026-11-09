@@ -94,6 +94,41 @@ try {
   });
   if (sure !== "ok") errors.push("[answer same as key] " + sure);
 
+  // 🛡️ A new worksheet's guard: a choice question whose answer isn't a choice becomes a written question; good ones stay
+  const guard = await run("new worksheet guard", () => {
+    const w = wsGuard({ subject: "Maths", questions: [
+      { number: 1, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", answer_lines: 0, points: 1 },
+      { number: 2, kind: "multiple_choice", options: ["3", "4", "5"], answer: "7", answer_lines: 0, points: 1 },
+      { number: 3, kind: "true_false", options: ["True", "False"], answer: "False", answer_lines: 0, points: 1 },
+      { number: 4, kind: "matching", options: ["cat"], answer: "x", answer_lines: 0, points: 1 }] });
+    const k = w.questions.map(q => q.kind).join();
+    return k === "multiple_choice,short_answer,true_false,short_answer" && w.questions[1].answer_lines === 2 ? "ok" : k;
+  });
+  if (guard !== "ok") errors.push("[new worksheet guard] " + guard);
+
+  // 🔤 "Put the letters in order to make a word" is a spelling question (the kid writes the word), never A B C D bits of instructions
+  const unscr = await run("unscramble letters", () => {
+    const w = cleanWorksheet({ questions: [{ number: 1, kind: "ordering", prompt: "Put the letters in the right order to make a word: H T G N E L", options: ["Rearrange the letters", "into one word", "then check it", "with a friend"], answer: "length", points: 1 },
+      { number: 2, kind: "ordering", prompt: "Order the steps: Rearrange the letters, into one word, then check it", options: [], answer: "x", points: 1 }] });
+    return w.questions.every(q => q.kind === "short_answer" && !q.options.length) ? "ok" : JSON.stringify(w.questions.map(q => [q.kind, q.options]));
+  });
+  if (unscr !== "ok") errors.push("[unscramble letters] " + unscr);
+
+  // 🔑 Key words: a parent saves them for a kid's subject → new worksheets and the check get them; cleared → gone
+  const words = await run("key words", () => {
+    const kid = "ex-kid1", sub = (subjectList(schoolOf(kid), true)[0] || {}).name;
+    if (!sub) return "no subject";
+    const host = document.createElement("div"); host.innerHTML = wsWordsHtml(kid, sub); document.body.appendChild(host);
+    const box = host.querySelector("textarea"), btn = host.querySelector("[data-wswords]");
+    if (!box || !btn) { host.remove(); return "no key words box"; }
+    box.value = "evaporation = water turns into a gas\n\n condensation = gas turns into water "; btn.click();
+    const saved = wsWordsOf(kid, sub), inWs = wsKidNote(kid, sub, "practice").includes("evaporation = water turns into a gas; condensation"),
+          inCheck = wsWordsCheck(kid, sub).includes("SAME thing");
+    box.value = ""; btn.click(); host.remove();
+    return saved === "evaporation = water turns into a gas\ncondensation = gas turns into water" && inWs && inCheck && !wsWordsOf(kid, sub) ? "ok" : JSON.stringify({ saved, inWs, inCheck });
+  });
+  if (words !== "ok") errors.push("[key words] " + words);
+
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 

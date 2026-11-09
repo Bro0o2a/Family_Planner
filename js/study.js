@@ -956,11 +956,10 @@ async function makePdf(node, fileName, opts = {}) {
         const both = (el.getBoundingClientRect().height + nx.getBoundingClientRect().height) * mmPerPx + GAP;
         if (y + both > H - M - FOOT && y > firstY) { pdf.addPage(); y = top(); }
       }
-      // ✏️ the answer sheet: never made smaller. It fills its page, and when it's too long it goes on over more pages.
+      // ✏️ the answer sheet: its own size (v178: no longer stretched to fill the page: Broo2a found the spaces too big),
+      // and when it's too long it goes on over more pages.
       if (el.classList && el.classList.contains("ws-answers")) {
-        el.classList.add("as-fill"); el.style.minHeight = `${roomPx}px`;
         if (el.getBoundingClientRect().height <= roomPx + 1) { await place(el); continue; }
-        el.classList.remove("as-fill"); el.style.minHeight = "";
         // (v157: no squeezing at all. A long answer sheet simply goes on over more pages, with BIG writing space)
         for (const pg of splitAnswerSheet(el, roomPx)) { if (y > firstY) { pdf.addPage(); y = top(); } await place(pg); }
         continue;
@@ -1003,7 +1002,7 @@ function splitAnswerSheet(el, roomPx) {
   }
   if (total) { page.appendChild(total); if (page.getBoundingClientRect().height > roomPx) { total.remove();
     const last = el.cloneNode(false); last.append(total); page.after(last); pages.push(last); } }
-  if (pages.length > 1) { const ins = el.querySelector(".ws-ins"); if (ins) ins.textContent = `Fill the circle for your answer. Write the other answers in the spaces. Take a clear photo of each answer page (${pages.filter(x => x.querySelector(".as-grid")).length} pages).`; }
+  if (pages.length > 1) { const ins = el.querySelector(".ws-ins"); if (ins) ins.textContent = `Write the LETTER of your answer in the box. Write the other answers in the spaces. Take a clear photo of each answer page (${pages.filter(x => x.querySelector(".as-grid")).length} pages).`; }
   return pages;
 }
 // The share sheet when the phone can share files, otherwise a download. (Some phones only share right after a tap: then a small "📤 Share" bar.)
@@ -1066,7 +1065,7 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
     h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
-  $("wsoTr").innerHTML = wsPickHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
+  $("wsoTr").innerHTML = wsPickHtml(kid, subject) + wsWordsHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
   $("wsoMake").focus();
 }
@@ -1188,7 +1187,25 @@ const wsPartOf = q => isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? "A"
 const marksText = n => `[${num(n)}]`;
 // A NEW worksheet (never one with answers already): put the questions in A → B → C order and number them 1, 2, 3 …
 // (a study session's sheet with topic parts keeps its order: its parts are in order already)
+// 🛡️ A NEW worksheet's guard (never an old one: its paper may be printed already): a choice question whose answer isn't one of its
+// choices (or with fewer than 2 different choices), or a matching question that can't be drawn in two columns, becomes a question
+// the child answers in writing (the answer stays the key), so the paper, the answer sheet and the check always agree.
+function wsGuard(ws) {
+  if (!ws || !Array.isArray(ws.questions)) return ws;
+  ws.questions = ws.questions.map(q => {
+    const write = () => ({ ...q, kind: "short_answer", options: [], answer_lines: Math.max(q.answer_lines || 0, 2) });
+    if (q.kind === "multiple_choice" || q.kind === "true_false") {
+      const opts = q.options.filter((o, k) => q.options.findIndex(x => optExact(x) === optExact(o)) === k);
+      if (opts.length < 2 || optFind(opts, q.answer) < 0) return write();
+      return opts.length === q.options.length ? q : { ...q, options: opts };
+    }
+    if (q.kind === "matching" && !matchCols(q, isArabicWs(ws))) return write();
+    return q;
+  });
+  return ws;
+}
 function wsExamOrder(ws) {
+  ws = wsGuard(ws);
   if (!ws || (ws.sections && ws.sections.length)) return ws;
   const rank = { A: 0, B: 1, C: 2 };
   ws.questions = ws.questions.map((q, i) => ({ q, i })).sort((a, b) => rank[wsPartOf(a.q)] - rank[wsPartOf(b.q)] || a.i - b.i)
@@ -1212,7 +1229,7 @@ const wsBoxHead = (w, sheet) => h("div", { class: "ws-hbox", dir: "ltr" },
     sheet ? null : h("span", null, "Time: ", h("u", null, w.minutes ? `${w.minutes} min` : "______")),
     sheet ? null : h("span", null, "Total: ", h("u", null, `____ / ${num(wsTotal(w))}`))));
 // ✅ How the AI marks written answers (sent with every check): right only when the MEANING is right (any words), wrong = 0, spelling never costs marks (but is shown)
-const CHECK_RULES = "MARKING RULES for written answers (short answer, fill in, explain): be a fair but strict teacher. An answer is RIGHT only when its meaning is scientifically correct and answers the question: the child may use their own words, simple sentences or a different correct way of saying it (do not ask for the exact words of the key). An answer whose idea is wrong, off-topic, missing or only guessed is WRONG with 0 points, even if it uses some words from the key. Do not give points for wrong answers. FULL SENTENCES: if the question asks for one word or part (a pronoun, a noun, a verb, a number, a name …) and the child writes a whole sentence, look INSIDE the sentence: when the right word is there and clearly used as the answer (for example underlined, circled, or the sentence copies the original one with the right word in it), it is RIGHT. Only mark it wrong when the right word is missing, or the child also gives a wrong answer for the same thing. Never mark an answer wrong only because of its form (a sentence instead of one word, capital letters, no full stop). SPELLING: never take marks off for spelling or grammar when the meaning is right (unless the question itself is about spelling), but in the note of that question add 'Spelling: wrong word → right word' for each misspelled science or key word, so the child can learn it.";
+const CHECK_RULES = "MARKING RULES for written answers (short answer, fill in, explain): be a fair teacher who judges the MEANING, in every subject (science, physics, English, maths, social studies …). An answer is RIGHT when its meaning is correct and answers the question: the child may use their own words, simple sentences, an example, a synonym or a different correct way of saying it. Never ask for the exact words of the key: if a real teacher would give the mark, it is RIGHT. An answer whose idea is wrong, off-topic, missing or only guessed is WRONG with 0 points, even if it uses some words from the key. Do not give points for wrong answers. FULL SENTENCES: if the question asks for one word or part (a pronoun, a noun, a verb, a number, a name …) and the child writes a whole sentence, look INSIDE the sentence: when the right word is there and clearly used as the answer (for example underlined, circled, or the sentence copies the original one with the right word in it), it is RIGHT. Only mark it wrong when the right word is missing, or the child also gives a wrong answer for the same thing. Never mark an answer wrong only because of its form (a sentence instead of one word, capital letters, no full stop). SPELLING: never take marks off for spelling or grammar when the meaning is right (unless the question itself is about spelling), but in the note of that question add 'Spelling: wrong word → right word' for each misspelled science or key word, so the child can learn it.";
 const MARK_EXPLAIN = "Right only when the meaning is correct (the key ideas, in any words). A wrong idea is wrong: 0 points.";
 const MARK_SHORT = "Right when the meaning is correct (other words or a spelling mistake are fine). A wrong answer is wrong: 0 points.";
 // A question with parts "a) … b) … c) …" (or "(a)", "a." at a line start, "i) ii)") → ["a", "b", "c"]  ([] when it has no parts)
@@ -1232,7 +1249,7 @@ function wsSheetNode(w, showAns, compact = false) {
   return h("div", { class: "ws-sheet ws-exam" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w),
     w.topics.length ? h("div", { class: "ws-sub" }, w.topics.join(", ")) : null,
-    h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): fill the circle for a choose question. Marks are shown in [brackets]."
+    h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): for a choose question, write the letter (A, B, C or D) in the box. Marks are shown in [brackets]."
       : "Answer all the questions. Marks are shown in [brackets]."),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
     h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
@@ -1260,25 +1277,34 @@ function wsAnswerSheetNode(w) {
   const rtl = isArabicWs(w), bars = wsPartBars(w);
   const cell = q => {
     const n = h("b", { class: "as-num" }, `Q${q.number}`);
-    if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
+    // (🔤 v178: a box to WRITE the letter of the answer, no circles: Broo2a's choice, easier to read than filled circles)
+    if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-pair as-choice" }, h("i", { class: "as-box" }),
+      h("small", { class: "as-of" }, `(A–${OPT_LETTERS[q.options.length - 1] || q.options.length})`)));
     if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
-      return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, Array.from({ length: k }, (_, i) => h("span", { class: "as-pair" }, `${i + 1}→`, h("i", { class: "as-box" }))))); }
+      // (🔗 a small table: the numbers of column 1 on top, an empty box under each for the letter from column 2)
+      const L = (m ? m.letters : MATCH_LETTERS[rtl ? "ar" : "en"]).slice(0, 3).join(rtl ? "، " : ", ");
+      return h("div", { class: "as-q as-wide" }, n, h("div", null,
+        h("div", { class: "as-how" }, rtl ? `اكتب الحرف (${L} …) تحت كل رقم:` : `Write the letter (${L} …) under each number:`),
+        h("table", { class: "as-mtab" }, h("tbody", null,
+          h("tr", null, Array.from({ length: k }, (_, i) => h("th", null, String(i + 1)))),
+          h("tr", null, Array.from({ length: k }, () => h("td", null))))))); }
     if (q.kind === "ordering") return h("div", { class: "as-q as-wide" }, n, h("div", null,
       h("div", { class: "as-how" }, "Write the letters in order:"),
       h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
     // (✍️ room to write: 🅲 explain = 4 lines · a problem to solve = 3 · a short answer = 2)
     // ✍️ v157 lots of room: explain 5 lines · a problem to solve 4 · a short answer 3 · a question with parts a), b), c): each part its own space
     // (v161: the BIG room only for explain questions; a problem to solve 3 lines, a short answer 2 lines in 2 columns)
-    const lines = wsPartOf(q) === "C" ? 5 : SOLVE_Q.test(q.prompt || "") ? 3 : 2, parts = qPartsOf(q.prompt);
+    // (v178 shorter, Broo2a: explain 3 lines · a problem to solve 2 · a short answer 1 · each part a) b) 2)
+    const lines = wsPartOf(q) === "C" ? 3 : SOLVE_Q.test(q.prompt || "") ? 2 : 1, parts = qPartsOf(q.prompt);
     const lineBox = k => h("div", { class: "as-lines" }, Array.from({ length: k }, () => h("div", { class: "as-line" })));
     // (each part is its own row, so a long question can go on over the next page)
     if (parts.length > 1) return parts.map((p, i) => h("div", { class: "as-q as-wide as-part" + (i ? " as-pnext" : "") },
-      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(wsPartOf(q) === "C" ? 4 : 2)));
-    return h("div", { class: "as-q " + (wsPartOf(q) === "C" || lines > 2 ? "as-wide as-c" : "as-s") }, n, lineBox(lines));
+      h("b", { class: "as-num" }, `Q${q.number} ${p})`), lineBox(2)));
+    return h("div", { class: "as-q " + (wsPartOf(q) === "C" || lines > 1 ? "as-wide as-c" : "as-s") }, n, lineBox(lines));
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
-    h("div", { class: "ws-ins" }, "Fill the circle for your answer. Write the other answers in the spaces. Take ONE clear photo of this page."),
+    h("div", { class: "ws-ins" }, "Write the LETTER of your answer in the box. Write the other answers in the spaces. Take ONE clear photo of this page."),
     h("div", { class: "ws-hand" }, HAND_TIP),
     h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), ...[cell(q)].flat()])),
     h("div", { class: "ws-total" }, "Score: ", h("i"), ` / ${num(wsTotal(w))}`));
@@ -1656,7 +1682,7 @@ async function checkWorksheetNow(wsId) {
     const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
     return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the letter A, B, C … written in a box for a choice question (older sheets: a circled or filled circle), for matching a small table with the numbers 1, 2, 3 … on top and the letter the child wrote under each number, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),

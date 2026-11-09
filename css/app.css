@@ -632,7 +632,7 @@
   .pdf-stage .ai-print { width: 703px; }
   /* 📄 Worksheets: drawn narrower, so on the A4 page everything is about 25% bigger (easy to read and write for the kids) */
   .pdf-stage.pdf-big, .pdf-stage.pdf-big .ai-print { width: 560px; }
-  .pdf-big .as-line { height: 42px; }
+  .pdf-big .as-line { height: 36px; }
   .pdf-big .as-q { padding: 6px 0; }
   .pdf-stage.pdf-big .ws-compact .ws-opts { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   /* 📄 A worksheet PDF: compact questions (no writing lines, choices with letters) + ✏️ the ANSWER SHEET page */
@@ -651,6 +651,9 @@
   .as-q.as-wide { grid-column: 1 / -1; align-items: flex-start; }
   .as-num { min-width: 30px; font-size: 17px; }
   .as-bubbles { display: flex; flex-wrap: wrap; gap: 8px 10px; }
+  .as-choice { gap: 8px; align-items: center; }
+  .as-choice .as-box { width: 40px; height: 40px; }
+  .as-of { color: #6b7280; font-size: 13px; }
   .as-bubble { width: 28px; height: 28px; border: 2px solid #333; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 14px; }
   .as-pair { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; }
   .as-how { font-size: 13px; color: #555; margin-bottom: 4px; }
@@ -1562,6 +1565,10 @@
   .rate-btns .miss-btn { border-color: #fecaca; }
   .rate-btns .miss-btn b { font-size: 12px; }
   /* 🔗 Matching: two columns, clear borders, the same row heights, room to write a letter (phone: still side by side, smaller) */
+  .as-mtab { border-collapse: collapse; margin: 4px 0; }
+  .as-mtab th, .as-mtab td { width: 44px; border: 1.5px solid #111827; text-align: center; }
+  .as-mtab th { height: 26px; background: #f3f4f6; font-weight: 700; }
+  .as-mtab td { height: 40px; }
   .ws-match { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
   .ws-match td { width: 50%; height: 48px; padding: 8px; border: 1.5px solid #6b7280; vertical-align: middle; overflow-wrap: anywhere; }
   .wm-box { display: inline-block; width: 32px; height: 32px; margin-inline-end: 8px; border: 2px solid #111827; border-radius: 4px;
@@ -1584,6 +1591,9 @@
   .tr-toggle { margin: 8px 0 4px; }
   .ws-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 6px; }
   .ws-pick b { flex-basis: 100%; }
+  .ws-words { margin: 8px 0; }
+  .ws-words summary { cursor: pointer; }
+  .ws-words textarea { width: 100%; box-sizing: border-box; margin: 6px 0; font: inherit; }
   .ws-pick .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
   /* 📸 answer photos before the check: thumbnails with 🗑 */
   .ans-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
