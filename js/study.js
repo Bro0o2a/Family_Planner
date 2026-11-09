@@ -1066,7 +1066,7 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
     h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
-  $("wsoTr").innerHTML = wsPickHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
+  $("wsoTr").innerHTML = wsPickHtml(kid, subject) + wsWordsHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
   $("wsoMake").focus();
 }
@@ -1674,7 +1674,7 @@ async function checkWorksheetNow(wsId) {
     const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
     return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),

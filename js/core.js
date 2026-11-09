@@ -1162,7 +1162,8 @@ function cleanSchool(s) {
                           .map(r => ({ date: r.date, ws: okKey(String(r.ws || "")) ? r.ws : "", pct: lnum(r.pct, 100) })),
                         skills: skillsIn(t.skills) };
       });
-      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics, ...(["easy", "hard"].includes(x.pick) ? { pick: x.pick } : {}) };
+      return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics, ...(["easy", "hard"].includes(x.pick) ? { pick: x.pick } : {}),
+               ...(txt(x.words, 1500) ? { words: txt(x.words, 1500) } : {}) };   // (🔑 the parents' key words)
     });
     // 📄 Syllabus and 📋 Brief for parents (newer: older data has none)
     const sy = k.syllabus;

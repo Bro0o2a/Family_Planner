@@ -482,7 +482,32 @@ const wsPickNote = (kid, subject, mode) => mode === "placement" || mode === "lev
 // 📚 v157 topic names: "Big topic › small topic" (so the topics of one unit sit together, see topicsCardHtml)
 const TOPIC_NAME_RULE = "name every topic as 'Big topic › small topic', 2 to 5 words, capital first letter, for example 'Fractions › Adding', 'Plants › Life cycle', 'Grammar › Pronouns'. No lesson numbers or dates. Use the same big topic name for topics of the same unit, and keep an existing topic's name when it is the same topic";
 const WS_KEY_NOTE = " Each question's topic: " + TOPIC_NAME_RULE + "." + " For every explain question, the answer is the 2 or 3 KEY IDEAS a good answer needs, short and separated by ' · ' (so marking is fair to a child who explains in their own words).";
-const wsKidNote = (kid, subject, mode) => wsNamesNote(kid) + wsLikesNote(kid) + wsPickNote(kid, subject, mode) + WS_KEY_NOTE;
+// 🔑 Key words, written by a parent per kid per subject (e.g. "evaporation = water turns into a gas"): the words the class uses.
+// New worksheets use them, and the check accepts them (or any words with the same meaning).
+const wsWordsOf = (kid, subject) => { const L = learnRead(kid, subject); return (L && L.words) || ""; };
+const wsWordsNote = (kid, subject) => { const w = wsWordsOf(kid, subject).trim();
+  return w ? ` KEY WORDS the class uses in ${subject}, written by the parents (use these words and meanings in the questions and the answers): ${w.replace(/\s*\n\s*/g, "; ")}.` : ""; };
+const wsWordsCheck = (kid, subject) => { const w = wsWordsOf(kid, subject).trim();
+  return w ? ` KEY WORDS the class uses, written by the parents: ${w.replace(/\s*\n\s*/g, "; ")}. When a child answers with one of these words, or with other words that mean the SAME thing (a key word's meaning, an example of it, or the word itself), it is RIGHT: judge the meaning, not the exact words of the key.` : ""; };
+const wsWordsHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : (() => { const w = wsWordsOf(kid, subject), n = w.split("\n").filter(x => x.trim()).length;
+  return `<details class="ws-words"><summary><b>🔑 Key words</b> ${n ? `(${n})` : "· the words the class uses"}</summary>
+  <p class="hint">One per line, like <i>evaporation = water turns into a gas</i>. New worksheets use them, and the check accepts them or any words that mean the same.</p>
+  <textarea rows="5" maxlength="1500" data-wswordsbox="${safe(kid)}|${safe(encodeURIComponent(subject))}">${safe(w)}</textarea>
+  <button type="button" class="btn" data-wswords="${safe(kid)}|${safe(encodeURIComponent(subject))}">Save key words</button></details>`; })();
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wswords]");
+  if (!b || !isParentDevice()) return;
+  const [kid, sub] = b.dataset.wswords.split("|"), subject = decodeURIComponent(sub), L = learnFor(kid, subject);
+  const box = document.querySelector(`[data-wswordsbox="${CSS.escape(b.dataset.wswords)}"]`);
+  if (!L || !box) return;
+  const w = box.value.split("\n").map(x => x.trim()).filter(Boolean).join("\n").slice(0, 1500);
+  if (w) L.words = w; else delete L.words;
+  writeData();
+  const sm = b.closest("details") && b.closest("details").querySelector("summary");
+  if (sm) sm.innerHTML = `<b>🔑 Key words</b> ${w ? `(${w.split("\n").length})` : "· the words the class uses"}`;
+  toast(w ? `🔑 Saved. New ${subject} worksheets and checks for ${kidNameOf(kid)} will use these words.` : "🔑 Key words cleared.", 3500);
+});
+const wsKidNote = (kid, subject, mode) => wsNamesNote(kid) + wsLikesNote(kid) + wsPickNote(kid, subject, mode) + wsWordsNote(kid, subject) + WS_KEY_NOTE;
 const wsPickHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : `<div class="ws-pick" role="radiogroup" aria-label="Worksheet level"><b>Worksheet level</b>
   ${WS_PICKS.map(([k, w]) => `<button type="button" class="pill${wsPickOf(kid, subject) === k ? " on" : ""}" role="radio" aria-checked="${wsPickOf(kid, subject) === k}" data-wspick="${safe(kid)}|${safe(encodeURIComponent(subject))}|${k}">${w}</button>`).join("")}</div>`;
 document.addEventListener("click", e => {

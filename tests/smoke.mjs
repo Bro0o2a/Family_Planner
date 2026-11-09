@@ -106,6 +106,21 @@ try {
   });
   if (guard !== "ok") errors.push("[new worksheet guard] " + guard);
 
+  // 🔑 Key words: a parent saves them for a kid's subject → new worksheets and the check get them; cleared → gone
+  const words = await run("key words", () => {
+    const kid = "ex-kid1", sub = (subjectList(schoolOf(kid), true)[0] || {}).name;
+    if (!sub) return "no subject";
+    const host = document.createElement("div"); host.innerHTML = wsWordsHtml(kid, sub); document.body.appendChild(host);
+    const box = host.querySelector("textarea"), btn = host.querySelector("[data-wswords]");
+    if (!box || !btn) { host.remove(); return "no key words box"; }
+    box.value = "evaporation = water turns into a gas\n\n condensation = gas turns into water "; btn.click();
+    const saved = wsWordsOf(kid, sub), inWs = wsKidNote(kid, sub, "practice").includes("evaporation = water turns into a gas; condensation"),
+          inCheck = wsWordsCheck(kid, sub).includes("SAME thing");
+    box.value = ""; btn.click(); host.remove();
+    return saved === "evaporation = water turns into a gas\ncondensation = gas turns into water" && inWs && inCheck && !wsWordsOf(kid, sub) ? "ok" : JSON.stringify({ saved, inWs, inCheck });
+  });
+  if (words !== "ok") errors.push("[key words] " + words);
+
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 

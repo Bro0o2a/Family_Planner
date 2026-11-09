@@ -1584,6 +1584,9 @@
   .tr-toggle { margin: 8px 0 4px; }
   .ws-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 6px; }
   .ws-pick b { flex-basis: 100%; }
+  .ws-words { margin: 8px 0; }
+  .ws-words summary { cursor: pointer; }
+  .ws-words textarea { width: 100%; box-sizing: border-box; margin: 6px 0; font: inherit; }
   .ws-pick .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
   /* 📸 answer photos before the check: thumbnails with 🗑 */
   .ans-thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
