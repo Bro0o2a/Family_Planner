@@ -1280,7 +1280,13 @@ function wsAnswerSheetNode(w) {
     const n = h("b", { class: "as-num" }, `Q${q.number}`);
     if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
     if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
-      return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, Array.from({ length: k }, (_, i) => h("span", { class: "as-pair" }, `${i + 1}→`, h("i", { class: "as-box" }))))); }
+      // (🔗 a small table: the numbers of column 1 on top, an empty box under each for the letter from column 2)
+      const L = (m ? m.letters : MATCH_LETTERS[rtl ? "ar" : "en"]).slice(0, 3).join(rtl ? "، " : ", ");
+      return h("div", { class: "as-q as-wide" }, n, h("div", null,
+        h("div", { class: "as-how" }, rtl ? `اكتب الحرف (${L} …) تحت كل رقم:` : `Write the letter (${L} …) under each number:`),
+        h("table", { class: "as-mtab" }, h("tbody", null,
+          h("tr", null, Array.from({ length: k }, (_, i) => h("th", null, String(i + 1)))),
+          h("tr", null, Array.from({ length: k }, () => h("td", null))))))); }
     if (q.kind === "ordering") return h("div", { class: "as-q as-wide" }, n, h("div", null,
       h("div", { class: "as-how" }, "Write the letters in order:"),
       h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-pair" }, ORDINALS[i] || `${i + 1}.`, h("i", { class: "as-box" }))))));
@@ -1674,7 +1680,7 @@ async function checkWorksheetNow(wsId) {
     const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
     return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, letters in boxes for matching, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, for matching a small table with the numbers 1, 2, 3 … on top and the letter the child wrote under each number, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),

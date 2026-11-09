@@ -1562,6 +1562,10 @@
   .rate-btns .miss-btn { border-color: #fecaca; }
   .rate-btns .miss-btn b { font-size: 12px; }
   /* 🔗 Matching: two columns, clear borders, the same row heights, room to write a letter (phone: still side by side, smaller) */
+  .as-mtab { border-collapse: collapse; margin: 4px 0; }
+  .as-mtab th, .as-mtab td { width: 44px; border: 1.5px solid #111827; text-align: center; }
+  .as-mtab th { height: 26px; background: #f3f4f6; font-weight: 700; }
+  .as-mtab td { height: 40px; }
   .ws-match { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 4px; }
   .ws-match td { width: 50%; height: 48px; padding: 8px; border: 1.5px solid #6b7280; vertical-align: middle; overflow-wrap: anywhere; }
   .wm-box { display: inline-block; width: 32px; height: 32px; margin-inline-end: 8px; border: 2px solid #111827; border-radius: 4px;
