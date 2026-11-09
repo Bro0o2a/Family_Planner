@@ -1003,7 +1003,7 @@ function splitAnswerSheet(el, roomPx) {
   }
   if (total) { page.appendChild(total); if (page.getBoundingClientRect().height > roomPx) { total.remove();
     const last = el.cloneNode(false); last.append(total); page.after(last); pages.push(last); } }
-  if (pages.length > 1) { const ins = el.querySelector(".ws-ins"); if (ins) ins.textContent = `Fill the circle for your answer. Write the other answers in the spaces. Take a clear photo of each answer page (${pages.filter(x => x.querySelector(".as-grid")).length} pages).`; }
+  if (pages.length > 1) { const ins = el.querySelector(".ws-ins"); if (ins) ins.textContent = `Write the LETTER of your answer in the box. Write the other answers in the spaces. Take a clear photo of each answer page (${pages.filter(x => x.querySelector(".as-grid")).length} pages).`; }
   return pages;
 }
 // The share sheet when the phone can share files, otherwise a download. (Some phones only share right after a tap: then a small "📤 Share" bar.)
@@ -1250,7 +1250,7 @@ function wsSheetNode(w, showAns, compact = false) {
   return h("div", { class: "ws-sheet ws-exam" + (rtl ? " ws-rtl" : "") + (compact ? " ws-compact" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w),
     w.topics.length ? h("div", { class: "ws-sub" }, w.topics.join(", ")) : null,
-    h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): fill the circle for a choose question. Marks are shown in [brackets]."
+    h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): for a choose question, write the letter (A, B, C or D) in the box. Marks are shown in [brackets]."
       : "Answer all the questions. Marks are shown in [brackets]."),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
     h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
@@ -1278,7 +1278,9 @@ function wsAnswerSheetNode(w) {
   const rtl = isArabicWs(w), bars = wsPartBars(w);
   const cell = q => {
     const n = h("b", { class: "as-num" }, `Q${q.number}`);
-    if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-bubbles" }, q.options.map((_, i) => h("span", { class: "as-bubble" }, OPT_LETTERS[i] || String(i + 1)))));
+    // (🔤 v178: a box to WRITE the letter of the answer, no circles: Broo2a's choice, easier to read than filled circles)
+    if (isChoiceQ(q)) return h("div", { class: "as-q" }, n, h("span", { class: "as-pair as-choice" }, h("i", { class: "as-box" }),
+      h("small", { class: "as-of" }, `(A–${OPT_LETTERS[q.options.length - 1] || q.options.length})`)));
     if (q.kind === "matching") { const m = matchCols(q, rtl), k = m ? m.left.length : q.options.length;
       // (🔗 a small table: the numbers of column 1 on top, an empty box under each for the letter from column 2)
       const L = (m ? m.letters : MATCH_LETTERS[rtl ? "ar" : "en"]).slice(0, 3).join(rtl ? "، " : ", ");
@@ -1302,7 +1304,7 @@ function wsAnswerSheetNode(w) {
   };
   return h("div", { class: "ws-sheet ws-answers ws-exam" + (rtl ? " ws-rtl" : ""), dir: rtl ? "rtl" : null, lang: rtl ? "ar" : null },
     wsBoxHead(w, true),
-    h("div", { class: "ws-ins" }, "Fill the circle for your answer. Write the other answers in the spaces. Take ONE clear photo of this page."),
+    h("div", { class: "ws-ins" }, "Write the LETTER of your answer in the box. Write the other answers in the spaces. Take ONE clear photo of this page."),
     h("div", { class: "ws-hand" }, HAND_TIP),
     h("div", { class: "as-grid" }, w.questions.flatMap(q => [...(bars[q.number] ? [h("div", { class: "as-bar" }, wsBarNode(bars[q.number], true))] : []), ...[cell(q)].flat()])),
     h("div", { class: "ws-total" }, "Score: ", h("i"), ` / ${num(wsTotal(w))}`));
@@ -1680,7 +1682,7 @@ async function checkWorksheetNow(wsId) {
     const i = isChoiceQ(q) ? optFind(q.options, q.answer) : -1;
     return { choices_on_paper: lettered(q), ...(i >= 0 ? { correct_letter: OPT_LETTERS[i] || String(i + 1) } : {}) }; };
   const r = await callAi("check", { ...kidInfo(w.kid), ...(lv ? { level: lv.level } : {}),
-    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the circled letter A, B, C … for a choice question, for matching a small table with the numbers 1, 2, 3 … on top and the letter the child wrote under each number, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
+    title: `${w.title} (the child may answer on an ANSWER SHEET page instead: each question's number with the answer, the letter A, B, C … written in a box for a choice question (older sheets: a circled or filled circle), for matching a small table with the numbers 1, 2, 3 … on top and the letter the child wrote under each number, and for ordering the step letters A, B, C … written in order next to 1st, 2nd, 3rd …. IMPORTANT: the letters in choices_on_paper are EXACTLY the letters printed on the child's paper. For a choice question, the child is right when the letter they wrote or circled equals correct_letter. Never re-letter the choices yourself). ${CHECK_RULES}${wsWordsCheck(w.kid, w.subject)}`,
     answerKey: w.questions.map(q => ({ number: q.number, answer: keyOf(q), ...extraOf(q), points: q.points,
                                        ...(isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? {} : { marking: wsPartOf(q) === "C" ? MARK_EXPLAIN : MARK_SHORT }),
                                        ...(q.skill ? { skill: q.skill } : {}), ...(q.difficulty ? { difficulty: q.difficulty } : {}),
