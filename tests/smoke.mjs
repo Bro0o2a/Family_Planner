@@ -106,6 +106,14 @@ try {
   });
   if (guard !== "ok") errors.push("[new worksheet guard] " + guard);
 
+  // 🔤 "Put the letters in order to make a word" is a spelling question (the kid writes the word), never A B C D bits of instructions
+  const unscr = await run("unscramble letters", () => {
+    const w = cleanWorksheet({ questions: [{ number: 1, kind: "ordering", prompt: "Put the letters in the right order to make a word: H T G N E L", options: ["Rearrange the letters", "into one word", "then check it", "with a friend"], answer: "length", points: 1 },
+      { number: 2, kind: "ordering", prompt: "Order the steps: Rearrange the letters, into one word, then check it", options: [], answer: "x", points: 1 }] });
+    return w.questions.every(q => q.kind === "short_answer" && !q.options.length) ? "ok" : JSON.stringify(w.questions.map(q => [q.kind, q.options]));
+  });
+  if (unscr !== "ok") errors.push("[unscramble letters] " + unscr);
+
   // 🔑 Key words: a parent saves them for a kid's subject → new worksheets and the check get them; cleared → gone
   const words = await run("key words", () => {
     const kid = "ex-kid1", sub = (subjectList(schoolOf(kid), true)[0] || {}).name;

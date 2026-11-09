@@ -263,6 +263,8 @@ function orderItemsOf(text) {
   const tail = text.slice(at + 1).trim().replace(/[.?!]$/, "");
   const parts = [/\s*;\s*/, /\s*\n+\s*/, /\s+\/\s+/, /,\s+(?:and\s+|or\s+)?|\s+(?:and|or)\s+(?!.*,\s)/].map(re => tail.split(re).map(x => x.trim()).filter(Boolean))
     .find(list => list.length >= 2 && list.length <= 10 && list.every(x => x.length <= 120));
+  // (never the question's own instructions: "Rearrange the letters, into one word, then check it with a friend")
+  if (parts && parts.some(x => /^(then|and|or|into|with|rearrange|write|check|use|make|put)\b/i.test(x))) return null;
   return parts ? { ask: text.slice(0, at + 1).trim(), list: parts } : null;
 }
 function cleanWorksheet(d) {
@@ -273,6 +275,11 @@ function cleanWorksheet(d) {
     if (kind === "true_false" && !options.length) options = ["True", "False"];
     // 🔢 "Put in order" with no items to letter (the items were only in the question text): take them from the text,
     // so the paper shows A, B, C … and the answer sheet 1st, 2nd …; can't find them → a normal question with lines to write
+    // 🔤 "Put the LETTERS in order to make a word" is a spelling question, not ordering: the child writes the word
+    // (its "options" were only bits of the instructions, e.g. "Rearrange the letters" "into one word" "then check it")
+    if (kind === "ordering" && /\bletters?\b/i.test(prompt) && /\b(word|spell|unscramble|rearrange|jumbled|mixed)/i.test(prompt)) {
+      kind = "short_answer"; options = []; lines = 1;
+    }
     if (kind === "ordering" && options.length < 2) {
       const items = orderItemsOf(prompt);
       if (items) { options = items.list; prompt = items.ask; }
