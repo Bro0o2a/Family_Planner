@@ -62,6 +62,38 @@ try {
   }, FAKE_WS);
   if (ok === false) errors.push("[clean a worksheet + check] the worksheet or its check came back empty");
 
+  // 🔢 A "put in order" question whose items are only in its text gets lettered items (A, B, C …) for the answer sheet
+  const ordered = await run("ordering items", () => {
+    const w = cleanWorksheet({ title: "t", questions: [
+      { number: 1, kind: "ordering", prompt: "Put these in order: egg; caterpillar; pupa; butterfly", options: [], answer: "egg; caterpillar; pupa; butterfly", points: 2 },
+      { number: 2, kind: "ordering", prompt: "Put the steps in order.", options: [], answer: "x", points: 1 }] });
+    const [a, b] = w.questions;
+    return a.options.length === 4 && a.prompt === "Put these in order:" && b.kind === "short_answer" && b.answer_lines >= 2 ? "ok" : JSON.stringify([a, b]);
+  });
+  if (ordered !== "ok") errors.push("[ordering items] " + ordered);
+
+  // ✍️ Choices that differ only in punctuation (where the speech marks go): the right letter is found, never a look-alike
+  const punct = await run("punctuation choices", () => {
+    const opts = ['"Let\'s play football, said Taha."', '"Let\'s play football," said Taha.', 'Let\'s play football, "said Taha."'];
+    return optFind(opts, '“Let’s play football,” said Taha.') === 1 && optFind(opts, "Lets play football said Taha") === -1 ? "ok" : "wrong letter";
+  });
+  if (punct !== "ok") errors.push("[punctuation choices] " + punct);
+
+  // ✅ An answer exactly like the key is always right (the AI once marked "1-B, 2-C, 3-A" wrong with the key "1-B, 2-C, 3-A")
+  const sure = await run("answer same as key", () => {
+    const w = { subject: "English", questions: [
+      { number: 1, kind: "matching", options: [], left: ["a", "b", "c"], right: ["x", "y", "z"], answer: "1-B, 2-C, 3-A", points: 3 },
+      { number: 2, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", points: 1 },
+      { number: 3, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", points: 1 }] };
+    const c = { score: 1, max_score: 5, questions: [
+      { number: 1, correct: false, points: 0, your_answer: "1-B, 2-C, 3-A" },
+      { number: 2, correct: false, points: 0, your_answer: "B" },
+      { number: 3, correct: false, points: 0, your_answer: "C" }] };
+    wsSureRight(w, c);
+    return c.questions[0].correct && c.questions[1].correct && !c.questions[2].correct && c.score === 5 ? "ok" : JSON.stringify(c);
+  });
+  if (sure !== "ok") errors.push("[answer same as key] " + sure);
+
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 
