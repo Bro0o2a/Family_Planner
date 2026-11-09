@@ -1188,7 +1188,25 @@ const wsPartOf = q => isChoiceQ(q) || isOrderQ(q) || q.kind === "matching" ? "A"
 const marksText = n => `[${num(n)}]`;
 // A NEW worksheet (never one with answers already): put the questions in A → B → C order and number them 1, 2, 3 …
 // (a study session's sheet with topic parts keeps its order: its parts are in order already)
+// 🛡️ A NEW worksheet's guard (never an old one: its paper may be printed already): a choice question whose answer isn't one of its
+// choices (or with fewer than 2 different choices), or a matching question that can't be drawn in two columns, becomes a question
+// the child answers in writing (the answer stays the key), so the paper, the answer sheet and the check always agree.
+function wsGuard(ws) {
+  if (!ws || !Array.isArray(ws.questions)) return ws;
+  ws.questions = ws.questions.map(q => {
+    const write = () => ({ ...q, kind: "short_answer", options: [], answer_lines: Math.max(q.answer_lines || 0, 2) });
+    if (q.kind === "multiple_choice" || q.kind === "true_false") {
+      const opts = q.options.filter((o, k) => q.options.findIndex(x => optExact(x) === optExact(o)) === k);
+      if (opts.length < 2 || optFind(opts, q.answer) < 0) return write();
+      return opts.length === q.options.length ? q : { ...q, options: opts };
+    }
+    if (q.kind === "matching" && !matchCols(q, isArabicWs(ws))) return write();
+    return q;
+  });
+  return ws;
+}
 function wsExamOrder(ws) {
+  ws = wsGuard(ws);
   if (!ws || (ws.sections && ws.sections.length)) return ws;
   const rank = { A: 0, B: 1, C: 2 };
   ws.questions = ws.questions.map((q, i) => ({ q, i })).sort((a, b) => rank[wsPartOf(a.q)] - rank[wsPartOf(b.q)] || a.i - b.i)

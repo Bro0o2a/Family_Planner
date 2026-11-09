@@ -94,6 +94,18 @@ try {
   });
   if (sure !== "ok") errors.push("[answer same as key] " + sure);
 
+  // 🛡️ A new worksheet's guard: a choice question whose answer isn't a choice becomes a written question; good ones stay
+  const guard = await run("new worksheet guard", () => {
+    const w = wsGuard({ subject: "Maths", questions: [
+      { number: 1, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", answer_lines: 0, points: 1 },
+      { number: 2, kind: "multiple_choice", options: ["3", "4", "5"], answer: "7", answer_lines: 0, points: 1 },
+      { number: 3, kind: "true_false", options: ["True", "False"], answer: "False", answer_lines: 0, points: 1 },
+      { number: 4, kind: "matching", options: ["cat"], answer: "x", answer_lines: 0, points: 1 }] });
+    const k = w.questions.map(q => q.kind).join();
+    return k === "multiple_choice,short_answer,true_false,short_answer" && w.questions[1].answer_lines === 2 ? "ok" : k;
+  });
+  if (guard !== "ok") errors.push("[new worksheet guard] " + guard);
+
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 
