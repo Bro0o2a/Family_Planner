@@ -255,17 +255,34 @@ function aiMeta(d) {
 //                part?: the topic title it's about (📊 "By part"), purpose?: the mode it was made with (see WS_MODES) }
 const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement"];
 const modeOf = x => x === "level" ? "level_check" : WS_MODES.includes(x) ? x : null;   // ("level": a few sheets from an earlier test version)
+// 🔢 The items of a "put in order" question written inside its text: "Put these in order: seed; shoot; flower" →
+// { ask: "Put these in order:", list: [seed, shoot, flower] }. Split on ";", new lines, " / " or ", " (not "1,000"). Null when unsure.
+function orderItemsOf(text) {
+  const at = text.lastIndexOf(":");
+  if (at < 3 || at > text.length - 4) return null;
+  const tail = text.slice(at + 1).trim().replace(/[.?!]$/, "");
+  const parts = [/\s*;\s*/, /\s*\n+\s*/, /\s+\/\s+/, /,\s+(?:and\s+|or\s+)?|\s+(?:and|or)\s+(?!.*,\s)/].map(re => tail.split(re).map(x => x.trim()).filter(Boolean))
+    .find(list => list.length >= 2 && list.length <= 10 && list.every(x => x.length <= 120));
+  return parts ? { ask: text.slice(0, at + 1).trim(), list: parts } : null;
+}
 function cleanWorksheet(d) {
   if (!d || typeof d !== "object") return null;
   const questions = aiObjs(d.questions, 40).map((q, i) => {
-    const kind = WS_KINDS.includes(q.kind) ? q.kind : "short_answer";
+    let kind = WS_KINDS.includes(q.kind) ? q.kind : "short_answer", prompt = aiTxt(q.prompt, 1000);
     let options = aiArr(q.options, 12).map(o => aiTxt(o, 200)).filter(Boolean), lines = aiInt(q.answer_lines, 0, 12, 0);
     if (kind === "true_false" && !options.length) options = ["True", "False"];
+    // 🔢 "Put in order" with no items to letter (the items were only in the question text): take them from the text,
+    // so the paper shows A, B, C … and the answer sheet 1st, 2nd …; can't find them → a normal question with lines to write
+    if (kind === "ordering" && options.length < 2) {
+      const items = orderItemsOf(prompt);
+      if (items) { options = items.list; prompt = items.ask; }
+      else { kind = "short_answer"; lines = Math.max(lines, 2); }
+    }
     // (🔤 choices that came with their own "A)" "B." … : the paper adds the letters, so take them off, else it shows "A) A) 30 cm")
     if (options.length > 1 && options.every((o, k) => new RegExp(`^\\(?${"ABCDEFGHIJKL"[k]}\\s*[).:\\-]\\s*\\S`, "i").test(o)))
       options = options.map(o => o.replace(/^\(?[a-l]\s*[).:\-]\s*/i, ""));
     if (!options.length && !lines) lines = 1;   // always somewhere to write
-    return { number: aiInt(q.number, 1, 99, i + 1), kind, prompt: aiTxt(q.prompt, 1000), options, answer_lines: lines,
+    return { number: aiInt(q.number, 1, 99, i + 1), kind, prompt, options, answer_lines: lines,
              points: aiInt(q.points, 0, 100, 1), answer: aiTxt(q.answer, 1000),
              // 🧠 its topic, skill and difficulty 1–10 (newer worksheets)
              ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),

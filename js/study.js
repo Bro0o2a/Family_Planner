@@ -1161,9 +1161,15 @@ function orderKey(q) {
 // 🔤 Which choice is the answer? Same text first ("30cm" = "30 cm" = "A) 30 cm"), then an answer that is only a letter ("B", "B)"),
 // then a near match only when exactly ONE choice fits (never guess between two). Not found → -1.
 const optNorm = x => String(x || "").toLowerCase().replace(/^\s*\(?[a-j]\s*[).:\-]\s+|^\s*\(?[a-j]\)\s*/, "").replace(/[^\p{L}\p{N}]+/gu, "");
+// (the same text WITH its punctuation: for choices that differ only in commas or speech marks, e.g. where the "…" go)
+const optExact = x => String(x || "").replace(/[“”„«»]/g, '"').replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim().toLowerCase();
 function optFind(opts, ans) {
   const a = optNorm(ans), o = opts.map(optNorm);
-  let i = a ? o.indexOf(a) : -1;
+  const ex = opts.map(optExact).reduce((l, x, k) => x && x === optExact(ans) ? [...l, k] : l, []);
+  if (ex.length === 1) return ex[0];
+  const same = o.reduce((l, x, k) => a && x === a ? [...l, k] : l, []);
+  if (same.length > 1) return -1;   // (only the punctuation tells them apart, and it doesn't match exactly: don't guess)
+  let i = same.length ? same[0] : -1;
   if (i >= 0) return i;
   const L = String(ans || "").trim().match(/^\(?([A-Ja-j])(?:\)|\.|:|$)/);
   if (L) { i = OPT_LETTERS.indexOf(L[1].toUpperCase()); if (i < opts.length) return i; }
