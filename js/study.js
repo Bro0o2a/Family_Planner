@@ -1602,6 +1602,32 @@ async function checkWorksheet(wsId) {
     schoolFresh = true; render();
   }
 }
+// ✅ A safety net after the AI check: an answer the AI wrote down EXACTLY like the key (the same matching letters, the same order
+// letters, the same choice letter or text) is always right, even if the AI said wrong. (Never the other way: it only ever adds marks.)
+const wsPairs = t => { const p = {}; String(t || "").replace(/(\d+)\s*[-–—:→=.)]?\s*([A-Za-zء-ي])(?!\p{L})/gu, (m, n, l) => { p[n] = /[a-z]/i.test(l) ? l.toUpperCase() : l; }); return p; };
+const wsLetters = t => (String(t || "").match(/(?<!\p{L})[A-Ja-j](?!\p{L})/gu) || []).map(x => x.toUpperCase()).join("");
+function wsSameAsKey(w, wq, said) {
+  if (!wq || !String(said || "").trim()) return false;
+  if (wq.kind === "matching") {
+    const m = matchCols(wq, isArabicWs(w)), key = m ? m.key : wsPairs(wq.answer), got = wsPairs(said), ks = Object.keys(key);
+    return ks.length > 0 && ks.length === Object.keys(got).length && ks.every(k => got[k] === key[k]);
+  }
+  if (isOrderQ(wq)) { const k = orderKey(wq); return !!k && wsLetters(said) === k.join(""); }
+  if (isChoiceQ(wq)) { const i = optFind(wq.options, wq.answer); return i >= 0 && optFind(wq.options, said) === i; }
+  return false;
+}
+function wsSureRight(w, c) {
+  let score = c.score;
+  c.questions.forEach(q => {
+    const wq = w.questions.find(x => x.number === q.number);
+    if (q.correct || !wsSameAsKey(w, wq, q.your_answer)) return;
+    const full = wq.points || 0;
+    score = Math.min(c.max_score, score + Math.max(0, full - (q.points || 0)));
+    Object.assign(q, { correct: true, points: Math.max(q.points || 0, full) });
+  });
+  c.score = score;
+  return c;
+}
 async function checkWorksheetNow(wsId) {
   const w = aiDocs.worksheets[wsId];
   if (!w) return;
@@ -1622,6 +1648,8 @@ async function checkWorksheetNow(wsId) {
   // (each choice question also sends its choices WITH the letters printed on the paper, so the checker never has to guess them)
   const lettered = q => q.options.map((o, i) => `${OPT_LETTERS[i] || i + 1}) ${o}`);
   const keyOf = q => { if (isOrderQ(q)) { const k = orderKey(q); return k ? `${k.join(", ")} (letters in order: ${q.answer})` : q.answer; }
+    if (q.kind === "matching") { const m = matchCols(q, isArabicWs(w)), ks = m ? Object.keys(m.key) : [];   // (🔗 the letters printed on the paper)
+      return ks.length ? `${ks.map(n => `${n}-${m.key[n]}`).join(", ")} (${q.answer})` : q.answer; }
     if (!isChoiceQ(q)) return q.answer; const i = optFind(q.options, q.answer);
     return i >= 0 ? `${OPT_LETTERS[i] || i + 1}) ${q.options[i]}` : q.answer; };
   const extraOf = q => { if (!isChoiceQ(q) && !isOrderQ(q)) return {};
@@ -1635,6 +1663,7 @@ async function checkWorksheetNow(wsId) {
                                        ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
   if (!r) { schoolFresh = true; return render(); }   // (⚠️ the reason shows under the button)
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
+  if (c) wsSureRight(w, c);   // (✅ an answer exactly like the key is right)
   if (!c) { aiFail = { key: "check|" + wsId, text: "🤖 The check came back empty. Please try again.", at: Date.now() }; schoolFresh = true; render(); return toast("🤖 The check came back empty. Please try again.", 4000); }
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;

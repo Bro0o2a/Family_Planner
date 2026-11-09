@@ -79,6 +79,21 @@ try {
   });
   if (punct !== "ok") errors.push("[punctuation choices] " + punct);
 
+  // ✅ An answer exactly like the key is always right (the AI once marked "1-B, 2-C, 3-A" wrong with the key "1-B, 2-C, 3-A")
+  const sure = await run("answer same as key", () => {
+    const w = { subject: "English", questions: [
+      { number: 1, kind: "matching", options: [], left: ["a", "b", "c"], right: ["x", "y", "z"], answer: "1-B, 2-C, 3-A", points: 3 },
+      { number: 2, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", points: 1 },
+      { number: 3, kind: "multiple_choice", options: ["3", "4", "5"], answer: "4", points: 1 }] };
+    const c = { score: 1, max_score: 5, questions: [
+      { number: 1, correct: false, points: 0, your_answer: "1-B, 2-C, 3-A" },
+      { number: 2, correct: false, points: 0, your_answer: "B" },
+      { number: 3, correct: false, points: 0, your_answer: "C" }] };
+    wsSureRight(w, c);
+    return c.questions[0].correct && c.questions[1].correct && !c.questions[2].correct && c.score === 5 ? "ok" : JSON.stringify(c);
+  });
+  if (sure !== "ok") errors.push("[answer same as key] " + sure);
+
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
 
