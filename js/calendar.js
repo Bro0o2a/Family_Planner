@@ -240,7 +240,7 @@ const ACT_ICONS = [[/break|get ready|lunch|dinner|breakfast|meal|bed|sleep|showe
   [/football|sport|gym|swim|karate|run|exercise|club|basket|tennis/i, "basketball"],
   [/study|revision|revise|practi[cs]e|lesson|tutor/i, "study"], [/pray|salah/i, "consistency"]];
 function actIcon3d(name, type, cls = "k-ic") {
-  const hit = ACT_ICONS.find(([re]) => re.test(name || "")), n = hit ? hit[1] : type === "study" ? "study" : type === "routine" ? "time" : "goal";
+  const hit = ACT_ICONS.find(([re]) => re.test(name || "")), n = hit ? hit[1] : type === "study" ? "study" : type === "routine" ? "time" : type === "free" ? "rainbow" : "goal";
   return ico3d(n, cls);
 }
 // What a block shows: big title, colors, and a smaller line underneath.
@@ -317,6 +317,12 @@ function weekHtml(days, opts) {
     const odays = oneDayOn(ds).filter(e => !opts.only || e.who.includes(opts.only));
     odays.forEach(e => parts.push({ start: toMin(e.from), end: toMin(e.to), html: oneDayCardHtml(e, ds, opts) }));
     if (!merged.length && !pacts.length && !odays.length) parts.push({ free: true, start: -1, html: `<div class="k-free">${past ? "Nothing planned" : "Free day! 🎉"}</div>` });
+    // 🎈 v182 (Broo2a): an empty gap of 45 minutes or more on one person's calendar (today from now, and the days ahead):
+    //  a "Free time" strip → 🎈 ideas, and for a parent ➕ add an activity there
+    if (opts.only && !opts.drag && !opts.readOnly && ds >= today) freeGaps(ds, opts.only, day, pacts, odays).forEach(([gs, ge]) =>
+      parts.push({ start: gs, end: gs + 1, strip: true, html: `<div class="k-gap"><span>🎈 Free ${clock(gs, true)}–${clock(ge, true)}</span>
+        <button class="pill small" data-freeopen="${safe(opts.only)}">💡 Ideas</button>${isParentDevice()
+          ? `<button class="pill small" data-gapadd="${ds}|${safe(opts.only)}|${gs}|${ge}">➕ Add</button>` : ""}</div>` }));
     // 🕌 Prayer times (only for people who want them): inside the activity happening then, otherwise a thin line of its own
     const prays = prayersOn(ds), inPrayer = new Set();
     const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
@@ -418,6 +424,22 @@ function weekHtml(days, opts) {
       pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, ds, opts)).join("")}`; }, opts.whole || wholeWeek, bars, dates);
 }
 
+// 🎈 v182 The empty gaps of one person on one date: [[from, to]] (45 minutes or more, inside the day and before bedtime)
+function freeGaps(ds, who, day, pacts, odays) {
+  const [ws, we0] = day.window || [0, 0], bed = bedMin(who, ds), we = bed != null ? Math.min(we0, bed) : we0;
+  const from = ds === todayYmd() ? Math.max(ws, Math.ceil(dubaiMinutes() / 15) * 15) : ws;
+  if (from >= we) return [];
+  const busy = [...day.items.filter(it => it.people.includes(who)).map(it => [it.start, it.end]),
+    ...day.routines.filter(r => (r.users || []).includes(who)).map(r => [r.start, r.end]),
+    ...pacts.filter(a => a.from).map(a => [toMin(a.from), toMin(a.to)]),
+    ...odays.map(e => [toMin(e.from), toMin(e.to)])];
+  return cutOut([from, we], busy).filter(([a, b]) => b - a >= 45);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-gapadd]"); if (!b || !isParentDevice()) return;
+  const [ds, who, gs, ge] = b.dataset.gapadd.split("|");
+  openDayFix(ds, [who], [[Number(gs), Number(ge)]]);
+});
 // 🌙 v180 Bedtime lines on one date: [{ min, kids: [ids] }] (one kid's calendar: only theirs; a parent's own: none)
 function bedGroups(ds, only) {
   const kids = only ? (isParentId(only) ? [] : [only]) : kidsList().map(k => k.id);
@@ -602,29 +624,36 @@ function openCard(b) {
   if (b.pact) return openPactCard(b);
   if (b.oneDay) return openOneDayCard(b);
   const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => baseActId(x.actId) === a.id));
-  const rows = [
-    b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
-    ["🙂 Who", namesOf(b.users)],   // (🏷️ v180: names only)   // (3rd = as HTML, with a parent's 🖼️ photo)
-    ["⭐ Type", (([, e, w]) => `${e} ${w}`)(actTypeInfo(b.type || "activity"))],
-    helperOf(b) ? ["🤝 Helper", helperOf(b).name] : null,
-    ["📅 Day", dayLong(b.day)],
-    // (👨‍👩‍👧 only the kids' parts: parents aren't ticked)
-    b.acts.some(a => !isParentId(a.user)) ? ["✅ Done", b.acts.filter(a => !isParentId(a.user)).map(a => (b.acts.length > 1 ? userById(a.user).name + ": " : "") + (isDone(b.day, a.actId, a.user) ? "Yes! 🎉" : "Not yet")).join("  ")] : null,
-    ["⏰ Start", clock(b.start, true)],
-    ["🏁 End", clock(b.end, true)],
-    flex && flex.between ? ["🕓 Only between", betweenText(flex.between)] : null
+  // 🎨 v182 (Broo2a): new look. Top = icon + what it is + type; a "when" box (day, time, minutes);
+  //   small tiles for who / helper / done; one ✏️ for the activity (top) and one for the time (when box)
+  const subj = !b.fixed && findSubject(b.name), what = b.fixed ? b.name : subj ? subj.name : b.name;
+  const [, tEmoji, tWord] = actTypeInfo(b.type || "activity");
+  const kids = b.acts.filter(a => !isParentId(a.user));
+  const doneHtml = kids.map(a => { const ok = isDone(b.day, a.actId, a.user);
+    return `<span class="kc2-done ${ok ? "yes" : ""}">${kids.length > 1 ? safe(userById(a.user).name) + (ok ? " ✅" : " ⏳") : ok ? "✅ Done" : "⏳ Not yet"}</span>`; }).join("");
+  const tiles = [
+    ["🙂", "Who", safe(namesOf(b.users)), b.users.length > 2],
+    helperOf(b) ? ["🤝", "Helper", safe(helperOf(b).name)] : null,
+    kids.length ? ["✅", "Done", doneHtml, kids.length > 1] : null,
+    flex && flex.between ? ["🕓", "Only between", safe(betweenText(flex.between))] : null
   ].filter(Boolean);
-  // ✏️ v180 (parents): a small pencil by the details → What / Who / Type: the activity's own form; Day / Start / End: move this one
-  //   (a flexible activity, today or later, in the plan: the same 📌 Move box as ✏️ Edit calendar, saved straight away)
   const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === baseActId(actId));
   const canMove = isParentDevice() && !b.fixed && actId && b.day >= todayYmd() && planItemsOn(b.day).some(x => !x.fixed && x.actId === actId);
-  const pen = (label) => { const what = ["📘 What", "📌 Activity", "🙂 Who", "⭐ Type"].includes(label), when = ["📅 Day", "⏰ Start", "🏁 End"].includes(label);
-    return what && canEditAct ? `<button class="k-edit" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change ${safe(label.slice(2).trim())}">✏️</button>`
-      : when && canMove ? `<button class="k-edit" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the ${safe(label.slice(2).trim().toLowerCase())}">✏️</button>` : ""; };
+  const mins = b.end - b.start, len = mins >= 60 ? `${Math.floor(mins / 60)} h${mins % 60 ? ` ${mins % 60} min` : ""}` : `${mins} min`;
+  cardDay = b.day;
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
-    <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
-    <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}${pen(label)}</b></div>`).join("")}</div>
+    <div class="k-card-top kc2-top">${canEditAct ? `<button class="k-edit kc2-pen" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change this activity">✏️</button>` : ""}
+      <div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div>
+      <div class="nm">${subj ? `${safe(subj.emoji)} ` : ""}${safe(what)}</div>
+      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}</div></div>
+    <div class="kc2-when">
+      <div class="kc2-day">📅 ${safe(dayLong(b.day))}</div>
+      <div class="kc2-time">${safe(clock(b.start, true))} <span>→</span> ${safe(clock(b.end, true))}</div>
+      <span class="kc2-len">⏱️ ${len}</span>
+      ${canMove ? `<button class="k-edit kc2-pen" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the day or time">✏️</button>` : ""}</div>
+    ${b.type === "free" ? `<div class="kc2-free">🎈 Free time: pick what to do!<div class="kc2-freebtns">${b.users.map(u => `<button class="pill small" data-freeopen="${safe(u)}">💡 Ideas${b.users.length > 1 ? ` for ${safe(userById(u).name)}` : ""}</button>`).join("")}</div></div>` : ""}
+    <div class="kc2-tiles">${tiles.map(([ic, l, v, wide]) => `<div class="kc2-tile${wide ? " wide" : ""}"><small>${ic} ${l}</small><b>${v}</b></div>`).join("")}</div>
     ${fixedTodayHtml(b)}
     <button class="k-ok" id="kOk">OK 👍</button>`;
   $("kModal").hidden = false;
@@ -961,10 +990,20 @@ document.addEventListener("click", e => {
   const [kind, a, b] = btn.dataset.kedit.split("|");
   closeCard();
   if (kind === "move") { openMoveBox(a, b); moveDirect = !editMode; return; }
+  // ↩️ v182 (Broo2a): after ✏️ → change → Save, come back to this calendar and its card
+  cardBack = { id: a, day: cardDay, calWho, viewDay, wholeWeek };
   go("add");
   setTimeout(() => { if (kind === "fixed") startEditFixed(a); else startEditFlex(a); }, 50);
 });
 
+let cardBack = null, cardDay = null;   // (↩️ where a ✏️ on the big card came from)
+function cardReturn(id) {
+  const cb = cardBack; cardBack = null;
+  if (!cb || cb.id !== id || !saveChanges()) return;   // (💾 saved straight away, then back)
+  go("mine"); calWho = cb.calWho; viewDay = cb.viewDay; wholeWeek = cb.wholeWeek; render();
+  const blk = blocks.find(x => x.day === cb.day && x.acts && x.acts.some(t => baseActId(t.actId) === id));
+  if (blk) openCard(blk);
+}
 // 📋 v180 Day plan (Broo2a): one day's activities as a short list (whose calendar it is, or everyone's).
 // Parents: ✏️ change each one (its card: times, didn't happen, move …), ✕ take a flexible one off that day, ➕ add something.
 // Kids: look only.
@@ -1040,8 +1079,10 @@ function drawMine() {
   // (face = HTML: a parent's 🖼️ photo or their emoji)
   const chip = (id, face, label, c) => `<button class="chip ${calWho === id ? "on" : ""}" data-calwho="${safe(id)}" style="--soft:${c.soft};--ink:${c.ink}"
     ${calWho === id ? `aria-current="true"` : ""}><span class="e">${face}</span>${safe(label)}</button>`;
-  $("minePeople").innerHTML = chip(me, parent ? faceHtml(userById(me)) : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
-    + (parent ? familyOrder(data.users.filter(x => x.id !== me)).map(x => chip(x.id, faceHtml(x), x.name, colorsOf(x))).join("") : "");
+  // (👨‍👩‍👧 v182 Broo2a: 👨‍👩‍👧 Everyone first, then the family in order: father, mother, kids oldest first; "Me" sits in its own place)
+  $("minePeople").innerHTML = chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
+    + (parent ? familyOrder(data.users).map(x => chip(x.id, faceHtml(x), x.id === me ? "Me" : x.name, colorsOf(x))).join("")
+       : chip(me, "🙋", "Me", colorsOf(userById(me))));
   $("mineTitle").textContent = all ? "Everyone's Week" : mine ? "My Week" : `${u.name}'s Week`;   // (🫧 the puffy banner: see puffTitles)
   $("mineSub").textContent = !mine && !parent && !all ? `Just looking 👀 Only ${u.name} or ${dadName()} can tick these.` : "";   // (v154: short)
   document.querySelector("#scr-mine .bar .cal-btn").classList.toggle("here", calWho === (parent ? "all" : me));
