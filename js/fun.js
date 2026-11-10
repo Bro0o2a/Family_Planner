@@ -519,29 +519,46 @@ function setDuty(kid, v) {
 }
 
 // =====================================================================
-//  💌 WISHES: every Friday (until Sunday) each kid answers 2 questions (+5 once a week)
+//  💌 WISHES: the last 2 days of the points week (Thu + Fri) each kid answers 3 questions (+5 once a week): me, siblings, 🎉 weekend
 //   data.points.wishes = "monday|kid" → { me, sib, at, done: { me: true?, sib: true? } }. Kept about 6 months.
 //   Parents see them in "💌 Kids' wishes" and tap ❤️ We did it! → a 🔔 to the kid. Kids see only their own.
 // =====================================================================
-const WISH_POINTS = 5, WISH_DAY = 4;   // Friday (0 = Monday)
+const WISH_POINTS = 5;
 const wishKey = (kid, week = data.points.week) => `${week}|${kid}`;
 function wishPoints(user, from, to) {
   return Object.entries(data.points.wishes).filter(([key, w]) => { const [week, kid] = key.split("|"); return kid === user && w.at && week >= from && week < to; }).length * WISH_POINTS;
 }
 const siblingsText = kid => { const names = kidsList().filter(k => k.id !== kid).map(k => k.name); return names.length < 2 ? names.join("") : names.slice(0, -1).join(", ") + " and " + names[names.length - 1]; };
 let wishEdit = false;   // ✏️ the kid is changing this week's answers
+// 💌 v183 (Broo2a): the form is back on the kid's home, the LAST 2 days of the points week (Thu + Fri), with a 3rd question:
+//   🎉 what I'd like to do at the weekend (parents see it in time to plan)
+const wishOpen = () => weekIndex() >= 5;
+function wishCardHtml(u) {
+  if (!feat("wishes") || isParentId(u.id) || !wishOpen()) return "";
+  const w = data.points.wishes[wishKey(u.id)], sibs = siblingsText(u.id);
+  if (w && w.at && !wishEdit) return `<div class="card wi-card" style="--c:${colorsOf(u).color}"><h2>💌 My wishes this week</h2>
+    ${w.me ? `<p>💭 <b>For me:</b> ${safe(w.me)}</p>` : ""}${w.sib ? `<p>🤝 <b>For ${safe(sibs)}:</b> ${safe(w.sib)}</p>` : ""}${w.wk ? `<p>🎉 <b>At the weekend:</b> ${safe(w.wk)}</p>` : ""}
+    <div class="btnrow"><button class="pill small" data-wishedit>✏️ Change</button></div></div>`;
+  const v = k => safe((w && w[k]) || "");
+  return `<div class="card wi-card" style="--c:${colorsOf(u).color}"><h2>💌 Wish time!</h2><p>Mum and Dad will read it. +${WISH_POINTS} ⭐</p>
+    <label class="small" for="wiMe">💭 What do you wish for this week?</label><input id="wiMe" maxlength="120" value="${v("me")}" placeholder="e.g. a park trip">
+    ${sibs ? `<label class="small" for="wiSib">🤝 A wish for ${safe(sibs)}?</label><input id="wiSib" maxlength="120" value="${v("sib")}">` : ""}
+    <label class="small" for="wiWk">🎉 What would you like to do at the weekend?</label><input id="wiWk" maxlength="120" value="${v("wk")}" placeholder="e.g. swimming, a movie, the beach">
+    <p class="err" id="wiErr"></p><div class="btnrow"><button class="pill primary" data-wishsave>💌 Send</button>${w && w.at ? `<button class="pill" data-wishcancel>Cancel</button>` : ""}</div></div>`;
+}
 function saveWish(button) {
-  if (isParentId(me) || todayIndex() < WISH_DAY) return;
-  const mine = $("wiMe").value.trim().slice(0, 120), sib = $("wiSib") ? $("wiSib").value.trim().slice(0, 120) : "";
-  if (!mine && !sib) return $("wiErr").textContent = "Write a wish first. 🙂";
+  if (isParentId(me) || !wishOpen()) return;
+  const mine = $("wiMe").value.trim().slice(0, 120), sib = $("wiSib") ? $("wiSib").value.trim().slice(0, 120) : "", wk = $("wiWk").value.trim().slice(0, 120);
+  if (!mine && !sib && !wk) return $("wiErr").textContent = "Write a wish first. 🙂";
   if (newWeek()) keepNow();
   const key = wishKey(me), old = data.points.wishes[key];
-  data.points.wishes[key] = { me: mine, sib, at: (old && old.at) || new Date().toISOString(), done: old ? old.done : {} };
+  data.points.wishes[key] = { me: mine, sib, wk, at: (old && old.at) || new Date().toISOString(), done: old ? old.done : {} };
   wishEdit = false;
   keepNow();
   const r = button.getBoundingClientRect();
   celebrate(r.left + r.width / 2, r.top + r.height / 2, colorsOf(userById(me)).color, false);
   toast(old ? "💌 Changed!" : `💌 Sent! +${WISH_POINTS} ⭐`, 2400);
+  render();
 }
 // 👨‍👩‍👧 "💌 Kids' wishes" on a parent's home: the last 4 weeks, newest first
 // (only = one kid's: 👧 the Kid page)
@@ -552,7 +569,7 @@ function wishesListHtml(only) {
   if (!list.length) return "";
   return `<div class="card wi-list"><h2>💌 Kids' wishes</h2><ul class="list">${list.flatMap(([key, w]) => {
     const kid = key.split("|")[1], u = userById(kid);
-    return [["me", "💭", "for me"], ["sib", "🤝", `for ${siblingsText(kid) || "the others"}`]].filter(([k]) => w[k]).map(([k, e, forWho]) => `<li>
+    return [["me", "💭", "for me"], ["sib", "🤝", `for ${siblingsText(kid) || "the others"}`], ["wk", "🎉", "at the weekend"]].filter(([k]) => w[k]).map(([k, e, forWho]) => `<li>
       <span class="what"><b>${safe(u.emoji)} ${safe(u.name)}</b> ${e} <small>${safe(forWho)} · ${weekLabel(key.slice(0, 10))}</small><br>${safe(w[k])}</span>
       ${w.done && w.done[k] ? `<span class="wi-done">❤️ Done</span>` : `<button data-wishdid="${safe(key)}|${k}">❤️ We did it!</button>`}</li>`);
   }).join("")}</ul></div>`;
