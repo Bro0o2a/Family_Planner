@@ -3255,3 +3255,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .who-names { font-size: .85em; font-weight: 700; opacity: .85; white-space: nowrap; }
 .k-card-top .big .k-bigic { width: 64px; height: 64px; }
 .k-card-top .big:has(.k-bigic) { display: flex; justify-content: center; }
+/* 🎈 v182 an empty gap on one person's calendar */
+.k-gap { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 4px 10px; border: 2px dashed #f9a8d4; border-radius: 12px; background: #fff7fb; color: #9d174d; font-size: 13px; font-weight: 700; }
+.k-gap span { margin-right: auto; }
+.k-gap .pill { padding: 3px 10px; min-height: 0; font-size: 12px; }

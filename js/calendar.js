@@ -317,6 +317,12 @@ function weekHtml(days, opts) {
     const odays = oneDayOn(ds).filter(e => !opts.only || e.who.includes(opts.only));
     odays.forEach(e => parts.push({ start: toMin(e.from), end: toMin(e.to), html: oneDayCardHtml(e, ds, opts) }));
     if (!merged.length && !pacts.length && !odays.length) parts.push({ free: true, start: -1, html: `<div class="k-free">${past ? "Nothing planned" : "Free day! 🎉"}</div>` });
+    // 🎈 v182 (Broo2a): an empty gap of 45 minutes or more on one person's calendar (today from now, and the days ahead):
+    //  a "Free time" strip → 🎈 ideas, and for a parent ➕ add an activity there
+    if (opts.only && !opts.drag && !opts.readOnly && ds >= today) freeGaps(ds, opts.only, day, pacts, odays).forEach(([gs, ge]) =>
+      parts.push({ start: gs, end: gs + 1, strip: true, html: `<div class="k-gap"><span>🎈 Free ${clock(gs, true)}–${clock(ge, true)}</span>
+        <button class="pill small" data-freeopen="${safe(opts.only)}">💡 Ideas</button>${isParentDevice()
+          ? `<button class="pill small" data-gapadd="${ds}|${safe(opts.only)}|${gs}|${ge}">➕ Add</button>` : ""}</div>` }));
     // 🕌 Prayer times (only for people who want them): inside the activity happening then, otherwise a thin line of its own
     const prays = prayersOn(ds), inPrayer = new Set();
     const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
@@ -418,6 +424,22 @@ function weekHtml(days, opts) {
       pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, ds, opts)).join("")}`; }, opts.whole || wholeWeek, bars, dates);
 }
 
+// 🎈 v182 The empty gaps of one person on one date: [[from, to]] (45 minutes or more, inside the day and before bedtime)
+function freeGaps(ds, who, day, pacts, odays) {
+  const [ws, we0] = day.window || [0, 0], bed = bedMin(who, ds), we = bed != null ? Math.min(we0, bed) : we0;
+  const from = ds === todayYmd() ? Math.max(ws, Math.ceil(dubaiMinutes() / 15) * 15) : ws;
+  if (from >= we) return [];
+  const busy = [...day.items.filter(it => it.people.includes(who)).map(it => [it.start, it.end]),
+    ...day.routines.filter(r => (r.users || []).includes(who)).map(r => [r.start, r.end]),
+    ...pacts.filter(a => a.from).map(a => [toMin(a.from), toMin(a.to)]),
+    ...odays.map(e => [toMin(e.from), toMin(e.to)])];
+  return cutOut([from, we], busy).filter(([a, b]) => b - a >= 45);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-gapadd]"); if (!b || !isParentDevice()) return;
+  const [ds, who, gs, ge] = b.dataset.gapadd.split("|");
+  openDayFix(ds, [who], [[Number(gs), Number(ge)]]);
+});
 // 🌙 v180 Bedtime lines on one date: [{ min, kids: [ids] }] (one kid's calendar: only theirs; a parent's own: none)
 function bedGroups(ds, only) {
   const kids = only ? (isParentId(only) ? [] : [only]) : kidsList().map(k => k.id);
