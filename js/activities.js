@@ -264,6 +264,7 @@ $("fxAdd").onclick = () => {
   resetFixedForm();
   changed();
   draftToast(old ? "✓ Changed" : "✓ Added");
+  cardReturn(id);   // (↩️ came from the calendar card: save + back there)
 };
 
 // Fill the form with an activity's values so you can change them
@@ -362,6 +363,7 @@ $("flAdd").onclick = () => {
   resetFlexForm();
   changed();
   draftToast(old ? "✓ Changed" : "✓ Added");
+  cardReturn(id);   // (↩️ came from the calendar card: save + back there)
 };
 
 function startEditFlex(id) {

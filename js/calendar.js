@@ -640,6 +640,7 @@ function openCard(b) {
   const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === baseActId(actId));
   const canMove = isParentDevice() && !b.fixed && actId && b.day >= todayYmd() && planItemsOn(b.day).some(x => !x.fixed && x.actId === actId);
   const mins = b.end - b.start, len = mins >= 60 ? `${Math.floor(mins / 60)} h${mins % 60 ? ` ${mins % 60} min` : ""}` : `${mins} min`;
+  cardDay = b.day;
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
     <div class="k-card-top kc2-top">${canEditAct ? `<button class="k-edit kc2-pen" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change this activity">✏️</button>` : ""}
@@ -989,10 +990,20 @@ document.addEventListener("click", e => {
   const [kind, a, b] = btn.dataset.kedit.split("|");
   closeCard();
   if (kind === "move") { openMoveBox(a, b); moveDirect = !editMode; return; }
+  // ↩️ v182 (Broo2a): after ✏️ → change → Save, come back to this calendar and its card
+  cardBack = { id: a, day: cardDay, calWho, viewDay, wholeWeek };
   go("add");
   setTimeout(() => { if (kind === "fixed") startEditFixed(a); else startEditFlex(a); }, 50);
 });
 
+let cardBack = null, cardDay = null;   // (↩️ where a ✏️ on the big card came from)
+function cardReturn(id) {
+  const cb = cardBack; cardBack = null;
+  if (!cb || cb.id !== id || !saveChanges()) return;   // (💾 saved straight away, then back)
+  go("mine"); calWho = cb.calWho; viewDay = cb.viewDay; wholeWeek = cb.wholeWeek; render();
+  const blk = blocks.find(x => x.day === cb.day && x.acts && x.acts.some(t => baseActId(t.actId) === id));
+  if (blk) openCard(blk);
+}
 // 📋 v180 Day plan (Broo2a): one day's activities as a short list (whose calendar it is, or everyone's).
 // Parents: ✏️ change each one (its card: times, didn't happen, move …), ✕ take a flexible one off that day, ➕ add something.
 // Kids: look only.
