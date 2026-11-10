@@ -11,6 +11,7 @@ function drawSettings() {
   $("starDay").innerHTML = DAYS.map((d, i) => `<option value="${i}" ${i === starTime().day ? "selected" : ""}>${d}</option>`).join("");
   $("starClock").value = starTime().time;
   $("extraLimit").value = String(data.extraLimit || 3);
+  $("moodRemind").value = data.moodRemind === undefined ? "18:00" : data.moodRemind;
   fillPrayer();
   drawUsers();
   drawHabitList();
@@ -114,6 +115,7 @@ $("maxTogether").addEventListener("change", () => {
 }));
 
 // 🤖 Extra worksheets per kid per day (3–5)
+$("moodRemind").addEventListener("change", () => { data.moodRemind = $("moodRemind").value; changed(); });
 $("extraLimit").addEventListener("change", () => { const n = Number($("extraLimit").value); if ([3, 4, 5].includes(n)) data.extraLimit = n; changed(); });
 
 // ---------- 🕌 Prayer times ----------
@@ -181,6 +183,31 @@ function answerPrayer(yes) {
 }
 $("prayYes").addEventListener("click", () => answerPrayer(true));
 $("prayNo").addEventListener("click", () => answerPrayer(false));
+
+// ---------- 📔 v180 Mood reminder (kids): from data.moodRemind (Dubai, default 6 PM; ⚙️ Settings, parents), when today's mood
+// isn't answered yet. Once a day; "Later" asks again an hour later. ----------
+const MOOD_ASK_KEY = SAVE_KEY + ".moodAsk.";
+function moodAskNeeds() {
+  const u = exists(me) && userById(me), at = data.moodRemind === undefined ? "18:00" : data.moodRemind;
+  if (!u || isParentId(me) || !at || !feat("diary")) return null;
+  if (dubaiMinutes() < toMin(at)) return null;
+  // (💌 the weekly wish has no form for kids any more, so only 📔 today's mood is asked)
+  return diaryOf(me, todayYmd()) ? null : { mood: true };
+}
+function maybeAskMood() {
+  if (!$("moodAsk").hidden || !$("prayAsk").hidden || screen === "start" || screen === "diary" || (cloud.enabled && !cloud.ready)) return;
+  if (!$("syncModal").hidden || !$("loginScreen").hidden || document.querySelector(".tour")) return;
+  const need = moodAskNeeds();
+  if (!need) return;
+  let next = 0; try { next = Number(localStorage.getItem(MOOD_ASK_KEY + me + "." + todayYmd())) || 0; } catch (e) {}
+  if (next < 0 || Date.now() < next) return;   // (-1 = answered / closed for today)
+  $("moodAskText").textContent = "Tap how you feel today. It only takes a second. 😊";
+  $("moodAsk").hidden = false;
+  $("moodAskGo").focus();
+}
+function moodAskSet(v) { try { localStorage.setItem(MOOD_ASK_KEY + me + "." + todayYmd(), String(v)); } catch (e) {} }
+$("moodAskGo").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); openDiary(me); });
+$("moodAskLater").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); toast("OK! I'll ask again in an hour. 🙂", 3000); });
 
 // ---------- People ----------
 let editingUser = null; // which person is being edited (null = adding a new one)

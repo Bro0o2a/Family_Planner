@@ -234,6 +234,7 @@
   .kid-bar .e { font-size: 22px; line-height: 1.1; }
   .kid-bar small { font-size: 11px; font-weight: 800; white-space: nowrap; }
   #scr-home.kid-home .bar .cal-btn { display: none; }   /* (📅 is the big CALENDAR button on a kid's home) */
+  #scr-home.kid-home .bar .sch-btn { display: none; }   /* (🎒 too: the big SCHOOL button is there) */
   .kid-bar button.on { background: var(--text); color: #fff; border-color: var(--text); }
   .kid-more { margin-bottom: 14px; }
   @media (min-width: 600px) { .rp-tiles { grid-template-columns: 1fr 1fr; } }

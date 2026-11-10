@@ -153,6 +153,7 @@ function render() {
   if (screen === "mine") saveCalPrefs();   // remember the day / view / chip on this device
   updateSaveBars();
   drawNews();
+  maybeAskMood();     // 📔 v180: the kids' evening mood + wish reminder
   maybeAskPrayer();   // 🕌 the first time after this update: "Show prayer times on your calendar?"
   puffTitles();   // 🫧 v159: every page title = the puffy "Daily Planner" banner
 }

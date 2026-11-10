@@ -301,6 +301,11 @@
           <label for="extraLimit">🤖 Extra worksheets per kid per day</label>
           <select id="extraLimit"><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
         </div>
+        <div class="setting" style="margin-top:14px">
+          <label for="moodRemind">📔 Remind the kids to answer their mood from</label>
+          <select id="moodRemind"><option value="15:00">3 PM</option><option value="16:00">4 PM</option><option value="17:00">5 PM</option><option value="18:00">6 PM</option>
+            <option value="19:00">7 PM</option><option value="20:00">8 PM</option><option value="21:00">9 PM</option><option value="">Off</option></select>
+        </div>
         <p class="hint" style="margin:8px 0 0">At this time everyone gets a pop-up with the results and the ⭐ Shining Star.
           The new week (scores back to zero) starts at midnight after it. Changing it starts the new count from today's week.</p>
       </div>
@@ -561,6 +566,19 @@
       <button class="primary" id="fmLink" hidden>🔗 Open link</button>
       <button class="danger-text" id="fmDel">🗑️ Delete</button>
       <button id="fmClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📔 v180: a kid's evening reminder: answer today's mood (and this week's wish) -->
+<div class="k-modal" id="moodAsk" hidden>
+  <div class="k-card pray-card" role="dialog" aria-modal="true" aria-labelledby="moodAskTitle">
+    <div class="leave-emoji">📔</div>
+    <div class="print-title" id="moodAskTitle" style="font-size:24px;margin:10px 0 0">How was your day?</div>
+    <p class="print-hint" id="moodAskText" style="margin:6px 0 18px"></p>
+    <div class="btnrow">
+      <button class="primary" id="moodAskGo">📔 Answer now</button>
+      <button id="moodAskLater">Later</button>
     </div>
   </div>
 </div>

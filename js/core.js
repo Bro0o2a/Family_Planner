@@ -429,7 +429,8 @@ function emptyData() {
     starAt: { day: 4, time: "15:30" },
     aiOk: null,    // 🤖 a parent said OK to the AI helper for the family: { by, at } (see askAiOk in ai.js)
     starV: 2,        // ⭐ 2 = the old Friday 6 PM was moved to Friday 3:30 PM once (v171)
-    extraLimit: 3,   // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
+    extraLimit: 3, moodRemind: "18:00",   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
+   // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
     plan: null,     // the week Dad planned with "Plan my week" (null = not planned yet)
     // Points: which activities are done this week. Starts again every Monday.
@@ -800,7 +801,8 @@ function cleanData(d) {
 
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
-  if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);   // 🤖 (otherwise the default 3)
+  if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);
+  if (d.moodRemind === "" || /^(1[5-9]|2[0-1]):00$/.test(String(d.moodRemind))) clean.moodRemind = d.moodRemind;   // 📔 v180   // 🤖 (otherwise the default 3)
   // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
   if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
     clean.starAt = { day: d.starAt.day, time: d.starAt.time };
