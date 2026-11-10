@@ -74,7 +74,7 @@ function drawKidHome(u) {
       ${tile("kt-cal", "data-kidcal", ico3d("calendar"), "Calendar", `${doneToday} of ${today.length}`, "done today")}
       ${tile("kt-habits", `data-kidpanel="habits"`, ico3d("goal"), "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
       ${tile("kt-score", `data-go="points"`, ico3d("achieve"), "Score this week", `${scoreOf(u.id).overall}`, `of ${scoreOf(u.id).max}`)}</div>
-    ${kidPlannerHtml(u, today, hb)}`;
+    ${wishCardHtml(u)}${kidPlannerHtml(u, today, hb)}`;
   $("homeMenu").hidden = true;
   const bar = [["data-go=\"points\"", "🏆", "Points"], ["data-kidpanel=\"habits\"", "⭐", "Habits"], ...(feat("diary") ? [["data-go=\"diary\"", "📔", "My day"]] : []),
                ...(feat("meeting") ? [[`data-extra="meeting"`, "🏡", "Community"]] : []), ["data-profile", "👤", "Me"], ["data-homemore", "☰", "More"]];

@@ -1014,8 +1014,8 @@ function cleanData(d) {
     if (pts.wishes && typeof pts.wishes === "object") Object.entries(pts.wishes).forEach(([key, w]) => {
       if (!/^\d{4}-\d{2}-\d{2}\|[^|]+$/.test(key) || !w || typeof w !== "object") return;
       const done = w.done && typeof w.done === "object" ? w.done : {};
-      clean.points.wishes[key] = { me: s(w.me, 120), sib: s(w.sib, 120), at: s(w.at, 40),
-                                   done: { ...(done.me === true ? { me: true } : {}), ...(done.sib === true ? { sib: true } : {}) } };
+      clean.points.wishes[key] = { me: s(w.me, 120), sib: s(w.sib, 120), wk: s(w.wk, 120), at: s(w.at, 40),
+                                   done: { ...(done.me === true ? { me: true } : {}), ...(done.sib === true ? { sib: true } : {}), ...(done.wk === true ? { wk: true } : {}) } };
     });
     if (pts.levels && typeof pts.levels === "object") Object.entries(pts.levels).forEach(([who, list]) => {
       if (Array.isArray(list)) clean.points.levels[who] = list.filter(x => x && Number(x.level) >= 1 && isDate(x.date))
