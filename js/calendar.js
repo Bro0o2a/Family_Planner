@@ -140,7 +140,11 @@ function planDay(ds) {
   // Strips (kept apart from activities: no checkbox, no points): routines, the fixed activities' get ready / break,
   // and the get ready / break around each planned flexible activity (not a deleted one's).
   const flexPads = items.filter(it => !it.fixed && !it.gone).flatMap(it => padsFor(data.flexible.find(a => a.id === it.actId), it.start, it.end));
-  return { date: ds, window: dayWindow(wd), items, routines: [...routinesOn(wd), ...flexPads].sort((a, b) => a.start - b.start) };
+  // (🏫 v180: a fixed activity changed for this date: its get ready / break move with it, or go when it didn't happen)
+  const moved = data.fixed.filter(f => fixedOnOf(ds, f.id)), gone = new Set(moved.map(f => f.id));
+  const rt = routinesOn(wd).filter(r => !(r.pad && [...gone].some(id => r.id.startsWith(`ready-${id}-`) || r.id.startsWith(`break-${id}-`))));
+  moved.forEach(f => { const o = fixedOnOf(ds, f.id); if (!o.off) rt.push(...padsFor(f, toMin(o.start), toMin(o.end))); });
+  return { date: ds, window: dayWindow(wd), items, routines: [...rt, ...flexPads].sort((a, b) => a.start - b.start) };
 }
 // This points week, Monday … Sunday (scores, reports, print, free time). null = no plan yet.
 function planDays() { return hasPlan() ? weekDates().map(planDay) : null; }
@@ -620,10 +624,63 @@ function openCard(b) {
   $("kCard").innerHTML = `
     <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : facesHtml(b.users)}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
     <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}${pen(label)}</b></div>`).join("")}</div>
+    ${fixedTodayHtml(b)}
     <button class="k-ok" id="kOk">OK 👍</button>`;
   $("kModal").hidden = false;
   $("kOk").focus();
 }
+// 🏫 v180 (Broo2a): a fixed activity (School, a club …) that changed on ONE day: "🚫 Didn't happen" or "🕐 Other times that day".
+// Parents, today and later. That day's plan is made again around it: what clashes moves, and free time gets the activities
+// that were missing this week (then 🔍 Missed sessions and 🎈 ideas use the new free time too).
+function fixedTodayHtml(b) {
+  if (!b.fixed || b.gone || !isParentDevice() || b.day < todayYmd()) return "";
+  const ids = [...new Set(b.acts.map(a => a.actId))].filter(id => data.fixed.some(f => f.id === id)); if (!ids.length) return "";
+  const once = fixedOnOf(b.day, ids[0]), key = `${b.day}|${ids.join(",")}`, hm = m => clock24(m);
+  return `<div class="fx-today"><b>${b.day === todayYmd() ? "Only today" : `Only on ${dayName(b.day)}`}:</b>
+    ${once ? `<span class="fx-note">${once.off ? "🚫 Marked as didn't happen" : `🕐 Changed to ${clock(toMin(once.start), true)}–${clock(toMin(once.end), true)}`}</span>` : ""}
+    <div class="btnrow"><button class="pill small" data-fxoff="${safe(key)}">🚫 Didn't happen</button>
+      <button class="pill small" data-fxtimes="${safe(key)}">🕐 Other times</button>${once ? `<button class="pill small" data-fxusual="${safe(key)}">↩️ As usual</button>` : ""}</div>
+    <div class="fx-times" hidden><label>From <input type="time" class="fx-from" value="${hm(b.start)}"></label><label>To <input type="time" class="fx-to" value="${hm(b.end)}"></label>
+      <button class="pill small primary" data-fxsave="${safe(key)}">💾 Save</button></div></div>`;
+}
+function setFixedToday(key, val) {
+  const [ds, idList] = key.split("|"), ids = idList.split(",");
+  if (!isParentId(me) || ds < todayYmd()) return;
+  data.fixedOn = data.fixedOn || {};
+  ids.forEach(id => { if (val) data.fixedOn[`${ds}|${id}`] = val; else delete data.fixedOn[`${ds}|${id}`]; });
+  const people = [...new Set(data.fixed.filter(f => ids.includes(f.id)).flatMap(peopleOf))];
+  let moved = 0;
+  if (hasPlan() && data.plan.dates[ds]) {
+    const day = data.plan.dates[ds], s = val && !val.off ? toMin(val.start) : null, e = val && !val.off ? toMin(val.end) : null;
+    const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
+    day.items = day.items.filter(it => {
+      if (it.fixed) return !ids.includes(it.actId);   // (placed again with the new times, or left out)
+      const act = data.flexible.find(a => a.id === it.actId);
+      if (s == null || !act || it.pinned || ticked(it.actId) || !(it.start < e && s < it.end) || !peopleOf(act).some(p => people.includes(p))) return true;
+      moved++; return false;   // (clashes with the new times: placed again in free time)
+    });
+    // 🚫 Didn't happen: its ✅ ticks that day are taken off (it doesn't count)
+    if (val && val.off) Object.keys(data.points.marks).forEach(k => { if (ids.some(id => k.startsWith(`${ds}|${id}|`))) delete data.points.marks[k]; });
+    makeAndKeepPlan("fill");
+  }
+  closeCard();
+  writeData();
+  render();
+  const left = missedSessions().reduce((n, x) => n + x.missing, 0);
+  toast(`${val ? val.off ? "🚫 Marked as didn't happen" : `🕐 Changed to ${clock(toMin(val.start), true)}–${clock(toMin(val.end), true)}` : "↩️ Back to usual"} on ${dayName(ds)}.${
+    moved ? ` ${moved} ${moved === 1 ? "activity was" : "activities were"} moved.` : ""} The free time was planned again${left ? `; ${left} still missing (🔍 Missed sessions)` : ""}.`, 4500);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-fxoff], [data-fxtimes], [data-fxusual], [data-fxsave]"); if (!b) return;
+  const d = b.dataset;
+  if (d.fxoff) return setFixedToday(d.fxoff, { off: true });
+  if (d.fxusual) return setFixedToday(d.fxusual, null);
+  if (d.fxtimes) { const box = b.closest(".fx-today").querySelector(".fx-times"); box.hidden = !box.hidden; return; }
+  const box = b.closest(".fx-today"), from = box.querySelector(".fx-from").value, to = box.querySelector(".fx-to").value;
+  if (!/^\d{2}:\d{2}$/.test(from) || !/^\d{2}:\d{2}$/.test(to) || from >= to) return toast("Pick a start time before the end time.", 2500);
+  setFixedToday(d.fxsave, { start: from, end: to });
+});
+
 // =====================================================================
 //  ✏️ EDIT CALENDAR (Bro2a only): move flexible activities to another time or day
 // =====================================================================

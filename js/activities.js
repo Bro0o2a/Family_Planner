@@ -782,7 +782,10 @@ function makePlan(mode = "replan") {
     if (day.date >= today && open(day.date) && !ticked) {
       if (!act) return;   // deleted
       // fixed: its weekday taken off, or new times → placed again with the new times (STEP B)
-      if (it.fixed && (!act.days.includes(weekdayOf(day.date)) || it.start !== toMin(act.start) || it.end !== toMin(act.end))) return;
+      // (🏫 v180: or changed for this date only: didn't happen / other times)
+      const once = it.fixed && fixedOnOf(day.date, it.actId);
+      if (once && (once.off || it.start !== toMin(once.start) || it.end !== toMin(once.end))) return;
+      if (it.fixed && !once && (!act.days.includes(weekdayOf(day.date)) || it.start !== toMin(act.start) || it.end !== toMin(act.end))) return;
       // flexible: new length, and it hasn't started → placed again
       if (!it.fixed && it.start > now && it.end - it.start !== act.duration && !it.longer) return;
     }
@@ -800,9 +803,12 @@ function makePlan(mode = "replan") {
   // STEP B: Put fixed activities at their exact times, on the dates of their weekdays that can get new things.
   // (Today: only if it isn't there yet and isn't over.)
   for (const f of data.fixed) {
-    const s = toMin(f.start), e = toMin(f.end), people = peopleOf(f);
+    const people = peopleOf(f);
     for (const [d, day] of days.entries()) {
       if (!f.days.includes(weekdayOf(day.date)) || !open(day.date) || skippedOn(day.date, f.id)) continue;
+      const once = fixedOnOf(day.date, f.id);   // (🏫 v180: changed for this date only)
+      if (once && once.off) continue;
+      const s = toMin(once ? once.start : f.start), e = toMin(once ? once.end : f.end);
       if (day.items.some(it => it.kept && it.actId === f.id) || (day.date === today && e <= now)) continue;   // (already there, or over)
       // Same person busy twice at once? (activities you allowed together are fine)
       // (Different people at the same time is always fine.)

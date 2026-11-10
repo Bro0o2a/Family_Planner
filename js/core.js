@@ -82,6 +82,8 @@ function bedUsual(person, wd) {
   const u = data && Array.isArray(data.users) && data.users.find(x => x.id === person);
   return u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null;
 }
+// 🏫 v180: a fixed activity on one date: null = as usual, { off: true } = didn't happen, { start, end } = other times that day
+const fixedOnOf = (ds, id) => (data && data.fixedOn && data.fixedOn[`${ds}|${id}`]) || null;
 function bedMin(person, ds) {
   const t = data && data.bedOn && data.bedOn[`${ds}|${person}`];
   return t ? toMin(t) : bedUsual(person, weekdayOf(ds));
@@ -457,6 +459,7 @@ function emptyData() {
     starAt: { day: 4, time: "15:30" },
     aiOk: null,    // 🤖 a parent said OK to the AI helper for the family: { by, at } (see askAiOk in ai.js)
     starV: 2,        // ⭐ 2 = the old Friday 6 PM was moved to Friday 3:30 PM once (v171)
+    fixedOn: {},    // 🏫 v180: a fixed activity changed on ONE date: "date|actId" → { off: true } (didn't happen) or { start, end } ("09:00")
     bedOn: {},      // 🌙 v180: a kid's bedtime changed for one night only: "date|kidId" → "21:00" (see bedMin)
     extraLimit: 3, moodRemind: "18:00",   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
    // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
@@ -833,6 +836,10 @@ function cleanData(d) {
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
   if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);
+  if (d.fixedOn && typeof d.fixedOn === "object" && !Array.isArray(d.fixedOn))   // 🏫 v180 (only the newest 100)
+    clean.fixedOn = Object.fromEntries(Object.entries(d.fixedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && v && (v.off === true
+      || (/^\d{2}:\d{2}$/.test(v.start || "") && /^\d{2}:\d{2}$/.test(v.end || "") && v.start < v.end)))
+      .map(([k, v]) => [k, v.off === true ? { off: true } : { start: v.start, end: v.end }]).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 100));
   if (d.bedOn && typeof d.bedOn === "object" && !Array.isArray(d.bedOn))   // 🌙 v180 (only the newest 60)
     clean.bedOn = Object.fromEntries(Object.entries(d.bedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && BED_TIME.test(String(v)))
       .sort((a, b) => b[0].localeCompare(a[0])).slice(0, 60));

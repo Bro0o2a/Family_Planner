@@ -3230,3 +3230,10 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .sdk-c.br { border-right: 3px solid #4c1d95; } .sdk-c.bb { border-bottom: 3px solid #4c1d95; }
 .sdk-pad { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px 0; }
 .sdk-pad button { width: 40px; height: 40px; min-height: 0; padding: 0; border-radius: 10px; font-size: 17px; font-weight: 700; }
+/* 🏫 v180 a fixed activity changed for one day */
+.fx-today { margin: 10px 0 4px; padding: 10px; border-radius: 12px; background: rgba(255,255,255,.7); text-align: left; }
+.fx-today .btnrow { margin: 6px 0 0; justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
+.fx-note { display: block; font-size: 13px; margin-top: 2px; }
+.fx-times { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.fx-times label { display: flex; gap: 4px; align-items: center; font-size: 13px; }
+.fx-times input { width: auto; }
