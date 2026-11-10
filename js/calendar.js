@@ -321,7 +321,8 @@ function weekHtml(days, opts) {
       // 🤝 On the helping parent's own calendar: the kid's activity shows faded, as "helping"
       const helping = !!opts.only && b.helper === opts.only && !b.users.includes(opts.only);
       // (📚 the subject filter: only that subject's sessions stand out)
-      const faded = (opts.fade && opts.fade !== "all" && !b.people.includes(opts.fade)) || helping || (!!opts.subj && !subjMatch(b, ds, opts, sessOf));
+      // (✨ v180 Broo2a: a parent's "🤝 helping" sessions are bright on their own calendar, not faded: they're the parent's job too)
+      const faded = (opts.fade && opts.fade !== "all" && !b.people.includes(opts.fade) && !(b.helper && b.helper === opts.fade)) || (!!opts.subj && !subjMatch(b, ds, opts, sessOf));
       const kidActs = b.acts.filter(a => !isParentId(a.user));   // (only the kids' parts are ticked)
       const done = kidActs.length > 0 && kidActs.every(a => isDone(ds, a.actId, a.user));
       const n = blocks.push({ ...b, ...info, day: ds }) - 1;
