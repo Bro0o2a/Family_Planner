@@ -11,6 +11,8 @@ function drawSettings() {
   $("starDay").innerHTML = DAYS.map((d, i) => `<option value="${i}" ${i === starTime().day ? "selected" : ""}>${d}</option>`).join("");
   $("starClock").value = starTime().time;
   $("extraLimit").value = String(data.extraLimit || 3);
+  $("moodRemind").value = data.moodRemind === undefined ? "18:00" : data.moodRemind;
+  drawBedtimes();
   fillPrayer();
   drawUsers();
   drawHabitList();
@@ -114,7 +116,51 @@ $("maxTogether").addEventListener("change", () => {
 }));
 
 // 🤖 Extra worksheets per kid per day (3–5)
+$("moodRemind").addEventListener("change", () => { data.moodRemind = $("moodRemind").value; changed(); });
 $("extraLimit").addEventListener("change", () => { const n = Number($("extraLimit").value); if ([3, 4, 5].includes(n)) data.extraLimit = n; changed(); });
+
+// ---------- 🌙 v180 Bedtimes (Broo2a): per kid, school nights (Sun–Thu) and weekend nights (Fri, Sat). "" = no bedtime.
+const SLEEP_WORDS = /\b(sleep|sleeping|bed)\b/i;   // (older "😴 Sleep" activities / routines, which the bedtime replaces)
+function sleepActs() {
+  return [...data.fixed.map(a => ["fixed", a]), ...data.flexible.map(a => ["flex", a]), ...data.routines.map(a => ["rt", a])]
+    .filter(([, a]) => SLEEP_WORDS.test(a.name) && !/routine|story|chat/i.test(a.name));
+}
+function drawBedtimes() {
+  const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  const sel = (id, which, now) => { const o = [`<option value="">None</option>`];
+    for (let m = 18 * 60; m < 24 * 60; m += 15) o.push(`<option value="${hm(m)}" ${now === hm(m) ? "selected" : ""}>${clock(m, true)}</option>`);
+    return `<select data-bedusual="${safe(id)}|${which}" aria-label="${which === "wd" ? "School nights" : "Weekend nights"}">${o.join("")}</select>`; };
+  const old = sleepActs();
+  $("bedSet").innerHTML = kidsList().map(k => `<div class="bed-row"><span class="bed-nm">${faceHtml(k)} ${safe(k.name)}</span>
+      <label>Sun–Thu ${sel(k.id, "wd", k.bed ? k.bed.wd : "")}</label><label>Fri, Sat ${sel(k.id, "we", k.bed ? k.bed.we : "")}</label></div>`).join("")
+    + (old.length && data.users.some(u => u.bed) ? `<p class="hint" style="margin:8px 0 4px">You still have ${old.length} old 😴 Sleep ${old.length === 1 ? "activity" : "activities"}
+      (${safe([...new Set(old.map(([, a]) => a.name))].join(", "))}). The bedtime does their job now.</p>
+      <button class="btn small" data-bedclean>🗑️ Remove the old Sleep activities</button>` : "");
+}
+document.addEventListener("change", e => {
+  const v = e.target.dataset && e.target.dataset.bedusual; if (!v || !isParentId(me)) return;
+  const [id, which] = v.split("|"), u = data.users.find(x => x.id === id); if (!u) return;
+  const t = e.target.value;
+  if (!t) delete u.bed;
+  else { const b = u.bed || { wd: t, we: t }; b[which] = t; u.bed = b; }   // (the first one picked fills both)
+  saveChanges();   // (the week is planned again with the new bedtime)
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest("[data-bedclean]") || !isParentId(me)) return;
+  const old = sleepActs(), ids = new Set(old.map(([, a]) => a.id));
+  if (!confirm(`Remove ${old.length} old Sleep ${old.length === 1 ? "activity" : "activities"}? The 🌙 bedtimes take their place.`)) return;
+  // (📅 like 🗑️ Delete: their items on the days that are gone stay as history)
+  if (hasPlan()) Object.entries(data.plan.dates).forEach(([ds, day]) => ds <= todayYmd() && day.items.forEach(it => {
+    const hit = old.find(([k, a]) => k !== "rt" && a.id === it.actId && (k === "fixed") === !!it.fixed);
+    if (hit) it.gone = { name: hit[1].name, users: [...hit[1].users], people: peopleOf(hit[1]), type: actTypeOf(hit[1]) };
+  }));
+  allActs().forEach(a => a.overlapWith = a.overlapWith.filter(x => !ids.has(x)));
+  data.fixed = data.fixed.filter(a => !ids.has(a.id));
+  data.flexible = data.flexible.filter(a => !ids.has(a.id));
+  data.routines = data.routines.filter(a => !ids.has(a.id));
+  saveChanges();
+  toast(`🗑️ ${old.length} old Sleep ${old.length === 1 ? "activity" : "activities"} removed. The 🌙 bedtimes are on the calendar.`, 3500);
+});
 
 // ---------- 🕌 Prayer times ----------
 // On / Off and the reminder are each person's own choice: kept right away (on all their devices).
@@ -181,6 +227,31 @@ function answerPrayer(yes) {
 }
 $("prayYes").addEventListener("click", () => answerPrayer(true));
 $("prayNo").addEventListener("click", () => answerPrayer(false));
+
+// ---------- 📔 v180 Mood reminder (kids): from data.moodRemind (Dubai, default 6 PM; ⚙️ Settings, parents), when today's mood
+// isn't answered yet. Once a day; "Later" asks again an hour later. ----------
+const MOOD_ASK_KEY = SAVE_KEY + ".moodAsk.";
+function moodAskNeeds() {
+  const u = exists(me) && userById(me), at = data.moodRemind === undefined ? "18:00" : data.moodRemind;
+  if (!u || isParentId(me) || !at || !feat("diary")) return null;
+  if (dubaiMinutes() < toMin(at)) return null;
+  // (💌 the weekly wish has no form for kids any more, so only 📔 today's mood is asked)
+  return diaryOf(me, todayYmd()) ? null : { mood: true };
+}
+function maybeAskMood() {
+  if (!$("moodAsk").hidden || !$("prayAsk").hidden || screen === "start" || screen === "diary" || (cloud.enabled && !cloud.ready)) return;
+  if (!$("syncModal").hidden || !$("loginScreen").hidden || document.querySelector(".tour")) return;
+  const need = moodAskNeeds();
+  if (!need) return;
+  let next = 0; try { next = Number(localStorage.getItem(MOOD_ASK_KEY + me + "." + todayYmd())) || 0; } catch (e) {}
+  if (next < 0 || Date.now() < next) return;   // (-1 = answered / closed for today)
+  $("moodAskText").textContent = "Tap how you feel today. It only takes a second. 😊";
+  $("moodAsk").hidden = false;
+  $("moodAskGo").focus();
+}
+function moodAskSet(v) { try { localStorage.setItem(MOOD_ASK_KEY + me + "." + todayYmd(), String(v)); } catch (e) {} }
+$("moodAskGo").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); openDiary(me); });
+$("moodAskLater").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); toast("OK! I'll ask again in an hour. 🙂", 3000); });
 
 // ---------- People ----------
 let editingUser = null; // which person is being edited (null = adding a new one)

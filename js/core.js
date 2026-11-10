@@ -58,6 +58,36 @@ function isParentId(id) {
   try { return !!id && !!data && Array.isArray(data.users) && data.users.some(u => u.id === id && u.role === "parent"); }
   catch (e) { return false; }   // (before the family's data is loaded)
 }
+// 👨‍👩‍👧 People in family order: the first parent (DAD), the other parents, then the kids from the oldest to the youngest
+//  (by 🎂 birthday; no birthday → by the number in their school year; else the order they were added)
+function familyOrder(list) {
+  const rank = u => u.id === DAD ? 0 : isParentId(u.id) ? 1 : 2;
+  const born = u => u.birthday ? Date.parse(u.birthday) : NaN;
+  const yr = u => { const m = /\d+/.exec(u.year || ""); return m ? +m[0] : NaN; };
+  return list.map((u, i) => ({ u, i })).sort((a, b) => {
+    const r = rank(a.u) - rank(b.u); if (r) return r;
+    const ba = born(a.u), bb = born(b.u);
+    if (!isNaN(ba) && !isNaN(bb) && ba !== bb) return ba - bb;          // older first
+    if (!isNaN(ba) !== !isNaN(bb)) return isNaN(ba) ? 1 : -1;
+    const ya = yr(a.u), yb = yr(b.u);
+    if (!isNaN(ya) && !isNaN(yb) && ya !== yb) return yb - ya;          // higher school year first
+    return a.i - b.i;
+  }).map(x => x.u);
+}
+// 🌙 v180 Bedtime per kid (Broo2a): one time for school nights, one for weekend nights (Friday and Saturday nights),
+//  and a parent can change it for one night (data.bedOn). Nothing is planned for that kid after it. null = no bedtime set.
+const BED_TIME = /^(1[89]|2[0-3]):[0-5]\d$/;   // 6 PM … 11:45 PM
+const isWeekendNight = wd => wd === 4 || wd === 5;   // (0 = Monday: Friday and Saturday nights)
+function bedUsual(person, wd) {
+  const u = data && Array.isArray(data.users) && data.users.find(x => x.id === person);
+  return u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null;
+}
+// 🏫 v180: a fixed activity on one date: null = as usual, { off: true } = didn't happen, { start, end } = other times that day
+const fixedOnOf = (ds, id) => (data && data.fixedOn && data.fixedOn[`${ds}|${id}`]) || null;
+function bedMin(person, ds) {
+  const t = data && data.bedOn && data.bedOn[`${ds}|${person}`];
+  return t ? toMin(t) : bedUsual(person, weekdayOf(ds));
+}
 const DAD_NAME = "Parent";                       // the first parent's name until they pick their own (a new family types it at sign-up)
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
 // 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
@@ -429,7 +459,10 @@ function emptyData() {
     starAt: { day: 4, time: "15:30" },
     aiOk: null,    // 🤖 a parent said OK to the AI helper for the family: { by, at } (see askAiOk in ai.js)
     starV: 2,        // ⭐ 2 = the old Friday 6 PM was moved to Friday 3:30 PM once (v171)
-    extraLimit: 3,   // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
+    fixedOn: {},    // 🏫 v180: a fixed activity changed on ONE date: "date|actId" → { off: true } (didn't happen) or { start, end } ("09:00")
+    bedOn: {},      // 🌙 v180: a kid's bedtime changed for one night only: "date|kidId" → "21:00" (see bedMin)
+    extraLimit: 3, moodRemind: "18:00",   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
+   // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
     plan: null,     // the week Dad planned with "Plan my week" (null = not planned yet)
     // Points: which activities are done this week. Starts again every Monday.
@@ -517,6 +550,8 @@ function cleanData(d) {
                    //  (buddyAt = when it was picked: the newer pick wins when two phones meet, see mergeBuddies)
                    ...(hasOwn(BUDDIES, u.buddy) ? { buddy: u.buddy, ...(typeof u.buddyAt === "string" ? { buddyAt: u.buddyAt } : {}) } : {}),
                    // 👤 My profile: 🎂 birthday ("2016-03-14") and ❤️ things I love (short boxes they fill themselves)
+                   // 🌙 v180: a kid's bedtime: wd = school nights (Sun–Thu), we = weekend nights (Fri, Sat)
+                   ...(u.bed && BED_TIME.test(u.bed.wd || "") && BED_TIME.test(u.bed.we || "") ? { bed: { wd: u.bed.wd, we: u.bed.we } } : {}),
                    ...(typeof u.birthday === "string" && /^\d{4}-\d{2}-\d{2}$/.test(u.birthday) ? { birthday: u.birthday } : {}),
                    ...(u.loves && typeof u.loves === "object" ? { loves: Object.fromEntries(LOVES.map(([k]) => [k, typeof u.loves[k] === "string" ? u.loves[k].trim().slice(0, 30) : ""]).filter(([, v]) => v)) } : {}),
                    // ✨ the Spark's own name (shown as "Spark"; the stored field stays "buddy")
@@ -800,7 +835,15 @@ function cleanData(d) {
 
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
-  if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);   // 🤖 (otherwise the default 3)
+  if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);
+  if (d.fixedOn && typeof d.fixedOn === "object" && !Array.isArray(d.fixedOn))   // 🏫 v180 (only the newest 100)
+    clean.fixedOn = Object.fromEntries(Object.entries(d.fixedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && v && (v.off === true
+      || (/^\d{2}:\d{2}$/.test(v.start || "") && /^\d{2}:\d{2}$/.test(v.end || "") && v.start < v.end)))
+      .map(([k, v]) => [k, v.off === true ? { off: true } : { start: v.start, end: v.end }]).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 100));
+  if (d.bedOn && typeof d.bedOn === "object" && !Array.isArray(d.bedOn))   // 🌙 v180 (only the newest 60)
+    clean.bedOn = Object.fromEntries(Object.entries(d.bedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && BED_TIME.test(String(v)))
+      .sort((a, b) => b[0].localeCompare(a[0])).slice(0, 60));
+  if (d.moodRemind === "" || /^(1[5-9]|2[0-1]):00$/.test(String(d.moodRemind))) clean.moodRemind = d.moodRemind;   // 📔 v180   // 🤖 (otherwise the default 3)
   // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
   if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
     clean.starAt = { day: d.starAt.day, time: d.starAt.time };
@@ -1431,6 +1474,14 @@ const facePhoto = u => u && isParentId(u.id) && typeof u.photo === "string" && u
 const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">`
   : faceAvatar(u) ? `<img class="face-img face-av" src="${avatarSrc(u.avatar)}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
 const facesHtml = ids => ids.map(id => faceHtml(userById(id))).join("");
+// 🏷️ v180 (Broo2a: the faces change, names don't): "Taha, Bana" · "All kids" · "Everyone" (short names when there are many)
+function namesTag(ids) {
+  const list = (ids || []).filter(exists); if (!list.length) return "";
+  const kids = data.users.filter(u => !isParentId(u.id)).map(u => u.id), all = data.users.map(u => u.id);
+  const txt = list.length === all.length && all.length > 1 ? "Everyone" : list.length === kids.length && kids.length > 1 && list.every(id => kids.includes(id)) ? "All kids"
+    : list.map(id => { const n = userById(id).name.split(" ")[0]; return list.length > 2 && n.length > 6 ? n.slice(0, 5) + "." : n; }).join(", ");
+  return `<span class="who-names">${safe(txt)}</span>`;
+}
 const whoHtml = id => { const u = userById(id); return `${faceHtml(u)} ${safe(u.name)}`; };   // ("👩 Mum" with her photo)
 // ✨ Only kids have a Spark (no Spark card, badge, levels or "pick your Spark" for parents)
 const hasSpark = id => feat("buddy") && exists(id) && !isParentId(id);
@@ -1443,7 +1494,7 @@ function peopleOf(act) { return act.helper && !act.users.includes(act.helper) ? 
 const helperOf = act => act && act.helper && !act.users.includes(act.helper) ? userById(act.helper) || null : null;
 // "🤝 with 🦸‍♂️ Bro2a"
 const withText = act => { const h = helperOf(act); return h ? `🤝 with ${h.emoji} ${h.name}` : ""; };
-const withHtml = act => { const h = helperOf(act); return h ? `🤝 with ${faceHtml(h)} ${safe(h.name)}` : ""; };   // (the same, with a parent's photo)
+const withHtml = act => { const h = helperOf(act); return h ? `🤝 with ${safe(h.name)}` : ""; };   // (🏷️ v180: the name only, no face)   // (the same, with a parent's photo)
 // How an activity looks from one person's side: "Gym", or "Math with Bana" when Dad only joins to help.
 function actFor(act, person) { return act.users.includes(person) ? act.name : `${act.name} with ${namesOf(act.users)}`; }
 // The clash message, e.g. "🦸‍♂️ Dad is busy twice on Monday: Gym (9am–10:30am) and Math with Bana (9:30am–10:15am)"

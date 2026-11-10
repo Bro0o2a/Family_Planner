@@ -33,7 +33,7 @@ function drawMe() {
   if (!exists(meWho) || (meWho !== me && !isParentViewer())) meWho = me;
   const u = userById(meWho), c = colorsOf(u), mine = u.id === me, kid = !isParentId(u.id), parent = isParentViewer();
   const p = lifetimePoints(u.id), L = levelOf(p), pct = levelPct(p), k = weekKinds(u.id), st = weekStats(u.id), bd = birthdayInfo(u.birthday);
-  const chips = parent ? `<div class="chips me-chips">${data.users.map(x => { const xc = colorsOf(x); return `<button class="chip ${x.id === u.id ? "on" : ""}" data-mewho="${safe(x.id)}"
+  const chips = parent ? `<div class="chips me-chips">${familyOrder(data.users).map(x => { const xc = colorsOf(x); return `<button class="chip ${x.id === u.id ? "on" : ""}" data-mewho="${safe(x.id)}"
     style="--soft:${xc.soft};--ink:${xc.ink}"><span class="e">${faceHtml(x)}</span>${x.id === me ? "Me" : safe(x.name)}</button>`; }).join("")}</div>` : "";
   const loves = LOVES.map(([key, e, label]) => { const v = (u.loves || {})[key]; return v ? `<li><span>${e} ${label}</span><b>${safe(v)}</b></li>` : ""; }).join("");
   // ⚙️ My settings: each person changes ALL their own things (kids too, from their own account); a parent also every kid's
@@ -90,10 +90,10 @@ function drawMe() {
       ${kid ? `<p class="me-kinds">This week: ${kindsText(k)}</p>` : ""}
     </div>
     ${form}
-    <div class="card me-card"><h2>🎂 Birthday</h2>${bd ? `<p class="me-big">${bd.days === 0 ? "🎉 Happy birthday!" : `🎂 ${bd.days} ${bd.days === 1 ? "day" : "days"} to go!`}</p>
-      <p class="hint">${bd.label}${bd.age != null ? ` · ${bd.age} years old` : ""}</p>` : `<p class="sc-empty">${canBirthday ? "Add it in ⚙️ Settings." : "Not added yet."}</p>`}</div>
+    <div class="card me-card"><h2>🎂 Birthday${canBirthday && !meEdit ? ` <button class="pill small me-cardedit" data-meedit="birthday">✏️ ${bd ? "Edit" : "Add"}</button>` : ""}</h2>${bd ? `<p class="me-big">${bd.days === 0 ? "🎉 Happy birthday!" : `🎂 ${bd.days} ${bd.days === 1 ? "day" : "days"} to go!`}</p>
+      <p class="hint">${bd.label}${bd.age != null ? ` · ${bd.age} years old` : ""}</p>` : `<p class="sc-empty">${canBirthday ? "Tap ✏️ Add to put it in." : "Not added yet."}</p>`}</div>
     ${kid ? schoolBasicsHtml(u.id, canEdit) : ""}
-    <div class="card me-card"><h2>❤️ Things I love</h2>${loves ? `<ul class="me-list">${loves}</ul>` : `<p class="sc-empty">${canEdit ? "Fill them in with ⚙️ Settings." : "Nothing yet."}</p>`}</div>
+    <div class="card me-card"><h2>❤️ Things I love${canEdit && !meEdit ? ` <button class="pill small me-cardedit" data-meedit="loves">✏️ ${loves ? "Edit" : "Add"}</button>` : ""}</h2>${loves ? `<ul class="me-list">${loves}</ul>` : `<p class="sc-empty">${canEdit ? "Tap ✏️ Add to fill them in." : "Nothing yet."}</p>`}</div>
     ${kid ? `<div class="card me-card"><h2>📅 This week</h2>${scoreBlockHtml(scoreOf(u.id))}<ul class="me-list">
       ${st.pct != null ? `<li><span>✅ Tasks done</span><b>${st.pct}% <small>(${st.done} of ${st.planned})</small></b></li>` : ""}
       <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li>
@@ -271,7 +271,11 @@ document.addEventListener("click", e => {
   const ds = b.dataset;
   if (ds.mewho) { meWho = ds.mewho; meEdit = false; return render(); }
   if ("menotyou" in ds) return askWhichParent(true);   // 👨‍👩‍👧 the family's main login: pick yourself again (this device only)
-  if ("meedit" in ds) { meEdit = true; mePhoto = null; render(); return $("meBody").querySelector(".me-form").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if ("meedit" in ds) { meEdit = true; mePhoto = null; render();
+    // (✏️ v180: from the 🎂 Birthday / ❤️ Things I love card: that part opens, ready to type)
+    const field = ds.meedit === "birthday" ? $("meBirthday") : ds.meedit === "loves" ? $("meBody").querySelector("[id^='meLove-']") : null;
+    if (field) { const g = field.closest("details"); if (g) g.open = true; field.scrollIntoView({ behavior: "smooth", block: "center" }); try { field.focus({ preventScroll: true }); } catch (e) {} return; }
+    return $("meBody").querySelector(".me-form").scrollIntoView({ behavior: "smooth", block: "start" }); }
   if ("mecancel" in ds) { meEdit = false; mePhoto = null; return render(); }
   if ("mesave" in ds) return saveMe();
   // 🖼️ a parent: 📷 take or choose a photo · 😀 use my emoji instead (tapping an emoji picks the emoji too)

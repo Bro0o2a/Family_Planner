@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=179">
+<link rel="stylesheet" href="css/app.css?v=180">
 </head>
 <body>
 <!-- ============================================================
@@ -54,7 +54,7 @@
 
 <!-- ===== HOME: big buttons ===== -->
 <section class="screen" id="scr-home" hidden>
-  <header class="bar"><button class="pill cal-btn" data-go="mine">📅 Calendar</button>
+  <header class="bar"><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button>
     <div class="bar-right"><button class="pill" id="backupPill" data-backup hidden>💾 Backup</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <!-- 📅 Today's day and date, big (Dubai time) -->
   <div class="home-date" id="homeDate"></div>
@@ -71,7 +71,7 @@
 
 <!-- ===== ADD ACTIVITIES ===== -->
 <section class="screen" id="scr-add" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button>
     <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <h1 class="page-title" id="addTitle"></h1>
   <p class="lead" id="addSub"></p>
@@ -202,7 +202,7 @@
 
 <!-- ===== 📅 CALENDAR: the one calendar page (Me · Everyone · each person). Everyone can look; only the owner and parents tick / change ===== -->
 <section class="screen" id="scr-mine" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn here" data-go="mine" aria-current="page">📅 Calendar</button>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn here" data-go="mine" aria-current="page">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button>
     <div class="bar-right"><button class="pill" data-printcal>🖨️ Print</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <!-- Small buttons: ✏️ Add activities · 🖨️ Schedules to tick (the only place to print the week) -->
   <div class="cal-tools" id="calTools"></div>
@@ -223,7 +223,7 @@
 
 <!-- ===== ☰ MORE PAGES: 🗣️ 📱 📗 🧹 (one screen, see MORE PAGES) ===== -->
 <section class="screen" id="scr-extra" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title" id="extraTitle"></h1>
   <div id="extraBody"></div>
 </section>
@@ -237,14 +237,14 @@
 
 <!-- ===== 📔 MY DAY ===== -->
 <section class="screen" id="scr-diary" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title" id="diaryTitle">📔 My day</h1>
   <div id="diaryBody"></div>
 </section>
 
 <!-- ===== POINTS ===== -->
 <section class="screen" id="scr-points" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">🏆 Points this week</h1>
   <p class="pt-fairnote" id="ptsFairNote">⭐ Score = 📚 Study 65% + ⚽ Activity 25% + 🌱 Habit 10% (ticked ✅ in the calendar)</p>
   <p class="lead" id="ptsWeek"></p>
@@ -261,7 +261,7 @@
 
 <!-- ===== SETTINGS (Dad only) ===== -->
 <section class="screen" id="scr-settings" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">⚙️ Settings</h1>
   <!-- ⚙️ Features (parents only): on / off for the family -->
   <div class="card feat-card" id="featCard"></div>
@@ -301,6 +301,15 @@
           <label for="extraLimit">🤖 Extra worksheets per kid per day</label>
           <select id="extraLimit"><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
         </div>
+        <div class="setting" style="margin-top:14px">
+          <label for="moodRemind">📔 Remind the kids to answer their mood from</label>
+          <select id="moodRemind"><option value="15:00">3 PM</option><option value="16:00">4 PM</option><option value="17:00">5 PM</option><option value="18:00">6 PM</option>
+            <option value="19:00">7 PM</option><option value="20:00">8 PM</option><option value="21:00">9 PM</option><option value="">Off</option></select>
+        </div>
+        <!-- 🌙 v180 Bedtimes (one per kid): filled by drawBedtimes (settings.js) -->
+        <div class="setting bed-set" style="margin-top:14px"><b>🌙 Bedtimes</b>
+          <p class="hint" style="margin:4px 0 6px">Nothing is planned for a kid after their bedtime. To change one night only, tap the 🌙 line on the calendar.</p>
+          <div id="bedSet"></div></div>
         <p class="hint" style="margin:8px 0 0">At this time everyone gets a pop-up with the results and the ⭐ Shining Star.
           The new week (scores back to zero) starts at midnight after it. Changing it starts the new count from today's week.</p>
       </div>
@@ -434,7 +443,7 @@
 
 <!-- ===== 🎒 SCHOOL (each kid; only Bro2a can add or change things, a kid sees only their own page) ===== -->
 <section class="screen" id="scr-school" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button>
     <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <!-- Bro2a: which kid? -->
   <div class="chips" id="schoolKids"></div>
@@ -449,7 +458,7 @@
 
 <!-- ===== 👧 THE KID PAGE (parents): everything about one kid (open it from their card on the parent's home) ===== -->
 <section class="screen" id="scr-kid" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button>
     <div class="bar-right"><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></div></header>
   <div id="kidBody"></div>
 </section>
@@ -565,6 +574,35 @@
   </div>
 </div>
 
+<!-- 📔 v180: a kid's evening reminder: answer today's mood (and this week's wish) -->
+<!-- 🎈 v180 Free-time ideas (a kid's calendar): filled by drawFree (fun.js) -->
+<div class="k-modal" id="freeModal" hidden>
+  <div class="k-card miss-card" role="dialog" aria-modal="true" aria-labelledby="ideaTitle">
+    <div class="print-title" id="ideaTitle" style="font-size:22px">🎈</div>
+    <div id="freeBody"></div>
+  </div>
+</div>
+<!-- 🔍 v180 Missed sessions (parents): filled by openMissed (activities.js) -->
+<div class="k-modal" id="missModal" hidden>
+  <div class="k-card miss-card" role="dialog" aria-modal="true" aria-labelledby="missTitle">
+    <div class="print-title" id="missTitle" style="font-size:22px">🔍 Missed sessions</div>
+    <p class="print-hint" id="missHint" style="margin:4px 0 10px">Tap a fix to put it on the calendar (📌 a new plan keeps it).</p>
+    <div id="missBody"></div>
+    <div class="btnrow"><button data-missclose>Close</button></div>
+  </div>
+</div>
+<div class="k-modal" id="moodAsk" hidden>
+  <div class="k-card pray-card" role="dialog" aria-modal="true" aria-labelledby="moodAskTitle">
+    <div class="leave-emoji">📔</div>
+    <div class="print-title" id="moodAskTitle" style="font-size:24px;margin:10px 0 0">How was your day?</div>
+    <p class="print-hint" id="moodAskText" style="margin:6px 0 18px"></p>
+    <div class="btnrow">
+      <button class="primary" id="moodAskGo">📔 Answer now</button>
+      <button id="moodAskLater">Later</button>
+    </div>
+  </div>
+</div>
+
 <!-- 🕌 Asked once per person: show prayer times on their calendar? -->
 <div class="k-modal" id="prayAsk" hidden>
   <div class="k-card pray-card" role="dialog" aria-modal="true" aria-labelledby="prayAskTitle">
@@ -666,20 +704,20 @@
 </div>
 <!-- ===== 📊 HOW ARE MY KIDS DOING? (parents: the big button on their home; see KIDS REPORT) ===== -->
 <section class="screen" id="scr-report" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">📊 How are my kids doing?</h1>
   <div id="reportBody"></div>
 </section>
 <!-- ===== 👀 YOUR KIDS' WORK TODAY (parents: the tile next to 📊 on their home; see KIDS' WORK TODAY) ===== -->
 <section class="screen" id="scr-kidswork" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <h1 class="page-title">👀 Your kids' work today</h1>
   <p class="lead">Live, as they do it · newest first</p>
   <div id="kidsWorkBody"></div>
 </section>
 <!-- ===== 👤 MY PROFILE (tap the Spark badge in the top bar, or ☰ More → 👤 My profile; see MY PROFILE) ===== -->
 <section class="screen" id="scr-me" hidden>
-  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
+  <header class="bar"><button class="pill nav-btn" data-navback aria-label="Back" title="Back">⬅️ Back</button><button class="pill nav-btn" data-go="home" aria-label="Home" title="Home">🏠 Home</button><button class="pill cal-btn" data-go="mine">📅 Calendar</button><button class="pill sch-btn" data-schoolnav aria-label="School">🎒 School</button><button class="pill bell-btn" data-bell aria-label="What's new">🔔 News<span class="bell-num" hidden></span></button></header>
   <div id="meBody"></div>
 </section>
 <!-- ☁️ The first screen when nobody is signed in on this device: 👨‍👩‍👧 I'm a parent · 🧒 I'm a kid -->
@@ -850,23 +888,23 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=179"></script>
-<script src="js/screens.js?v=179"></script>
-<script src="js/points.js?v=179"></script>
-<script src="js/fun.js?v=179"></script>
-<script src="js/reports.js?v=179"></script>
-<script src="js/profile.js?v=179"></script>
-<script src="js/home.js?v=179"></script>
-<script src="js/activities.js?v=179"></script>
-<script src="js/calendar.js?v=179"></script>
-<script src="js/school.js?v=179"></script>
-<script src="js/ai.js?v=179"></script>
-<script src="js/pictures.js?v=179"></script>
-<script src="js/study.js?v=179"></script>
-<script src="js/settings.js?v=179"></script>
-<script src="js/taps.js?v=179"></script>
-<script src="js/cloud.js?v=179"></script>
-<script src="js/news.js?v=179"></script>
-<script src="js/start.js?v=179"></script>
+<script src="js/core.js?v=180"></script>
+<script src="js/screens.js?v=180"></script>
+<script src="js/points.js?v=180"></script>
+<script src="js/fun.js?v=180"></script>
+<script src="js/reports.js?v=180"></script>
+<script src="js/profile.js?v=180"></script>
+<script src="js/home.js?v=180"></script>
+<script src="js/activities.js?v=180"></script>
+<script src="js/calendar.js?v=180"></script>
+<script src="js/school.js?v=180"></script>
+<script src="js/ai.js?v=180"></script>
+<script src="js/pictures.js?v=180"></script>
+<script src="js/study.js?v=180"></script>
+<script src="js/settings.js?v=180"></script>
+<script src="js/taps.js?v=180"></script>
+<script src="js/cloud.js?v=180"></script>
+<script src="js/news.js?v=180"></script>
+<script src="js/start.js?v=180"></script>
 </body>
 </html>

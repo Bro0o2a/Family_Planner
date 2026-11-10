@@ -100,6 +100,15 @@ function openSchool(kid) {
   schoolFresh = true;
   go("school");
 }
+// 🎒 v180: the School button in every top bar (kids: their own School; parents: the kid they looked at last, else the first kid)
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-schoolnav]");
+  if (!b || !exists(me)) return;
+  if (!isParentId(me)) return openSchool(me);
+  const kids = kidsList(), pick = [schoolKid, kidPage].find(id => id && kids.some(k => k.id === id)) || (kids[0] || {}).id;
+  if (!pick) return toast("Add a kid first 🙂", 3000);
+  openSchool(pick);
+});
 function goSchool(view, subject, tab) {
   const was = schoolView + "|" + schoolSubject;
   schoolView = view || "home";
@@ -819,7 +828,7 @@ function schoolSubjectHtml(s, isDad, u) {
   }
   const t = secs.find(x => x.id === stSec);
   html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.label}</h1></div>`;
-  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + (learnRead(schoolKid, f.name) ? parentWsButtonsHtml(schoolKid, f) : "") + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
+  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
   if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
   if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;
