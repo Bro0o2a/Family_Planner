@@ -819,7 +819,7 @@ function schoolSubjectHtml(s, isDad, u) {
   }
   const t = secs.find(x => x.id === stSec);
   html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.label}</h1></div>`;
-  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + (learnRead(schoolKid, f.name) ? parentWsButtonsHtml(schoolKid, f) : "") + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
+  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
   if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
   if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;

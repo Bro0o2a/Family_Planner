@@ -806,7 +806,6 @@ function learnCardHtml(kid, f) {
       </div>
     ${wsLevelHtml(kid, f.name)}
     ${learnChartSvg(L)}
-    ${parentWsButtonsHtml(kid, f)}
     <p class="learn-h">💪 Strong</p>${strong.length ? `<div class="learn-chips">${strong.map(r => `<span class="learn-chip good">${safe(r.title)} <small>${r.pct}%</small></span>`).join("")}</div>`
       : `<p class="hint">None yet (85% or more).</p>`}
     <p class="learn-h">🎯 To work on</p>${weak.length ? `<ul class="learn-weak">${weak.map(r => `<li><span>${ST[r.st][0]} ${safe(r.title)} (${r.pct}%)${tag(r)}${r.weak.length ? `<small>weak at ${safe(r.weak.join(", "))}</small>` : ""}</span>
@@ -857,11 +856,6 @@ function wsSummaryNote(kid, subject, titles) {
   if (!out.length) return "";
   return (" WHAT THE CLASS LEARNED, from the school's own files (follow it: the same methods, words and kind of examples, never harder than this unless the level says so): " + out.join(" | ")).slice(0, 3500);
 }
-// 👨‍👩‍👧 Two buttons for parents in a subject: 🎯 a weak points worksheet (the app picks the topics) · 🧪 a placement test
-const parentWsButtonsHtml = (kid, f) => !isParentDevice() ? "" : `<div class="btnrow ws-parent-btns">
-  <button type="button" class="primary" data-weakws="${safe(kid)}|${safe(f.id)}" data-aiwait="weakws|${safe(kid)}|${safe(f.id)}">🎯 Weak points worksheet</button>
-  <button type="button" data-placews="${safe(kid)}|${safe(f.id)}" data-aiwait="placement|${safe(kid)}|${safe(f.id)}">🧪 Placement test</button></div>
-  <p class="hint">🎯 picks the topics ${safe(kidNameOf(kid))} needs to work on by itself. 🧪 finds the real level (1 to 10) from ${PLACEMENT_COUNT} questions.</p>`;
 // 🎯 The topics to work on, weakest first: 🔴 needs work, then anything under 70 % (not 😟 skipped ones)
 function weakTopicsOf(kid, f) {
   return learnTopicRows(kid, f).filter(r => !stuckSkipped(kid, f.id, r.title) && (r.st === "needs" || r.pct < 70))

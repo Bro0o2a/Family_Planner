@@ -325,6 +325,7 @@ function kidSectionHtml(k, sec) {
         return `<li>${x.open ? `<button class="kw-item" data-kwopen="${safe(x.kid)}|${safe(x.open)}">${inner}</button>` : `<div class="kw-item">${inner}</div>`}</li>`; }).join("")}</ul>` : `<p class="sc-empty">No work yet today 🙂</p>`}</div>`,
     moods: () => `${feat("diary") ? `<div class="card"><h2>📔 Moods this week</h2><div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>
       <div class="btnrow"><button class="pill" data-dyopen="${safe(k.id)}">📔 ${safe(k.name)}'s day</button></div></div>` : ""}${wishesListHtml(k.id)}`,
+    tools: () => worksheetToolsHtml(k),
     report: () => `${lines.best || lines.help ? `<div class="card rp-card rp-lines">${lines.best ? `<p>🌟 <b>Best this week:</b> ${safe(lines.best)}</p>` : ""}${lines.help ? `<p>👀 <b>Needs help:</b> ${safe(lines.help)}</p>` : ""}</div>` : ""}
       <div class="btnrow"><button class="primary" data-kidreport="${safe(k.id)}">📊 Open the full report (PDF, this month)</button></div>`
   };
@@ -332,6 +333,30 @@ function kidSectionHtml(k, sec) {
   return `<div class="ks-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><button class="pill" data-kidsec="">⬅️ All about ${safe(k.name)}</button>
     <h1 class="ks-title">${safe(k.name)}'s ${t.label.toLowerCase()}</h1></div>${S[sec]()}`;
 }
+// 🛠️ v180 Worksheet tools (parents, on the Kid page): one 🎯 worksheet button per subject (the app picks the weak topics),
+//    a small 🧪 placement test, and 📅 See week topics (this week's newsletter topics and when the week review comes)
+let wtWeek = false;
+function worksheetToolsHtml(k) {
+  const s = schoolOf(k.id), subs = subjectList(s), c = colorsOf(k);
+  const rows = subs.map(f0 => { const f = { id: f0.id, ...f0 }, n = weakTopicsOf(k.id, f).length;
+    return `<li class="wt-row"><button class="primary wt-main" data-weakws="${safe(k.id)}|${safe(f.id)}" data-aiwait="weakws|${safe(k.id)}|${safe(f.id)}">🎯 ${safe(f.name)}
+        <small>Weak points worksheet${n ? ` · ${n} ${n === 1 ? "topic" : "topics"}` : ""}</small></button>
+      <button class="wt-side" data-placews="${safe(k.id)}|${safe(f.id)}" data-aiwait="placement|${safe(k.id)}|${safe(f.id)}" aria-label="${safe(f.name)} placement test">🧪 Test</button></li>`; }).join("");
+  const wk = s.week, due = (s.reviewDue || [])[0];
+  const week = !wtWeek ? "" : wk ? `<div class="card wt-week"><h3>📰 ${safe(wk.label || "This week")} <small>${dayMon(wk.start)} – ${dayMon(wk.end)}</small></h3>
+      ${wk.subjects.map(x => `<p><b>${safe(x.subject)}:</b> ${safe(x.topics.join(", "))}</p>`).join("") || `<p class="sc-empty">No topics in this newsletter.</p>`}
+      ${due ? `<p class="hint">📰 The week review comes on Friday ${dayMon(due.fri)} after school.</p>` : ""}</div>`
+    : `<div class="card wt-week"><p class="sc-empty">No newsletter for this week yet.</p><div class="btnrow"><button class="primary" data-nlnudge="${safe(k.id)}">📰 Upload the newsletter</button></div></div>`;
+  return `<div class="card wt-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}"><h2>🛠️ Worksheet tools</h2>
+    <p class="hint">🎯 makes a ${WS_COUNT}-question worksheet on the topics ${safe(k.name)} needs to work on: the app picks them. It's in ${safe(k.name)}'s 🎒 School › Worksheets.</p>
+    ${subs.length ? `<ul class="wt-list">${rows}</ul>` : `<p class="sc-empty">No subjects yet. Add them in 🎒 School.</p>`}
+    <div class="btnrow"><button class="wt-main" data-wtweek aria-expanded="${wtWeek}">📅 ${wtWeek ? "Hide" : "See"} week topics</button></div></div>${week}`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wtweek]");
+  if (!b) return;
+  wtWeek = !wtWeek; render();
+});
 // v155: titles without pictures (more professional): takes the emoji off the start of every h1 / h2 / h3 inside root
 const PICS_RE = /^[\s\p{Extended_Pictographic}\p{Emoji_Modifier}\uFE0F\u200D]+/u;
 function plainHeads(root) {
@@ -346,7 +371,7 @@ const KID_SECS = [
   { id: "today", emoji: "📋", label: "Today" }, { id: "habits", emoji: "⭐", label: "Good habits today" },
   { id: "star", emoji: "🌟", label: "Shining Star" }, { id: "score", emoji: "🏆", label: "Score this week" },
   { id: "study", emoji: "📚", label: "Study per subject" }, { id: "points", emoji: "🎯", label: "Strong and weak points" },
-  { id: "tasks", emoji: "✅", label: "Tasks" }, { id: "school", emoji: "🎒", label: "School" },
+  { id: "tasks", emoji: "✅", label: "Tasks" }, { id: "school", emoji: "🎒", label: "School" }, { id: "tools", emoji: "🛠️", label: "Worksheet tools" },
   { id: "work", emoji: "👀", label: "Work today" }, { id: "moods", emoji: "📔", label: "Moods and wishes" }, { id: "report", emoji: "📊", label: "Report" }];
 // The status line under each big button
 function kidSecLine(k, id) {
@@ -359,6 +384,7 @@ function kidSecLine(k, id) {
   if (id === "points") { const n = subjectList(schoolOf(k.id)).length; return n ? `${n} ${n === 1 ? "subject" : "subjects"}: good at, weak at, practise` : "No subjects yet"; }
   if (id === "tasks") { const t = sc.tk || {}; return t.planned ? `${Math.round(t.done / t.planned * 100)}% done this week` : "Nothing planned yet"; }
   if (id === "school") return "Files, worksheets, marks";
+  if (id === "tools") return "Weak points worksheets, week topics";
   if (id === "work") { const n = kidsWorkItems().filter(x => x.kid === k.id).length; return n ? `${n} ${n === 1 ? "thing" : "things"} today` : "Nothing yet today"; }
   if (id === "moods") return "Moods, wishes";
   return "Best thing, needs help, PDF";
