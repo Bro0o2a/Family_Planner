@@ -3253,3 +3253,5 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .k-navrow .k-mode button { padding-left: 10px; padding-right: 10px; }
 @media (max-width: 400px) { .k-navrow { gap: 5px; } .k-planbtn { padding: 6px 9px; } }
 .who-names { font-size: .85em; font-weight: 700; opacity: .85; white-space: nowrap; }
+.k-card-top .big .k-bigic { width: 64px; height: 64px; }
+.k-card-top .big:has(.k-bigic) { display: flex; justify-content: center; }

@@ -1494,7 +1494,7 @@ function peopleOf(act) { return act.helper && !act.users.includes(act.helper) ? 
 const helperOf = act => act && act.helper && !act.users.includes(act.helper) ? userById(act.helper) || null : null;
 // "🤝 with 🦸‍♂️ Bro2a"
 const withText = act => { const h = helperOf(act); return h ? `🤝 with ${h.emoji} ${h.name}` : ""; };
-const withHtml = act => { const h = helperOf(act); return h ? `🤝 with ${faceHtml(h)} ${safe(h.name)}` : ""; };   // (the same, with a parent's photo)
+const withHtml = act => { const h = helperOf(act); return h ? `🤝 with ${safe(h.name)}` : ""; };   // (🏷️ v180: the name only, no face)   // (the same, with a parent's photo)
 // How an activity looks from one person's side: "Gym", or "Math with Bana" when Dad only joins to help.
 function actFor(act, person) { return act.users.includes(person) ? act.name : `${act.name} with ${namesOf(act.users)}`; }
 // The clash message, e.g. "🦸‍♂️ Dad is busy twice on Monday: Gym (9am–10:30am) and Math with Bana (9:30am–10:15am)"

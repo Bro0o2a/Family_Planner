@@ -258,7 +258,7 @@ function blockInfo(b) {
   // One person's lesson: light background of their color, darker left border, dark text
   // (titleHtml: the same with a parent's 🖼️ photo instead of their emoji)
   const c = colorsOf(userById(b.users[0]));
-  return { title: `${emojisOf(b.users)} ${namesOf(b.users)}`, titleHtml: `${facesHtml(b.users)} ${safe(namesOf(b.users))}`, emoji: emojisOf(b.users),
+  return { title: `${emojisOf(b.users)} ${namesOf(b.users)}`, titleHtml: `${safe(namesOf(b.users))}`, emoji: emojisOf(b.users),
            soft: c.soft, ink: c.ink, line: c.color, what: `${te} ${subject ? subject.name : b.name}` + withDad };
 }
 // The colors of a block, the same on screen and on paper: one person's lesson → their color; fixed or shared → grey
@@ -604,12 +604,12 @@ function openCard(b) {
   const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => x.actId === a.id));
   const rows = [
     b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
-    ["🙂 Who", b.users.map(whoText).join(", "), b.users.map(whoHtml).join(", ")],   // (3rd = as HTML, with a parent's 🖼️ photo)
+    ["🙂 Who", namesOf(b.users)],   // (🏷️ v180: names only)   // (3rd = as HTML, with a parent's 🖼️ photo)
     ["⭐ Type", (([, e, w]) => `${e} ${w}`)(actTypeInfo(b.type || "activity"))],
-    helperOf(b) ? ["🤝 Helper", `${helperOf(b).emoji} ${helperOf(b).name}`, whoHtml(helperOf(b).id)] : null,
+    helperOf(b) ? ["🤝 Helper", helperOf(b).name] : null,
     ["📅 Day", dayLong(b.day)],
     // (👨‍👩‍👧 only the kids' parts: parents aren't ticked)
-    b.acts.some(a => !isParentId(a.user)) ? ["✅ Done", b.acts.filter(a => !isParentId(a.user)).map(a => (b.acts.length > 1 ? userById(a.user).emoji + " " : "") + (isDone(b.day, a.actId, a.user) ? "Yes! 🎉" : "Not yet")).join("  ")] : null,
+    b.acts.some(a => !isParentId(a.user)) ? ["✅ Done", b.acts.filter(a => !isParentId(a.user)).map(a => (b.acts.length > 1 ? userById(a.user).name + ": " : "") + (isDone(b.day, a.actId, a.user) ? "Yes! 🎉" : "Not yet")).join("  ")] : null,
     ["⏰ Start", clock(b.start, true)],
     ["🏁 End", clock(b.end, true)],
     flex && flex.between ? ["🕓 Only between", betweenText(flex.between)] : null
@@ -623,7 +623,7 @@ function openCard(b) {
       : when && canMove ? `<button class="k-edit" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the ${safe(label.slice(2).trim().toLowerCase())}">✏️</button>` : ""; };
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
-    <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : facesHtml(b.users)}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
+    <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
     <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}${pen(label)}</b></div>`).join("")}</div>
     ${fixedTodayHtml(b)}
     <button class="k-ok" id="kOk">OK 👍</button>`;
