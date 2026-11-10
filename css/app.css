@@ -1592,7 +1592,11 @@
   .ws-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0 6px; }
   .ws-pick b { flex-basis: 100%; }
   .ws-words { margin: 8px 0; }
-  .ws-words summary { cursor: pointer; }
+  /* (v180: a tick box instead of the ▶ arrow: ticked = the key words box is open) */
+  .ws-words summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; min-height: 32px; }
+  .ws-words summary::-webkit-details-marker { display: none; }
+  .ws-words summary::before { content: ""; flex: none; width: 20px; height: 20px; border: 2px solid var(--accent); border-radius: 6px; background: #fff; }
+  .ws-words[open] summary::before { content: "✓"; background: var(--accent); color: #fff; font-weight: 700; font-size: 14px; line-height: 20px; text-align: center; }
   .ws-words textarea { width: 100%; box-sizing: border-box; margin: 6px 0; font: inherit; }
   .ws-pick .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
   /* 📸 answer photos before the check: thumbnails with 🗑 */
