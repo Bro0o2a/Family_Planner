@@ -253,7 +253,7 @@ function aiMeta(d) {
 // A worksheet: { kid, subject, topics, count, title, intro, questions, youtube_searches, printable_searches,
 //                date, status: "To do" | "Answers uploaded" | "Checked ✓", by, at, work?, answers: [file ids], check?,
 //                part?: the topic title it's about (📊 "By part"), purpose?: the mode it was made with (see WS_MODES) }
-const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement"];
+const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement", "weak_points"];
 const modeOf = x => x === "level" ? "level_check" : WS_MODES.includes(x) ? x : null;   // ("level": a few sheets from an earlier test version)
 // 🔢 The items of a "put in order" question written inside its text: "Put these in order: seed; shoot; flower" →
 // { ask: "Put these in order:", list: [seed, shoot, flower] }. Split on ";", new lines, " / " or ", " (not "1,000"). Null when unsure.
@@ -309,6 +309,7 @@ function cleanWorksheet(d) {
            answers, status: check ? "Checked ✓" : answers.length ? "Answers uploaded" : "To do", ...(check ? { check } : {}),
            ...(d.hidden === true ? { hidden: true } : {}),   // (🙈 "deleted": kept, only hidden)
            ...(aiTxt(d.part, 80) ? { part: aiTxt(d.part, 80) } : {}), ...(modeOf(d.purpose) ? { purpose: modeOf(d.purpose) } : {}), ...(["easy", "hard"].includes(d.pick) ? { pick: d.pick } : {}),
+           ...(aiInt(d.lvl, 0, 10, 0) ? { lvl: aiInt(d.lvl, 0, 10, 0) } : {}),   // (🎚️ v179: the level 1–10 it was made at)
            // 📚 made for a study session: its key "date|actId|person", its minutes and the AI's estimate
            ...(/^\d{4}-\d{2}-\d{2}\|[^|]+\|[^|]+$/.test(aiTxt(d.session, 100)) ? { session: aiTxt(d.session, 100) } : {}),
            ...(d.minutes != null ? { minutes: aiInt(d.minutes, 5, 240, 30) } : {}), ...(d.estimated_minutes != null ? { estimated_minutes: aiInt(d.estimated_minutes, 1, 600, 30) } : {}),
@@ -469,7 +470,9 @@ function isNewTopic(s, kid, subject, title, workId) {
 
 // ---------- Every 🤖 worksheet: a mode + a short profile of the kid ----------
 //   mode: "level_check" (🧭 a new topic) | "practice" (🔁) | "week_review" (📰 the newsletter's week) | "challenge" (🚀)
-const LEVEL_COUNT = 8, PRACTICE_COUNT = 8, REVIEW_COUNT = 8;
+// 🔢 v179 (Broo2a): EVERY worksheet has 15 questions (not by age); a 📚 study session's worksheet has 20, so it fills the session.
+const WS_COUNT = 15, SESSION_COUNT = 20;
+const LEVEL_COUNT = WS_COUNT, PRACTICE_COUNT = WS_COUNT, REVIEW_COUNT = WS_COUNT;
 // 😊 Use the family's names in story, sentence and grammar questions: always kind, happy and safe (never someone hurt, sad or naughty)
 const wsNamesNote = kid => { const me = kidNameOf(kid), others = kidsList().map(u => u.name).filter(n => n && n !== me);
   return ` Where it fits (stories, sentences, grammar, word problems), use the child's name ${me}${others.length ? ` and sometimes ${others.join(", ")}` : ""} in some questions. Keep these sentences kind, happy and safe: never a child who is hurt, sad, scared, rude or in trouble, and never jokes about anyone.`; };
@@ -477,14 +480,15 @@ const wsNamesNote = kid => { const me = kidNameOf(kid), others = kidsList().map(
 const wsLikesNote = kid => { const likes = (schoolOf(kid).profile.likes || "").trim(), me = kidNameOf(kid);
   return likes ? ` Make it fun for ${me}: use things ${me} likes in the stories, examples and word problems (${likes}). Keep the school topic and skills exactly the same.`
     : ` Make it fun: use examples children of this age enjoy (games, animals, sport, food, space). Keep the school topic and skills exactly the same.`; };
-// 🎚️ Worksheet level, set by a parent per kid per subject: Easy · Normal · Hard (kept until they change it; Normal when never set)
-const WS_PICKS = [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"]];
-const wsPickOf = (kid, subject) => { const L = learnRead(kid, subject); return (L && L.pick) || "normal"; };
-const WS_PICK_TEXT = {
-  easy: " LEVEL CHOSEN BY THE PARENTS: EASY. The child finds this subject hard: make every question easier than usual. Short sentences, simple words, one step at a time, small numbers, and a hint where it helps. Start very easy.",
-  hard: " LEVEL CHOSEN BY THE PARENTS: HARD. The child finds the usual questions too easy: make them harder. More steps, bigger numbers, reasoning and 'explain why' questions, a little above the year level."
-};
-const wsPickNote = (kid, subject, mode) => mode === "placement" || mode === "level_check" ? "" : WS_PICK_TEXT[wsPickOf(kid, subject)] || "";
+// 🎚️ v179: ONE level, 1–10, on a slider the parents move (5 = right at the school year). Easy / Normal / Hard is now only its name:
+//   1–3 Easy · 4–6 Normal · 7–10 Hard (a Hard free-study worksheet still gives its bonus). Older data: Easy = level − 2, Hard = level + 2.
+const levelNow = L => !L ? 5 : Math.max(1, Math.min(10, L.level + (L.pick === "easy" ? -2 : L.pick === "hard" ? 2 : 0)));
+const levelBand = lv => lv <= 3 ? "easy" : lv >= 7 ? "hard" : "normal";
+const BAND_NAME = { easy: "Easy", normal: "Normal", hard: "Hard" };
+const wsPickOf = (kid, subject) => levelBand(levelNow(learnRead(kid, subject)));
+// (v179: the level number itself goes to the AI, see learnBody; no extra Easy / Hard text)
+const wsPickNote = () => "";
+const wsBandOf = (kid, subject, mode) => ["placement", "level_check"].includes(mode) ? "normal" : wsPickOf(kid, subject);
 // Everything extra the AI gets about the kid: 😊 names · 💛 likes · 🎚️ level
 // 📚 v157 topic names: "Big topic › small topic" (so the topics of one unit sit together, see topicsCardHtml)
 const TOPIC_NAME_RULE = "name every topic as 'Big topic › small topic', 2 to 5 words, capital first letter, for example 'Fractions › Adding', 'Plants › Life cycle', 'Grammar › Pronouns'. No lesson numbers or dates. Use the same big topic name for topics of the same unit, and keep an existing topic's name when it is the same topic";
@@ -515,24 +519,57 @@ document.addEventListener("click", e => {
   toast(w ? `🔑 Saved. New ${subject} worksheets and checks for ${kidNameOf(kid)} will use these words.` : "🔑 Key words cleared.", 3500);
 });
 const wsKidNote = (kid, subject, mode) => wsNamesNote(kid) + wsLikesNote(kid) + wsPickNote(kid, subject, mode) + wsWordsNote(kid, subject) + WS_KEY_NOTE;
-const wsPickHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : `<div class="ws-pick" role="radiogroup" aria-label="Worksheet level"><b>Worksheet level</b>
-  ${WS_PICKS.map(([k, w]) => `<button type="button" class="pill${wsPickOf(kid, subject) === k ? " on" : ""}" role="radio" aria-checked="${wsPickOf(kid, subject) === k}" data-wspick="${safe(kid)}|${safe(encodeURIComponent(subject))}|${k}">${w}</button>`).join("")}</div>`;
-document.addEventListener("click", e => {
-  const b = e.target.closest && e.target.closest("[data-wspick]");
-  if (!b || !isParentDevice()) return;
-  const [kid, sub, k] = b.dataset.wspick.split("|"), subject = decodeURIComponent(sub), L = learnFor(kid, subject);
-  if (!L) return;
-  if (k === "normal") delete L.pick; else L.pick = k;
+// 🎚️ The level slider (parents): 1 … 10, and under it where the kid stands now + a suggestion
+function learnAdvice(kid, subject) {
+  const L = learnRead(kid, subject), lv = levelNow(L), last = checkedOf(kid, subject).slice(0, 3), who = kidNameOf(kid);
+  if (!last.length) return { text: `No checked worksheets yet. The level also moves by itself after each check.`, to: 0 };
+  const avg = avgPct(last), why = last[0].check.level_reason ? ` 🤖 ${last[0].check.level_reason}` : "";
+  const now = `${who} is on level ${lv}/10 (${BAND_NAME[levelBand(lv)]}). The last ${last.length === 1 ? "worksheet" : last.length + " worksheets"}: ${avg}%.`;
+  if (avg >= 85 && lv < 10) return { text: `${now} 💡 Doing great: ready for harder work. Try level ${lv + 1}.${why}`, to: lv + 1 };
+  if (avg < 50 && lv > 1) return { text: `${now} 💡 This looks too hard right now. Try level ${lv - 1} for a while.${why}`, to: lv - 1 };
+  return { text: `${now} 👍 This level looks right.${why}`, to: 0 };
+}
+const wsLevelHtml = (kid, subject) => { if (!isParentDevice() || !learnRead(kid, subject)) return "";
+  const lv = levelNow(learnRead(kid, subject)), ad = learnAdvice(kid, subject), id = `${safe(kid)}|${safe(encodeURIComponent(subject))}`;
+  return `<div class="ws-lv"><div class="ws-lv-top"><b>🎚️ Worksheet level</b><span class="ws-lv-n"><b data-wslvn="${id}">${lv}</b>/10 <small data-wslvb="${id}">${BAND_NAME[levelBand(lv)]}</small></span></div>
+    <input type="range" min="1" max="10" step="1" value="${lv}" data-wslv="${id}" aria-label="Worksheet level, 1 to 10">
+    <div class="ws-lv-ends"><span>◀ Easier</span><span>5 = school year</span><span>Harder ▶</span></div>
+    <p class="hint ws-lv-now">${safe(ad.text)}</p>${ad.to ? `<div class="btnrow"><button type="button" class="pill" data-wslvto="${id}|${ad.to}">Move to level ${ad.to}</button></div>` : ""}</div>`; };
+const wsPickHtml = wsLevelHtml;
+function setWsLevel(kid, subject, v) {
+  const L = learnFor(kid, subject), lv = Math.max(1, Math.min(10, Math.round(Number(v)) || 5));
+  if (!L || !isParentDevice()) return;
+  if (lv === levelNow(L) && !L.pick) return;
+  L.level = lv; delete L.pick;
+  L.history = [...L.history, { date: todayYmd(), ws: "", pct: 0, level: lv, hand: true }].slice(-30);
   writeData();
-  document.querySelectorAll(`[data-wspick^="${CSS.escape(kid)}|${CSS.escape(sub)}|"]`).forEach(x => { const on = x.dataset.wspick.endsWith("|" + k); x.classList.toggle("on", on); x.setAttribute("aria-checked", on); });
-  toast(`🎚️ New ${subject} worksheets for ${kidNameOf(kid)}: ${WS_PICKS.find(x => x[0] === k)[1]}.`, 3000);
+  toast(`🎚️ New ${subject} worksheets for ${kidNameOf(kid)}: level ${lv}/10 (${BAND_NAME[levelBand(lv)]}).`, 3000);
+  render();
+}
+document.addEventListener("input", e => {
+  if (!e.target.matches || !e.target.matches("[data-wslv]")) return;
+  const id = e.target.dataset.wslv, v = Number(e.target.value);
+  document.querySelectorAll(`[data-wslvn="${CSS.escape(id)}"]`).forEach(x => x.textContent = v);
+  document.querySelectorAll(`[data-wslvb="${CSS.escape(id)}"]`).forEach(x => x.textContent = BAND_NAME[levelBand(v)]);
+});
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("[data-wslv]")) return;
+  const [kid, sub] = e.target.dataset.wslv.split("|");
+  setWsLevel(kid, decodeURIComponent(sub), e.target.value);
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wslvto]");
+  if (!b) return;
+  const [kid, sub, v] = b.dataset.wslvto.split("|");
+  setWsLevel(kid, decodeURIComponent(sub), v);
 });
 const MODE_NOTES = {
   level_check: "short level check to see what the child already knows",
   practice: "practice only these weak points",
   week_review: "review of this week's school topics",
   challenge: "a harder challenge sheet: the child is doing very well in this subject",
-  placement: "short placement test: we don't know the child's level in this subject yet"
+  placement: "placement test: find the child's real level in this subject (1 to 10)",
+  weak_points: "weak points worksheet: only the topics the child keeps getting wrong"
 };
 // 🏫 The kid's school system and 📄 syllabus (when saved): sent with EVERY 🤖 worksheet
 function schoolSystemOf(kid) {
@@ -543,7 +580,6 @@ function schoolSystemOf(kid) {
 // The kind is picked the usual way: 🧭 a level check for a topic that's new in the subject, else 🔁 practice or 🚀 challenge (see pickMode).
 // (A kid's phone asks 🤖 itself, like a parent's.)
 let mk = null;   // { subject, picked: [topic titles], typed: [topics typed by hand], count }
-const MAKE_COUNTS = [5, 10, 15];
 const topicsKey = subject => subject.trim().toLowerCase().slice(0, 40);
 function openMake(subject) {
   mk ={ subject: subject || "", picked: [], typed: [], count: 10 };
@@ -594,8 +630,7 @@ function schoolMakeHtml(s) {
     ${mk.typed.length ? `<b class="mk-label">✍️ Typed</b><div class="ph-chips">${mk.typed.map(t => chip(t)).join("")}</div>` : ""}
     <div class="row mk-type"><div><label class="small" for="mkType">✍️ Or type a topic</label><input type="text" id="mkType" maxlength="60" placeholder="Fractions, the water cycle…"></div></div>
     <div class="btnrow"><button data-mkadd>➕ Add</button></div>
-    <h3 class="ph-group">3️⃣ How many questions?</h3>
-    <div class="mk-counts">${MAKE_COUNTS.map(n => `<button class="${mk.count === n ? "on" : ""}" data-mkcount="${n}" aria-pressed="${mk.count === n}">${n}</button>`).join("")}</div>
+    <p class="hint">Every worksheet has ${WS_COUNT} questions, at ${safe(kidNameOf(schoolKid))}'s level.</p>
     <div class="btnrow mk-go"><button class="primary" data-mkgo data-aiwait="make" ${mk.picked.length ? "" : "disabled"}>✨ Make it${mk.picked.length ? ` (${mk.picked.length} ${mk.picked.length === 1 ? "topic" : "topics"})` : ""}</button></div></div>`;
 }
 async function makeFromPicker() {
@@ -618,11 +653,10 @@ function makeTap(ds) {
   if ("mkother" in ds) { const v = $("mkOther").value.trim().slice(0, 30); if (!v) return; mk.subject = v; render(); return maybeLoadTopics(); }
   if (ds.mktopic) { mk.picked = mk.picked.includes(ds.mktopic) ? mk.picked.filter(t => t !== ds.mktopic) : [...mk.picked, ds.mktopic].slice(0, 8); return render(); }
   if ("mkadd" in ds) { const v = $("mkType").value.trim().slice(0, 60); if (!v) return; if (!mk.typed.includes(v)) mk.typed.push(v); if (!mk.picked.includes(v)) mk.picked.push(v); return render(); }
-  if (ds.mkcount) { mk.count = Number(ds.mkcount); return render(); }
   if ("mkload" in ds) return loadTopics();
   if ("mkgo" in ds) return makeFromPicker();
 }
-const MAKE_KEYS = ["mkopen", "mksub", "mkother", "mktopic", "mkadd", "mkcount", "mkload", "mkgo"];
+const MAKE_KEYS = ["mkopen", "mksub", "mkother", "mktopic", "mkadd", "mkload", "mkgo"];
 
 // 🚀 Challenge when the last 3 checks of the subject average 85% or more,
 // but back to 🔁 practice when a challenge among them scored under 60%
@@ -670,7 +704,7 @@ const strongSkills = L => skillList(L).filter(x => x.mastery >= 80).sort((a, b) 
 function learnBody(kid, subject, focus) {
   const L = learnRead(kid, subject);
   if (!L) return {};
-  const lv = Math.max(1, Math.min(10, L.level + (L.pick === "easy" ? -2 : L.pick === "hard" ? 2 : 0)));
+  const lv = levelNow(L);
   return { level: lv, skills: skillList(L).sort((a, b) => b.tries - a.tries).slice(0, 30).map(x => ({ skill: x.skill, mastery: x.mastery })),
            focus: focus && focus.length ? focus : weakSkills(L).slice(0, 3).map(x => x.skill) };
 }
@@ -735,7 +769,7 @@ async function learnPractise(kid, fid, skill) {
   if (!isParentDevice()) return;
   const f = schoolOf(kid).subjects[fid];
   if (!f || !skill) return;
-  const id = await newWorksheet(kid, f.name, [skill], 10, "practice", "learn|" + kid + "|" + skill, { part: skill, focus: [skill] });
+  const id = await newWorksheet(kid, f.name, [skill], WS_COUNT, "practice", "learn|" + kid + "|" + skill, { part: skill, focus: [skill] });
   if (id) toast(`📝 A ${f.name} worksheet on “${skill}” is ready${screen === "school" ? "" : ` in ${kidNameOf(kid)}'s 🎒 School`}!`, 3500);
 }
 // The small line chart of the level over time (1–10)
@@ -769,9 +803,10 @@ function learnCardHtml(kid, f) {
         <button class="pill" data-learnpr="${safe(kid)}|${safe(f.id)}|${enc(x.skill)}" data-aiwait="learn|${safe(kid)}|${safe(x.skill)}">✏️ Practise this</button></li>`).join("")}</ul>`
       : `<p class="hint">Nothing to work on right now.</p>`; };
   return `<div class="learn-box"><div class="learn-top"><span class="learn-sub">${safe(f.emoji)} ${safe(f.name)}</span>
-      <span class="learn-lv"><button class="pill" data-learnlv="${safe(kid)}|${safe(f.id)}|-1" aria-label="Level down" ${L.level <= 1 ? "disabled" : ""}>−</button>
-      <b>Level ${L.level}/10</b><button class="pill" data-learnlv="${safe(kid)}|${safe(f.id)}|1" aria-label="Level up" ${L.level >= 10 ? "disabled" : ""}>+</button></span></div>
+      </div>
+    ${wsLevelHtml(kid, f.name)}
     ${learnChartSvg(L)}
+    ${parentWsButtonsHtml(kid, f)}
     <p class="learn-h">💪 Strong</p>${strong.length ? `<div class="learn-chips">${strong.map(r => `<span class="learn-chip good">${safe(r.title)} <small>${r.pct}%</small></span>`).join("")}</div>`
       : `<p class="hint">None yet (85% or more).</p>`}
     <p class="learn-h">🎯 To work on</p>${weak.length ? `<ul class="learn-weak">${weak.map(r => `<li><span>${ST[r.st][0]} ${safe(r.title)} (${r.pct}%)${tag(r)}${r.weak.length ? `<small>weak at ${safe(r.weak.join(", "))}</small>` : ""}</span>
@@ -797,7 +832,7 @@ async function learnPractiseTopic(kid, fid, title, src) {
   const f = schoolOf(kid).subjects[fid];
   if (!f || !title) return;
   const row = learnTopicRows(kid, { id: fid, ...f }).find(r => lowerT(r.title) === lowerT(title)), focus = row ? row.weak : [];
-  const id = await newWorksheet(kid, f.name, [title], 10, "practice", "ltp|" + kid + "|" + title,
+  const id = await newWorksheet(kid, f.name, [title], WS_COUNT, "practice", "ltp|" + kid + "|" + title,
     { part: title, ...(focus.length ? { focus } : {}), ...(src === "igcse" ? { src: "igcse" } : {}),
       sections: [{ topic: title, minutes: 20, focus, kind: row && row.st === "needs" ? "needs_work" : "practising" }] });
   if (id) toast(`📝 A ${f.name} worksheet on “${title}” is ready${screen === "school" ? "" : ` in ${kidNameOf(kid)}'s 🎒 School`}!`, 3500);
@@ -809,6 +844,64 @@ document.addEventListener("click", e => {
   if (b.dataset.learntp) { const [kid, fid, title, src] = b.dataset.learntp.split("|"); return learnPractiseTopic(kid, fid, decodeURIComponent(title || ""), src); }
   const [kid, fid, skill] = b.dataset.learnpr.split("|");
   learnPractise(kid, fid, decodeURIComponent(skill || ""));
+});
+// 📄 v179: what the class learned on these topics (the summary saved from the school file, see 📚 Add to curriculum) → in the worksheet's notes
+function wsSummaryNote(kid, subject, titles) {
+  const s = schoolOf(kid), f = folderOf(s, subject);
+  if (!f || !s.curr) return "";
+  const have = topicsOf(s, f.id).filter(t => t.sum), seen = new Set(), out = [];
+  (titles || []).forEach(title => {
+    const t = have.find(x => lowerT(x.title) === lowerT(title)) || have.find(x => sameTopicTitle(x.title, title));
+    if (t && !seen.has(t.id)) { seen.add(t.id); out.push(`"${t.title}": ${t.sum}`); }
+  });
+  if (!out.length) return "";
+  return (" WHAT THE CLASS LEARNED, from the school's own files (follow it: the same methods, words and kind of examples, never harder than this unless the level says so): " + out.join(" | ")).slice(0, 3500);
+}
+// 👨‍👩‍👧 Two buttons for parents in a subject: 🎯 a weak points worksheet (the app picks the topics) · 🧪 a placement test
+const parentWsButtonsHtml = (kid, f) => !isParentDevice() ? "" : `<div class="btnrow ws-parent-btns">
+  <button type="button" class="primary" data-weakws="${safe(kid)}|${safe(f.id)}" data-aiwait="weakws|${safe(kid)}|${safe(f.id)}">🎯 Weak points worksheet</button>
+  <button type="button" data-placews="${safe(kid)}|${safe(f.id)}" data-aiwait="placement|${safe(kid)}|${safe(f.id)}">🧪 Placement test</button></div>
+  <p class="hint">🎯 picks the topics ${safe(kidNameOf(kid))} needs to work on by itself. 🧪 finds the real level (1 to 10) from ${PLACEMENT_COUNT} questions.</p>`;
+// 🎯 The topics to work on, weakest first: 🔴 needs work, then anything under 70 % (not 😟 skipped ones)
+function weakTopicsOf(kid, f) {
+  return learnTopicRows(kid, f).filter(r => !stuckSkipped(kid, f.id, r.title) && (r.st === "needs" || r.pct < 70))
+    .sort((a, b) => (b.st === "needs") - (a.st === "needs") || a.pct - b.pct);
+}
+async function makeWeakWorksheet(kid, fid, quiet) {
+  if (!isParentDevice()) return null;
+  const s = schoolOf(kid), f = s.subjects[fid] && { id: fid, ...s.subjects[fid] };
+  if (!f) return null;
+  const rows = weakTopicsOf(kid, f).slice(0, 4), L = learnRead(kid, f.name);
+  let topics = rows.map(r => r.title), sections = [], focus = [];
+  if (rows.length) {
+    sections = rows.map(r => ({ topic: r.title, minutes: Math.max(5, Math.round(30 / rows.length)), focus: r.weak, kind: "needs_work" }));
+    focus = [...new Set(rows.flatMap(r => r.weak))].slice(0, 3);
+  } else if (L && weakSkills(L).length) { topics = weakSkills(L).slice(0, 3).map(x => x.skill); focus = topics; }
+  if (!topics.length) { if (!quiet) toast(`👍 No weak points in ${f.name} right now: ${kidNameOf(kid)} is doing well!`, 4000); return null; }
+  const id = await newWorksheet(kid, f.name, topics, WS_COUNT, "weak_points", "weakws|" + kid + "|" + fid,
+    { title: `🎯 ${f.name} weak points`, part: topics[0], ...(focus.length ? { focus } : {}), ...(sections.length ? { sections } : {}) }, false);
+  if (id && !quiet) toast(`🎯 A ${f.name} weak points worksheet (${topics.length} ${topics.length === 1 ? "topic" : "topics"}) is ready in ${kidNameOf(kid)}'s 🎒 School › Worksheets!`, 4500);
+  if (id && screen === "school") render();
+  return id;
+}
+// 🧪 A placement test any time (parents): 15 questions from the year below to the year above, on the subject's school topics.
+//    Its check sets the level 1–10 (see afterPlacement).
+async function makePlacementOne(kid, fid) {
+  if (!isParentDevice()) return;
+  const s = schoolOf(kid), f = s.subjects[fid];
+  if (!f) return;
+  const school = topicsOf(s, fid).filter(t => !stuckSkipped(kid, fid, t.title)).map(t => t.title).slice(0, 10);
+  const topics = school.length ? school : [`The main ${f.name} topics of ${gradeOf(kid) || "this school year"}`];
+  const id = await newWorksheet(kid, f.name, topics, PLACEMENT_COUNT, "placement", "placement|" + kid + "|" + fid,
+                                { title: `🧪 ${f.name} placement test`, part: "🧪 Placement test" }, false);
+  if (id) toast(`🧪 The ${f.name} placement test is ready in ${kidNameOf(kid)}'s 🎒 School › Worksheets. Its check sets the level.`, 4500);
+  if (id && screen === "school") render();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-weakws], [data-placews]");
+  if (!b || !isParentDevice()) return;
+  const [kid, fid] = (b.dataset.weakws || b.dataset.placews).split("|");
+  if (b.dataset.weakws) makeWeakWorksheet(kid, fid); else makePlacementOne(kid, fid);
 });
 // ---------- 🇦🇪 ARABIC WORKSHEETS · 🌐 ARABIC TRANSLATION OF QUESTIONS ----------
 // An Arabic / Islamic subject (Islamic studies, Quran, Tarbiya, دين, عربي …) → lang "ar": the whole worksheet in Arabic, right-to-left.
@@ -842,23 +935,27 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
   // (📚 a study session's worksheet: extra.minutes = the session's minutes → the AI fills them; sections = its parts in order;
   //  ⚡ instant + files = only about the file (never kept); avoid = questions already given; focus = the skills to practise.
   //  Those go to the AI only: the rest of extra is saved with the worksheet.)
-  const { files, instant, sections, avoid, focus, ...keep } = extra || {};
+  const { files, instant, sections, avoid, focus, hint, ...keep } = extra || {};
+  count = keep.session ? SESSION_COUNT : WS_COUNT;   // 🔢 v179: always 15, a study session 20
   // 🤖 A kid's EXTRA worksheets (not in a planned study session): at most data.extraLimit a day (⚙️ Settings: 3–5, the AI costs money)
   if (!keep.session && !isParentId(me) && !["level_check", "placement"].includes(mode)) {
     const lim = data.extraLimit || 3, today = todayYmd();
     const made = Object.values(aiDocs.worksheets).filter(x => x && x.kid === kid && !x.session && x.date === today).length;
     if (made >= lim) { toast(`🌟 You've made today's ${lim} extra worksheets. Great work! More tomorrow 📚`, 5000); return null; }
   }
-  const minutes = keep.minutes >= 5 && keep.minutes <= 240 ? Math.round(keep.minutes) : 0;
-  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsKidNote(kid, subject, mode),
-                                        mode, profile: profileText(kid, subject), ...schoolSystemOf(kid), ...(minutes ? { minutes } : {}),
+  // (⏱️ v179: the session's minutes are kept on the worksheet but not sent: the AI would then pick the number of questions itself)
+  const sumNote = wsSummaryNote(kid, subject, [...topics, ...(sections || []).map(x => x.topic)]);
+  const r = await callAi("worksheet", { ...kidInfo(kid), subject, topics, count, notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + ` Exactly ${count} questions.`
+                                        + wsKidNote(kid, subject, mode) + sumNote + (hint ? " " + String(hint).slice(0, 800) : ""),
+                                        mode, profile: profileText(kid, subject), ...schoolSystemOf(kid),
                                         ...(sections && sections.length ? { sections } : {}), ...(instant ? { instant: true, files } : {}),
                                         ...(avoid && avoid.length ? { avoid } : {}), ...learnBody(kid, subject, focus),   // (🧠 level, skills, focus)
                                         ...langBody(kid, subject) }, key);   // (🇦🇪 Arabic / 🌐 translation)
   if (!r) return null;
   const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
   const ws = wsExamOrder(cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
-                              at: new Date().toISOString(), answers: [], purpose: mode, ...(wsPickNote(kid, subject, mode) ? { pick: wsPickOf(kid, subject) } : {}), ...(instant && found ? { part: found } : {}), ...keep }));
+                              at: new Date().toISOString(), answers: [], purpose: mode, ...(wsBandOf(kid, subject, mode) !== "normal" ? { pick: wsBandOf(kid, subject, mode) } : {}),
+                              ...(!["placement", "level_check"].includes(mode) && learnRead(kid, subject) ? { lvl: levelNow(learnRead(kid, subject)) } : {}), ...(instant && found ? { part: found } : {}), ...keep }));
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
   delete ws.check;
   const id = newId();

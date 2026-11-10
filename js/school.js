@@ -397,7 +397,7 @@ const LEVEL_WORDS = { 1: "needs help", 2: "doing OK", 3: "strong" };
 const testOf = x => x && x.test && aiDocs.worksheets[x.test] ? { id: x.test, w: aiDocs.worksheets[x.test] } : null;
 function testStatusText(x) {
   const t = testOf(x);
-  if (!t) return "A short 10-question test is made when you tap 💾 Save. Get its 📄 PDF from 📝 Worksheets.";
+  if (!t) return `A short ${PLACEMENT_COUNT}-question test is made when you tap 💾 Save. Get its 📄 PDF from 📝 Worksheets.`;
   if (!t.w.check) return "🧪 Test pending: get its 📄 PDF from 📝 Worksheets, then ⬆ upload the answers.";
   return `✅ Checked: ${num(t.w.check.score)}/${num(t.w.check.max_score)} → Level ${"⭐".repeat(x.level || 1)}`;
 }
@@ -544,7 +544,7 @@ function saveProfile(skip) {
   makePlacementTests(kid, tests);
 }
 // 🧪 One placement test for each "Not sure" subject, one after the other (they're in 📝 Worksheets, checked like any worksheet)
-const PLACEMENT_COUNT = 10;
+const PLACEMENT_COUNT = 15;   // (🔢 v179: 15 like every worksheet, see WS_COUNT in ai.js)
 async function makePlacementTests(kid, folderIds) {
   toast(`👤 Saved! Making ${folderIds.length === 1 ? "a placement test" : folderIds.length + " placement tests"}… 🧪`, 4000);
   let made = 0;
@@ -565,7 +565,18 @@ async function makePlacementTests(kid, folderIds) {
     : `🧪 ${made} of ${folderIds.length} placement tests were made. Save the profile again to try the others.`, 4500);
 }
 // A checked 🧪 placement test: the subject's level from the score, and 📋 the brief once ALL the kid's tests are checked
+// 🎚️ v179: and the level 1–10 (the checker's suggested level; else from the score), the first time it's checked
+const PLACE_LEVEL = pct => pct >= 90 ? 7 : pct >= 80 ? 6 : pct >= 65 ? 5 : pct >= 50 ? 4 : pct >= 35 ? 3 : 2;
 function afterPlacement(kid, wsId, c, first) {
+  const w = aiDocs.worksheets[wsId], L = w && first && c.max_score > 0 ? learnFor(kid, w.subject) : null;
+  if (L) {
+    const lv = c.suggested_level >= 1 && c.suggested_level <= 10 ? Math.round(c.suggested_level) : PLACE_LEVEL(c.score / c.max_score * 100);
+    L.level = lv; delete L.pick;
+    const last = L.history[L.history.length - 1];
+    if (last && last.ws === wsId) last.level = lv;
+    writeData();
+    toast(`🧪 Placement test done: ${w.subject} level ${lv}/10. New worksheets start there.`, 4500);
+  }
   const p = schoolFor(kid).profile, x = Object.values(p.subjects).find(y => y.unsure && y.test === wsId);
   if (x) { const pct = c.score / c.max_score * 100; x.level = pct >= 80 ? 3 : pct >= 50 ? 2 : 1; writeData(); }
   const tests = Object.values(p.subjects).filter(y => y.unsure);
@@ -808,7 +819,7 @@ function schoolSubjectHtml(s, isDad, u) {
   }
   const t = secs.find(x => x.id === stSec);
   html += `<div class="ks-top" style="--ink:${c.ink}"><button class="pill" data-stsec="">⬅️ All about ${safe(f.name)}</button><h1 class="ks-title">${t.label}</h1></div>`;
-  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
+  if (stSec === "ws") return html + wsPickHtml(schoolKid, f.name) + (learnRead(schoolKid, f.name) ? parentWsButtonsHtml(schoolKid, f) : "") + wsWordsHtml(schoolKid, f.name) + translateToggleHtml(schoolKid, f.name) + wsGroupedHtml(s, all);
   if (stSec === "topics") return html + topicsCardHtml(s, f, parent) + (parent ? "" : learnKidLine(schoolKid, f));
   if (stSec === "goal") return html + goalCardHtml(schoolKid, f);
   if (stSec === "study") return html + `<div class="card bd-card">${studyTableHtml(schoolKid, f.name)}</div>`;
@@ -956,7 +967,7 @@ function fileStatus(f, s) {
 }
 
 // 📝 Worksheets: each with its status and 🖨️ ⬆ 🤖 🔑
-const WS_PURPOSE = { level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"],
+const WS_PURPOSE = { level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"], weak_points: ["🎯", "Weak points"],
                      placement: ["🧪", "Placement test"] };
 // A worksheet row: its status (✅ the score and the short note), then 📂 🖨️ 📸 ✅ 🔑
 // "👨‍👩‍👧 from Bro2a": a worksheet / explanation a parent made for the kid (it's in the kid's lists too)

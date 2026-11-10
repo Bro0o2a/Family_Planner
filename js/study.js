@@ -145,7 +145,8 @@ function topicHistoryHtml(t) {
   return `<div class="st-hist">${list.length ? `<ul>${list.map(w => { const pct = w.check ? topicPctIn(w, t.title) : null, weak = w.check ? w.check.weak_points || [] : [];
       return `<li><button class="linkbtn" data-aiopen="worksheet|${safe(w.id)}">📝 ${safe(w.title)}</button>
         <small>${dayMon(w.date)} · ${pct != null ? `${pct}%` : safe(w.status)}</small>${weak.length ? `<small class="st-weak">🎯 ${safe(weak.join(", "))}</small>` : ""}</li>`; }).join("")}</ul>`
-    : `<p class="hint">No worksheets on this topic yet.</p>`}${t.note ? `<p class="hint">${safe(t.note)}</p>` : ""}${t.files.length ? `<p class="hint">📂 ${t.files.length} school ${t.files.length === 1 ? "file" : "files"}</p>` : ""}</div>`;
+    : `<p class="hint">No worksheets on this topic yet.</p>`}${t.note ? `<p class="hint">${safe(t.note)}</p>` : ""}${t.sum ? `<p class="hint st-sum">📄 <b>From the school file:</b> ${safe(t.sum)}</p>` : ""}${
+      stuckSkipped(schoolKid, t.sub, t.title) ? `<p class="hint">⏭ Skipped for now (not in sessions). <button class="linkbtn" data-stuckback="${safe(schoolKid)}|${safe(t.sub)}|${safe(encodeURIComponent(t.title))}">↩ Bring it back</button></p>` : ""}${t.files.length ? `<p class="hint">📂 ${t.files.length} school ${t.files.length === 1 ? "file" : "files"}</p>` : ""}</div>`;
 }
 // ✏️ Make a worksheet on the ticked topics (one section a topic; focus = their weak skills)
 async function makeFromTopics() {
@@ -168,10 +169,12 @@ const sessionWsIds = key => Object.entries(aiDocs.worksheets).filter(([, w]) => 
 // (newest first) → 🟡 practising ≈ 20 % → 🟢 a quick review ≈ 7 % (only every 3rd session of the subject). Empty groups share their time.
 // All 🟢: the newest topics + a small 🚀 challenge. Only 1 topic: the whole session on it, mixed difficulty.
 function sessionSections(kid, s, f, minutes) {
-  const rows = topicRows(kid, s, f);
+  const all = topicRows(kid, s, f), kept = all.filter(t => !stuckSkipped(kid, f.id, t.title)), rows = kept.length ? kept : all;   // (⏭ not the skipped ones)
   const avg = t => { const r = t.info.results.slice(-3).map(x => x.pct); return r.length ? meanPct(r) : 100; };
   if (rows.length === 1) return [{ topic: rows[0].title, minutes, focus: topicWeak(rows[0].info), kind: rows[0].st === "needs" ? "needs_work" : "practising" }];
-  const g = { needs: rows.filter(t => t.st === "needs").sort((a, b) => avg(a) - avg(b)), new: rows.filter(t => t.st === "new"),
+  // (📚 v179: never-practised topics one after the other in the school's order: the oldest first, then their place in the file)
+  const byOrder = (a, b) => (a.added || "").localeCompare(b.added || "") || (a.ord ?? 999) - (b.ord ?? 999);
+  const g = { needs: rows.filter(t => t.st === "needs").sort((a, b) => avg(a) - avg(b)), new: rows.filter(t => t.st === "new").sort(byOrder),
               practising: rows.filter(t => t.st === "practising").sort((a, b) => avg(a) - avg(b)), mastered: rows.filter(t => t.st === "mastered") };
   if (!g.needs.length && !g.new.length && !g.practising.length) {   // all 🟢
     const a = g.mastered[0], b = g.mastered[1] || a, main = Math.max(5, Math.round(minutes * 0.75));
@@ -341,7 +344,7 @@ function cleanCurriculum(s, subs, r) {
       const title = aiTxt(t.title, 80), sameAs = aiTxt(t.same_as, 80);
       if (!title || g.topics.some(y => lowerT(y.title) === lowerT(title))) return;
       const hit = (sameAs && have.find(y => lowerT(y.title) === lowerT(sameAs))) || have.find(y => lowerT(y.title) === lowerT(title));
-      g.topics.push({ title, note: aiTxt(t.note, 200), same: hit ? hit.id : "", on: !hit });
+      g.topics.push({ title, note: aiTxt(t.note, 200), sum: aiTxt(t.summary, 1200), same: hit ? hit.id : "", on: !hit });   // (📄 v179: what the file teaches on it)
     });
   });
   const events = aiObjs(r.events, 30).map(e => ({ date: isYmd(e.date) ? e.date : "", time: hmOf(e.time), title: aiTxt(e.title, 80), on: true })).filter(e => e.date && e.title);
@@ -374,14 +377,17 @@ function addCurriculum() {
   const box = aw;
   if (!box || !box.result) return;
   const s = schoolFor(box.kid), files = box.items.map(x => x.id).filter(id => id && s.files[id]), today = todayYmd();
-  const touch = x => { x.added = today; x.files = [...new Set([...x.files, ...files])].slice(0, 30); };
+  // 📄 v179: each topic keeps the file's SUMMARY (sum: what the class learned, new first) and its place in the file (ord), so the
+  //    worksheets follow what was taught, topic after topic in the school's order
+  const addSum = (x, t) => { if (t.sum && !(x.sum || "").includes(t.sum)) x.sum = [t.sum, x.sum].filter(Boolean).join(" ").slice(0, 1200); };
+  const touch = (x, t) => { x.added = today; x.files = [...new Set([...x.files, ...files])].slice(0, 30); addSum(x, t); };
   let added = 0, linked = 0, dates = 0;
-  box.result.groups.forEach(g => g.topics.forEach(t => {
+  box.result.groups.forEach(g => g.topics.forEach((t, i) => {
     if (t.on) {
       const id = topicIdOf(g.sid, t.title);
-      if (s.curr[id]) { touch(s.curr[id]); linked++; }   // (the very same title)
-      else { s.curr[id] = { sub: g.sid, title: t.title, note: t.note, added: today, files: files.slice(0, 30), by: me }; added++; }
-    } else if (t.same && s.curr[t.same]) { touch(s.curr[t.same]); linked++; }
+      if (s.curr[id]) { touch(s.curr[id], t); linked++; }   // (the very same title)
+      else { s.curr[id] = { sub: g.sid, title: t.title, note: t.note, added: today, files: files.slice(0, 30), by: me, ord: i, ...(t.sum ? { sum: t.sum } : {}) }; added++; }
+    } else if (t.same && s.curr[t.same]) { touch(s.curr[t.same], t); linked++; }
   }));
   box.result.events.filter(e => e.on).forEach(e => {
     if (Object.values(s.events).some(x => x.date === e.date && lowerT(x.title) === lowerT(e.title))) return;
@@ -446,6 +452,112 @@ function topicsFromAllWorksheets() {
   Object.entries(aiDocs.worksheets).forEach(([id, w]) => { if (topicsFromWorksheet(id, w)) changed = true; });
   if (changed) { writeData("auto"); if (screen === "school") render(); }
 }
+// ---------- 😟 v179 STUCK ON A TOPIC (Broo2a): the last 5 worksheets with that topic were ALL under 60 % ----------
+// → 🔔 Needs you (parents): "Does he need more explaining, or skip this topic?" · 🤖 Ask AI for help (the same mistake + advice)
+//   · ⏭ Skip this topic (out of 📚 sessions and 🎯 weak points; ↩ Bring it back in the topic's history)
+//   · ✅ I explained it → a new 🎯 worksheet on those weak points (then it only alerts again after 5 more fails).
+// Data: data.school[kid].learn[subject id].stuck[topic key] = { skip?, done? (its results count then), help?, at }
+const STUCK_N = 5, STUCK_PCT = 60;
+const stuckRecOf = (kid, fid, title) => { const L = (schoolOf(kid).learn || {})[fid]; return (L && L.stuck && L.stuck[topicKey(title)]) || null; };
+const stuckSkipped = (kid, fid, title) => { const r = stuckRecOf(kid, fid, title); return !!(r && r.skip); };
+function stuckRecFor(kid, fid, title) {
+  const f = schoolOf(kid).subjects[fid], L = f && learnFor(kid, f.name);
+  if (!L) return null;
+  if (!L.stuck) L.stuck = {};
+  return L.stuck[topicKey(title)] || (L.stuck[topicKey(title)] = { at: new Date().toISOString() });
+}
+function isStuck(kid, fid, t) {
+  const rec = stuckRecOf(kid, fid, t.title);
+  if (rec && rec.skip) return false;
+  const last = t.info.results.slice(rec && rec.done ? rec.done : 0).slice(-STUCK_N);
+  return last.length >= STUCK_N && last.every(x => x.pct < STUCK_PCT);
+}
+// Every stuck topic of every kid (parents only) → [{ kid, f, t, rec }]
+function stuckList() {
+  if (!isParentDevice() || !feat("coach")) return [];
+  const out = [];
+  kidsList().forEach(k => { const s = schoolOf(k.id);
+    subjectList(s).forEach(f0 => { const f = { id: f0.id, ...f0 };
+      topicRows(k.id, s, f).filter(t => isStuck(k.id, f.id, t)).forEach(t => out.push({ kid: k.id, f, t, rec: stuckRecOf(k.id, f.id, t.title) })); }); });
+  return out;
+}
+const stuckId = x => `${safe(x.kid)}|${safe(x.f.id)}|${safe(encodeURIComponent(x.t.title))}`;
+function stuckCardHtml(x) {
+  const name = kidNameOf(x.kid), last = x.t.info.results.slice(-STUCK_N).map(r => r.pct + "%").join(", "), hp = x.rec && x.rec.help, id = stuckId(x);
+  return `<div class="card stuck-card"><p>😟 <b>${safe(name)}</b> is stuck on <b>${safe(x.t.title)}</b> in ${safe(x.f.name)}: the last ${STUCK_N} worksheets were ${safe(last)}.</p>
+    <p>Does ${safe(name)} need more explaining, or should we skip this topic for now?</p>
+    ${hp ? `<div class="stuck-help"><p><b>🔁 The same mistake:</b> ${safe(hp.mistake)}</p>${hp.why ? `<p><b>🤔 Why:</b> ${safe(hp.why)}</p>` : ""}
+      ${hp.explain_steps.length ? `<p><b>🧑‍🏫 How to explain it:</b></p><ol>${hp.explain_steps.map(t => `<li>${safe(t)}</li>`).join("")}</ol>` : ""}
+      ${hp.home_tips.length ? `<p><b>🏠 At home:</b></p><ul>${hp.home_tips.map(t => `<li>${safe(t)}</li>`).join("")}</ul>` : ""}</div>` : ""}
+    <div class="btnrow">${hp ? "" : `<button class="primary" data-stuckai="${id}" data-aiwait="stuck|${safe(x.kid)}|${safe(x.t.title)}">🤖 Ask AI for help</button>`}
+      <button ${hp ? `class="primary"` : ""} data-stuckfix="${id}" data-aiwait="stuckfix|${safe(x.kid)}|${safe(x.t.title)}">✅ I explained it: make a new worksheet</button>
+      <button data-stuckskip="${id}">⏭ Skip this topic</button></div></div>`;
+}
+// The kid's wrong answers on the topic, from its last checked worksheets
+function stuckWrong(t) {
+  const out = [], title = lowerT(t.title);
+  t.info.list.filter(w => w.check).slice(0, STUCK_N + 2).forEach(w => {
+    const mine = (w.questions || []).some(q => q.topic) ? new Set(w.questions.filter(q => lowerT(q.topic) === title || sameTopicTitle(q.topic || "", t.title)).map(q => q.number)) : null;
+    w.check.questions.filter(q => q.fixed === "wrong" || (!q.correct && q.fixed !== "right")).forEach(q => {
+      if (mine && mine.size && !mine.has(q.number)) return;
+      const wq = w.questions.find(y => y.number === q.number) || {};
+      out.push({ question: String(wq.prompt || "").slice(0, 300), child: q.your_answer || "", right: String(wq.answer || "").slice(0, 200), note: q.explanation || q.note || "" });
+    });
+  });
+  return out.slice(0, 30);
+}
+function stuckFind(ds) {
+  const [kid, fid, enc] = String(ds).split("|"), title = decodeURIComponent(enc || ""), s = schoolOf(kid), f0 = s.subjects[fid];
+  if (!f0) return null;
+  const f = { id: fid, ...f0 }, t = topicRows(kid, s, f).find(y => y.title === title);
+  return t ? { kid, f, t } : null;
+}
+async function stuckAskAi(ds) {
+  const x = stuckFind(ds);
+  if (!x) return;
+  const L = learnRead(x.kid, x.f.name), r = await callAi("stuck", { ...kidInfo(x.kid), subject: x.f.name, topic: x.t.title, ...(x.t.sum ? { summary: x.t.sum } : {}),
+    results: x.t.info.results.slice(-STUCK_N).map(y => y.pct), weak: topicWeak(x.t.info), wrong: stuckWrong(x.t), ...(L ? { level: levelNow(L) } : {}) }, "stuck|" + x.kid + "|" + x.t.title);
+  if (!r) return;
+  const strs = (y, n) => aiArr(y, n).map(t => aiTxt(t, 300)).filter(Boolean);
+  const rec = stuckRecFor(x.kid, x.f.id, x.t.title);
+  if (!rec) return;
+  rec.help = { mistake: aiTxt(r.mistake, 600) || "No clear pattern yet.", why: aiTxt(r.why, 600), explain_steps: strs(r.explain_steps, 6), home_tips: strs(r.home_tips, 4),
+               focus: strs(r.focus, 3).map(t => t.slice(0, 60)), at: new Date().toISOString() };
+  writeData();
+  render();
+}
+async function stuckFix(ds) {
+  const x = stuckFind(ds);
+  if (!x) return;
+  const hp = (stuckRecOf(x.kid, x.f.id, x.t.title) || {}).help, focus = hp && hp.focus.length ? hp.focus : topicWeak(x.t.info);
+  const id = await newWorksheet(x.kid, x.f.name, [x.t.title], WS_COUNT, "weak_points", "stuckfix|" + x.kid + "|" + x.t.title,
+    { title: `🎯 ${x.f.name}: ${topicShort(x.t.title)} again`, part: x.t.title, ...(focus.length ? { focus } : {}),
+      sections: [{ topic: x.t.title, minutes: 25, focus, kind: "needs_work" }],
+      ...(hp ? { hint: `The parents just explained this topic again. The child kept making this mistake: ${hp.mistake} Include questions that check exactly this, from very easy up to the child's level.` } : {}) }, false);
+  if (!id) return;
+  const rec = stuckRecFor(x.kid, x.f.id, x.t.title);
+  rec.done = x.t.info.results.length;   // (alerts again only after 5 more fails)
+  writeData();
+  render();
+  toast(`✅ A new worksheet on ${x.t.title} is ready in ${kidNameOf(x.kid)}'s 🎒 School › Worksheets.`, 4500);
+}
+function stuckSkip(ds, on) {
+  const [kid, fid, enc] = String(ds).split("|"), rec = stuckRecFor(kid, fid, decodeURIComponent(enc || ""));
+  if (!rec) return;
+  if (on) rec.skip = true; else { delete rec.skip; rec.done = 0; }
+  writeData();
+  render();
+  toast(on ? "⏭ Skipped for now: it's out of the study sessions. Bring it back from the topic's history any time." : "↩ It's back in the study sessions.", 4000);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-stuckai], [data-stuckfix], [data-stuckskip], [data-stuckback]");
+  if (!b || !isParentDevice()) return;
+  const ds = b.dataset;
+  if (ds.stuckai) return stuckAskAi(ds.stuckai);
+  if (ds.stuckfix) return stuckFix(ds.stuckfix);
+  if (ds.stuckskip) return stuckSkip(ds.stuckskip, true);
+  if (ds.stuckback) return stuckSkip(ds.stuckback, false);
+});
 // ⚡ Instant worksheet: only about the file (nothing about the file is kept; its results go to the 🧠 profile under the topic found)
 // During a 📚 study session now: 🤖 finds the file's subject first. The same subject → the minutes left, it's the session's result.
 // Another subject → "Continue anyway?" Yes → it still counts for the session, "🔁 swapped to …", and the parents are told.
@@ -662,7 +774,7 @@ function drawNewsletter() {
              e.note ? h("small", null, e.note) : null)))))
          : h("p", { class: "sc-empty" }, "No school dates in this newsletter."),
        res.subjects.length ? h("p", { class: "hint" }, "📰 This week: " + res.subjects.map(x => `${x.subject} (${x.topics.join(", ")})`).join(" · ")
-         + ". A week review worksheet is made for each subject.") : null,
+         + ". On Friday after school, a week review worksheet is made for each subject.") : null,
        res.reminders.length ? h("p", { class: "hint" }, "🔔 Reminders: " + res.reminders.join(" · ")) : null,
        h("div", { class: "err" }, nl.err),
        h("div", { class: "btnrow" }, h("button", { class: "primary", data: { nladd: "" } }, "✅ Add to the plan"), h("button", { data: { nlclose: "" } }, "Close"))]
@@ -798,14 +910,42 @@ async function addNewsletter() {
   writeData();
   closeNewsletter();
   if (screen === "school") { schoolKid = kid; goSchool("home"); }
-  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length ? ". Making the week reviews…" : ""}`, 4000);
-  // 📰 Week {n} review: one for each subject, one after the other (checked like any worksheet)
-  let made = 0;
-  for (const x of subjects) {
-    if (await newWorksheet(kid, x.subject, x.topics, REVIEW_COUNT, "week_review", "review", { title: `📰 Week ${n} review`, part: `📰 Week ${n}` }, false)) made++;
+  // 📰 v179 (Broo2a): the Week {n} reviews are made AFTER the week is taught: on its Friday after school (from 3 PM Dubai), not now
+  if (subjects.length) {
+    const fri = addDaysYmd(start, 4);
+    s.reviewDue = [...(s.reviewDue || []).filter(x => x.start !== start), { n, label: res.week_label, start, fri, subjects: subjects.map(x => ({ subject: x.subject, topics: x.topics })) }].slice(-3);
+    writeData();
   }
-  if (subjects.length) toast(made === subjects.length ? `📰 ${made} week ${made === 1 ? "review is" : "reviews are"} ready in 📝 Worksheets!`
-    : `📰 ${made} of ${subjects.length} week reviews were made. Try the others again later.`, 4500);
+  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length ? `. The week reviews come on Friday ${dayMon(addDaysYmd(start, 4))} after school.` : ""}`, 5000);
+}
+// 📰 Friday after school (a parent's device opens the app from Friday 3 PM on): each waiting week review, one per subject.
+//    🔴 needs-work topics of that week get more of the worksheet. (Older than 2 weeks: dropped, not made.)
+const REVIEW_FROM = 15 * 60;
+let reviewsMaking = false;
+async function maybeMakeWeekReviews() {
+  if (reviewsMaking || !isParentDevice() || !aiReady() || (cloud.enabled && !cloud.ready) || hasDraft()) return;
+  const d = dubaiNow().date, after = x => d > x.fri || (d === x.fri && dubaiMinutes() >= REVIEW_FROM);
+  const jobs = [];
+  kidsList().forEach(k => { const s = schoolOf(k.id); (s.reviewDue || []).filter(after).forEach(x => jobs.push({ kid: k.id, x })); });
+  if (!jobs.length) return;
+  reviewsMaking = true;
+  jobs.forEach(j => { const s = schoolFor(j.kid); s.reviewDue = (s.reviewDue || []).filter(y => y.start !== j.x.start); });   // (taken first: never made twice)
+  writeData();
+  try {
+    let made = 0, tried = 0;
+    for (const j of jobs) {
+      if (daysBetween(j.x.fri, d) > 14) continue;
+      for (const y of j.x.subjects) {
+        tried++;
+        const s = schoolOf(j.kid), f0 = folderOf(s, y.subject), f = f0 && { ...f0 }, rows = f ? topicRows(j.kid, s, f) : [];
+        const sections = y.topics.map(t => { const row = rows.find(r => sameTopicTitle(r.title, t)), needs = row && row.st === "needs";
+          return { topic: t, minutes: needs ? 10 : 5, focus: row && needs ? topicWeak(row.info) : [], kind: needs ? "needs_work" : row && row.st === "mastered" ? "review" : "practising" }; });
+        if (await newWorksheet(j.kid, y.subject, y.topics, REVIEW_COUNT, "week_review", "review", { title: `📰 Week ${j.x.n} review`, part: `📰 Week ${j.x.n}`, sections }, false)) made++;
+      }
+    }
+    if (tried) toast(made === tried ? `📰 ${made} week ${made === 1 ? "review is" : "reviews are"} ready in 📝 Worksheets!` : `📰 ${made} of ${tried} week reviews were made.`, 4500);
+    if (made && screen === "school") render();
+  } finally { reviewsMaking = false; }
 }
 $("nlModal").addEventListener("click", e => {
   if (e.target === $("nlModal")) return closeNewsletter();
@@ -1062,8 +1202,7 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoHint").textContent = `${subject} for ${kidNameOf(kid)}. The answers stay hidden until you tap 🔑.`;
   $("wsoTopics").replaceChildren(...wso.topics.map((t, i) => h("label", { class: "checkline" },
     h("input", { type: "checkbox", value: i, checked: true }), h("span", null, t))));
-  $("wsoCount").replaceChildren(...WS_COUNTS.map(n => h("label", null,
-    h("input", { type: "radio", name: "wsoN", value: n, checked: n === wso.count }), h("span", null, `${n} questions`))));
+  $("wsoCount").replaceChildren(h("p", { class: "hint" }, `${WS_COUNT} questions, at ${kidNameOf(kid)}'s level.`));   // (🔢 v179: always 15)
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
   $("wsoTr").innerHTML = wsPickHtml(kid, subject) + wsWordsHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
@@ -1082,16 +1221,17 @@ async function makeWorksheet() {
   if (!o) return;
   const topics = [...$("wsoTopics").querySelectorAll("input:checked")].map(x => o.topics[Number(x.value)]).filter(Boolean);
   if (!topics.length) return $("wsoErr").textContent = "Please tick at least one topic.";
-  const count = Number((document.querySelector('input[name="wsoN"]:checked') || {}).value) || 10;
+  const count = WS_COUNT;
   $("wsoErr").textContent = "";
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
-                                        notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + wsKidNote(o.kid, o.subject, mode), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
+                                        notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + ` Exactly ${count} questions.` + wsKidNote(o.kid, o.subject, mode) + wsSummaryNote(o.kid, o.subject, topics), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
   const ws = wsExamOrder(cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
                               ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
-                              answers: [], ...(wsPickNote(o.kid, o.subject, mode) ? { pick: wsPickOf(o.kid, o.subject) } : {}), ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
+                              answers: [], ...(wsBandOf(o.kid, o.subject, mode) !== "normal" ? { pick: wsBandOf(o.kid, o.subject, mode) } : {}),
+                              ...(learnRead(o.kid, o.subject) ? { lvl: levelNow(learnRead(o.kid, o.subject)) } : {}), ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
   if (!ws) return toast("🤖 The worksheet came back empty. Please try again.", 4000);
   delete ws.check;
   const id = newId();
@@ -1436,7 +1576,7 @@ const HARD_BONUS = 5;
 function wsLevelNode(w) {
   const k = w.pick || "normal", name = { easy: "Easy", normal: "Normal", hard: "Hard" }[k];
   if (["placement", "level_check"].includes(w.purpose)) return null;
-  return h("div", { class: "card ws-level ws-level-" + k }, h("b", null, `🎚️ Level: ${name}`), h("span", null, w.pick ? " · chosen by your parents" : ""),
+  return h("div", { class: "card ws-level ws-level-" + k }, h("b", null, w.lvl ? `🎚️ Level ${w.lvl}/10 · ${name}` : `🎚️ Level: ${name}`), h("span", null, w.pick && !w.lvl ? " · chosen by your parents" : ""),
     k === "hard" && isFreeStudy(w) && !w.check ? h("p", null, `⭐ Bonus! Get 50% or more on this Hard worksheet for +${HARD_BONUS} extra points.`) : null);
 }
 // 🚀 After a good mark (85%+): go up a level for more points (the parents choose it) · ⭐ the Hard bonus that came
@@ -1444,10 +1584,10 @@ function levelUpNode(w, pct) {
   const k = w.pick || "normal";
   if (["placement", "level_check"].includes(w.purpose)) return null;
   if (k === "hard") return pct >= 50 && isFreeStudy(w) ? h("p", { class: "ai-note ws-lvl-tip" }, `⭐ Hard level bonus: +${HARD_BONUS} points!`) : null;
-  if (pct < 85 || wsPickOf(w.kid, w.subject) !== k) return null;
-  const next = k === "easy" ? "Normal" : "Hard";
-  return h("p", { class: "ai-note ws-lvl-tip" }, isParentDevice() ? `🚀 ${kidNameOf(w.kid)} got ${pct}%! Time to move up to ${next} in ${w.subject}?`
-    : `🚀 Great mark! You're ready for ${next}. Ask your parents to move you up to ${next} in ${w.subject}${next === "Hard" ? ": Hard worksheets give bonus points!" : " to earn more points!"}`);
+  const lv = levelNow(learnRead(w.kid, w.subject));
+  if (pct < 85 || wsPickOf(w.kid, w.subject) !== k || lv >= 10) return null;
+  return h("p", { class: "ai-note ws-lvl-tip" }, isParentDevice() ? `🚀 ${kidNameOf(w.kid)} got ${pct}%! Time to move the ${w.subject} level up to ${lv + 1}? (🎚️ Worksheet level)`
+    : `🚀 Great mark! You're ready for harder work. Ask your parents to move your ${w.subject} level up${k === "normal" && lv >= 6 ? ": Hard worksheets give bonus points!" : " to earn more points!"}`);
 }
 // The score big, the notes, then the mistakes one by one (parents: "See all answers" for ✓ / ✗ on every question)
 function resultNode(w) {
