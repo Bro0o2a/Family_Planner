@@ -3181,3 +3181,8 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
   /* ✏️ v180: the small pencils on the big calendar card (parents) */
   .k-rows .k-edit { margin-left: 8px; width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 50%; font-size: 15px; line-height: 1;
     display: inline-grid; place-items: center; vertical-align: middle; background: #fff7e0; border: 1px solid #f1d27a; }
+  /* 🔍 v180: "Find a subject" in the calendar's days row */
+  .k-navrow { gap: 8px; align-items: center; }
+  .k-navrow .k-mode button { white-space: nowrap; }
+  .k-navrow .k-subj { margin-right: auto; flex: 1 1 0; min-width: 0; max-width: 50%; min-height: 40px; padding: 6px 10px; border-radius: 999px; border: 2px solid var(--line); background: #fff; font: inherit; font-weight: 700; font-size: 15px; }
+  .k-navrow .k-subj.on { border-color: #f28ca0; background: #fff2f5; }

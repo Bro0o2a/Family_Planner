@@ -215,10 +215,11 @@ function restoreMine() {
   if (calWho !== "all") calWho = who === "all" || exists(who) ? who : null;   // (a link to "Everyone" keeps "Everyone")
 }
 
+let navSubj = "";   // (🔍 v180: the "Find a subject" picker, in the days row of 📅 Calendar only)
 // A small Day / Week switch, then ‹ Thu 23 · Fri 24 … › (the calendar's 12 dates). Phone: swiping also changes the day.
 function navHtml(dates) {
   const today = todayYmd();
-  return `<div class="k-nav"><div class="k-navrow">
+  return `<div class="k-nav"><div class="k-navrow">${navSubj}
       <div class="seg k-mode"><button class="${wholeWeek ? "" : "on"}" data-kmode="day">📆 Day</button>
         <button class="${wholeWeek ? "on" : ""}" data-kmode="week">📅 Week</button></div></div>
     <div class="k-days"><button class="k-arrow" data-kprev aria-label="Previous day">‹</button>${dates.map(ds => [ds, calDates().indexOf(ds)])
@@ -876,10 +877,11 @@ function drawMine() {
   // 📅 v154: the Week view = today and the next 6 days only (no past days); the Day view still reaches back with ‹
   const keepDay = viewDay, wk = wholeWeek && !editing;
   if (wk) viewDay = Math.max(0, viewDay - CAL_BACK);
+  navSubj = subjPickHtml(sk, who);
   try { $("mineWeek").innerHTML = editBarHtml() + weekHtml(wk ? days.slice(CAL_BACK) : days, { only: who, readOnly: editing, drag: editing, subj }); }
-  finally { viewDay = keepDay; }
+  finally { viewDay = keepDay; navSubj = ""; }
   putCalScroll("mineWeek");   // (📅 opens with today in view; a tick or a tap keeps it where it was)
-  $("mineSubj").innerHTML = sk ? subjFilterHtml(sk, who) : "";
+  $("mineSubj").innerHTML = sk ? subjFilterHtml(sk, who) : "";   // (v180: only the picked subject's summary; the picker is in the days row)
   // ⭐ v154: one big button "Good habits today · 3 of 16"; tap → the habits card
   const hb = who && !kidLockedOut(who) && habitsFor(who).length ? kidHabitsToday(who) : null;
   $("mineHabits").innerHTML = hb ? `<button class="cal-habits-btn ${calHabits ? "on" : ""}" data-calhabits aria-expanded="${calHabits}"><span class="e">⭐</span>
@@ -914,25 +916,34 @@ function subjSummaryHtml(kid, f) {
     ${sess.length} ${sess.length === 1 ? "session" : "sessions"}${days.length ? ` (${days.join(", ")})` : ""} · ${hmText(mins)} · done ${sess.filter(x => x.done).length} of ${sess.length}
     · worksheets done ${done} of ${ws.length} · topics covered ${covered} of ${rows.length}</div>`;
 }
+// 🔍 v180 (Broo2a): "Find a subject" sits in the days row (‹ Tue · Wed · Thu › 🔍). A parent on Everyone / their own calendar
+//   picks "kid · subject" (each kid's subjects in a group); a kid's calendar: that kid's subjects.
+function subjPickHtml(kid, who) {
+  if (!kid) return "";
+  const many = isParentDevice() && (!who || isParentId(who)) && kidsList().length > 1, kids = many ? kidsList() : [userById(kid)];
+  const opt = (k, f) => { const on = k.id === kid && calSubj !== "all" && sameSubject(f.name, calSubj);
+    return `<option value="${safe(k.id)}|${safe(f.name)}" ${on ? "selected" : ""}>${safe(f.emoji)} ${safe(f.name)}</option>`; };
+  const groups = kids.map(k => { const subs = subjectList(schoolOf(k.id)); if (!subs.length) return "";
+    return many ? `<optgroup label="${safe(k.emoji)} ${safe(k.name)}">${subs.map(f => opt(k, f)).join("")}</optgroup>` : subs.map(f => opt(k, f)).join(""); }).join("");
+  if (!groups) return "";
+  return `<label class="sr-only" for="calSubjPick">Find a subject</label><select id="calSubjPick" class="k-subj ${calSubj !== "all" ? "on" : ""}" data-calsubjpick>
+    <option value="all" ${calSubj === "all" ? "selected" : ""}>🔍 Subject</option>${groups}</select>`;
+}
 function subjFilterHtml(kid, who) {
   const s = schoolOf(kid), subs = subjectList(s);
   if (!subs.length) return "";
   if (calSubj !== "all" && !subs.some(x => sameSubject(x.name, calSubj))) calSubj = "all";
-  const kids = isParentDevice() && (!who || isParentId(who)) && kidsList().length > 1
-    ? `<div class="chips subj-kids">${kidsList().map(k => `<button class="chip ${k.id === kid ? "on" : ""}" data-sfkid="${safe(k.id)}" aria-pressed="${k.id === kid}"><span class="e">${safe(k.emoji)}</span>${safe(k.name)}</button>`).join("")}</div>` : "";
-  // (v154: one big "🔍 Find a subject" picker: pick one → only its sessions stand out on the calendar)
+  // (v180: the picker moved up into the days row; here only the picked subject's week, with ✕ to clear it)
   const f = calSubj !== "all" && subs.find(x => sameSubject(x.name, calSubj));
-  return `<div class="card subj-filter"><h2>🔍 Find a subject${isParentDevice() ? ` · ${safe(userById(kid).name)}` : ""}</h2>${kids}
-    <label class="sr-only" for="calSubjPick">Subject</label>
-    <select id="calSubjPick" class="subj-pick" data-calsubjpick><option value="all" ${f ? "" : "selected"}>📚 All subjects</option>${subs.map(x =>
-      `<option value="${safe(x.name)}" ${f && f.id === x.id ? "selected" : ""}>${safe(x.emoji)} ${safe(x.name)}</option>`).join("")}</select>
-    ${f ? subjSummaryHtml(kid, f) : `<p class="hint">Pick a subject to see its times on the calendar.</p>`}</div>`;
+  return f ? `<div class="subj-filter-on">${subjSummaryHtml(kid, f)}<div class="btnrow"><button class="pill" data-calsubj="all">✕ All subjects</button></div></div>` : "";
 }
 // v154: the calendar's ☰ More and ⭐ Good habits open / close (this device only)
 let calMore = false, calHabits = false;
 document.addEventListener("change", e => {
   if (!e.target.matches || !e.target.matches("[data-calsubjpick]")) return;
-  calSubj = e.target.value || "all";
+  const v = e.target.value || "all", [k, name] = v.includes("|") ? v.split("|") : ["", v];
+  if (k && kidsList().some(x => x.id === k)) sfKid = k;
+  calSubj = name || "all";
   render();
 });
 document.addEventListener("click", e => {
