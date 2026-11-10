@@ -58,6 +58,22 @@ function isParentId(id) {
   try { return !!id && !!data && Array.isArray(data.users) && data.users.some(u => u.id === id && u.role === "parent"); }
   catch (e) { return false; }   // (before the family's data is loaded)
 }
+// 👨‍👩‍👧 People in family order: the first parent (DAD), the other parents, then the kids from the oldest to the youngest
+//  (by 🎂 birthday; no birthday → by the number in their school year; else the order they were added)
+function familyOrder(list) {
+  const rank = u => u.id === DAD ? 0 : isParentId(u.id) ? 1 : 2;
+  const born = u => u.birthday ? Date.parse(u.birthday) : NaN;
+  const yr = u => { const m = /\d+/.exec(u.year || ""); return m ? +m[0] : NaN; };
+  return list.map((u, i) => ({ u, i })).sort((a, b) => {
+    const r = rank(a.u) - rank(b.u); if (r) return r;
+    const ba = born(a.u), bb = born(b.u);
+    if (!isNaN(ba) && !isNaN(bb) && ba !== bb) return ba - bb;          // older first
+    if (!isNaN(ba) !== !isNaN(bb)) return isNaN(ba) ? 1 : -1;
+    const ya = yr(a.u), yb = yr(b.u);
+    if (!isNaN(ya) && !isNaN(yb) && ya !== yb) return yb - ya;          // higher school year first
+    return a.i - b.i;
+  }).map(x => x.u);
+}
 const DAD_NAME = "Parent";                       // the first parent's name until they pick their own (a new family types it at sign-up)
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
 // 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
