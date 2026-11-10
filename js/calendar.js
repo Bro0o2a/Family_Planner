@@ -1040,8 +1040,10 @@ function drawMine() {
   // (face = HTML: a parent's 🖼️ photo or their emoji)
   const chip = (id, face, label, c) => `<button class="chip ${calWho === id ? "on" : ""}" data-calwho="${safe(id)}" style="--soft:${c.soft};--ink:${c.ink}"
     ${calWho === id ? `aria-current="true"` : ""}><span class="e">${face}</span>${safe(label)}</button>`;
-  $("minePeople").innerHTML = chip(me, parent ? faceHtml(userById(me)) : "🙋", "Me", colorsOf(userById(me))) + chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
-    + (parent ? familyOrder(data.users.filter(x => x.id !== me)).map(x => chip(x.id, faceHtml(x), x.name, colorsOf(x))).join("") : "");
+  // (👨‍👩‍👧 v182 Broo2a: 👨‍👩‍👧 Everyone first, then the family in order: father, mother, kids oldest first; "Me" sits in its own place)
+  $("minePeople").innerHTML = chip("all", "👨‍👩‍👧", "Everyone", { soft: "#fef3c7", ink: "var(--text)" })
+    + (parent ? familyOrder(data.users).map(x => chip(x.id, faceHtml(x), x.id === me ? "Me" : x.name, colorsOf(x))).join("")
+       : chip(me, "🙋", "Me", colorsOf(userById(me))));
   $("mineTitle").textContent = all ? "Everyone's Week" : mine ? "My Week" : `${u.name}'s Week`;   // (🫧 the puffy banner: see puffTitles)
   $("mineSub").textContent = !mine && !parent && !all ? `Just looking 👀 Only ${u.name} or ${dadName()} can tick these.` : "";   // (v154: short)
   document.querySelector("#scr-mine .bar .cal-btn").classList.toggle("here", calWho === (parent ? "all" : me));
