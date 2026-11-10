@@ -225,7 +225,8 @@ function navHtml(dates) {
   const today = todayYmd();
   return `<div class="k-nav"><div class="k-navrow">${navSubj}
       <div class="seg k-mode"><button class="${wholeWeek ? "" : "on"}" data-kmode="day">📆 Day</button>
-        <button class="${wholeWeek ? "on" : ""}" data-kmode="week">📅 Week</button></div></div>
+        <button class="${wholeWeek ? "on" : ""}" data-kmode="week">📅 Week</button></div>
+      <button class="pill small k-planbtn" data-dayplan="${wholeWeek ? today : calDates()[viewDay] || today}" aria-label="Day plan" title="This day's plan">📋 Plan</button></div>
     <div class="k-days"><button class="k-arrow" data-kprev aria-label="Previous day">‹</button>${dates.map(ds => [ds, calDates().indexOf(ds)])
       // (v154: Day = only the day before, the day, the day after · Week = the 7 days shown)
       .filter(([, i]) => wholeWeek || Math.abs(i - viewDay) <= 1).map(([ds, i]) => { const d = SHORT[weekdayOf(ds)];
@@ -702,7 +703,7 @@ function drawDayFix() {
   const items = planItemsOn(ds).filter(it => !it.fixed).map(it => ({ it, act: data.flexible.find(a => a.id === it.actId) }))
     .filter(x => x.act && peopleOf(x.act).some(p => people.includes(p)));
   const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
-  $("missTitle").textContent = `✏️ ${dayName(ds)}: free time ${freed.map(([a, b]) => `${clock(a, true)}–${clock(b, true)}`).join(", ")}`;
+  $("missTitle").textContent = dayFix.plan ? `➕ Add on ${dayName(ds)}` : `✏️ ${dayName(ds)}: free time ${freed.map(([a, b]) => `${clock(a, true)}–${clock(b, true)}`).join(", ")}`;
   $("missBody").innerHTML = `<p class="print-hint" style="margin:0 0 6px">➕ Add something in the free time:</p><div class="miss-fixes">${dayFix.adds.length
       ? dayFix.adds.map((x, i) => { const a = data.flexible.find(f => f.id === x.id); return `<button class="pill small" data-dfadd="${i}">➕ ${safe(a.name)} ${facesHtml(a.users)} · ${clock(x.at, true)}</button>`; }).join("")
       : `<span class="hint">Nothing else fits there. You can still use 🎈 free-time ideas.</span>`}</div>
@@ -724,6 +725,7 @@ document.addEventListener("click", e => {
     toast(`✕ Taken off ${dayName(ds)}.`, 2500); }
   writeData();
   render();
+  if (dayFix.plan && b.dataset.dfdel != null) return openDayPlan(ds);
   drawDayFix();
 });
 document.addEventListener("click", e => {
@@ -960,6 +962,44 @@ document.addEventListener("click", e => {
   if (kind === "move") { openMoveBox(a, b); moveDirect = !editMode; return; }
   go("add");
   setTimeout(() => { if (kind === "fixed") startEditFixed(a); else startEditFlex(a); }, 50);
+});
+
+// 📋 v180 Day plan (Broo2a): one day's activities as a short list (whose calendar it is, or everyone's).
+// Parents: ✏️ change each one (its card: times, didn't happen, move …), ✕ take a flexible one off that day, ➕ add something.
+// Kids: look only.
+function openDayPlan(ds) {
+  const who = calWho && calWho !== "all" ? calWho : null, parent = isParentDevice() && ds >= todayYmd();
+  const day = planDay(ds), mine = it => !who || it.people.includes(who);
+  const rows = [
+    ...day.items.filter(mine).map(it => ({ s: it.start, e: it.end, name: it.name, users: it.users, it })),
+    ...oneDayOn(ds).filter(e => !who || e.who.includes(who)).map(e => ({ s: toMin(e.from), e: toMin(e.to), name: `📌 ${e.title}`, users: e.who })),
+    ...day.routines.filter(r => !r.pad && (!who || (r.users || []).includes(who))).map(r => ({ s: r.start, e: r.end, name: `${r.emoji || ""} ${r.name}`, users: r.users || [], soft: true }))
+  ].sort((a, b) => a.s - b.s);
+  const beds = bedGroups(ds, who);
+  const ticked = (it) => it && Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${it.actId}|`));
+  $("missTitle").textContent = `📋 ${dayName(ds)} ${fromYmd(ds).getDate()} ${MONTHS[fromYmd(ds).getMonth()]}${who ? ` · ${userById(who).name}` : ""}`;
+  $("missHint").hidden = true;
+  $("missBody").innerHTML = `<div class="df-list">${rows.length ? rows.map(r => `<div class="df-row ${r.soft ? "soft" : ""}"><span><b class="dp-time">${clock(r.s, true)}–${clock(r.e, true)}</b>
+      ${safe(r.name)} ${who ? "" : facesHtml(r.users.filter(exists))}${ticked(r.it) ? " ✅" : ""}</span>${parent && r.it && !r.it.gone ? `<span class="dp-acts">
+      <button class="pill small" data-dpedit="${safe(r.it.actId)}" aria-label="Change ${safe(r.name)}">✏️</button>${!r.it.fixed && !ticked(r.it)
+        ? `<button class="pill small" data-dfdel="${safe(r.it.actId)}" aria-label="Take ${safe(r.name)} off">✕</button>` : ""}</span>` : ""}</div>`).join("")
+      : `<span class="hint">Nothing planned. 🎉</span>`}
+    ${beds.map(g => `<div class="df-row soft"><span><b class="dp-time">${clock(g.min, true)}</b> 🌙 Bedtime ${who ? "" : facesHtml(g.kids)}</span></div>`).join("")}</div>
+    ${parent ? `<div class="btnrow" style="margin-top:10px"><button class="pill small primary" data-dpadd="${ds}">➕ Add something</button></div>`
+      : isParentDevice() ? "" : `<p class="hint" style="margin-top:8px">👀 Only a parent can change the plan.</p>`}`;
+  dayFix = { ds, people: who ? [who] : kidsList().map(k => k.id), freed: [day.window || [0, 24 * 60]], plan: true };
+  $("missModal").hidden = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-dayplan], [data-dpedit], [data-dpadd]"); if (!b) return;
+  const d = b.dataset;
+  if (d.dayplan) return openDayPlan(d.dayplan);
+  if (!dayFix || !isParentDevice()) return;
+  if (d.dpadd) return drawDayFix();
+  // ✏️ the activity's own card (with its ✏️ pencils, and for a fixed one "Only today: didn't happen / other times")
+  const n = blocks.findIndex(x => x.day === dayFix.ds && x.acts && x.acts.some(a => a.actId === d.dpedit));
+  $("missModal").hidden = true;
+  if (n >= 0) openCard(blocks[n]);
 });
 
 // The card for a routine strip: no "Done" row (routines give no points)

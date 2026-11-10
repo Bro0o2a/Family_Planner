@@ -3243,3 +3243,12 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .miss-card { padding: 18px 18px 16px; } .miss-card .print-title { margin: 4px 0 0; }
 .fx-days { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 8px; font-size: 13px; }
 .fx-days .checkline { margin: 0; }
+/* 📋 v180 Day plan */
+.k-planbtn { margin-left: auto; font-size: 13px; padding: 6px 12px; min-height: 0; white-space: nowrap; }
+.df-row.soft { opacity: .7; }
+.dp-time { display: inline-block; min-width: 118px; font-size: 13px; }
+.dp-acts { display: flex; gap: 4px; flex: none; }
+.dp-acts .pill { padding: 4px 10px; min-height: 0; }
+.k-navrow .k-subj { min-width: 92px; }
+.k-navrow .k-mode button { padding-left: 10px; padding-right: 10px; }
+@media (max-width: 400px) { .k-navrow { gap: 5px; } .k-planbtn { padding: 6px 9px; } }
