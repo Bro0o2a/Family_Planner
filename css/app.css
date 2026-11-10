@@ -3146,3 +3146,16 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 /* ⚠️ App problems list (Settings → Backup) */
 .err-list { max-height: 260px; overflow-y: auto; font-size: 12px; line-height: 1.4; word-break: break-word; }
 .err-list p { margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,.08); }
+
+  /* 🎚️ v179: the worksheet level slider (1–10) · 😟 stuck topic card · 📄 the school file's summary */
+  .ws-lv { margin: 10px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--accent-soft); }
+  .ws-lv-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .ws-lv-n b { font-size: 1.4em; color: var(--accent); }
+  .ws-lv input[type="range"] { width: 100%; margin: 8px 0 2px; accent-color: var(--accent); height: 28px; }
+  .ws-lv-ends { display: flex; justify-content: space-between; font-size: .8em; opacity: .75; }
+  .ws-lv-now { margin: 8px 0 0; }
+  .ws-parent-btns { flex-wrap: wrap; }
+  .stuck-card { border-left: 5px solid #e8a33c; }
+  .stuck-help { margin: 8px 0; padding: 8px 12px; border-radius: 12px; background: var(--accent-soft); }
+  .stuck-help ol, .stuck-help ul { margin: 4px 0 8px 18px; padding: 0; }
+  .st-sum { white-space: normal; }

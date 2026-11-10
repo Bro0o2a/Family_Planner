@@ -915,6 +915,7 @@ function drawHome() {
   $("homeHabits").innerHTML = "";
   $("homeCal").innerHTML = "";
   if (!isParentDevice()) maybeMakeRiddles();   // (🧩 riddles: kids only, never made on a parent's device)
+  else maybeMakeWeekReviews();   // (📰 v179: the week reviews, on Friday after school)
   maybeShowTour();
   maybeShowSetup();   // ✨ a parent, the first time: "Make the app yours"
 }

@@ -1061,7 +1061,7 @@ function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
            subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
            profile: { asked: false, subjects: {}, other: "", skip: [] }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {},
-           learn: {},   // (🧠 the learning profile per subject: see LEARNING PROFILE)
+           learn: {}, reviewDue: [],   // (🧠 the learning profile per subject: see LEARNING PROFILE)
            curr: {}, map: {}, bench: {},   // (📚 the school topics, 🌍 the official curriculum, 📏 the benchmark: see STUDY TOPICS)
            wsScores: {} };   // (📝 a small copy of every worksheet's check, so the score stays: see ALL MY WORKSHEETS)
 }
@@ -1149,6 +1149,19 @@ function cleanSchool(s) {
       });
       return skills;
     };
+    // 😟 topic key → { skip?, done? (its results count when the parents explained it), help?: the AI's advice, at }
+    const stuckIn = m => {
+      if (!m || typeof m !== "object" || Array.isArray(m)) return null;
+      const out = {}, strs = (y, n) => (Array.isArray(y) ? y : []).map(t => txt(t, 300)).filter(Boolean).slice(0, n);
+      Object.entries(m).slice(0, 60).forEach(([key, v]) => {
+        if (!okKey(key) || !v || typeof v !== "object") return;
+        const hp = v.help && typeof v.help === "object" && txt(v.help.mistake, 600) ? { mistake: txt(v.help.mistake, 600), why: txt(v.help.why, 600),
+          explain_steps: strs(v.help.explain_steps, 6), home_tips: strs(v.help.home_tips, 4), focus: strs(v.help.focus, 3).map(t => t.slice(0, 60)), at: txt(v.help.at, 40) } : null;
+        const r = { ...(v.skip === true ? { skip: true } : {}), ...(Number(v.done) > 0 ? { done: Math.min(999, Math.round(Number(v.done))) } : {}), ...(hp ? { help: hp } : {}), at: txt(v.at, 40) };
+        if (r.skip || r.done || r.help) out[key] = r;
+      });
+      return Object.keys(out).length ? out : null;
+    };
     c.learn = list(k.learn, x => {
       const lv = Math.round(Number(x.level)), skills = skillsIn(x.skills);
       const history = (Array.isArray(x.history) ? x.history : []).filter(h => h && isDate(h.date)).slice(-30)
@@ -1163,7 +1176,8 @@ function cleanSchool(s) {
                         skills: skillsIn(t.skills) };
       });
       return { level: lv >= 1 && lv <= 10 ? lv : 5, skills, history, topics, ...(["easy", "hard"].includes(x.pick) ? { pick: x.pick } : {}),
-               ...(txt(x.words, 1500) ? { words: txt(x.words, 1500) } : {}) };   // (🔑 the parents' key words)
+               ...(txt(x.words, 1500) ? { words: txt(x.words, 1500) } : {}),   // (🔑 the parents' key words)
+               ...(stuckIn(x.stuck) ? { stuck: stuckIn(x.stuck) } : {}) };   // (😟 v179: stuck topics: skipped / explained / the AI's help)
     });
     // 📄 Syllabus and 📋 Brief for parents (newer: older data has none)
     const sy = k.syllabus;
@@ -1199,6 +1213,11 @@ function cleanSchool(s) {
             .map(x => ({ subject: txt(x.subject, 30), topics: (Array.isArray(x.topics) ? x.topics : []).map(t => txt(t, 60)).filter(Boolean).slice(0, 8) })),
           reminders: (Array.isArray(wk.reminders) ? wk.reminders : []).map(t => txt(t, 200)).filter(Boolean).slice(0, 10) }
       : null;
+    // 📰 v179: week reviews waiting for Friday after school: [{ n, label, start, fri, subjects: [{ subject, topics }] }]
+    c.reviewDue = (Array.isArray(k.reviewDue) ? k.reviewDue : []).filter(x => x && isDate(x.start) && isDate(x.fri)).slice(-3)
+      .map(x => ({ n: Math.max(0, Math.round(Number(x.n)) || 0), label: txt(x.label, 60), start: x.start, fri: x.fri,
+                   subjects: (Array.isArray(x.subjects) ? x.subjects : []).filter(y => y && txt(y.subject, 30)).slice(0, 12)
+                     .map(y => ({ subject: txt(y.subject, 30), topics: (Array.isArray(y.topics) ? y.topics : []).map(t => txt(t, 60)).filter(Boolean).slice(0, 8) })) }));
     c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
       ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
     // 📚 School topics (see STUDY TOPICS): topic id → { sub: subject id, title, note, added: date, files: [file ids], by? }.
@@ -1206,6 +1225,8 @@ function cleanSchool(s) {
     c.curr = k.curr && typeof k.curr === "object" && !Array.isArray(k.curr)
       ? list(k.curr, t => !txt(t.title, 80) || !okKey(String(t.sub || "")) ? null
           : { sub: t.sub, title: txt(t.title, 80), note: txt(t.note, 200), added: isDate(t.added) ? t.added : "",
+              // (📄 v179: what the school file taught on it, and its place in the file: worksheets follow it)
+              ...(txt(t.sum, 1200) ? { sum: txt(t.sum, 1200) } : {}), ...(Number(t.ord) >= 0 && t.ord !== null && t.ord !== "" ? { ord: Math.min(999, Math.round(Number(t.ord))) } : {}),
               files: (Array.isArray(t.files) ? t.files : []).filter(x => okKey(String(x || ""))).slice(0, 30), ...(okKey(String(t.by || "")) ? { by: t.by } : {}),
               // (⚡ added from a worksheet; 🔗 the worksheets that practise it: worksheet id → the topic as that worksheet words it)
               ...(t.src === "ws" ? { src: "ws" } : {}),
