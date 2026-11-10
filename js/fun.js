@@ -713,15 +713,18 @@ const FREE_KINDS = [
   { id: "read", e: "📚", label: "Read a book", ideas: {
     s: ["The Very Hungry Caterpillar", "Where the Wild Things Are", "The Gruffalo", "Room on the Broom", "Elmer the Patchwork Elephant", "Oi Frog!", "Owl Babies", "Peppa Pig: Peppa's Big Book", "We're Going on a Bear Hunt", "The Snail and the Whale", "Hamid and the Moon (an Islamic picture book)", "Any picture book from your shelf: read it to someone!"],
     m: ["Charlotte's Web", "Fantastic Mr Fox", "The Magic Finger", "Diary of a Wimpy Kid", "Dog Man", "The Owl Who Was Afraid of the Dark", "Matilda", "The Iron Man", "Amelia Fang", "Horrid Henry", "Stories of the Prophets for kids", "The Worst Witch", "A Boy Called Christmas", "Encyclopedia of animals: pick 3 pages"],
-    b: ["Wonder", "Holes", "Percy Jackson and the Lightning Thief", "The Wild Robot", "Harry Potter and the Philosopher's Stone", "Journey to the River Sea", "Pax", "Amari and the Night Brothers", "Boy at the Back of the Class", "The 1001 Inventions of Muslim civilisation", "Hatchet", "The Phantom Tollbooth", "A newspaper for kids: read 2 stories"] } },
+    b: ["Wonder", "Holes", "Percy Jackson and the Lightning Thief", "The Wild Robot", "Harry Potter and the Philosopher's Stone", "Journey to the River Sea", "Pax", "Amari and the Night Brothers", "Boy at the Back of the Class", "The 1001 Inventions of Muslim civilisation", "Hatchet", "The Phantom Tollbooth", "A newspaper for kids: read 2 stories"],
+    a: ["Atomic Habits", "The Alchemist", "Man's Search for Meaning", "Sapiens", "The Sealed Nectar (the Prophet's life)", "Rich Dad Poor Dad", "A chapter of a book you started and stopped"] } },
   { id: "animals", e: "🦁", label: "Animal films", ideas: {
     s: ["Puffin Rock (an episode)", "Octonauts (an episode)", "Andy's Wild Adventures", "Tiny World (a short clip)", "Hey Duggee: The Animal Badge", "A video of baby animals at the zoo"],
     m: ["Wild Kratts (an episode)", "Tiny World (an episode)", "Our Planet: Jungles", "Secret Life of the Zoo", "Meerkat Manor", "Penguins: a day at the South Pole", "Seven Worlds, One Planet: Africa"],
-    b: ["Our Planet: Frozen Worlds", "Planet Earth II: Islands", "Blue Planet II: The Deep", "Life in Colour", "Dynasties: Lions", "The Hunt", "My Octopus Teacher", "Seven Worlds, One Planet: Asia"] } },
+    b: ["Our Planet: Frozen Worlds", "Planet Earth II: Islands", "Blue Planet II: The Deep", "Life in Colour", "Dynasties: Lions", "The Hunt", "My Octopus Teacher", "Seven Worlds, One Planet: Asia"],
+    a: ["Our Planet II", "Planet Earth III", "Chimp Empire", "My Octopus Teacher", "Blue Planet II: One Ocean", "Watch one with the kids and talk about it"] } },
   { id: "draw", e: "🎨", label: "Draw and make", ideas: {
     s: ["Draw your family as animals", "Colour a picture using only {color}", "Make a paper crown", "Draw your dream house", "Hand-print animals", "Make a card for Mum"],
     m: ["Draw a comic with 4 boxes about your day", "Design a new animal (half lion, half fish?)", "Make a paper plane and paint it {color}", "Draw a map of a treasure island", "Make a bookmark for your book", "Draw your favourite food: {food}"],
-    b: ["Design a logo for your future company", "Draw a comic strip with a twist ending", "Sketch your room from the door", "Learn to draw a 3D cube and a 3D name", "Design a poster for your dream job: {job}", "Make an origami crane"] } },
+    b: ["Design a logo for your future company", "Draw a comic strip with a twist ending", "Sketch your room from the door", "Learn to draw a 3D cube and a 3D name", "Design a poster for your dream job: {job}", "Make an origami crane"],
+    a: ["Doodle for 15 minutes with music on", "Try calligraphy: write a short ayah or name", "Paint with the kids: everyone paints the same thing", "Sketch a corner of your home"] } },
   { id: "build", e: "🧱", label: "Build something", ideas: {
     s: ["Build the tallest tower you can", "Make a house for your toy", "Build a car with blocks", "Make a train with chairs"],
     m: ["Lego challenge: a bridge between two books", "Build a marble run from paper rolls", "Make a pillow fort", "Build a robot from boxes", "Build a city with Lego or blocks"],
@@ -729,7 +732,8 @@ const FREE_KINDS = [
   { id: "move", e: "🏃", label: "Move your body", ideas: {
     s: ["Animal walk: hop like a frog, waddle like a penguin", "Dance to 2 songs", "Throw and catch a ball 20 times", "Freeze dance with someone"],
     m: ["Skip with a rope 50 times", "Ride your bike or scooter", "Football: 20 keepy-uppies", "Make an obstacle course", "10 minutes of kids' yoga"],
-    b: ["A 15-minute workout: jumps, push-ups, squats", "Practise your football skills", "Go for a walk with a parent", "Learn a new trick (bike, ball, skipping)", "Swim if you can"] } },
+    b: ["A 15-minute workout: jumps, push-ups, squats", "Practise your football skills", "Go for a walk with a parent", "Learn a new trick (bike, ball, skipping)", "Swim if you can"],
+    a: ["A 20-minute walk outside", "Stretching or yoga for 15 minutes", "Play football or catch with the kids", "A short home workout"] } },
   { id: "science", e: "🔬", label: "Little experiments", ideas: {
     s: ["Which toys float and which sink?", "Mix colours with water and food colouring", "Grow a bean in a wet tissue", "Find 5 shapes in your house"],
     m: ["Make a lemon volcano with baking soda (ask a parent)", "Make a rainbow with a glass of water and the sun", "Make slime (ask a parent)", "Find out how many drops fit on a coin", "Grow crystals with salt"],
@@ -737,39 +741,58 @@ const FREE_KINDS = [
   { id: "puzzle", e: "🧩", label: "Puzzles and games", ideas: {
     s: ["Do a jigsaw puzzle", "Play memory cards", "Play I spy", "Play snakes and ladders"],
     m: ["Play chess or checkers", "Do an easy sudoku", "Make your own word search", "Play Uno with the family", "A 100-piece jigsaw"],
-    b: ["Play chess (or learn a new opening)", "A hard sudoku", "Rubik's cube: learn one step", "Make a quiz for your family", "A 500-piece jigsaw"] } },
+    b: ["Play chess (or learn a new opening)", "A hard sudoku", "Rubik's cube: learn one step", "Make a quiz for your family", "A 500-piece jigsaw"],
+    a: ["A crossword or a hard sudoku", "Play chess with one of the kids", "Learn a new card game", "A 1000-piece jigsaw with the family"] } },
   { id: "cook", e: "🍳", label: "Help in the kitchen", ideas: {
     s: ["Wash the fruit", "Make a fruit face on a plate", "Help mix a cake (with a parent)"],
     m: ["Make a sandwich by yourself", "Make a fruit salad", "Help bake cookies (with a parent)", "Make lemonade"],
-    b: ["Cook an omelette (with a parent)", "Make a smoothie with your own recipe", "Bake a cake from a recipe", "Help plan tomorrow's dinner: {food}?"] } },
+    b: ["Cook an omelette (with a parent)", "Make a smoothie with your own recipe", "Bake a cake from a recipe", "Help plan tomorrow's dinner: {food}?"],
+    a: ["Try a new recipe from another country", "Cook with one of the kids", "Plan next week's meals", "Bake bread from scratch"] } },
   { id: "space", e: "🚀", label: "Space and science films", ideas: {
     s: ["Ready Jet Go! (an episode)", "Peppa Pig goes to the moon", "Look at the moon tonight: what shape is it?"],
     m: ["Ada Twist, Scientist (an episode)", "The Magic School Bus Rides Again", "A video tour of the International Space Station", "Find the planets in order: make a song"],
-    b: ["A video about black holes for kids", "Cosmos: A Spacetime Odyssey (part)", "Watch a rocket launch video", "How the pyramids were built (a short film)", "1001 Inventions and the Library of Secrets"] } },
+    b: ["A video about black holes for kids", "Cosmos: A Spacetime Odyssey (part)", "Watch a rocket launch video", "How the pyramids were built (a short film)", "1001 Inventions and the Library of Secrets"],
+    a: ["A short documentary about the universe", "Watch a rocket launch with the kids", "Look at the stars tonight with an app"] } },
   { id: "write", e: "✍️", label: "Write something", ideas: {
     s: ["Tell a story and a parent writes it", "Write your name in big bubble letters", "Make a list of 5 things you love"],
     m: ["Write a short story about a talking cat", "Write a letter to your grandma or grandpa", "Make a diary page about today", "Write 5 riddles for your family"],
-    b: ["Write a story that starts: 'The door was open…'", "Write a review of the last film you watched", "Start a diary", "Write a letter to yourself in 5 years", "Write about your dream job: {job}"] } },
+    b: ["Write a story that starts: 'The door was open…'", "Write a review of the last film you watched", "Start a diary", "Write a letter to yourself in 5 years", "Write about your dream job: {job}"],
+    a: ["Write 3 things you're grateful for", "Write a letter to each kid to read when they're older", "Plan your goals for this month", "Journal for 10 minutes"] } },
   { id: "kind", e: "💌", label: "Do something kind", ideas: {
     s: ["Give someone a big hug", "Help tidy the toys", "Draw a picture for a friend"],
     m: ["Make a thank-you card for your teacher", "Help set the table", "Call your grandparents", "Share a toy with your sibling"],
-    b: ["Help your little brother or sister with homework", "Call a relative you haven't talked to", "Do a job at home without being asked", "Write kind notes for the family"] } },
+    b: ["Help your little brother or sister with homework", "Call a relative you haven't talked to", "Do a job at home without being asked", "Write kind notes for the family"],
+    a: ["Call your parents or a relative", "Message an old friend", "Leave a kind note for your partner", "Help a neighbour"] } },
+  { id: "outside", e: "🌳", label: "Play outside", ideas: {
+    s: ["Treasure hunt with a magnifying glass: find 5 tiny things", "Collect leaves of 3 different shapes", "Draw with chalk on the floor", "Blow bubbles and chase them"],
+    m: ["A nature hunt: a feather, a smooth stone, a yellow leaf", "Make a family sports day: 3 races", "Count the birds you see in 10 minutes", "Water the plants and check what grew"],
+    b: ["Plan a mini sports day for the family", "Photograph 10 interesting things outside", "Find north with the sun or a compass", "Start a small plant pot of your own"],
+    a: ["A family walk in the park", "Tend the plants or start a small herb pot", "Watch the sunset with a tea", "Take the kids to the beach or a playground"] } },
+  { id: "family", e: "🎲", label: "Family game time", ideas: {
+    s: ["Play Simon says", "Hide and seek", "Play a board game with someone", "Make a puppet show for the family"],
+    m: ["Board game night: pick the game!", "Charades: act out animals", "Start a family book club with one book", "Play 20 questions"],
+    b: ["Teach the family a game you know", "A family quiz night: you ask the questions", "Play Pictionary", "Swap books with a friend or cousin"],
+    a: ["Board game night with the kids", "Ask each kid about the best part of their day", "A family quiz: you ask the questions", "Look at old family photos together"] } },
+  { id: "metime", e: "☕", label: "Me time", ideas: { a: ["A quiet coffee or tea, no phone", "A short nap (20 minutes)", "Listen to a podcast you like", "A long shower and an early night", "Read something just for fun"] } },
   { id: "quran", e: "🕌", label: "Quran and stories", ideas: {
     s: ["Listen to a short surah: Al-Fatiha, Al-Ikhlas", "Listen to a story of a prophet", "Learn a short dua"],
     m: ["Learn 3 new ayat", "Listen to the story of Prophet Yunus", "Learn the meaning of a short surah", "Read a hadith with a parent"],
-    b: ["Revise a surah you know", "Listen to the story of Prophet Yusuf", "Learn about a famous Muslim scientist", "Read the meaning of a surah you know"] } }
+    b: ["Revise a surah you know", "Listen to the story of Prophet Yusuf", "Learn about a famous Muslim scientist", "Read the meaning of a surah you know"],
+    a: ["Read one page of Quran with its meaning", "Listen to a short tafsir", "Learn a new dua with the kids", "Revise a surah you know"] } }
 ];
 // Personality → kinds that come first (from ❤️ Things I love)
 const FREE_LIKES = [[/vet|animal|zoo|horse|dog|cat|nature|marine|biolog/i, ["animals", "science"]], [/doctor|scien|engineer|invent|chemist|lab/i, ["science", "build"]],
   [/artist|design|paint|draw|fashion|architect/i, ["draw", "build"]], [/foot|soccer|athlet|sport|swim|player|basket|tennis|gym/i, ["move"]],
   [/chef|cook|bak|food/i, ["cook"]], [/astronaut|pilot|space|planet/i, ["space", "science"]], [/writer|author|poet|journalist|teacher/i, ["write", "read"]],
   [/minecraft|lego|roblox|build|craft/i, ["build", "puzzle"]], [/chess|puzzle|sudoku|uno|card/i, ["puzzle"]], [/youtube|film|movie|actor/i, ["animals", "space"]],
-  [/imam|sheikh|quran|hafiz/i, ["quran", "read"]]];
+  [/imam|sheikh|quran|hafiz/i, ["quran", "read"]], [/garden|farm|explor|camp/i, ["outside"]], [/math|maths|number|smart|genius|coder|program/i, ["iq", "sudoku"]]];
 function kidAge(u) {
   if (u.birthday) { const [y, m, d] = u.birthday.split("-").map(Number), n = new Date(); return n.getFullYear() - y - (n.getMonth() + 1 < m || (n.getMonth() + 1 === m && n.getDate() < d) ? 1 : 0); }
   const yr = /\d+/.exec(u.year || ""); return yr ? +yr[0] + 5 : 9;   // (Year 4 / Grade 4 ≈ 9 years old)
 }
-const freeBand = u => { const a = kidAge(u); return a <= 7 ? "s" : a <= 10 ? "m" : "b"; };
+// (👨‍👩‍👧 a parent: "a" = grown-up ideas; their games are the hardest ones)
+const freeBand = u => { if (isParentId(u.id)) return "a"; const a = kidAge(u); return a <= 7 ? "s" : a <= 10 ? "m" : "b"; };
+const gameBand = u => freeBand(u) === "a" ? "b" : freeBand(u);
 // A small number from text, so the same day gives the same ideas (and 🔄 gives new ones)
 function freeSeed(t) { let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
 function freeShuffle(list, seed) { const a = [...list]; let s = seed || 1;
@@ -781,7 +804,7 @@ function freeKindsFor(u, spin) {
   const loves = Object.values(u.loves || {}).join(" "), liked = new Set(FREE_LIKES.filter(([re]) => re.test(loves)).flatMap(([, ks]) => ks));
   const picks = freePicks(u.id), seed = freeSeed(`${u.id}|${todayYmd()}|${spin}`);
   const score = k => (liked.has(k.id) ? 3 : 0) + Math.min(3, (picks[k.id] || 0) / 2) + (freeSeed(k.id + seed) % 100) / 40;
-  return [...FREE_KINDS].sort((a, b) => score(b) - score(a)).slice(0, 6);
+  return FREE_KINDS.filter(k => k.ideas[freeBand(u)]).sort((a, b) => score(b) - score(a)).slice(0, 6);
 }
 function freeIdeasFor(u, kind, spin) {
   const fill = t => t.replace("{color}", (u.loves && u.loves.color) || "blue").replace("{food}", (u.loves && u.loves.food) || "pizza")
@@ -789,7 +812,7 @@ function freeIdeasFor(u, kind, spin) {
   return freeShuffle(kind.ideas[freeBand(u)], freeSeed(`${u.id}|${kind.id}|${todayYmd()}|${spin}`)).slice(0, 3).map(fill);
 }
 function freeNowHtml(who) {
-  if (!who || isParentId(who) || !exists(who)) return "";
+  if (!who || !exists(who) || (isParentId(who) && who !== me)) return "";   // (👨‍👩‍👧 v180: a parent on their own calendar too)
   const u = userById(who), now = dubaiMinutes(), ds = todayYmd(), day = planDay(ds), [ws, we] = day.window || [0, 0];
   const bed = bedMin(who, ds), busy = [...day.items.filter(it => it.people.includes(who)), ...day.routines.filter(r => (r.users || []).includes(who)),
     ...oneDayOn(ds).filter(e => e.who.includes(who)).map(e => ({ start: toMin(e.from), end: toMin(e.to) }))].some(b => b.start <= now && now < b.end);
@@ -800,9 +823,12 @@ function drawFree() {
   const u = userById(freeBox.kid);
   if (!freeBox.kind) {
     $("ideaTitle").textContent = `🎈 What do you want to do${freeBox.kid === me ? "" : `, ${u.name}`}?`;
-    $("freeBody").innerHTML = `<div class="free-kinds">${freeKindsFor(u, freeBox.spin).map(k => `<button class="free-kind" data-freekind="${k.id}"><span class="e">${k.e}</span>${safe(k.label)}</button>`).join("")}</div>
+    const kb = k => `<button class="free-kind ${k.game ? "game" : ""}" data-freekind="${k.id}"><span class="e">${k.e}</span>${safe(k.label)}</button>`;
+    $("freeBody").innerHTML = `<div class="free-kinds">${FREE_GAMES.map(kb).join("")}${freeKindsFor(u, freeBox.spin).map(kb).join("")}</div>
       <div class="btnrow"><button data-freespin>🔄 Other ideas</button><button data-freeclose>Close</button></div>`;
-  } else {
+  } else if (freeBox.kind === "iq") drawIq(u);
+  else if (freeBox.kind === "sudoku") drawSudoku(u);
+  else {
     const k = FREE_KINDS.find(x => x.id === freeBox.kind);
     $("ideaTitle").textContent = `${k.e} ${k.label}`;
     $("freeBody").innerHTML = `<p class="print-hint" style="margin:0 0 8px">Pick one you like:</p><ul class="free-ideas">${freeIdeasFor(u, k, freeBox.spin).map(t => `<li>${safe(t)}</li>`).join("")}</ul>
@@ -813,12 +839,119 @@ function drawFree() {
 document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-freeopen], [data-freekind], [data-freespin], [data-freeback], [data-freeclose]"); if (!b) return;
   const d = b.dataset;
-  if (d.freeopen) { freeBox = { kid: d.freeopen, kind: null, spin: 0 }; return drawFree(); }
+  if (d.freeopen) { freeBox = { kid: d.freeopen, kind: null, spin: 0 }; iqBox = null; sdk = null; return drawFree(); }
   if (!freeBox) return;
   if ("freeclose" in d) { $("freeModal").hidden = true; freeBox = null; return; }
   if ("freeback" in d) { freeBox.kind = null; return drawFree(); }
-  if ("freespin" in d) { freeBox.spin++; return drawFree(); }
+  if ("freespin" in d) { freeBox.spin++; if (freeBox.kind === "iq") iqBox = null; if (freeBox.kind === "sudoku") sdk = null; return drawFree(); }
   if (d.freekind) { freeBox.kind = d.freekind; freeBox.spin = 0;
     try { const p = freePicks(freeBox.kid); p[d.freekind] = (p[d.freekind] || 0) + 1; localStorage.setItem(FREE_KEY + freeBox.kid, JSON.stringify(p)); } catch (err) {}
     return drawFree(); }
+});
+
+// ---------- 🧠 IQ puzzles and 🔢 Sudoku (v180, Broo2a): played right in the 🎈 box, new ones every time, harder for older kids ----------
+const FREE_GAMES = [{ id: "iq", e: "🧠", label: "IQ puzzles", game: true }, { id: "sudoku", e: "🔢", label: "Sudoku", game: true }];
+const rnd = n => Math.floor(Math.random() * n);
+const ODD_SETS = [["Lion", "Tiger", "Cat", "Carrot"], ["Apple", "Banana", "Mango", "Chair"], ["Red", "Blue", "Green", "Spoon"], ["Car", "Bus", "Train", "Shoe"],
+  ["Eagle", "Owl", "Parrot", "Shark"], ["Square", "Circle", "Triangle", "Seven"], ["Monday", "Friday", "Sunday", "March"], ["Piano", "Guitar", "Drum", "Pencil"],
+  ["Whale", "Dolphin", "Shark", "Camel"], ["Mars", "Venus", "Earth", "Moon"], ["Doctor", "Teacher", "Pilot", "Hospital"], ["Milk", "Juice", "Water", "Bread"]];
+const IQ_RIDDLES = [
+  ["Sara is taller than Ali. Ali is taller than Omar. Who is the shortest?", "Omar", ["Sara", "Ali", "Same"]],
+  ["A farmer has 5 sheep. All but 2 run away. How many are left?", "2", ["3", "5", "0"]],
+  ["What is half of 2 + 2?", "3", ["2", "1", "4"]],
+  ["How many months have 28 days?", "All 12", ["1", "2", "6"]],
+  ["If 3 cats catch 3 mice in 3 minutes, how many cats catch 6 mice in 6 minutes?", "3", ["6", "9", "12"]],
+  ["Which weighs more: 1 kg of feathers or 1 kg of stones?", "The same", ["Feathers", "Stones", "Can't tell"]],
+  ["Mona's father has 3 daughters: Lulu, Lala and …?", "Mona", ["Lili", "Lolo", "Nobody"]],
+  ["You overtake the person in 2nd place in a race. What place are you in now?", "2nd", ["1st", "3rd", "Last"]],
+  ["8 teams play a knockout cup (the loser goes home). How many games are played?", "7", ["8", "4", "16"]],
+  ["A clock shows 3:00. What is the angle between the hands?", "90°", ["45°", "180°", "30°"]],
+  ["What comes next: Monday, Wednesday, Friday, …?", "Sunday", ["Saturday", "Tuesday", "Thursday"]],
+  ["If BAT is written 213, how is TAB written?", "312", ["231", "123", "321"]]];
+// One question: { q, a (the right answer), opts }
+function iqQuestion(band) {
+  const t = rnd(band === "s" ? 2 : 4);
+  const shuffle = l => freeShuffle(l, rnd(1e9) + 1);
+  if (t === 0) {   // 🔢 what comes next?
+    const kinds = band === "s" ? ["add"] : band === "m" ? ["add", "mul", "alt"] : ["mul", "alt", "sq", "fib", "grow"];
+    const k = kinds[rnd(kinds.length)], a0 = 1 + rnd(band === "s" ? 5 : 9), d = 2 + rnd(band === "s" ? 2 : 5);
+    let seq = [];
+    if (k === "add") for (let i = 0; i < 5; i++) seq.push(a0 + d * i);
+    if (k === "mul") for (let i = 0; i < 5; i++) seq.push(a0 * Math.pow(2, i));
+    if (k === "alt") for (let i = 0; i < 5; i++) seq.push(i % 2 ? seq[i - 1] - 1 : (i ? seq[i - 1] + d + 1 : a0 + 5));
+    if (k === "sq") for (let i = 0; i < 5; i++) seq.push((i + 1 + rnd(1)) ** 2);
+    if (k === "fib") { seq = [a0, a0 + 1]; while (seq.length < 5) seq.push(seq[seq.length - 1] + seq[seq.length - 2]); }
+    if (k === "grow") { seq = [a0]; for (let i = 1; i < 5; i++) seq.push(seq[i - 1] + i + 1); }
+    const ans = seq.pop(), wrong = new Set(); while (wrong.size < 3) { const w = ans + (rnd(2) ? 1 : -1) * (1 + rnd(d + 3)); if (w !== ans && w > 0) wrong.add(w); }
+    return { q: `What comes next? ${seq.join(", ")}, ?`, a: String(ans), opts: shuffle([ans, ...wrong].map(String)) };
+  }
+  if (t === 1) {   // 🔍 the odd one out
+    const set = ODD_SETS[rnd(ODD_SETS.length)];
+    return { q: "Which one is the odd one out?", a: set[3], opts: shuffle(set) };
+  }
+  if (t === 2) {   // ⚖️ a balance puzzle
+    const x = 2 + rnd(8), n = 2 + rnd(3), tot = x * n + (band === "b" ? 0 : 0);
+    const wrong = new Set(); while (wrong.size < 3) { const w = x + (rnd(2) ? 1 : -1) * (1 + rnd(3)); if (w > 0 && w !== x) wrong.add(w); }
+    return { q: `${"🍎 ".repeat(n)}= ${tot}. How much is one 🍎?`, a: String(x), opts: shuffle([x, ...wrong].map(String)) };
+  }
+  const r = IQ_RIDDLES[rnd(IQ_RIDDLES.length)];   // 🤔 a thinking riddle
+  return { q: r[0], a: r[1], opts: shuffle([r[1], ...r[2]]) };
+}
+let iqBox = null;   // { q, picked, right, n (asked), score }
+function drawIq(u) {
+  if (!iqBox) iqBox = { ...iqQuestion(gameBand(u)), picked: null, n: 1, score: 0 };
+  const x = iqBox;
+  $("ideaTitle").textContent = `🧠 IQ puzzle ${x.n}`;
+  $("freeBody").innerHTML = `<p class="iq-q">${safe(x.q)}</p><div class="iq-opts">${x.opts.map(o => `<button class="iq-opt ${x.picked == null ? "" : o === x.a ? "right" : o === x.picked ? "wrong" : ""}"
+      data-iqpick="${safe(o)}" ${x.picked == null ? "" : "disabled"}>${safe(o)}</button>`).join("")}</div>
+    ${x.picked == null ? "" : `<p class="iq-res">${x.picked === x.a ? "✅ Correct! Clever!" : `❌ Not this time. The answer is <b>${safe(x.a)}</b>.`} Score: ${x.score} of ${x.n}</p>`}
+    <div class="btnrow">${x.picked == null ? "" : `<button class="primary" data-iqnext>Next puzzle ›</button>`}<button data-freeback>‹ Back</button><button data-freeclose>Close</button></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-iqpick], [data-iqnext]"); if (!b || !iqBox || !freeBox) return;
+  const u = userById(freeBox.kid);
+  if (b.dataset.iqpick != null && iqBox.picked == null) { iqBox.picked = b.dataset.iqpick; if (iqBox.picked === iqBox.a) iqBox.score++; }
+  else if ("iqnext" in b.dataset) { let q = iqQuestion(gameBand(u)); for (let i = 0; i < 5 && q.q === iqBox.q; i++) q = iqQuestion(gameBand(u));   // (never the same twice in a row)
+    iqBox = { ...q, picked: null, n: iqBox.n + 1, score: iqBox.score }; }
+  drawIq(u);
+});
+
+// 🔢 Sudoku: 4×4 for small kids, 6×6 for 8–10, 9×9 for 11+. A full grid from a pattern, shuffled; then cells are taken out.
+// Any answer that follows the rules (row, column, box) counts as solved.
+let sdk = null;   // { n, br, bc (box rows / cols), grid (0 = empty), given, sel }
+function sudokuNew(band) {
+  const [n, br, bc] = band === "s" ? [4, 2, 2] : band === "m" ? [6, 2, 3] : [9, 3, 3];
+  const sh = l => freeShuffle(l, rnd(1e9) + 1);
+  const base = (r, c) => (bc * (r % br) + Math.floor(r / br) + c) % n;
+  const rows = sh([...Array(n / br).keys()]).flatMap(g => sh([...Array(br).keys()]).map(r => g * br + r));
+  const cols = sh([...Array(n / bc).keys()]).flatMap(g => sh([...Array(bc).keys()]).map(c => g * bc + c));
+  const nums = sh([...Array(n).keys()].map(i => i + 1));
+  const full = rows.map(r => cols.map(c => nums[base(r, c)]));
+  const holes = Math.round(n * n * (band === "s" ? 0.45 : band === "m" ? 0.5 : 0.55));
+  const grid = full.map(r => [...r]);
+  sh([...Array(n * n).keys()]).slice(0, holes).forEach(i => grid[Math.floor(i / n)][i % n] = 0);
+  return { n, br, bc, grid, given: grid.map(r => r.map(v => v > 0)), sel: null };
+}
+function sudokuBad(s, r, c) {
+  const v = s.grid[r][c]; if (!v) return false;
+  for (let i = 0; i < s.n; i++) { if (i !== c && s.grid[r][i] === v) return true; if (i !== r && s.grid[i][c] === v) return true; }
+  const r0 = r - r % s.br, c0 = c - c % s.bc;
+  for (let i = r0; i < r0 + s.br; i++) for (let j = c0; j < c0 + s.bc; j++) if ((i !== r || j !== c) && s.grid[i][j] === v) return true;
+  return false;
+}
+function drawSudoku(u) {
+  if (!sdk) sdk = sudokuNew(gameBand(u));
+  const s = sdk, done = s.grid.every((row, r) => row.every((v, c) => v && !sudokuBad(s, r, c)));
+  $("ideaTitle").textContent = `🔢 Sudoku ${s.n}×${s.n}`;
+  $("freeBody").innerHTML = `<p class="print-hint" style="margin:0 0 8px">${done ? "🎉 Solved! Well done!" : `Every row, column and box has 1 to ${s.n} once. Tap a box, then a number.`}</p>
+    <div class="sdk sdk-${s.n}" style="--n:${s.n}">${s.grid.map((row, r) => row.map((v, c) => `<button class="sdk-c ${s.given[r][c] ? "given" : ""} ${s.sel === r * s.n + c ? "sel" : ""} ${sudokuBad(s, r, c) ? "bad" : ""}
+      ${(c + 1) % s.bc === 0 && c < s.n - 1 ? "br" : ""} ${(r + 1) % s.br === 0 && r < s.n - 1 ? "bb" : ""}" data-sdkcell="${r * s.n + c}" ${s.given[r][c] ? "disabled" : ""}>${v || ""}</button>`).join("")).join("")}</div>
+    ${done ? "" : `<div class="sdk-pad">${[...Array(s.n).keys()].map(i => `<button data-sdknum="${i + 1}">${i + 1}</button>`).join("")}<button data-sdknum="0">⌫</button></div>`}
+    <div class="btnrow"><button data-freespin>🔄 New sudoku</button><button data-freeback>‹ Back</button><button data-freeclose>Close</button></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-sdkcell], [data-sdknum]"); if (!b || !sdk || !freeBox) return;
+  if (b.dataset.sdkcell != null) sdk.sel = Number(b.dataset.sdkcell);
+  else if (sdk.sel != null) { const r = Math.floor(sdk.sel / sdk.n), c = sdk.sel % sdk.n; if (!sdk.given[r][c]) sdk.grid[r][c] = Number(b.dataset.sdknum); }
+  drawSudoku(userById(freeBox.kid));
 });

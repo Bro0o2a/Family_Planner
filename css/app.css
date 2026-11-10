@@ -3216,3 +3216,17 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .free-kind { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 14px; text-align: left; font-weight: 700; }
 .free-kind .e { font-size: 24px; }
 .free-ideas { margin: 0 0 10px; padding-left: 20px; } .free-ideas li { margin: 6px 0; font-size: 16px; }
+.free-kind.game { background: #ede9fe; color: #4c1d95; }
+.iq-q { font-size: 19px; font-weight: 700; margin: 6px 0 12px; }
+.iq-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.iq-opt { padding: 12px; border-radius: 14px; font-size: 17px; font-weight: 700; }
+.iq-opt.right { background: #dcfce7; color: #166534; } .iq-opt.wrong { background: #fee2e2; color: #991b1b; }
+.iq-res { margin: 10px 0 0; font-weight: 600; }
+.sdk { display: grid; grid-template-columns: repeat(var(--n), 1fr); border: 3px solid #4c1d95; border-radius: 8px; overflow: hidden; max-width: 340px; margin: 0 auto; }
+.sdk-c { aspect-ratio: 1; min-height: 0; padding: 0; border: 1px solid #ddd6fe; border-radius: 0; background: #fff; font-size: 18px; font-weight: 700; color: #2563eb; box-shadow: none; }
+.sdk-9 .sdk-c { font-size: 15px; }
+.sdk-c.given { color: #1f2937; background: #f5f3ff; }
+.sdk-c.sel { background: #fde68a; } .sdk-c.bad { color: #dc2626; background: #fee2e2; }
+.sdk-c.br { border-right: 3px solid #4c1d95; } .sdk-c.bb { border-bottom: 3px solid #4c1d95; }
+.sdk-pad { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px 0; }
+.sdk-pad button { width: 40px; height: 40px; min-height: 0; padding: 0; border-radius: 10px; font-size: 17px; font-weight: 700; }
