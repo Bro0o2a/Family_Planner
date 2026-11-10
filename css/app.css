@@ -3178,3 +3178,6 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
   .wt-main { flex: 1; width: 100%; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .wt-main small { font-weight: 400; opacity: .85; font-size: .8em; }
   .wt-side { flex: none; white-space: nowrap; padding-left: 14px; padding-right: 14px; }
+  /* ✏️ v180: the small pencils on the big calendar card (parents) */
+  .k-rows .k-edit { margin-left: 8px; width: 32px; height: 32px; min-height: 0; padding: 0; border-radius: 50%; font-size: 15px; line-height: 1;
+    display: inline-grid; place-items: center; vertical-align: middle; background: #fff7e0; border: 1px solid #f1d27a; }

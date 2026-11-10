@@ -554,10 +554,17 @@ function openCard(b) {
     ["🏁 End", clock(b.end, true)],
     flex && flex.between ? ["🕓 Only between", betweenText(flex.between)] : null
   ].filter(Boolean);
+  // ✏️ v180 (parents): a small pencil by the details → What / Who / Type: the activity's own form; Day / Start / End: move this one
+  //   (a flexible activity, today or later, in the plan: the same 📌 Move box as ✏️ Edit calendar, saved straight away)
+  const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === actId);
+  const canMove = isParentDevice() && !b.fixed && actId && b.day >= todayYmd() && planItemsOn(b.day).some(x => !x.fixed && x.actId === actId);
+  const pen = (label) => { const what = ["📘 What", "📌 Activity", "🙂 Who", "⭐ Type"].includes(label), when = ["📅 Day", "⏰ Start", "🏁 End"].includes(label);
+    return what && canEditAct ? `<button class="k-edit" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(actId)}" aria-label="Change ${safe(label.slice(2).trim())}">✏️</button>`
+      : when && canMove ? `<button class="k-edit" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the ${safe(label.slice(2).trim().toLowerCase())}">✏️</button>` : ""; };
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
     <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : facesHtml(b.users)}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
-    <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}</b></div>`).join("")}</div>
+    <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}${pen(label)}</b></div>`).join("")}</div>
     <button class="k-ok" id="kOk">OK 👍</button>`;
   $("kModal").hidden = false;
   $("kOk").focus();
@@ -741,6 +748,7 @@ function unpin(day, actId) {
 // ---------- The small "Move" box (edit mode): tap a flexible activity, pick the day and start time ----------
 let moving = null;   // { actId, fromDay, day } (dates)
 function openMoveBox(fromDay, actId) {
+  moveDirect = false;
   const act = data.flexible.find(a => a.id === actId);
   const it = act && fromDay >= todayYmd() && planItemsOn(fromDay).find(x => !x.fixed && x.actId === actId);
   if (!it) return;
@@ -770,8 +778,20 @@ function saveMoveBox() {
   const it = planItemsOn(m.fromDay).find(x => !x.fixed && x.actId === m.actId);
   if (m.day === m.fromDay && it && it.start === start) return;   // nothing changed
   moveActivity(m.actId, m.fromDay, m.day, start);
+  if (moveDirect) { moveDirect = false; editUndo = []; saveChanges(); hideSaved(); toast(`✓ Saved: ${dayName(m.day)} ${clock(start, true)}`, 3000, "#16a34a"); }
 }
 function closeMoveBox() { $("moveModal").hidden = true; moving = null; }
+// ✏️ v180: the pencils on the big card (parents)
+let moveDirect = false;   // (opened from the card, not in ✏️ Edit calendar: saved straight away)
+document.addEventListener("click", e => {
+  const btn = e.target.closest && e.target.closest("[data-kedit]");
+  if (!btn || !isParentDevice()) return;
+  const [kind, a, b] = btn.dataset.kedit.split("|");
+  closeCard();
+  if (kind === "move") { openMoveBox(a, b); moveDirect = !editMode; return; }
+  go("add");
+  setTimeout(() => { if (kind === "fixed") startEditFixed(a); else startEditFlex(a); }, 50);
+});
 
 // The card for a routine strip: no "Done" row (routines give no points)
 function openRoutineCard(b) {
