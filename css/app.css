@@ -3237,3 +3237,9 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .fx-times { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
 .fx-times label { display: flex; gap: 4px; align-items: center; font-size: 13px; }
 .fx-times input { width: auto; }
+.df-list { display: flex; flex-direction: column; gap: 6px; }
+.df-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px dashed var(--line, #e5e7eb); }
+.df-row small { color: var(--muted, #6b7280); margin-left: 4px; }
+.miss-card { padding: 18px 18px 16px; } .miss-card .print-title { margin: 4px 0 0; }
+.fx-days { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 8px; font-size: 13px; }
+.fx-days .checkline { margin: 0; }

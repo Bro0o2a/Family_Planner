@@ -1067,6 +1067,7 @@ function openMissed() {
   if (!isParentId(me)) return;
   if (!hasPlan()) return toast("Press ✨ Plan my week first.", 3000);
   missList = [];
+  dayFix = null; $("missTitle").textContent = "🔍 Missed sessions"; $("missHint").hidden = false;
   const list = missedSessions();
   const fixText = (f, act) => f.kind === "put" ? `➕ ${dayName(f.ds)} ${clock(f.at, true)}`
     : f.kind === "bed" ? `🌙 ${dayName(f.ds)} ${clock(f.at, true)} · bedtime ${f.plus} min later that night`

@@ -636,16 +636,23 @@ function fixedTodayHtml(b) {
   if (!b.fixed || b.gone || !isParentDevice() || b.day < todayYmd()) return "";
   const ids = [...new Set(b.acts.map(a => a.actId))].filter(id => data.fixed.some(f => f.id === id)); if (!ids.length) return "";
   const once = fixedOnOf(b.day, ids[0]), key = `${b.day}|${ids.join(",")}`, hm = m => clock24(m);
-  return `<div class="fx-today"><b>${b.day === todayYmd() ? "Only today" : `Only on ${dayName(b.day)}`}:</b>
+  // (📅 the same change on more days: the other dates this week that it happens on, ticked = changed too)
+  const f0 = data.fixed.find(f => f.id === ids[0]), more = aheadDates().filter(ds => ds !== b.day && f0.days.includes(weekdayOf(ds)));
+  const days = more.length ? `<div class="fx-days"><small>Also on:</small>${more.map(ds => `<label class="checkline"><input type="checkbox" class="fx-day" value="${ds}">${dayHead(ds)}</label>`).join("")}</div>` : "";
+  return `<div class="fx-today"><b>${b.day === todayYmd() ? "Only today" : `Only on ${dayName(b.day)}`}${more.length ? ", or tick more days" : ""}:</b>
     ${once ? `<span class="fx-note">${once.off ? "🚫 Marked as didn't happen" : `🕐 Changed to ${clock(toMin(once.start), true)}–${clock(toMin(once.end), true)}`}</span>` : ""}
+    ${days}
     <div class="btnrow"><button class="pill small" data-fxoff="${safe(key)}">🚫 Didn't happen</button>
       <button class="pill small" data-fxtimes="${safe(key)}">🕐 Other times</button>${once ? `<button class="pill small" data-fxusual="${safe(key)}">↩️ As usual</button>` : ""}</div>
     <div class="fx-times" hidden><label>From <input type="time" class="fx-from" value="${hm(b.start)}"></label><label>To <input type="time" class="fx-to" value="${hm(b.end)}"></label>
       <button class="pill small primary" data-fxsave="${safe(key)}">💾 Save</button></div></div>`;
 }
-function setFixedToday(key, val) {
+function setFixedToday(key, val, quiet, also = []) {
   const [ds, idList] = key.split("|"), ids = idList.split(",");
   if (!isParentId(me) || ds < todayYmd()) return;
+  // (the times before the change, for the "new free time" box after it)
+  const wasItems = planItemsOn(ds).filter(it => it.fixed && ids.includes(it.actId));
+  const was = wasItems.length ? [Math.min(...wasItems.map(it => it.start)), Math.max(...wasItems.map(it => it.end))] : null;
   data.fixedOn = data.fixedOn || {};
   ids.forEach(id => { if (val) data.fixedOn[`${ds}|${id}`] = val; else delete data.fixedOn[`${ds}|${id}`]; });
   const people = [...new Set(data.fixed.filter(f => ids.includes(f.id)).flatMap(peopleOf))];
@@ -663,22 +670,72 @@ function setFixedToday(key, val) {
     if (val && val.off) Object.keys(data.points.marks).forEach(k => { if (ids.some(id => k.startsWith(`${ds}|${id}|`))) delete data.points.marks[k]; });
     makeAndKeepPlan("fill");
   }
+  if (quiet) return;
+  also.forEach(d2 => setFixedToday(`${d2}|${idList}`, val, true));   // (📅 the same change on the other days picked)
   closeCard();
   writeData();
   render();
   const left = missedSessions().reduce((n, x) => n + x.missing, 0);
-  toast(`${val ? val.off ? "🚫 Marked as didn't happen" : `🕐 Changed to ${clock(toMin(val.start), true)}–${clock(toMin(val.end), true)}` : "↩️ Back to usual"} on ${dayName(ds)}.${
+  // ✏️ v180 (Broo2a): then the parent adds or removes that day's activities themselves
+  if (val && was) {
+    const now = val.off ? [] : [[toMin(val.start), toMin(val.end)]];
+    const freed = cutOut(was, now).filter(([a, b]) => b - a >= 15);
+    if (freed.length || val.off) return openDayFix(ds, people, freed.length ? freed : [was]);
+  }
+  toast(`${val ? val.off ? "🚫 Marked as didn't happen" : `🕐 Changed to ${clock(toMin(val.start), true)}–${clock(toMin(val.end), true)}` : "↩️ Back to usual"} on ${[ds, ...also].map(dayName).join(", ")}.${
     moved ? ` ${moved} ${moved === 1 ? "activity was" : "activities were"} moved.` : ""} The free time was planned again${left ? `; ${left} still missing (🔍 Missed sessions)` : ""}.`, 4500);
 }
+// ✏️ v180 "That day's activities" box (after 🏫 a change): ➕ add an activity into the new free time (📌 pinned there),
+// or ✕ remove one of that day's activities (for that day only: never planned there again)
+let dayFix = null;   // { ds, people, freed: [[from, to]], adds: [] }
+function openDayFix(ds, people, freed) { dayFix = { ds, people, freed }; drawDayFix(); }
+function drawDayFix() {
+  const { ds, people, freed } = dayFix, has = id => planItemsOn(ds).some(it => !it.fixed && it.actId === id);
+  dayFix.adds = [];
+  // ➕ the activities of these people that aren't on that day yet and fit inside the new free time
+  data.flexible.filter(a => peopleOf(a).some(p => people.includes(p)) && !has(a.id)).forEach(a => {
+    const day = missDayCtx(ds); if (!day.window) return;
+    const pre = a.getReady || 0, post = a.breakAfter || 0, len = pre + a.duration + post, span = { ...a, duration: len };
+    for (const [f, t] of freed) for (let st = Math.ceil(f / 5) * 5; st + len <= Math.max(t, f + len) && st < t; st += 5)
+      if (fitsAt(day, st, st + len, span, "empty")) { dayFix.adds.push({ id: a.id, at: st + pre, len: a.duration }); return; }
+  });
+  const items = planItemsOn(ds).filter(it => !it.fixed).map(it => ({ it, act: data.flexible.find(a => a.id === it.actId) }))
+    .filter(x => x.act && peopleOf(x.act).some(p => people.includes(p)));
+  const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
+  $("missTitle").textContent = `✏️ ${dayName(ds)}: free time ${freed.map(([a, b]) => `${clock(a, true)}–${clock(b, true)}`).join(", ")}`;
+  $("missBody").innerHTML = `<p class="print-hint" style="margin:0 0 6px">➕ Add something in the free time:</p><div class="miss-fixes">${dayFix.adds.length
+      ? dayFix.adds.map((x, i) => { const a = data.flexible.find(f => f.id === x.id); return `<button class="pill small" data-dfadd="${i}">➕ ${safe(a.name)} ${facesHtml(a.users)} · ${clock(x.at, true)}</button>`; }).join("")
+      : `<span class="hint">Nothing else fits there. You can still use 🎈 free-time ideas.</span>`}</div>
+    <p class="print-hint" style="margin:14px 0 6px">✕ Or take one off ${safe(dayName(ds))}:</p><div class="df-list">${items.length ? items.map(({ it, act }) =>
+      `<div class="df-row"><span>${safe(act.name)} ${facesHtml(act.users)} <small>${clock(it.start, true)}–${clock(it.end, true)}</small></span>${ticked(it.actId) ? `<small>✅ done</small>`
+        : `<button class="pill small" data-dfdel="${safe(it.actId)}">✕ Remove</button>`}</div>`).join("") : `<span class="hint">Nothing else that day.</span>`}</div>`;
+  $("missHint").hidden = true;
+  $("missModal").hidden = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-dfadd], [data-dfdel]"); if (!b || !dayFix || !isParentId(me) || !hasPlan()) return;
+  const ds = dayFix.ds, day = data.plan.dates[ds] = data.plan.dates[ds] || { items: [] };
+  if (b.dataset.dfadd != null) { const x = dayFix.adds[Number(b.dataset.dfadd)]; if (!x) return;
+    day.items.push({ actId: x.id, fixed: false, start: x.at, end: x.at + x.len, pinned: true }); day.items.sort((p, q) => p.start - q.start);
+    toast(`📌 Added on ${dayName(ds)} at ${clock(x.at, true)}.`, 2500); }
+  else { const id = b.dataset.dfdel;
+    day.items = day.items.filter(it => it.fixed || it.actId !== id);
+    data.skips = { ...(data.skips || {}), [`${ds}|${id}`]: { by: me, at: new Date().toISOString(), why: "skip" } };   // (never planned on that day again)
+    toast(`✕ Taken off ${dayName(ds)}.`, 2500); }
+  writeData();
+  render();
+  drawDayFix();
+});
 document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-fxoff], [data-fxtimes], [data-fxusual], [data-fxsave]"); if (!b) return;
   const d = b.dataset;
-  if (d.fxoff) return setFixedToday(d.fxoff, { off: true });
-  if (d.fxusual) return setFixedToday(d.fxusual, null);
+  const alsoDays = () => [...b.closest(".fx-today").querySelectorAll(".fx-day:checked")].map(x => x.value);
+  if (d.fxoff) return setFixedToday(d.fxoff, { off: true }, false, alsoDays());
+  if (d.fxusual) return setFixedToday(d.fxusual, null, false, alsoDays());
   if (d.fxtimes) { const box = b.closest(".fx-today").querySelector(".fx-times"); box.hidden = !box.hidden; return; }
   const box = b.closest(".fx-today"), from = box.querySelector(".fx-from").value, to = box.querySelector(".fx-to").value;
   if (!/^\d{2}:\d{2}$/.test(from) || !/^\d{2}:\d{2}$/.test(to) || from >= to) return toast("Pick a start time before the end time.", 2500);
-  setFixedToday(d.fxsave, { start: from, end: to });
+  setFixedToday(d.fxsave, { start: from, end: to }, false, alsoDays());
 });
 
 // =====================================================================
