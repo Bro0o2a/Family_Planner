@@ -75,7 +75,7 @@ function drawFreeTime() {
       const acts = days[i].items.filter(it => !it.fixed && it.people.includes(freeWho) && inFree(it.start, it.end));
       // The time they take, with their get ready / break, counted only where it's inside the free time
       const pieces = acts.flatMap(it => {
-        const act = data.flexible.find(a => a.id === it.actId) || {};
+        const act = data.flexible.find(a => a.id === baseActId(it.actId)) || {};
         const s = it.start - (act.getReady || 0), e = it.end + (act.breakAfter || 0);
         return free.map(([a, b]) => ({ start: Math.max(a, s), end: Math.min(b, e) })).filter(p => p.end > p.start);
       });

@@ -190,7 +190,7 @@ function typeTally(id, type) {
     if (day.date > today) return;
     day.items.forEach(it => {
       if (!it.users.includes(id) || (day.date === today && it.start > now)) return;
-      const a = acts.find(x => x.id === it.actId);
+      const a = acts.find(x => x.id === baseActId(it.actId));
       if (!a || actTypeOf(a) !== type) return;
       planned++;
       if (isDone(day.date, it.actId, id)) done++;
@@ -232,7 +232,7 @@ const sessionNotYet = x => x.date > todayYmd() || (x.date === todayYmd() && duba
 const sessionNotYetToast = x => toast(`🔒 ${x.act.name} opens ${x.date === todayYmd() ? `at ${clock(x.start, true)}` : `on ${dayLong(x.date)}`}. Choose then! 📅`, 3200);
 // 📚 "Which subject today?": the kid (or a parent) picks one of the allowed subjects for that session → saved for it
 function pickSessionSubject(key, sid) {
-  const [date, actId, kid] = String(key).split("|"), a = allActs().find(x => x.id === actId);
+  const [date, actId, kid] = String(key).split("|"), a = allActs().find(x => x.id === baseActId(actId));
   if (!a || !exists(kid) || (isKidDevice() && kid !== kidDeviceId()) || (!isParentId(me) && kid !== me)) return false;
   const x = actSubjectsFor(a, kid).find(o => o.id === sid), sess = sessionByKey(key);
   if (!x || !isYmd(date)) return false;
@@ -272,7 +272,7 @@ function sessionsIn(id, dates, full = false) {
   const today = todayYmd(), now = dubaiMinutes(), acts = allActs(), out = [];
   dates.forEach(date => planDay(date).items.forEach(it => {
     if (!it.users.includes(id)) return;
-    const a = acts.find(x => x.id === it.actId);
+    const a = acts.find(x => x.id === baseActId(it.actId));
     if (!a || actTypeOf(a) !== "study") return;
     const key = `${date}|${it.actId}|${id}`;
     // 📚 Its subject: the one the kid picked (several allowed), the only one allowed, or (none set) the older subject / the name
@@ -506,7 +506,7 @@ function ticksTally(id) {
     if (day.date > today) return;
     day.items.forEach(it => {
       if (!it.users.includes(id)) return;
-      const a = acts.find(x => x.id === it.actId);
+      const a = acts.find(x => x.id === baseActId(it.actId));
       if (!a || !["study", "activity", "habit"].includes(actTypeOf(a))) return;
       const ok = isDone(day.date, it.actId, id);
       if (day.date === today && !ok) return;
@@ -698,7 +698,7 @@ function toggleDone(day, actId, user, button) {
   if (editMode) return toast("Tap ✅ Done first, then you can tick.");
   if (newWeek()) { keepNow(); return toast("🌅 A new week started! Points are back to zero."); }
   if (!isYmd(day)) return;
-  const act = allActs().find(a => a.id === actId), pact = !act && (data.parentActs || []).find(a => a.id === actId);
+  const act = allActs().find(a => a.id === baseActId(actId)), pact = !act && (data.parentActs || []).find(a => a.id === actId);
   if (pact) {   // 👨‍👩‍👧 a parent's ➕ My activity: only that parent ticks it (kids just look)
     if (pact.by !== user || pact.type === "travel" || !pactStartOn(pact, day)) return;
     if (user !== me || isKidDevice()) return toast(`Only ${userById(user).name} can tick this. 👀`);
