@@ -3287,3 +3287,5 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 #scr-mine .bar-right { gap: 6px; }
 #scr-mine .bar [data-printcal], #scr-mine .bar .bell-btn, #scr-mine .bar .signout-btn { width: 40px; height: 40px; }
 .kc2-tile.wide { grid-column: 1 / -1; }
+.kc2-free { margin: 12px 18px 0; padding: 12px 14px; border-radius: 18px; background: #fef3c7; color: #92400e; font-weight: 800; text-align: center; }
+.kc2-freebtns { display: flex; justify-content: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }

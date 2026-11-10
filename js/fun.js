@@ -839,7 +839,7 @@ function drawFree() {
 document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-freeopen], [data-freekind], [data-freespin], [data-freeback], [data-freeclose]"); if (!b) return;
   const d = b.dataset;
-  if (d.freeopen) { freeBox = { kid: d.freeopen, kind: null, spin: 0 }; iqBox = null; sdk = null; return drawFree(); }
+  if (d.freeopen) { if (b.closest("#kCard")) closeCard(); freeBox = { kid: d.freeopen, kind: null, spin: 0 }; iqBox = null; sdk = null; return drawFree(); }
   if (!freeBox) return;
   if ("freeclose" in d) { $("freeModal").hidden = true; freeBox = null; return; }
   if ("freeback" in d) { freeBox.kind = null; return drawFree(); }
