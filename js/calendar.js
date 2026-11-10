@@ -931,7 +931,7 @@ function drawMine() {
   const keepDay = viewDay, wk = wholeWeek && !editing;
   if (wk) viewDay = Math.max(0, viewDay - CAL_BACK);
   navSubj = subjPickHtml(sk, who);
-  try { $("mineWeek").innerHTML = editBarHtml() + weekHtml(wk ? days.slice(CAL_BACK) : days, { only: who, readOnly: editing, drag: editing, subj }); }
+  try { $("mineWeek").innerHTML = editBarHtml() + (editing ? "" : freeNowHtml(who)) + weekHtml(wk ? days.slice(CAL_BACK) : days, { only: who, readOnly: editing, drag: editing, subj }); }
   finally { viewDay = keepDay; navSubj = ""; }
   putCalScroll("mineWeek");   // (📅 opens with today in view; a tick or a tap keeps it where it was)
   $("mineSubj").innerHTML = sk ? subjFilterHtml(sk, who) : "";   // (v180: only the picked subject's summary; the picker is in the days row)

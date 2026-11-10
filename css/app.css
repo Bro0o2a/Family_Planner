@@ -3209,3 +3209,10 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .miss-row small { display: block; color: var(--muted, #6b7280); margin: 2px 0 6px; }
 .miss-fixes { display: flex; flex-wrap: wrap; gap: 6px; }
 .miss-fixes .pill { font-size: 13px; padding: 6px 10px; min-height: 0; }
+/* 🎈 v180 Free-time ideas */
+.free-btn { display: block; width: 100%; margin: 0 0 10px; padding: 10px 14px; border-radius: 16px; border: 2px dashed #f9a8d4; background: #fff1f7; color: #9d174d; font-weight: 700; text-align: left; }
+.free-btn.now { border-style: solid; background: #fde7f3; }
+.free-kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+.free-kind { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 14px; text-align: left; font-weight: 700; }
+.free-kind .e { font-size: 24px; }
+.free-ideas { margin: 0 0 10px; padding-left: 20px; } .free-ideas li { margin: 6px 0; font-size: 16px; }

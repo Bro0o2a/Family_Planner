@@ -702,3 +702,123 @@ function mergePicks(into, from) {
   if (from.featuresChosen === true && into.featuresChosen !== true) { into.featuresChosen = true; changed = true; }
   return changed;
 }
+
+// =====================================================================
+//  🎈 v180 FREE-TIME IDEAS (Broo2a): on a kid's own calendar, "🎈 Free now? What do you want to do?" → kinds of things
+//  (📚 read, 🦁 animal films, 🎨 draw …) → tap one → 3 ideas. They change every day and with 🔄, fit the kid's AGE
+//  (🎂 birthday, else school year) and PERSONALITY (❤️ Things I love: dream job, game, colour; and the kinds they pick most).
+//  Built in (no AI, no internet). s = up to 7 years, m = 8–10, b = 11 and up.
+// =====================================================================
+const FREE_KINDS = [
+  { id: "read", e: "📚", label: "Read a book", ideas: {
+    s: ["The Very Hungry Caterpillar", "Where the Wild Things Are", "The Gruffalo", "Room on the Broom", "Elmer the Patchwork Elephant", "Oi Frog!", "Owl Babies", "Peppa Pig: Peppa's Big Book", "We're Going on a Bear Hunt", "The Snail and the Whale", "Hamid and the Moon (an Islamic picture book)", "Any picture book from your shelf: read it to someone!"],
+    m: ["Charlotte's Web", "Fantastic Mr Fox", "The Magic Finger", "Diary of a Wimpy Kid", "Dog Man", "The Owl Who Was Afraid of the Dark", "Matilda", "The Iron Man", "Amelia Fang", "Horrid Henry", "Stories of the Prophets for kids", "The Worst Witch", "A Boy Called Christmas", "Encyclopedia of animals: pick 3 pages"],
+    b: ["Wonder", "Holes", "Percy Jackson and the Lightning Thief", "The Wild Robot", "Harry Potter and the Philosopher's Stone", "Journey to the River Sea", "Pax", "Amari and the Night Brothers", "Boy at the Back of the Class", "The 1001 Inventions of Muslim civilisation", "Hatchet", "The Phantom Tollbooth", "A newspaper for kids: read 2 stories"] } },
+  { id: "animals", e: "🦁", label: "Animal films", ideas: {
+    s: ["Puffin Rock (an episode)", "Octonauts (an episode)", "Andy's Wild Adventures", "Tiny World (a short clip)", "Hey Duggee: The Animal Badge", "A video of baby animals at the zoo"],
+    m: ["Wild Kratts (an episode)", "Tiny World (an episode)", "Our Planet: Jungles", "Secret Life of the Zoo", "Meerkat Manor", "Penguins: a day at the South Pole", "Seven Worlds, One Planet: Africa"],
+    b: ["Our Planet: Frozen Worlds", "Planet Earth II: Islands", "Blue Planet II: The Deep", "Life in Colour", "Dynasties: Lions", "The Hunt", "My Octopus Teacher", "Seven Worlds, One Planet: Asia"] } },
+  { id: "draw", e: "🎨", label: "Draw and make", ideas: {
+    s: ["Draw your family as animals", "Colour a picture using only {color}", "Make a paper crown", "Draw your dream house", "Hand-print animals", "Make a card for Mum"],
+    m: ["Draw a comic with 4 boxes about your day", "Design a new animal (half lion, half fish?)", "Make a paper plane and paint it {color}", "Draw a map of a treasure island", "Make a bookmark for your book", "Draw your favourite food: {food}"],
+    b: ["Design a logo for your future company", "Draw a comic strip with a twist ending", "Sketch your room from the door", "Learn to draw a 3D cube and a 3D name", "Design a poster for your dream job: {job}", "Make an origami crane"] } },
+  { id: "build", e: "🧱", label: "Build something", ideas: {
+    s: ["Build the tallest tower you can", "Make a house for your toy", "Build a car with blocks", "Make a train with chairs"],
+    m: ["Lego challenge: a bridge between two books", "Build a marble run from paper rolls", "Make a pillow fort", "Build a robot from boxes", "Build a city with Lego or blocks"],
+    b: ["Build a working catapult from lolly sticks", "Lego challenge: a machine that moves", "Make a phone stand from cardboard", "Plan and build a mini city", "Build a paper bridge that holds a book"] } },
+  { id: "move", e: "🏃", label: "Move your body", ideas: {
+    s: ["Animal walk: hop like a frog, waddle like a penguin", "Dance to 2 songs", "Throw and catch a ball 20 times", "Freeze dance with someone"],
+    m: ["Skip with a rope 50 times", "Ride your bike or scooter", "Football: 20 keepy-uppies", "Make an obstacle course", "10 minutes of kids' yoga"],
+    b: ["A 15-minute workout: jumps, push-ups, squats", "Practise your football skills", "Go for a walk with a parent", "Learn a new trick (bike, ball, skipping)", "Swim if you can"] } },
+  { id: "science", e: "🔬", label: "Little experiments", ideas: {
+    s: ["Which toys float and which sink?", "Mix colours with water and food colouring", "Grow a bean in a wet tissue", "Find 5 shapes in your house"],
+    m: ["Make a lemon volcano with baking soda (ask a parent)", "Make a rainbow with a glass of water and the sun", "Make slime (ask a parent)", "Find out how many drops fit on a coin", "Grow crystals with salt"],
+    b: ["Build a simple circuit with a battery (ask a parent)", "Make a balloon rocket on a string", "Test which paper plane flies furthest", "Make a pH tester with red cabbage (ask a parent)", "Watch a Mark Rober video and try one idea"] } },
+  { id: "puzzle", e: "🧩", label: "Puzzles and games", ideas: {
+    s: ["Do a jigsaw puzzle", "Play memory cards", "Play I spy", "Play snakes and ladders"],
+    m: ["Play chess or checkers", "Do an easy sudoku", "Make your own word search", "Play Uno with the family", "A 100-piece jigsaw"],
+    b: ["Play chess (or learn a new opening)", "A hard sudoku", "Rubik's cube: learn one step", "Make a quiz for your family", "A 500-piece jigsaw"] } },
+  { id: "cook", e: "🍳", label: "Help in the kitchen", ideas: {
+    s: ["Wash the fruit", "Make a fruit face on a plate", "Help mix a cake (with a parent)"],
+    m: ["Make a sandwich by yourself", "Make a fruit salad", "Help bake cookies (with a parent)", "Make lemonade"],
+    b: ["Cook an omelette (with a parent)", "Make a smoothie with your own recipe", "Bake a cake from a recipe", "Help plan tomorrow's dinner: {food}?"] } },
+  { id: "space", e: "🚀", label: "Space and science films", ideas: {
+    s: ["Ready Jet Go! (an episode)", "Peppa Pig goes to the moon", "Look at the moon tonight: what shape is it?"],
+    m: ["Ada Twist, Scientist (an episode)", "The Magic School Bus Rides Again", "A video tour of the International Space Station", "Find the planets in order: make a song"],
+    b: ["A video about black holes for kids", "Cosmos: A Spacetime Odyssey (part)", "Watch a rocket launch video", "How the pyramids were built (a short film)", "1001 Inventions and the Library of Secrets"] } },
+  { id: "write", e: "✍️", label: "Write something", ideas: {
+    s: ["Tell a story and a parent writes it", "Write your name in big bubble letters", "Make a list of 5 things you love"],
+    m: ["Write a short story about a talking cat", "Write a letter to your grandma or grandpa", "Make a diary page about today", "Write 5 riddles for your family"],
+    b: ["Write a story that starts: 'The door was open…'", "Write a review of the last film you watched", "Start a diary", "Write a letter to yourself in 5 years", "Write about your dream job: {job}"] } },
+  { id: "kind", e: "💌", label: "Do something kind", ideas: {
+    s: ["Give someone a big hug", "Help tidy the toys", "Draw a picture for a friend"],
+    m: ["Make a thank-you card for your teacher", "Help set the table", "Call your grandparents", "Share a toy with your sibling"],
+    b: ["Help your little brother or sister with homework", "Call a relative you haven't talked to", "Do a job at home without being asked", "Write kind notes for the family"] } },
+  { id: "quran", e: "🕌", label: "Quran and stories", ideas: {
+    s: ["Listen to a short surah: Al-Fatiha, Al-Ikhlas", "Listen to a story of a prophet", "Learn a short dua"],
+    m: ["Learn 3 new ayat", "Listen to the story of Prophet Yunus", "Learn the meaning of a short surah", "Read a hadith with a parent"],
+    b: ["Revise a surah you know", "Listen to the story of Prophet Yusuf", "Learn about a famous Muslim scientist", "Read the meaning of a surah you know"] } }
+];
+// Personality → kinds that come first (from ❤️ Things I love)
+const FREE_LIKES = [[/vet|animal|zoo|horse|dog|cat|nature|marine|biolog/i, ["animals", "science"]], [/doctor|scien|engineer|invent|chemist|lab/i, ["science", "build"]],
+  [/artist|design|paint|draw|fashion|architect/i, ["draw", "build"]], [/foot|soccer|athlet|sport|swim|player|basket|tennis|gym/i, ["move"]],
+  [/chef|cook|bak|food/i, ["cook"]], [/astronaut|pilot|space|planet/i, ["space", "science"]], [/writer|author|poet|journalist|teacher/i, ["write", "read"]],
+  [/minecraft|lego|roblox|build|craft/i, ["build", "puzzle"]], [/chess|puzzle|sudoku|uno|card/i, ["puzzle"]], [/youtube|film|movie|actor/i, ["animals", "space"]],
+  [/imam|sheikh|quran|hafiz/i, ["quran", "read"]]];
+function kidAge(u) {
+  if (u.birthday) { const [y, m, d] = u.birthday.split("-").map(Number), n = new Date(); return n.getFullYear() - y - (n.getMonth() + 1 < m || (n.getMonth() + 1 === m && n.getDate() < d) ? 1 : 0); }
+  const yr = /\d+/.exec(u.year || ""); return yr ? +yr[0] + 5 : 9;   // (Year 4 / Grade 4 ≈ 9 years old)
+}
+const freeBand = u => { const a = kidAge(u); return a <= 7 ? "s" : a <= 10 ? "m" : "b"; };
+// A small number from text, so the same day gives the same ideas (and 🔄 gives new ones)
+function freeSeed(t) { let h = 2166136261; for (const c of t) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+function freeShuffle(list, seed) { const a = [...list]; let s = seed || 1;
+  for (let i = a.length - 1; i > 0; i--) { s = Math.imul(s ^ (s >>> 15), 2246822507) >>> 0; const j = s % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const FREE_KEY = SAVE_KEY + ".freeIdeas.";   // (this device: the kinds each kid picked most, so their favourites come first)
+function freePicks(id) { try { return JSON.parse(localStorage.getItem(FREE_KEY + id)) || {}; } catch (e) { return {}; } }
+let freeBox = null;   // the open box: { kid, kind (null = the kinds), spin }
+function freeKindsFor(u, spin) {
+  const loves = Object.values(u.loves || {}).join(" "), liked = new Set(FREE_LIKES.filter(([re]) => re.test(loves)).flatMap(([, ks]) => ks));
+  const picks = freePicks(u.id), seed = freeSeed(`${u.id}|${todayYmd()}|${spin}`);
+  const score = k => (liked.has(k.id) ? 3 : 0) + Math.min(3, (picks[k.id] || 0) / 2) + (freeSeed(k.id + seed) % 100) / 40;
+  return [...FREE_KINDS].sort((a, b) => score(b) - score(a)).slice(0, 6);
+}
+function freeIdeasFor(u, kind, spin) {
+  const fill = t => t.replace("{color}", (u.loves && u.loves.color) || "blue").replace("{food}", (u.loves && u.loves.food) || "pizza")
+    .replace("{job}", (u.loves && u.loves.job) || "your dream job");
+  return freeShuffle(kind.ideas[freeBand(u)], freeSeed(`${u.id}|${kind.id}|${todayYmd()}|${spin}`)).slice(0, 3).map(fill);
+}
+function freeNowHtml(who) {
+  if (!who || isParentId(who) || !exists(who)) return "";
+  const u = userById(who), now = dubaiMinutes(), ds = todayYmd(), day = planDay(ds), [ws, we] = day.window || [0, 0];
+  const bed = bedMin(who, ds), busy = [...day.items.filter(it => it.people.includes(who)), ...day.routines.filter(r => (r.users || []).includes(who)),
+    ...oneDayOn(ds).filter(e => e.who.includes(who)).map(e => ({ start: toMin(e.from), end: toMin(e.to) }))].some(b => b.start <= now && now < b.end);
+  const freeNow = !busy && now >= ws && now < we && (bed == null || now < bed);
+  return `<button class="free-btn ${freeNow ? "now" : ""}" data-freeopen="${safe(who)}">🎈 ${freeNow ? `Free now${who === me ? "" : `, ${safe(u.name)}`}? What do you want to do?` : "Free-time ideas"}</button>`;
+}
+function drawFree() {
+  const u = userById(freeBox.kid);
+  if (!freeBox.kind) {
+    $("ideaTitle").textContent = `🎈 What do you want to do${freeBox.kid === me ? "" : `, ${u.name}`}?`;
+    $("freeBody").innerHTML = `<div class="free-kinds">${freeKindsFor(u, freeBox.spin).map(k => `<button class="free-kind" data-freekind="${k.id}"><span class="e">${k.e}</span>${safe(k.label)}</button>`).join("")}</div>
+      <div class="btnrow"><button data-freespin>🔄 Other ideas</button><button data-freeclose>Close</button></div>`;
+  } else {
+    const k = FREE_KINDS.find(x => x.id === freeBox.kind);
+    $("ideaTitle").textContent = `${k.e} ${k.label}`;
+    $("freeBody").innerHTML = `<p class="print-hint" style="margin:0 0 8px">Pick one you like:</p><ul class="free-ideas">${freeIdeasFor(u, k, freeBox.spin).map(t => `<li>${safe(t)}</li>`).join("")}</ul>
+      <div class="btnrow"><button data-freespin>🔄 Other ideas</button><button data-freeback>‹ Back</button><button data-freeclose>Close</button></div>`;
+  }
+  $("freeModal").hidden = false;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-freeopen], [data-freekind], [data-freespin], [data-freeback], [data-freeclose]"); if (!b) return;
+  const d = b.dataset;
+  if (d.freeopen) { freeBox = { kid: d.freeopen, kind: null, spin: 0 }; return drawFree(); }
+  if (!freeBox) return;
+  if ("freeclose" in d) { $("freeModal").hidden = true; freeBox = null; return; }
+  if ("freeback" in d) { freeBox.kind = null; return drawFree(); }
+  if ("freespin" in d) { freeBox.spin++; return drawFree(); }
+  if (d.freekind) { freeBox.kind = d.freekind; freeBox.spin = 0;
+    try { const p = freePicks(freeBox.kid); p[d.freekind] = (p[d.freekind] || 0) + 1; localStorage.setItem(FREE_KEY + freeBox.kid, JSON.stringify(p)); } catch (err) {}
+    return drawFree(); }
+});
