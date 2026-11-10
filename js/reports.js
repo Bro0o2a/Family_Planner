@@ -236,7 +236,7 @@ function kidsWorkItems() {
   Object.entries(data.points.marks).forEach(([key, m]) => {
     const [d, actId] = key.split("|");
     if (d !== date) return;
-    const a = allActs().find(x => x.id === actId);
+    const a = allActs().find(x => x.id === baseActId(actId));
     add(m.at, m.user, `✅ finished ${a ? a.name : "an activity"}`, "go|mine", "act");
   });
   // ⭐ habits and 🕌 prayers

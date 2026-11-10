@@ -131,15 +131,15 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("odModa
 function planDay(ds) {
   const wd = weekdayOf(ds), saved = hasPlan() && data.plan.dates[ds];
   const items = (saved ? saved.items : []).map(it => {
-    const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === it.actId);
+    const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === baseActId(it.actId));
     // (🗂️ a deleted activity kept as history on a day that's gone: drawn from what it remembers, look-only)
     const g = !act && it.gone, users = g ? g.users.filter(exists) : [];
     if (g) return users.length ? { ...it, name: g.name, users, people: g.people.filter(exists), helper: "", type: g.type } : null;
-    return act ? { ...it, name: act.name, users: act.users, people: peopleOf(act), helper: helperOf(act) ? act.helper : "", type: actTypeOf(act) } : null;
+    return act ? { ...it, ...(isSecondId(it.actId) ? { second: true } : {}), name: act.name, users: act.users, people: peopleOf(act), helper: helperOf(act) ? act.helper : "", type: actTypeOf(act) } : null;
   }).filter(Boolean).sort((a, b) => a.start - b.start || b.fixed - a.fixed);
   // Strips (kept apart from activities: no checkbox, no points): routines, the fixed activities' get ready / break,
   // and the get ready / break around each planned flexible activity (not a deleted one's).
-  const flexPads = items.filter(it => !it.fixed && !it.gone).flatMap(it => padsFor(data.flexible.find(a => a.id === it.actId), it.start, it.end));
+  const flexPads = items.filter(it => !it.fixed && !it.gone).flatMap(it => padsFor(data.flexible.find(a => a.id === baseActId(it.actId)), it.start, it.end));
   // (🏫 v180: a fixed activity changed for this date: its get ready / break move with it, or go when it didn't happen)
   const moved = data.fixed.filter(f => fixedOnOf(ds, f.id)), gone = new Set(moved.map(f => f.id));
   const rt = routinesOn(wd).filter(r => !(r.pad && [...gone].some(id => r.id.startsWith(`ready-${id}-`) || r.id.startsWith(`break-${id}-`))));
@@ -402,7 +402,7 @@ function weekHtml(days, opts) {
                  style="--soft:${info.soft};--ink:${info.ink};--line-c:${info.line}">
         ${mark}${pin}<span class="k-checks">${checks}${done ? `<span class="k-donetag">Done!</span>` : ""}</span>
         <span class="who">${sameBtn}${actIcon3d(b.name, b.type)}<span class="t-full">${b.fixed || b.users.length > 1 ? nm : info.titleHtml}</span><span class="t-short">${shortHtml}</span></span>
-        <span class="k-sub"><span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatHtml
+        <span class="k-sub">${b.second ? `<span class="k-2nd" title="The 2nd session today">2nd</span> ` : ""}<span class="when">${clock(b.start)} - ${clock(b.end)}</span>${info.dots ? " " + dotsHtml(info.dots) : ""}${whatHtml
           ? ` <span class="what">${whatHtml}</span>` : ""}</span>${sessHtml ? `<span class="k-sessrow">${sessHtml}</span>` : ""}${praysIn(b).map(p => prayLineHtml(p, true)).join("")}</div>` });
     });
     // 🕗 Only that day's time (Day starts at … Day ends at): anything wholly before or after it isn't drawn
@@ -450,7 +450,7 @@ function setBedTonight(key, val) {
   if (hasPlan() && data.plan.dates[ds]) {
     const items = data.plan.dates[ds].items, keep = items.filter(it => {
       if (it.fixed || it.pinned || it.gone) return true;
-      const act = data.flexible.find(a => a.id === it.actId); if (!act) return true;
+      const act = data.flexible.find(a => a.id === baseActId(it.actId)); if (!act) return true;
       const late = peopleOf(act).some(p => kids.includes(p) && bedMin(p, ds) != null && it.end > bedMin(p, ds));
       const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${it.actId}|`));
       return !late || ticked;
@@ -601,7 +601,7 @@ function openCard(b) {
   if (b.routine) return openRoutineCard(b);
   if (b.pact) return openPactCard(b);
   if (b.oneDay) return openOneDayCard(b);
-  const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => x.actId === a.id));
+  const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => baseActId(x.actId) === a.id));
   const rows = [
     b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
     ["🙂 Who", namesOf(b.users)],   // (🏷️ v180: names only)   // (3rd = as HTML, with a parent's 🖼️ photo)
@@ -616,10 +616,10 @@ function openCard(b) {
   ].filter(Boolean);
   // ✏️ v180 (parents): a small pencil by the details → What / Who / Type: the activity's own form; Day / Start / End: move this one
   //   (a flexible activity, today or later, in the plan: the same 📌 Move box as ✏️ Edit calendar, saved straight away)
-  const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === actId);
+  const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === baseActId(actId));
   const canMove = isParentDevice() && !b.fixed && actId && b.day >= todayYmd() && planItemsOn(b.day).some(x => !x.fixed && x.actId === actId);
   const pen = (label) => { const what = ["📘 What", "📌 Activity", "🙂 Who", "⭐ Type"].includes(label), when = ["📅 Day", "⏰ Start", "🏁 End"].includes(label);
-    return what && canEditAct ? `<button class="k-edit" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(actId)}" aria-label="Change ${safe(label.slice(2).trim())}">✏️</button>`
+    return what && canEditAct ? `<button class="k-edit" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change ${safe(label.slice(2).trim())}">✏️</button>`
       : when && canMove ? `<button class="k-edit" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the ${safe(label.slice(2).trim().toLowerCase())}">✏️</button>` : ""; };
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
@@ -663,7 +663,7 @@ function setFixedToday(key, val, quiet, also = []) {
     const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
     day.items = day.items.filter(it => {
       if (it.fixed) return !ids.includes(it.actId);   // (placed again with the new times, or left out)
-      const act = data.flexible.find(a => a.id === it.actId);
+      const act = data.flexible.find(a => a.id === baseActId(it.actId));
       if (s == null || !act || it.pinned || ticked(it.actId) || !(it.start < e && s < it.end) || !peopleOf(act).some(p => people.includes(p))) return true;
       moved++; return false;   // (clashes with the new times: placed again in free time)
     });
@@ -691,16 +691,17 @@ function setFixedToday(key, val, quiet, also = []) {
 let dayFix = null;   // { ds, people, freed: [[from, to]], adds: [] }
 function openDayFix(ds, people, freed) { dayFix = { ds, people, freed }; drawDayFix(); }
 function drawDayFix() {
-  const { ds, people, freed } = dayFix, has = id => planItemsOn(ds).some(it => !it.fixed && it.actId === id);
+  const { ds, people, freed } = dayFix, count = id => planItemsOn(ds).filter(it => !it.fixed && baseActId(it.actId) === id).length;
+  const has = id => count(id) >= ((data.flexible.find(a => a.id === id) || {}).twiceDay ? 2 : 1);   // (2️⃣ "Can be twice a day": room for a 2nd)
   dayFix.adds = [];
   // ➕ the activities of these people that aren't on that day yet and fit inside the new free time
   data.flexible.filter(a => peopleOf(a).some(p => people.includes(p)) && !has(a.id)).forEach(a => {
     const day = missDayCtx(ds); if (!day.window) return;
     const pre = a.getReady || 0, post = a.breakAfter || 0, len = pre + a.duration + post, span = { ...a, duration: len };
     for (const [f, t] of freed) for (let st = Math.ceil(f / 5) * 5; st + len <= Math.max(t, f + len) && st < t; st += 5)
-      if (fitsAt(day, st, st + len, span, "empty")) { dayFix.adds.push({ id: a.id, at: st + pre, len: a.duration }); return; }
+      if (fitsAt(day, st, st + len, span, "empty")) { dayFix.adds.push({ id: a.id, at: st + pre, len: a.duration, second: count(a.id) === 1 }); return; }
   });
-  const items = planItemsOn(ds).filter(it => !it.fixed).map(it => ({ it, act: data.flexible.find(a => a.id === it.actId) }))
+  const items = planItemsOn(ds).filter(it => !it.fixed).map(it => ({ it, act: data.flexible.find(a => a.id === baseActId(it.actId)) }))
     .filter(x => x.act && peopleOf(x.act).some(p => people.includes(p)));
   const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
   $("missTitle").textContent = dayFix.plan ? `➕ Add on ${dayName(ds)}` : `✏️ ${dayName(ds)}: free time ${freed.map(([a, b]) => `${clock(a, true)}–${clock(b, true)}`).join(", ")}`;
@@ -717,7 +718,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-dfadd], [data-dfdel]"); if (!b || !dayFix || !isParentId(me) || !hasPlan()) return;
   const ds = dayFix.ds, day = data.plan.dates[ds] = data.plan.dates[ds] || { items: [] };
   if (b.dataset.dfadd != null) { const x = dayFix.adds[Number(b.dataset.dfadd)]; if (!x) return;
-    day.items.push({ actId: x.id, fixed: false, start: x.at, end: x.at + x.len, pinned: true }); day.items.sort((p, q) => p.start - q.start);
+    day.items.push({ actId: x.second ? x.id + "~2" : x.id, fixed: false, start: x.at, end: x.at + x.len, pinned: true }); day.items.sort((p, q) => p.start - q.start);
     toast(`📌 Added on ${dayName(ds)} at ${clock(x.at, true)}.`, 2500); }
   else { const id = b.dataset.dfdel;
     day.items = day.items.filter(it => it.fixed || it.actId !== id);
@@ -788,7 +789,7 @@ function editBarHtml() {
 // Is this place free for everyone in the activity? → { ok } or { ok: false, why: "Jawad is at School then." }
 // fromDay / toDay = dates. 📅 Only today (from now) … today + 6: past days never change.
 function moveCheck(actId, fromDay, toDay, start) {
-  const act = data.flexible.find(a => a.id === actId);
+  const act = data.flexible.find(a => a.id === baseActId(actId));
   if (!act) return { ok: false, why: "That activity doesn't exist any more." };
   const today = todayYmd(), last = addDaysYmd(today, PLAN_AHEAD);
   if (!isYmd(toDay) || toDay < today) return { ok: false, why: "Past days can't be changed." };
@@ -861,7 +862,7 @@ function updateDrag(x, y) {
   }
   // The new time: up/down moves it, snapped to 15 minutes.
   // Over a day button (phone) the time doesn't change: it keeps the time it had just before (same time, another day).
-  const act = data.flexible.find(a => a.id === drag.actId);
+  const act = data.flexible.find(a => a.id === baseActId(drag.actId));
   if (under && under.matches(".k-dbtn")) drag.start = drag.keep !== undefined ? drag.keep : drag.orig;
   else drag.start = drag.keep = Math.max(0, Math.min(24 * 60 - act.duration, Math.round((drag.orig + dy / PX_PER_SNAP * SNAP) / SNAP) * SNAP));
   drag.check = moveCheck(drag.actId, drag.fromDay, drag.toDay, drag.start);
@@ -893,7 +894,7 @@ document.addEventListener("click", e => { if (suppressClick) { suppressClick = f
 // and print all read the same saved plan.
 // (fromDay / toDay = dates)
 function moveActivity(actId, fromDay, toDay, start) {
-  const act = data.flexible.find(a => a.id === actId);
+  const act = data.flexible.find(a => a.id === baseActId(actId));
   editUndo.push(JSON.stringify(data.plan));
   const from = data.plan.dates[fromDay], to = data.plan.dates[toDay] = data.plan.dates[toDay] || { items: [] };
   if (from) from.items = from.items.filter(it => !(!it.fixed && it.actId === actId));
@@ -920,7 +921,7 @@ function unpin(day, actId) {
 let moving = null;   // { actId, fromDay, day } (dates)
 function openMoveBox(fromDay, actId) {
   moveDirect = false;
-  const act = data.flexible.find(a => a.id === actId);
+  const act = data.flexible.find(a => a.id === baseActId(actId));
   const it = act && fromDay >= todayYmd() && planItemsOn(fromDay).find(x => !x.fixed && x.actId === actId);
   if (!it) return;
   moving = { actId, fromDay, day: fromDay };
@@ -932,7 +933,7 @@ function openMoveBox(fromDay, actId) {
 function drawMoveBox() {
   // (📅 today … today + 6)
   $("moveDays").innerHTML = aheadDates().map(ds => `<button class="${ds === moving.day ? "on" : ""}" data-moveday="${ds}">${SHORT[weekdayOf(ds)]}<small>${fromYmd(ds).getDate()}</small></button>`).join("");
-  const t = $("moveTime").value, act = data.flexible.find(a => a.id === moving.actId);
+  const t = $("moveTime").value, act = data.flexible.find(a => a.id === baseActId(moving.actId));
   if (!t) { $("moveCheck").className = "move-check bad"; return $("moveCheck").textContent = "Pick a start time."; }
   const start = toMin(t), check = moveCheck(moving.actId, moving.fromDay, moving.day, start);
   $("moveCheck").className = "move-check " + (check.ok ? "ok" : "bad");
@@ -971,7 +972,7 @@ function openDayPlan(ds) {
   const who = calWho && calWho !== "all" ? calWho : null, parent = isParentDevice() && ds >= todayYmd();
   const day = planDay(ds), mine = it => !who || it.people.includes(who);
   const rows = [
-    ...day.items.filter(mine).map(it => ({ s: it.start, e: it.end, name: it.name, users: it.users, it })),
+    ...day.items.filter(mine).map(it => ({ s: it.start, e: it.end, name: it.second ? `${it.name} (2nd)` : it.name, users: it.users, it })),
     ...oneDayOn(ds).filter(e => !who || e.who.includes(who)).map(e => ({ s: toMin(e.from), e: toMin(e.to), name: `📌 ${e.title}`, users: e.who })),
     ...day.routines.filter(r => !r.pad && (!who || (r.users || []).includes(who))).map(r => ({ s: r.start, e: r.end, name: `${r.emoji || ""} ${r.name}`, users: r.users || [], soft: true }))
   ].sort((a, b) => a.s - b.s);

@@ -82,6 +82,10 @@ function bedUsual(person, wd) {
   const u = data && Array.isArray(data.users) && data.users.find(x => x.id === person);
   return u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null;
 }
+// 2️⃣ v181: an activity's 2nd session on the same date has its own id "actId~2" in the plan (own ✅ tick, own study session and
+// worksheet); baseActId gives the activity's own id back (for its name, people, length …)
+const baseActId = id => String(id || "").replace(/~2$/, "");
+const isSecondId = id => /~2$/.test(String(id || ""));
 // 🏫 v180: a fixed activity on one date: null = as usual, { off: true } = didn't happen, { start, end } = other times that day
 const fixedOnOf = (ds, id) => (data && data.fixedOn && data.fixedOn[`${ds}|${id}`]) || null;
 function bedMin(person, ds) {
@@ -734,10 +738,11 @@ function cleanData(d) {
     .map(f => {
       const users = usersOf(f);
       return { id: String(f.id || newId()), name: String(f.name),
-               duration: Number(f.duration), times: Math.min(DAYS.length, Number(f.times)),
+               duration: Number(f.duration), times: Math.min(f.twiceDay === true ? DAYS.length * 2 : DAYS.length, Number(f.times)),
                overlapWith: Array.isArray(f.overlapWith) ? f.overlapWith.map(String) : [],
                users, ...helpOf(f, users, true), ...padsOf(f), ...betweenOf(f),   // (🤝 helper · ⭐ type · 📚 study details)
                ...(f.twice === false ? { twice: false } : {}),   // (⏱️ "make one day's session longer" switched off)
+               ...(f.twiceDay === true ? { twiceDay: true } : {}),   // (2️⃣ v181: may have a 2nd session on the same day)
                oldCanOverlap: f.canOverlap === true };
     });
 

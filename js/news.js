@@ -27,7 +27,7 @@ function tickNews(before, now) {
   const was = before.marks || {}, is = now.marks || {}, out = [];
   new Set([...Object.keys(was), ...Object.keys(is)]).forEach(key => {
     if (!!was[key] === !!is[key]) return;
-    const [, actId, user] = key.split("|"), act = allActs().find(a => a.id === actId), pact = !act && (data.parentActs || []).find(a => a.id === actId);
+    const [, actId, user] = key.split("|"), act = allActs().find(a => a.id === baseActId(actId)), pact = !act && (data.parentActs || []).find(a => a.id === actId);
     const name = act ? act.name : pact ? `${pactType(pact)[1]} ${pact.title}` : "an activity", by = is[key] ? is[key].by : me;
     const forWho = by !== user ? ` for ${whoText(user)}` : "";
     out.push(is[key]

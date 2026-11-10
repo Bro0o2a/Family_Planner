@@ -336,7 +336,8 @@ $("flAdd").onclick = () => {
   if (!name) return $("flErr").textContent = "Please type a name.";
   if (!users.length) return $("flErr").textContent = "Tick “Who?” — at least one person.";
   if (!(duration >= 5)) return $("flErr").textContent = "It should be at least 5 minutes.";
-  if (!(times >= 1 && times <= DAYS.length)) return $("flErr").textContent = `Times per week must be 1 to ${DAYS.length}.`;
+  const twiceDay = $("flTwiceDay").checked, maxTimes = DAYS.length * (twiceDay ? 2 : 1);   // (2️⃣ v181: twice a day → up to 14)
+  if (!(times >= 1 && times <= maxTimes)) return $("flErr").textContent = `Times per week must be 1 to ${maxTimes}${twiceDay ? "" : " (tick “Can be twice a day” for more)"}.`;
   // "Only between": both times or none; the time must be long enough for the activity
   const from = $("flFrom").value, to = $("flTo").value;
   if (!from !== !to) return $("flErr").textContent = "“Only between”: pick both times, or tap ✕ Any time.";
@@ -352,9 +353,10 @@ $("flAdd").onclick = () => {
     putHelp(Object.assign(old, { name, duration, times, overlapWith, users, getReady, breakAfter, type }), help);
     if (between) old.between = between; else delete old.between;
     if (twice) delete old.twice; else old.twice = false;
+    if (twiceDay) old.twiceDay = true; else delete old.twiceDay;
   } else {                                                                         // add a new one
     id = newId();
-    data.flexible.push(putHelp({ id, name, duration, times, overlapWith, users, getReady, breakAfter, type, ...(between ? { between } : {}), ...(twice ? {} : { twice: false }) }, help));
+    data.flexible.push(putHelp({ id, name, duration, times, overlapWith, users, getReady, breakAfter, type, ...(between ? { between } : {}), ...(twice ? {} : { twice: false }), ...(twiceDay ? { twiceDay: true } : {}) }, help));
   }
   if (isParentId(me)) syncPartners(id, overlapWith); // keep it two-way
   resetFlexForm();
@@ -363,7 +365,7 @@ $("flAdd").onclick = () => {
 };
 
 function startEditFlex(id) {
-  const f = data.flexible.find(x => x.id === id);
+  const f = data.flexible.find(x => x.id === baseActId(id));
   if (!f || !canEdit(f)) return;
   editingFlex = id;
   $("flName").value = f.name;
@@ -371,6 +373,7 @@ function startEditFlex(id) {
   $("flDur").value = f.duration;
   $("flTimes").value = f.times;
   $("flTwice").checked = f.twice !== false;
+  $("flTwiceDay").checked = f.twiceDay === true; $("flTimes").max = f.twiceDay ? 14 : 7;
   $("flReady").value = String(f.getReady || 0);
   $("flBreak").value = String(f.breakAfter || 0);
   $("flFrom").value = f.between ? f.between.from : "";
@@ -394,6 +397,7 @@ function resetFlexForm() {
   $("flDur").value = 45;
   $("flTimes").value = 3;
   $("flTwice").checked = true;
+  $("flTwiceDay").checked = false; $("flTimes").max = 7;
   $("flFrom").value = $("flTo").value = "";   // any free time
   padTouched.fl = false;
   fillPads("fl");          // automatic times
@@ -507,7 +511,7 @@ function deleteActivity(id, isFixedOne) {
   // 📅 Its items on the days that are gone (and today) stay as history: they remember its name, people and type
   // (today's ones that haven't started and aren't ticked are taken out when the week is planned again, see makePlan)
   if (hasPlan()) Object.entries(data.plan.dates).forEach(([ds, day]) => ds <= todayYmd() && day.items.forEach(it => {
-    if (it.actId === id && !!it.fixed === !!isFixedOne) it.gone = { name: act.name, users: [...act.users], people: peopleOf(act), type: actTypeOf(act) };
+    if (baseActId(it.actId) === id && !!it.fixed === !!isFixedOne) it.gone = { name: act.name, users: [...act.users], people: peopleOf(act), type: actTypeOf(act) };
   }));
   if (isFixedOne) data.fixed = data.fixed.filter(f => f.id !== id);
   else data.flexible = data.flexible.filter(f => f.id !== id);
@@ -776,7 +780,7 @@ function makePlan(mode = "replan") {
   // STEP A2: the saved items of the kept dates, as they are
   const keptOf = {};   // flexible activity id → the days (0 = today) it's already on (they count towards its "times a week")
   days.forEach((day, d) => { if (day.date <= keepUpTo) savedOn(day.date).forEach(it => {
-    const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === it.actId);
+    const act = (it.fixed ? data.fixed : data.flexible).find(a => a.id === baseActId(it.actId));
     const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${day.date}|${it.actId}|`));
     // ✏️ Edited activities show at once, today too (only what nobody ticked yet stays as it was):
     if (day.date >= today && open(day.date) && !ticked) {
@@ -844,11 +848,11 @@ function makePlan(mode = "replan") {
   // (Only the pins on the dates planned again; the ones on kept dates are already there, see STEP A2.)
   const pinnedOf = keptOf;   // activity id → the days it's pinned (or kept) on
   days.forEach((day, d) => day.date > keepUpTo && savedOn(day.date).forEach(it => {
-    const act = !it.fixed && it.pinned && data.flexible.find(a => a.id === it.actId);
+    const act = !it.fixed && it.pinned && data.flexible.find(a => a.id === baseActId(it.actId));
     if (!act) return;
     const pre = act.getReady || 0, post = act.breakAfter || 0;
     days[d].items.push({ name: act.name, start: it.start - pre, end: it.start + act.duration + post, pre, post, pinned: true,
-                         actId: act.id, users: act.users, people: peopleOf(act) });
+                         actId: it.actId, users: act.users, people: peopleOf(act) });   // (2️⃣ a pinned 2nd session keeps its "~2" id)
     (pinnedOf[act.id] = pinnedOf[act.id] || []).push(d);
   }));
 
@@ -871,7 +875,8 @@ function makePlan(mode = "replan") {
     const modes = [...(sharingOn && hasFixedPartner ? ["onFixed"] : []), "empty", ...(sharingOn ? ["share"] : [])];
 
     // ("times a week" = times inside the 7-day window, today included; the kept and pinned ones already count)
-    for (let n = usedDays.length; n < Math.min(act.times, days.length); n++) {
+    // (2️⃣ v181 "Can be twice a day": up to 2 a day, so up to 14 in the 7 days)
+    for (let n = usedDays.length; n < Math.min(act.times, days.length * (act0.twiceDay ? 2 : 1)); n++) {
       let best = null;
       for (const mode of modes) {
         for (let d = 0; d < days.length; d++) {
@@ -890,6 +895,28 @@ function makePlan(mode = "replan") {
       }
       // 2️⃣ Last try (unless switched off): no new day has room → make its session LONGER on a day that already has it
       // (one block, one tick, one worksheet for the whole time). Each day's session gets longer only once.
+      // 2️⃣ v181 (Broo2a): "Can be twice a day" ticked → no new day has room: a 2nd SEPARATE session on a day that has one,
+      // in an empty slot at least an hour away from the first one (its own tick, session and worksheet: id "actId~2")
+      if (!best && act0.twiceDay) {
+        for (const mode of modes) {
+          for (const d of [...new Set(usedDays)]) {
+            const day = days[d], mine = day.items.filter(x => baseActId(x.actId) === act.id && !x.fixed);
+            if (mine.length !== 1 || skippedOn(day.date, act.id + "~2")) continue;
+            const gap = { fixed: false, actId: "~gap", start: mine[0].start - 60, end: mine[0].end + 60, people };
+            const start = earliestStart({ ...day, items: [...day.items, gap] }, act, mode);
+            if (start === null) continue;
+            const score = fullness(d, people);
+            if (!best || score < best.score) best = { d, score, start, second: true };
+          }
+          if (best) break;
+        }
+        if (best) {
+          days[best.d].items.push({ name: act.name, start: best.start, end: best.start + act.duration, pre, post,
+                                    actId: act.id + "~2", users: act.users, people, ...(only ? { lo: act.lo, hi: act.hi } : {}) });
+          usedDays.push(best.d);
+          continue;
+        }
+      }
       if (!best && act0.twice !== false) {
         for (const mode of modes) {
           for (const d of [...new Set(usedDays)]) {
@@ -918,7 +945,7 @@ function makePlan(mode = "replan") {
     }
 
     // STEP D: Warn if we couldn't place everything.
-    if (usedDays.length < act.times) {
+    if (usedDays.length < Math.min(act.times, days.length * (act0.twiceDay ? 2 : 1))) {
       const missing = act.times - usedDays.length;
       const tips = [...(only ? ["a wider “Only between” time (or ✕ Any time)"] : []), "a longer day (in Settings)", "shortening it", "reducing how often"];
       if (helperOf(act)) tips.push(`another parent in “🤝” (${helperOf(act).name} is busy)`);
@@ -944,7 +971,7 @@ function planKey() {
     fx: data.fixed.map(f => [f.id, f.days, f.start, f.end, [...f.overlapWith].sort(), f.users, helps(f), ...pads(f)]),
     // (the "Only between" time only when it's set, so plans made before it existed still count as up to date)
     fl: data.flexible.map(f => [f.id, f.duration, f.times, [...f.overlapWith].sort(), f.users, helps(f), ...pads(f),
-                                ...(f.between ? [{ only: [f.between.from, f.between.to] }] : []), ...(f.twice === false ? [{ once: true }] : [])]),
+                                ...(f.between ? [{ only: [f.between.from, f.between.to] }] : []), ...(f.twice === false ? [{ once: true }] : []), ...(f.twiceDay ? [{ two: true }] : [])]),
     day: [data.myDay.start, data.myDay.end, data.myDay.weekendOwn, data.myDay.weekendStart, data.myDay.weekendEnd],
     // (🕗 each day's own hours: only when they're set, so a plan made before still counts as up to date)
     ...(data.myDay.days ? { days: data.myDay.days.map(x => [x.start, x.end]) } : {}),
@@ -1010,8 +1037,8 @@ function missedSessions() {
   if (!hasPlan()) return [];
   const dates = aheadDates();
   return data.flexible.map(act => {
-    const placed = dates.filter(ds => planItemsOn(ds).some(it => !it.fixed && it.actId === act.id)).length;
-    return { act, missing: Math.min(act.times, dates.length) - placed };
+    const placed = dates.reduce((n, ds) => n + planItemsOn(ds).filter(it => !it.fixed && baseActId(it.actId) === act.id).length, 0);
+    return { act, missing: Math.min(act.times, dates.length * (act.twiceDay ? 2 : 1)) - placed };
   }).filter(x => x.missing > 0);
 }
 // One date, ready for fitsAt: the plan's items + routines, get ready / break and 📌 one-day events (all keep their people busy)
@@ -1055,6 +1082,17 @@ function missFixes(act) {
       if (at != null && !fixes.some(f => f.ds === ds && f.kind === "put")) { fixes.push({ kind: "bed", ds, at, len: act.duration, plus, kids }); break; }
     }
   }
+  // 2️⃣ v181: a 2nd session on a day that already has one (only when "Can be twice a day" is ticked), an hour away from it
+  if (act.twiceDay && fixes.length < 4) for (const ds of dates) {
+    const mine = planItemsOn(ds).filter(it => !it.fixed && baseActId(it.actId) === act.id);
+    if (mine.length !== 1 || skippedOn(ds, act.id + "~2")) continue;
+    const day = missDayCtx(ds); if (!day.window) continue;
+    day.items.push({ fixed: false, actId: "~gap", start: mine[0].start - 60, end: mine[0].end + 60, people: peopleOf(act) });
+    const pre = act.getReady || 0, post = act.breakAfter || 0, len = pre + act.duration + post;
+    let at = null;
+    for (let s = Math.ceil(day.window[0] / 5) * 5; s + len <= day.window[1]; s += 5) if (fitsAt(day, s, s + len, { ...act, duration: len }, "empty")) { at = s + pre; break; }
+    if (at != null) { fixes.push({ kind: "second", ds, at, len: act.duration }); break; }
+  }
   // ✂️ a shorter session (two thirds, at least 20 minutes) on a day with no room for the whole one
   const short = Math.max(20, Math.round(act.duration * 2 / 3 / 5) * 5);
   if (short < act.duration) for (const ds of free) { if (fixes.length >= 4 || fixes.some(f => f.ds === ds)) continue;
@@ -1070,6 +1108,7 @@ function openMissed() {
   dayFix = null; $("missTitle").textContent = "🔍 Missed sessions"; $("missHint").hidden = false;
   const list = missedSessions();
   const fixText = (f, act) => f.kind === "put" ? `➕ ${dayName(f.ds)} ${clock(f.at, true)}`
+    : f.kind === "second" ? `2️⃣ ${dayName(f.ds)} ${clock(f.at, true)} · a 2nd session that day`
     : f.kind === "bed" ? `🌙 ${dayName(f.ds)} ${clock(f.at, true)} · bedtime ${f.plus} min later that night`
     : `✂️ ${dayName(f.ds)} ${clock(f.at, true)} · shorter (${f.len} of ${act.duration} min)`;
   $("missBody").innerHTML = !list.length ? `<p class="print-hint">🎉 Nothing is missing: every activity fit this week.</p>`
@@ -1084,7 +1123,7 @@ function applyMissFix(i) {
   const f = missList[i]; if (!f || !isParentId(me) || !hasPlan()) return;
   if (f.kind === "bed") { data.bedOn = data.bedOn || {}; f.kids.forEach(p => data.bedOn[`${f.ds}|${p}`] = clock24(bedMin(p, f.ds) + f.plus)); }
   const day = data.plan.dates[f.ds] = data.plan.dates[f.ds] || { items: [] };
-  day.items.push({ actId: f.actId, fixed: false, start: f.at, end: f.at + f.len, pinned: true });
+  day.items.push({ actId: f.kind === "second" ? f.actId + "~2" : f.actId, fixed: false, start: f.at, end: f.at + f.len, pinned: true });
   day.items.sort((a, b) => a.start - b.start);
   writeData();
   render();
@@ -1097,3 +1136,6 @@ document.addEventListener("click", e => {
   if ("missclose" in b.dataset) { $("missModal").hidden = true; return; }
   applyMissFix(Number(b.dataset.missfix));
 });
+
+// 2️⃣ v181: "Can be twice a day" ticked → "Times per week" may go up to 14
+document.addEventListener("change", e => { if (e.target && e.target.id === "flTwiceDay") $("flTimes").max = e.target.checked ? 14 : 7; });
