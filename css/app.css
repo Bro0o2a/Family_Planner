@@ -3203,3 +3203,9 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .k-bed .bed-pick { width: auto; max-width: 110px; flex: none; margin: 0; }
 .k-bed .r-who { display: inline-flex; flex-direction: row; gap: 1px; }
 .k-bed small { white-space: nowrap; }
+/* 🔍 v180 Missed sessions */
+.miss-card { max-height: 85vh; overflow-y: auto; text-align: left; }
+.miss-row { padding: 10px 0; border-top: 1px dashed var(--line, #e5e7eb); }
+.miss-row small { display: block; color: var(--muted, #6b7280); margin: 2px 0 6px; }
+.miss-fixes { display: flex; flex-wrap: wrap; gap: 6px; }
+.miss-fixes .pill { font-size: 13px; padding: 6px 10px; min-height: 0; }

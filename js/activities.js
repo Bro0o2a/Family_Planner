@@ -994,3 +994,99 @@ function newPlanNow() {
   render();
   toast(p.warnings.length ? "🔄 New plan made! A few things need your attention." : "🔄 New plan made! Ticks already done stayed.", 3500);
 }
+
+// =====================================================================
+//  🔍 v180 MISSED SESSIONS (Broo2a): a parent's button on the home. Lists every activity the plan couldn't fit as many times
+//  as asked (this plan's 7 days, today … today + 6) and gives fixes to tap: ➕ put it on a day that has room (days off first),
+//  🌙 bedtime a bit later that night, or ✂️ a shorter session that day. A fix is 📌 pinned, so a new plan keeps it.
+// =====================================================================
+function missedSessions() {
+  if (!hasPlan()) return [];
+  const dates = aheadDates();
+  return data.flexible.map(act => {
+    const placed = dates.filter(ds => planItemsOn(ds).some(it => !it.fixed && it.actId === act.id)).length;
+    return { act, missing: Math.min(act.times, dates.length) - placed };
+  }).filter(x => x.missing > 0);
+}
+// One date, ready for fitsAt: the plan's items + routines, get ready / break and 📌 one-day events (all keep their people busy)
+function missDayCtx(ds) {
+  const pd = planDay(ds), today = todayYmd(), [ws, we] = dayWindow(weekdayOf(ds));
+  const s = ds === today ? Math.max(ws, Math.ceil(dubaiMinutes() / 5) * 5 + 10) : ws;
+  const items = [...pd.items.map(it => ({ ...it })),
+    ...pd.routines.map(r => ({ fixed: true, actId: r.id, start: r.start, end: r.end, people: r.users || [] })),
+    ...oneDayOn(ds).map(e => ({ routine: true, fixed: true, actId: e.id, start: toMin(e.from), end: toMin(e.to), people: e.who }))];
+  return { date: ds, items, window: s < we ? [s, we] : null };
+}
+// The first start (every 5 minutes) where the activity (with its get ready / break) fits that day, or null
+function missFitOn(ds, act, len) {
+  const day = missDayCtx(ds); if (!day.window) return null;
+  const pre = act.getReady || 0, post = act.breakAfter || 0, only = onlyWindow(act);
+  const a = { ...act, duration: pre + len + post, ...(only ? { lo: only[0] - pre, hi: only[1] + post } : {}) };
+  const modes = ["empty", ...(act.overlapWith.length && data.maxTogether > 1 ? ["share"] : [])];
+  for (const mode of modes) for (let s = Math.ceil(day.window[0] / 5) * 5; s + a.duration <= day.window[1]; s += 5)
+    if (fitsAt(day, s, s + a.duration, a, mode)) return s + pre;   // (the activity's own start)
+  return null;
+}
+// Up to 4 fixes for one activity
+function missFixes(act) {
+  const dates = aheadDates(), has = ds => planItemsOn(ds).some(it => !it.fixed && it.actId === act.id);
+  const free = dates.filter(ds => !has(ds) && !skippedOn(ds, act.id));
+  // (days off first: the days with the fewest fixed activities, e.g. Saturday and Sunday)
+  const busy = ds => planItemsOn(ds).filter(it => it.fixed).length;
+  free.sort((a, b) => busy(a) - busy(b) || a.localeCompare(b));
+  const fixes = [];
+  for (const ds of free) { if (fixes.length >= 2) break;
+    const at = missFitOn(ds, act, act.duration); if (at != null) fixes.push({ kind: "put", ds, at, len: act.duration }); }
+  // 🌙 a later bedtime that night (15 … 60 minutes) for its kids that have one
+  const kids = peopleOf(act).filter(p => !isParentId(p) && (bedUsual(p, 0) != null || bedUsual(p, 4) != null));
+  if (kids.length) for (const ds of free) { if (fixes.some(f => f.kind === "bed")) break;
+    const was = { ...(data.bedOn || {}) };
+    for (let plus = 15; plus <= 60; plus += 15) {
+      data.bedOn = { ...was }; let ok = true;
+      kids.forEach(p => { const b = bedMin(p, ds), m = b + plus; if (b == null || m >= 24 * 60) ok = false; else data.bedOn[`${ds}|${p}`] = clock24(m); });
+      const at = ok ? missFitOn(ds, act, act.duration) : null;
+      data.bedOn = was;
+      if (at != null && !fixes.some(f => f.ds === ds && f.kind === "put")) { fixes.push({ kind: "bed", ds, at, len: act.duration, plus, kids }); break; }
+    }
+  }
+  // ✂️ a shorter session (two thirds, at least 20 minutes) on a day with no room for the whole one
+  const short = Math.max(20, Math.round(act.duration * 2 / 3 / 5) * 5);
+  if (short < act.duration) for (const ds of free) { if (fixes.length >= 4 || fixes.some(f => f.ds === ds)) continue;
+    const at = missFitOn(ds, act, short); if (at != null) { fixes.push({ kind: "short", ds, at, len: short }); break; } }
+  return fixes;
+}
+const clock24 = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+let missList = [];   // the fixes on screen (the button's number → the fix)
+function openMissed() {
+  if (!isParentId(me)) return;
+  if (!hasPlan()) return toast("Press ✨ Plan my week first.", 3000);
+  missList = [];
+  const list = missedSessions();
+  const fixText = (f, act) => f.kind === "put" ? `➕ ${dayName(f.ds)} ${clock(f.at, true)}`
+    : f.kind === "bed" ? `🌙 ${dayName(f.ds)} ${clock(f.at, true)} · bedtime ${f.plus} min later that night`
+    : `✂️ ${dayName(f.ds)} ${clock(f.at, true)} · shorter (${f.len} of ${act.duration} min)`;
+  $("missBody").innerHTML = !list.length ? `<p class="print-hint">🎉 Nothing is missing: every activity fit this week.</p>`
+    : list.map(({ act, missing }) => { const fixes = missFixes(act);
+      return `<div class="miss-row"><b>${safe(act.name)}</b> <span class="miss-who">${facesHtml(act.users)}</span>
+        <small>${missing} of ${Math.min(act.times, 7)} ${missing === 1 ? "session" : "sessions"} missing this week</small>
+        <div class="miss-fixes">${fixes.length ? fixes.map(f => `<button class="pill small" data-missfix="${missList.push({ ...f, actId: act.id }) - 1}">${safe(fixText(f, act))}</button>`).join("")
+          : `<span class="hint">No room on any day. Try a shorter time, fewer times a week, or a longer day in ⚙️ Settings.</span>`}</div></div>`; }).join("");
+  $("missModal").hidden = false;
+}
+function applyMissFix(i) {
+  const f = missList[i]; if (!f || !isParentId(me) || !hasPlan()) return;
+  if (f.kind === "bed") { data.bedOn = data.bedOn || {}; f.kids.forEach(p => data.bedOn[`${f.ds}|${p}`] = clock24(bedMin(p, f.ds) + f.plus)); }
+  const day = data.plan.dates[f.ds] = data.plan.dates[f.ds] || { items: [] };
+  day.items.push({ actId: f.actId, fixed: false, start: f.at, end: f.at + f.len, pinned: true });
+  day.items.sort((a, b) => a.start - b.start);
+  writeData();
+  render();
+  toast(`📌 Added on ${dayName(f.ds)} at ${clock(f.at, true)}.`, 3000);
+  openMissed();   // (the list again, with what's still missing)
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-missed], [data-missfix], [data-missclose]"); if (!b) return;
+  if ("missed" in b.dataset) return openMissed();
+  if ("missclose" in b.dataset) { $("missModal").hidden = true; return; }
+  applyMissFix(Number(b.dataset.missfix));
+});

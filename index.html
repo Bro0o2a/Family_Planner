@@ -575,6 +575,15 @@
 </div>
 
 <!-- 📔 v180: a kid's evening reminder: answer today's mood (and this week's wish) -->
+<!-- 🔍 v180 Missed sessions (parents): filled by openMissed (activities.js) -->
+<div class="k-modal" id="missModal" hidden>
+  <div class="k-card miss-card" role="dialog" aria-modal="true" aria-labelledby="missTitle">
+    <div class="print-title" id="missTitle" style="font-size:22px">🔍 Missed sessions</div>
+    <p class="print-hint" style="margin:4px 0 10px">Tap a fix to put it on the calendar (📌 a new plan keeps it).</p>
+    <div id="missBody"></div>
+    <div class="btnrow"><button data-missclose>Close</button></div>
+  </div>
+</div>
 <div class="k-modal" id="moodAsk" hidden>
   <div class="k-card pray-card" role="dialog" aria-modal="true" aria-labelledby="moodAskTitle">
     <div class="leave-emoji">📔</div>

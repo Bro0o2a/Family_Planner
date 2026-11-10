@@ -178,6 +178,8 @@ function familyRowHtml() {
   const n = feat("meeting") ? cmNewCount() : 0, dad = isParentId(me);
   const groups = [
     ["Plan the week", [{ attr: "data-calall", label: "Family calendar", sub: "Everyone's week in one place", cls: "hub-main" },
+      // 🔍 v180: the sessions the plan couldn't fit, with fixes to tap
+      ...(dad && hasPlan() ? (m => [{ attr: "data-missed", label: "Missed sessions", sub: m ? "Didn't fit this week: see how to fit them" : "Everything fit this week 🎉", badge: m ? `${m} missing` : "" }])(missedSessions().reduce((n, x) => n + x.missing, 0)) : []),
       { go: "add", label: "Add activities", sub: "School, clubs, work, sports" },
       ...(dad ? [{ plan: true, label: "Plan my week", sub: "Fit all the activities together" }] : []),
       { attr: "data-onedaynew", label: "One-day event", sub: "Something on one date only" },
