@@ -121,7 +121,8 @@ function needsItems() {
   const asked = isParentId(me) && !isKidDevice() ? askedWs() : [];
   if (asked.length) out.push({ key: "ask", text: asked.length === 1 ? `🙋 ${kidNameOf(asked[0].w.kid)} asks you to check ${asked[0].nums.map(n => "Q" + n).join(", ")} in ${asked[0].w.subject}` : `🙋 ${asked.length} answers to check`,
     html: `<div class="card">${asked.map(x => `<p>🙋 <b>${safe(kidNameOf(x.w.kid))}</b> asks you to check ${x.nums.map(n => "Q" + n).join(", ")} in ${safe(x.w.subject)} (${safe(x.w.title)})</p>
-      <div class="btnrow"><button class="primary" data-wsaskopen="${safe(x.id)}">Check it</button></div>`).join("")}</div>` });
+      <div class="btnrow"><button class="primary" data-wsaskopen="${safe(x.id)}">Check it</button><button data-wsaskx="${safe(x.id)}" aria-label="Remove this alert">✕ Remove</button></div>`).join("")}
+      ${asked.length > 1 ? `<div class="btnrow"><button data-wsaskx="all">✕ Clear all</button></div>` : ""}</div>` });
   // 😟 v179: a kid is stuck on a topic (5 worksheets in a row under 60 %)
   const stuck = stuckList();
   if (stuck.length) out.push({ key: "stuck", text: stuck.length === 1 ? `😟 ${kidNameOf(stuck[0].kid)} is stuck on ${topicShort(stuck[0].t.title)}` : `😟 ${stuck.length} topics the kids are stuck on`,

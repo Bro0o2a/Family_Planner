@@ -1667,6 +1667,23 @@ document.addEventListener("click", e => {
   if (b.dataset.wsqask) { const [n, to] = b.dataset.wsqask.split("|"); return askQuestion(schoolDoc, Number(n), to); }
   if (b.dataset.wsaskopen) { openAiDoc("worksheet", b.dataset.wsaskopen); wsAllAns = true; schoolFresh = true; return render(); }
 });
+// ✕ v180: a parent removes a "please check" alert (the AI's mark stays as it is; the kid's question is closed)
+function askDismiss(which) {
+  if (!isParentId(me) || isKidDevice()) return;
+  const list = askedWs().filter(x => which === "all" || x.id === which);
+  list.forEach(x => {
+    const w = aiDocs.worksheets[x.id];
+    if (!w || !w.check) return;
+    const questions = w.check.questions.map(q => { if (!askedMe(q)) return q; const { ask, askTo, ...rest } = q; return rest; });
+    aiSave("worksheets", x.id, { ...w, check: { ...w.check, questions } });
+  });
+  if (list.length) toast(list.length === 1 ? "✕ Alert removed." : `✕ ${list.length} alerts removed.`, 2500);
+  render();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-wsaskx]");
+  if (b) askDismiss(b.dataset.wsaskx);
+});
 // ✏️ Bro2a changes the score / adds his own note
 function fixFormNode(w) {
   const c = w.check;
