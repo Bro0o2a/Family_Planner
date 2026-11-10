@@ -565,6 +565,7 @@ function freeFor(i, person) {
   const busy = data.fixed.filter(f => f.days.includes(i) && peopleOf(f).includes(person) && blocks(f))
     .map(f => [toMin(f.start), toMin(f.end)]);
   routinesOn(i).filter(r => r.users.includes(person)).forEach(r => busy.push([r.start, r.end]));  // routines aren't free time
+  const bed = bedUsual(person, i); if (bed != null) busy.push([bed, 24 * 60]);   // 🌙 after bedtime: no free time
   return cutOut(dayWindow(i), busy);
 }
 
@@ -674,6 +675,8 @@ function fitsAt(day, start, end, act, mode) {
   // "Only between": the activity itself must be inside its time (its get ready / break may stick out)
   if (act.lo != null && (start < act.lo || end > act.hi)) return false;
   const people = peopleOf(act);
+  // 🌙 never after one of its people's bedtime
+  if (day.date && people.some(p => { const b = bedMin(p, day.date); return b != null && end > b; })) return false;
   const touching = day.items.filter(it => it.start < end && start < it.end && it.people.some(p => people.includes(p)));
   // Kids can't do anything while they're at School (or in another fixed activity of theirs):
   // a kid's fixed activity always blocks that kid, even if "can be done at the same time" was ticked.
@@ -718,7 +721,8 @@ function spreadDay(day) {
     for (const it of movable) {
       const len = it.end - it.start;
       const ws = it.lo != null ? Math.max(day.window[0], it.lo) : day.window[0];
-      const we = it.hi != null ? Math.min(day.window[1], it.hi) : day.window[1];
+      const beds = it.people.map(p => bedMin(p, day.date)).filter(b => b != null);   // (🌙 not after bedtime)
+      const we = Math.min(it.hi != null ? Math.min(day.window[1], it.hi) : day.window[1], ...beds);
       const others = day.items.filter(o => o !== it && shares(it, o));
       // The room around it if it starts at s: the smallest gap to its neighbors or the edges of the day (-1 = clash)
       const room = s => {
@@ -940,6 +944,7 @@ function planKey() {
     ...(data.myDay.days ? { days: data.myDay.days.map(x => [x.start, x.end]) } : {}),
     max: data.maxTogether,
     // (only when there are routines, so a plan made before routines existed still counts as up to date)
+    ...(data.users.some(u => u.bed) ? { bed: data.users.filter(u => u.bed).map(u => [u.id, u.bed.wd, u.bed.we]) } : {}),   // 🌙
     ...(data.routines.length ? { rt: data.routines.map(r => [r.id, r.days, r.start, r.duration, r.users]) } : {})
   });
 }

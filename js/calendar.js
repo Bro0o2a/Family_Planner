@@ -317,6 +317,12 @@ function weekHtml(days, opts) {
     const praysIn = b => prays.filter(p => b.start <= p.start && p.start < b.end);
     merged.forEach(b => praysIn(b).forEach(p => inPrayer.add(p)));
     prays.filter(p => !inPrayer.has(p)).forEach(p => parts.push({ start: p.start, end: p.start + 1, strip: true, html: prayLineHtml(p, false) }));
+    // 🌙 v180 Bedtime: one thin line per bedtime (kids with the same time share it). After the day's end: shown at the end.
+    const [, dayEnd] = day.window || [0, 24 * 60];
+    // (a shared view: ONE line at the first bedtime, with each time's kids in it, so the lines don't squeeze side by side)
+    const beds = bedGroups(ds, opts.only || null);
+    if (beds.length) { const at = Math.min(beds[0].min, dayEnd - 1);
+      parts.push({ start: at, end: at + 1, strip: true, html: `<div class="k-bed ${beds.some(g => g.tonight) ? "tonight" : ""}">🌙 Bedtime ${beds.map(g => bedLineHtml(g, ds, opts)).join("")}</div>` }); }
     merged.forEach(b => {
       const info = blockInfo(b);
       // 🤝 On the helping parent's own calendar: the kid's activity shows faded, as "helping"
@@ -406,6 +412,53 @@ function weekHtml(days, opts) {
       eventsOn(ds, opts.only || null).filter(e => !e.time).map(e => eventHtml(e, opts.only || null)).join("")}${
       pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, ds, opts)).join("")}`; }, opts.whole || wholeWeek, bars, dates);
 }
+
+// 🌙 v180 Bedtime lines on one date: [{ min, kids: [ids] }] (one kid's calendar: only theirs; a parent's own: none)
+function bedGroups(ds, only) {
+  const kids = only ? (isParentId(only) ? [] : [only]) : kidsList().map(k => k.id);
+  const by = {};
+  kids.forEach(id => { const b = bedMin(id, ds); if (b != null) (by[b] = by[b] || []).push(id); });
+  return Object.keys(by).map(Number).sort((a, b) => a - b).map(min => ({ min, kids: by[min], tonight: by[min].some(id => data.bedOn && data.bedOn[`${ds}|${id}`]) }));
+}
+// The line: "🌙 Bedtime 8:30 PM" (+ the kids' faces on a shared view). A parent (today and later): a time picker to change
+// it for THIS night only (the usual times are in ⚙️ Settings → 🌙 Bedtimes).
+function bedLineHtml(g, ds, opts) {
+  const faces = opts.only ? "" : ` <span class="r-who">${facesHtml(g.kids)}</span>`;
+  const tonight = g.tonight;
+  const can = isParentDevice() && !opts.readOnly && ds >= todayYmd();
+  const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  const opt = [];
+  for (let m = 18 * 60; m < 24 * 60; m += 15) opt.push(`<option value="${hm(m)}" ${m === g.min ? "selected" : ""}>${clock(m, true)}</option>`);
+  const pick = can ? `<select class="bed-pick" data-bedset="${ds}|${safe(g.kids.join(","))}" aria-label="Change bedtime for this night"
+      title="Change it for this night only">${opt.join("")}${tonight ? `<option value="usual">↩️ Usual time</option>` : ""}</select>`
+    : `<b>${clock(g.min, true)}</b>`;
+  return `<span class="bed-g" title="🌙 Bedtime${tonight ? " (this night only)" : ""}">${pick}${faces}${tonight ? ` <small>this night</small>` : ""}</span>`;
+}
+// A parent changed one night's bedtime: kept for that date; anything planned for those kids after it (not ticked, not 📌, not fixed)
+// is taken off and placed again earlier if there's room (like a 📌 one-day event)
+function setBedTonight(key, val) {
+  const [ds, ids] = key.split("|"), kids = ids.split(",").filter(exists);
+  if (!isParentId(me) || !kids.length) return;
+  data.bedOn = data.bedOn || {};
+  kids.forEach(id => { if (val === "usual" || toMin(val) === bedUsual(id, weekdayOf(ds))) delete data.bedOn[`${ds}|${id}`]; else data.bedOn[`${ds}|${id}`] = val; });
+  let moved = 0;
+  if (hasPlan() && data.plan.dates[ds]) {
+    const items = data.plan.dates[ds].items, keep = items.filter(it => {
+      if (it.fixed || it.pinned || it.gone) return true;
+      const act = data.flexible.find(a => a.id === it.actId); if (!act) return true;
+      const late = peopleOf(act).some(p => kids.includes(p) && bedMin(p, ds) != null && it.end > bedMin(p, ds));
+      const ticked = Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${it.actId}|`));
+      return !late || ticked;
+    });
+    moved = items.length - keep.length;
+    data.plan.dates[ds].items = keep;
+    if (moved) makeAndKeepPlan("fill");
+  }
+  writeData();
+  render();
+  toast(`🌙 Bedtime changed for ${dayName(ds)} only${moved ? `. ${moved} ${moved === 1 ? "activity was" : "activities were"} moved earlier (or off, if there was no room)` : ""}.`, 3500);
+}
+document.addEventListener("change", e => { const t = e.target; if (t.dataset && t.dataset.bedset) setBedTonight(t.dataset.bedset, t.value); });
 
 // Rows by time of day: every different start time in the week (to the nearest 15 minutes) is one row,
 // sorted from morning to night, so things that start at the same time line up across the week.

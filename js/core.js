@@ -74,6 +74,18 @@ function familyOrder(list) {
     return a.i - b.i;
   }).map(x => x.u);
 }
+// 🌙 v180 Bedtime per kid (Broo2a): one time for school nights, one for weekend nights (Friday and Saturday nights),
+//  and a parent can change it for one night (data.bedOn). Nothing is planned for that kid after it. null = no bedtime set.
+const BED_TIME = /^(1[89]|2[0-3]):[0-5]\d$/;   // 6 PM … 11:45 PM
+const isWeekendNight = wd => wd === 4 || wd === 5;   // (0 = Monday: Friday and Saturday nights)
+function bedUsual(person, wd) {
+  const u = data && Array.isArray(data.users) && data.users.find(x => x.id === person);
+  return u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null;
+}
+function bedMin(person, ds) {
+  const t = data && data.bedOn && data.bedOn[`${ds}|${person}`];
+  return t ? toMin(t) : bedUsual(person, weekdayOf(ds));
+}
 const DAD_NAME = "Parent";                       // the first parent's name until they pick their own (a new family types it at sign-up)
 const PLAN_FRESH = "fresh-after-update";         // marks a plan that was up to date before an app update
 // 👨‍👩‍👧 Families: each family's data is families/{familyId}/…; who is who: members/{uid}; kids' and parents' codes: codes/{CODE}
@@ -445,6 +457,7 @@ function emptyData() {
     starAt: { day: 4, time: "15:30" },
     aiOk: null,    // 🤖 a parent said OK to the AI helper for the family: { by, at } (see askAiOk in ai.js)
     starV: 2,        // ⭐ 2 = the old Friday 6 PM was moved to Friday 3:30 PM once (v171)
+    bedOn: {},      // 🌙 v180: a kid's bedtime changed for one night only: "date|kidId" → "21:00" (see bedMin)
     extraLimit: 3, moodRemind: "18:00",   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
    // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
@@ -534,6 +547,8 @@ function cleanData(d) {
                    //  (buddyAt = when it was picked: the newer pick wins when two phones meet, see mergeBuddies)
                    ...(hasOwn(BUDDIES, u.buddy) ? { buddy: u.buddy, ...(typeof u.buddyAt === "string" ? { buddyAt: u.buddyAt } : {}) } : {}),
                    // 👤 My profile: 🎂 birthday ("2016-03-14") and ❤️ things I love (short boxes they fill themselves)
+                   // 🌙 v180: a kid's bedtime: wd = school nights (Sun–Thu), we = weekend nights (Fri, Sat)
+                   ...(u.bed && BED_TIME.test(u.bed.wd || "") && BED_TIME.test(u.bed.we || "") ? { bed: { wd: u.bed.wd, we: u.bed.we } } : {}),
                    ...(typeof u.birthday === "string" && /^\d{4}-\d{2}-\d{2}$/.test(u.birthday) ? { birthday: u.birthday } : {}),
                    ...(u.loves && typeof u.loves === "object" ? { loves: Object.fromEntries(LOVES.map(([k]) => [k, typeof u.loves[k] === "string" ? u.loves[k].trim().slice(0, 30) : ""]).filter(([, v]) => v)) } : {}),
                    // ✨ the Spark's own name (shown as "Spark"; the stored field stays "buddy")
@@ -818,6 +833,9 @@ function cleanData(d) {
   const max = Math.round(Number(d.maxTogether));
   if (max >= 1 && max <= 5) clean.maxTogether = max;  // otherwise keep the default (2)
   if ([3, 4, 5].includes(Number(d.extraLimit))) clean.extraLimit = Number(d.extraLimit);
+  if (d.bedOn && typeof d.bedOn === "object" && !Array.isArray(d.bedOn))   // 🌙 v180 (only the newest 60)
+    clean.bedOn = Object.fromEntries(Object.entries(d.bedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && BED_TIME.test(String(v)))
+      .sort((a, b) => b[0].localeCompare(a[0])).slice(0, 60));
   if (d.moodRemind === "" || /^(1[5-9]|2[0-1]):00$/.test(String(d.moodRemind))) clean.moodRemind = d.moodRemind;   // 📔 v180   // 🤖 (otherwise the default 3)
   // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
   if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
