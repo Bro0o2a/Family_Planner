@@ -624,29 +624,34 @@ function openCard(b) {
   if (b.pact) return openPactCard(b);
   if (b.oneDay) return openOneDayCard(b);
   const flex = !b.fixed && data.flexible.find(a => b.acts.some(x => baseActId(x.actId) === a.id));
-  const rows = [
-    b.fixed ? ["📌 Activity", b.name] : ["📘 What", findSubject(b.name) ? `${findSubject(b.name).emoji} ${findSubject(b.name).name}` : b.name],
-    ["🙂 Who", namesOf(b.users)],   // (🏷️ v180: names only)   // (3rd = as HTML, with a parent's 🖼️ photo)
-    ["⭐ Type", (([, e, w]) => `${e} ${w}`)(actTypeInfo(b.type || "activity"))],
-    helperOf(b) ? ["🤝 Helper", helperOf(b).name] : null,
-    ["📅 Day", dayLong(b.day)],
-    // (👨‍👩‍👧 only the kids' parts: parents aren't ticked)
-    b.acts.some(a => !isParentId(a.user)) ? ["✅ Done", b.acts.filter(a => !isParentId(a.user)).map(a => (b.acts.length > 1 ? userById(a.user).name + ": " : "") + (isDone(b.day, a.actId, a.user) ? "Yes! 🎉" : "Not yet")).join("  ")] : null,
-    ["⏰ Start", clock(b.start, true)],
-    ["🏁 End", clock(b.end, true)],
-    flex && flex.between ? ["🕓 Only between", betweenText(flex.between)] : null
+  // 🎨 v182 (Broo2a): new look. Top = icon + what it is + type; a "when" box (day, time, minutes);
+  //   small tiles for who / helper / done; one ✏️ for the activity (top) and one for the time (when box)
+  const subj = !b.fixed && findSubject(b.name), what = b.fixed ? b.name : subj ? subj.name : b.name;
+  const [, tEmoji, tWord] = actTypeInfo(b.type || "activity");
+  const kids = b.acts.filter(a => !isParentId(a.user));
+  const doneHtml = kids.map(a => { const ok = isDone(b.day, a.actId, a.user);
+    return `<span class="kc2-done ${ok ? "yes" : ""}">${kids.length > 1 ? safe(userById(a.user).name) + (ok ? " ✅" : " ⏳") : ok ? "✅ Done" : "⏳ Not yet"}</span>`; }).join("");
+  const tiles = [
+    ["🙂", "Who", safe(namesOf(b.users)), b.users.length > 2],
+    helperOf(b) ? ["🤝", "Helper", safe(helperOf(b).name)] : null,
+    kids.length ? ["✅", "Done", doneHtml, kids.length > 1] : null,
+    flex && flex.between ? ["🕓", "Only between", safe(betweenText(flex.between))] : null
   ].filter(Boolean);
-  // ✏️ v180 (parents): a small pencil by the details → What / Who / Type: the activity's own form; Day / Start / End: move this one
-  //   (a flexible activity, today or later, in the plan: the same 📌 Move box as ✏️ Edit calendar, saved straight away)
   const actId = (b.acts[0] || {}).actId, canEditAct = isParentDevice() && actId && (b.fixed ? data.fixed : data.flexible).some(a => a.id === baseActId(actId));
   const canMove = isParentDevice() && !b.fixed && actId && b.day >= todayYmd() && planItemsOn(b.day).some(x => !x.fixed && x.actId === actId);
-  const pen = (label) => { const what = ["📘 What", "📌 Activity", "🙂 Who", "⭐ Type"].includes(label), when = ["📅 Day", "⏰ Start", "🏁 End"].includes(label);
-    return what && canEditAct ? `<button class="k-edit" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change ${safe(label.slice(2).trim())}">✏️</button>`
-      : when && canMove ? `<button class="k-edit" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the ${safe(label.slice(2).trim().toLowerCase())}">✏️</button>` : ""; };
+  const mins = b.end - b.start, len = mins >= 60 ? `${Math.floor(mins / 60)} h${mins % 60 ? ` ${mins % 60} min` : ""}` : `${mins} min`;
   $("kCard").style.cssText = `--soft:${b.soft};--ink:${b.ink}`;
   $("kCard").innerHTML = `
-    <div class="k-card-top"><div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div><div class="nm">${safe(b.fixed ? b.name : namesOf(b.users))}</div></div>
-    <div class="k-rows">${rows.map(([label, value, html]) => `<div><span>${safe(label)}</span><b>${html || safe(value)}${pen(label)}</b></div>`).join("")}</div>
+    <div class="k-card-top kc2-top">${canEditAct ? `<button class="k-edit kc2-pen" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change this activity">✏️</button>` : ""}
+      <div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div>
+      <div class="nm">${subj ? `${safe(subj.emoji)} ` : ""}${safe(what)}</div>
+      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}</div></div>
+    <div class="kc2-when">
+      <div class="kc2-day">📅 ${safe(dayLong(b.day))}</div>
+      <div class="kc2-time">${safe(clock(b.start, true))} <span>→</span> ${safe(clock(b.end, true))}</div>
+      <span class="kc2-len">⏱️ ${len}</span>
+      ${canMove ? `<button class="k-edit kc2-pen" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the day or time">✏️</button>` : ""}</div>
+    <div class="kc2-tiles">${tiles.map(([ic, l, v, wide]) => `<div class="kc2-tile${wide ? " wide" : ""}"><small>${ic} ${l}</small><b>${v}</b></div>`).join("")}</div>
     ${fixedTodayHtml(b)}
     <button class="k-ok" id="kOk">OK 👍</button>`;
   $("kModal").hidden = false;

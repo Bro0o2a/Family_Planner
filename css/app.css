@@ -3080,8 +3080,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 #scr-mine .bar [data-printcal], #scr-mine .bar .bell-btn, #scr-mine .bar .signout-btn { position: relative; width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; }
 #scr-mine .bar [data-printcal]::before { content: "🖨️"; font-size: 20px; }
 #scr-mine .bar .bell-btn::before { content: "🔔"; font-size: 20px; }
-#scr-mine .bar .sch-btn { order: 0; width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; margin-right: 0; flex: none; }
-#scr-mine .bar .sch-btn::before { content: "🎒"; font-size: 20px; }
+#scr-mine .bar .sch-btn { order: 0; min-height: 46px; padding: 0 14px; border-radius: 999px; font-size: 16px; margin-right: 0; flex: none; white-space: nowrap; }   /* (v182 Broo2a: the word "School" shows) */
 #scr-mine .bar .signout-btn span[aria-hidden] { font-size: 20px; } #scr-mine .bar .signout-word { display: none; }
 #scr-mine .bar .bell-num { position: absolute; top: -4px; right: -4px; font-size: 11px; }
 #scr-mine .enc-line { display: none !important; }
@@ -3259,3 +3258,32 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .k-gap { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 4px 10px; border: 2px dashed #f9a8d4; border-radius: 12px; background: #fff7fb; color: #9d174d; font-size: 13px; font-weight: 700; }
 .k-gap span { margin-right: auto; }
 .k-gap .pill { padding: 3px 10px; min-height: 0; font-size: 12px; }
+/* 🎨 v182: the new big calendar card (openCard) */
+.kc2-top { position: relative; padding: 20px 16px 16px; }
+.kc2-top .nm { font-size: 30px; }
+.kc2-tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.kc2-tag { padding: 3px 12px; border-radius: 999px; background: rgba(255, 255, 255, .75); color: var(--ink); font-size: 14px; font-weight: 800; }
+.kc2-top .kc2-pen { position: absolute; top: 12px; right: 12px; }
+.kc2-when { position: relative; margin: 16px 18px 0; padding: 14px 16px; border-radius: 22px; background: #fffaf2;
+  border: 2px solid var(--soft); text-align: center; }
+.kc2-day { font-size: 16px; font-weight: 800; color: var(--muted); }
+.kc2-time { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1.25; margin: 2px 0 6px; }
+.kc2-time span { color: var(--muted); font-weight: 700; font-size: 22px; }
+.kc2-len { display: inline-block; padding: 2px 12px; border-radius: 999px; background: var(--soft); color: var(--ink); font-size: 14px; font-weight: 800; }
+.kc2-when .kc2-pen { position: absolute; top: 10px; right: 10px; }
+.kc2-pen { width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; font-size: 16px; line-height: 1;
+  display: grid; place-items: center; background: #fff7e0; border: 1px solid #f1d27a; box-shadow: none; }
+.kc2-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 12px 18px 6px; }
+.kc2-tile { padding: 10px 12px; border-radius: 18px; background: #f8f6f2; display: grid; gap: 2px; min-width: 0; }
+.kc2-tile small { font-size: 13px; font-weight: 800; color: var(--muted); }
+.kc2-tile b { font-size: 18px; font-weight: 800; overflow-wrap: anywhere; display: flex; flex-wrap: wrap; gap: 4px; }
+.kc2-done { padding: 2px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: 14px; }
+.kc2-done.yes { background: #dcfce7; color: #166534; }
+/* v182: calendar top row fits on a phone with the words Home + School */
+#scr-mine .bar { gap: 6px; }
+#scr-mine .bar [data-navback] { width: 40px; height: 40px; min-width: 0; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; flex: none; }
+#scr-mine .bar [data-navback]::before { content: "⬅️"; font-size: 18px; }
+#scr-mine .bar .nav-btn[data-go="home"], #scr-mine .bar .sch-btn { min-height: 40px; padding: 0 10px; font-size: 15px; flex: none; }
+#scr-mine .bar-right { gap: 6px; }
+#scr-mine .bar [data-printcal], #scr-mine .bar .bell-btn, #scr-mine .bar .signout-btn { width: 40px; height: 40px; }
+.kc2-tile.wide { grid-column: 1 / -1; }
