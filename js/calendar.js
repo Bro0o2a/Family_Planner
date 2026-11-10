@@ -88,7 +88,7 @@ function oneDayCardHtml(e, ds, opts) {
   const n = blocks.push({ oneDay: e, day: ds }) - 1, faded = (opts.fade && opts.fade !== "all" && !e.who.includes(opts.fade)) || !!opts.subj;
   return `<div class="k-block k-oneday ${faded ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0" title="${safe(`📌 ${e.title} · ${clock(toMin(e.from), true)}–${clock(toMin(e.to), true)}`)}">
     <span class="who"><span class="t-full">📌 ${safe(e.title)}</span><span class="t-short">📌 ${safe(e.title)}</span></span>
-    <span class="k-sub"><span class="when">${clock(toMin(e.from))} - ${clock(toMin(e.to))}</span> <span class="what">${facesHtml(e.who.filter(exists))}</span></span></div>`;
+    <span class="k-sub"><span class="when">${clock(toMin(e.from))} - ${clock(toMin(e.to))}</span> <span class="what">${namesTag(e.who)}</span></span></div>`;
 }
 function openOneDayCard(b) {
   const e = b.oneDay;
@@ -305,7 +305,7 @@ function weekHtml(days, opts) {
       const n = blocks.push({ ...s, day: ds, soft: "#f1f2f6", ink: "#6b7280" }) - 1;
       parts.push({ start: s.start, end: s.end, strip: true, padId: s.pad ? s.id : null, html: `<div class="k-routine ${s.pad ? "pad" : ""} ${faded ? "faded" : ""}" data-kblock="${n}" role="button" tabindex="0"
           title="${safe(s.name)} · ${clock(s.start, true)}–${clock(s.end, true)}"><span class="r-nm">${actIcon3d(s.name, "routine", "r-ic")}${safe(s.name)}</span>${
-          !opts.only && !isEveryone(s.users) ? `<span class="r-who">${facesHtml(s.users)}</span>` : ""}</div>` });
+          !opts.only && !isEveryone(s.users) ? `<span class="r-who">${namesTag(s.users)}</span>` : ""}</div>` });
     });
     // 📌 School dates with a time: a strip at that time (all-day ones are under the day name). Never planned around.
     eventsOn(ds, opts.only || null).filter(e => e.time).forEach(e =>
@@ -376,7 +376,7 @@ function weekHtml(days, opts) {
       // (as HTML: a parent's 🖼️ photo instead of their emoji)
       // (🫧 v160: the 3D icon is the only picture: no type emoji next to it)
       const nm = safe(b.fixed || !subject ? b.name : subject.name);
-      const shortHtml = b.fixed || b.users.length > 1 ? nm : `${facesHtml(b.users)} ${safe(subject ? subject.name : b.name)}`;
+      const shortHtml = b.fixed || b.users.length > 1 ? nm : `${namesTag(b.users)} ${safe(subject ? subject.name : b.name)}`;
       // Line 2 = time, then the dots (shared) or the type + name, then 🤝 with the helping parent ("🤝 helping" on their own calendar)
       const whatHtml = [info.dots ? "" : safe(`${subject ? subject.name : b.name}`), helping ? "🤝 helping" : b.helper ? withHtml(b) : ""].filter(Boolean).join(" · ");
       // 📚 A study session: its result ("✅ 85%", "⏳ 👩 Mum rates it"), or 📖 "📚 Start session" (today only, not while moving cards)
@@ -428,7 +428,7 @@ function bedGroups(ds, only) {
 // The line: "🌙 Bedtime 8:30 PM" (+ the kids' faces on a shared view). A parent (today and later): a time picker to change
 // it for THIS night only (the usual times are in ⚙️ Settings → 🌙 Bedtimes).
 function bedLineHtml(g, ds, opts) {
-  const faces = opts.only ? "" : ` <span class="r-who">${facesHtml(g.kids)}</span>`;
+  const faces = opts.only ? "" : ` <span class="r-who">${namesTag(g.kids)}</span>`;
   const tonight = g.tonight;
   const can = isParentDevice() && !opts.readOnly && ds >= todayYmd();
   const hm = m => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
@@ -705,10 +705,10 @@ function drawDayFix() {
   const ticked = id => Object.keys(data.points.marks).some(k => k.startsWith(`${ds}|${id}|`));
   $("missTitle").textContent = dayFix.plan ? `➕ Add on ${dayName(ds)}` : `✏️ ${dayName(ds)}: free time ${freed.map(([a, b]) => `${clock(a, true)}–${clock(b, true)}`).join(", ")}`;
   $("missBody").innerHTML = `<p class="print-hint" style="margin:0 0 6px">➕ Add something in the free time:</p><div class="miss-fixes">${dayFix.adds.length
-      ? dayFix.adds.map((x, i) => { const a = data.flexible.find(f => f.id === x.id); return `<button class="pill small" data-dfadd="${i}">➕ ${safe(a.name)} ${facesHtml(a.users)} · ${clock(x.at, true)}</button>`; }).join("")
+      ? dayFix.adds.map((x, i) => { const a = data.flexible.find(f => f.id === x.id); return `<button class="pill small" data-dfadd="${i}">➕ ${safe(a.name)} · ${namesTag(a.users)} · ${clock(x.at, true)}</button>`; }).join("")
       : `<span class="hint">Nothing else fits there. You can still use 🎈 free-time ideas.</span>`}</div>
     <p class="print-hint" style="margin:14px 0 6px">✕ Or take one off ${safe(dayName(ds))}:</p><div class="df-list">${items.length ? items.map(({ it, act }) =>
-      `<div class="df-row"><span>${safe(act.name)} ${facesHtml(act.users)} <small>${clock(it.start, true)}–${clock(it.end, true)}</small></span>${ticked(it.actId) ? `<small>✅ done</small>`
+      `<div class="df-row"><span>${safe(act.name)} · ${namesTag(act.users)} <small>${clock(it.start, true)}–${clock(it.end, true)}</small></span>${ticked(it.actId) ? `<small>✅ done</small>`
         : `<button class="pill small" data-dfdel="${safe(it.actId)}">✕ Remove</button>`}</div>`).join("") : `<span class="hint">Nothing else that day.</span>`}</div>`;
   $("missHint").hidden = true;
   $("missModal").hidden = false;
@@ -980,11 +980,11 @@ function openDayPlan(ds) {
   $("missTitle").textContent = `📋 ${dayName(ds)} ${fromYmd(ds).getDate()} ${MONTHS[fromYmd(ds).getMonth()]}${who ? ` · ${userById(who).name}` : ""}`;
   $("missHint").hidden = true;
   $("missBody").innerHTML = `<div class="df-list">${rows.length ? rows.map(r => `<div class="df-row ${r.soft ? "soft" : ""}"><span><b class="dp-time">${clock(r.s, true)}–${clock(r.e, true)}</b>
-      ${safe(r.name)} ${who ? "" : facesHtml(r.users.filter(exists))}${ticked(r.it) ? " ✅" : ""}</span>${parent && r.it && !r.it.gone ? `<span class="dp-acts">
+      ${safe(r.name)} ${who ? "" : `· ${namesTag(r.users)}`}${ticked(r.it) ? " ✅" : ""}</span>${parent && r.it && !r.it.gone ? `<span class="dp-acts">
       <button class="pill small" data-dpedit="${safe(r.it.actId)}" aria-label="Change ${safe(r.name)}">✏️</button>${!r.it.fixed && !ticked(r.it)
         ? `<button class="pill small" data-dfdel="${safe(r.it.actId)}" aria-label="Take ${safe(r.name)} off">✕</button>` : ""}</span>` : ""}</div>`).join("")
       : `<span class="hint">Nothing planned. 🎉</span>`}
-    ${beds.map(g => `<div class="df-row soft"><span><b class="dp-time">${clock(g.min, true)}</b> 🌙 Bedtime ${who ? "" : facesHtml(g.kids)}</span></div>`).join("")}</div>
+    ${beds.map(g => `<div class="df-row soft"><span><b class="dp-time">${clock(g.min, true)}</b> 🌙 Bedtime ${who ? "" : `· ${namesTag(g.kids)}`}</span></div>`).join("")}</div>
     ${parent ? `<div class="btnrow" style="margin-top:10px"><button class="pill small primary" data-dpadd="${ds}">➕ Add something</button></div>`
       : isParentDevice() ? "" : `<p class="hint" style="margin-top:8px">👀 Only a parent can change the plan.</p>`}`;
   dayFix = { ds, people: who ? [who] : kidsList().map(k => k.id), freed: [day.window || [0, 24 * 60]], plan: true };

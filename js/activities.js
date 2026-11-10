@@ -1074,7 +1074,7 @@ function openMissed() {
     : `✂️ ${dayName(f.ds)} ${clock(f.at, true)} · shorter (${f.len} of ${act.duration} min)`;
   $("missBody").innerHTML = !list.length ? `<p class="print-hint">🎉 Nothing is missing: every activity fit this week.</p>`
     : list.map(({ act, missing }) => { const fixes = missFixes(act);
-      return `<div class="miss-row"><b>${safe(act.name)}</b> <span class="miss-who">${facesHtml(act.users)}</span>
+      return `<div class="miss-row"><b>${safe(act.name)}</b> <span class="miss-who">· ${namesTag(act.users)}</span>
         <small>${missing} of ${Math.min(act.times, 7)} ${missing === 1 ? "session" : "sessions"} missing this week</small>
         <div class="miss-fixes">${fixes.length ? fixes.map(f => `<button class="pill small" data-missfix="${missList.push({ ...f, actId: act.id }) - 1}">${safe(fixText(f, act))}</button>`).join("")
           : `<span class="hint">No room on any day. Try a shorter time, fewer times a week, or a longer day in ⚙️ Settings.</span>`}</div></div>`; }).join("");

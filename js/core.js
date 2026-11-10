@@ -1474,6 +1474,14 @@ const facePhoto = u => u && isParentId(u.id) && typeof u.photo === "string" && u
 const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">`
   : faceAvatar(u) ? `<img class="face-img face-av" src="${avatarSrc(u.avatar)}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
 const facesHtml = ids => ids.map(id => faceHtml(userById(id))).join("");
+// 🏷️ v180 (Broo2a: the faces change, names don't): "Taha, Bana" · "All kids" · "Everyone" (short names when there are many)
+function namesTag(ids) {
+  const list = (ids || []).filter(exists); if (!list.length) return "";
+  const kids = data.users.filter(u => !isParentId(u.id)).map(u => u.id), all = data.users.map(u => u.id);
+  const txt = list.length === all.length && all.length > 1 ? "Everyone" : list.length === kids.length && kids.length > 1 && list.every(id => kids.includes(id)) ? "All kids"
+    : list.map(id => { const n = userById(id).name.split(" ")[0]; return list.length > 2 && n.length > 6 ? n.slice(0, 5) + "." : n; }).join(", ");
+  return `<span class="who-names">${safe(txt)}</span>`;
+}
 const whoHtml = id => { const u = userById(id); return `${faceHtml(u)} ${safe(u.name)}`; };   // ("👩 Mum" with her photo)
 // ✨ Only kids have a Spark (no Spark card, badge, levels or "pick your Spark" for parents)
 const hasSpark = id => feat("buddy") && exists(id) && !isParentId(id);
