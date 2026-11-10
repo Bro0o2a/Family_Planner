@@ -100,6 +100,15 @@ function openSchool(kid) {
   schoolFresh = true;
   go("school");
 }
+// 🎒 v180: the School button in every top bar (kids: their own School; parents: the kid they looked at last, else the first kid)
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-schoolnav]");
+  if (!b || !exists(me)) return;
+  if (!isParentId(me)) return openSchool(me);
+  const kids = kidsList(), pick = [schoolKid, kidPage].find(id => id && kids.some(k => k.id === id)) || (kids[0] || {}).id;
+  if (!pick) return toast("Add a kid first 🙂", 3000);
+  openSchool(pick);
+});
 function goSchool(view, subject, tab) {
   const was = schoolView + "|" + schoolSubject;
   schoolView = view || "home";

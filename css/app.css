@@ -38,6 +38,9 @@
   .pill:hover { background: #fffaf0; }
   /* "📅 My calendar": same place on every page (next to Home), in the app's purple so kids can spot it */
   .bar .cal-btn { margin-right: auto; }
+  .bar .cal-btn:has(+ .sch-btn) { margin-right: 0; }
+  .bar .sch-btn { margin-right: auto; white-space: nowrap; background: #f3c76b; border-color: #f3c76b; color: #4a3410; }
+  #scr-school .bar .sch-btn { background: transparent; cursor: default; }
   .bar > [data-switch] { margin-left: auto; }   /* Switch user stays on the right */
   .cal-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
   .cal-btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
@@ -2359,6 +2362,9 @@
     /* Phone: "My calendar" gets its own row under Home / Switch user, as one big easy button */
     .bar { flex-wrap: wrap; }
     .bar .cal-btn { order: 3; flex: 1 1 100%; margin-right: 0; min-height: 56px; font-size: 20px; }
+    /* (v180: 🎒 School sits next to it, half and half) */
+    .bar .cal-btn:has(+ .sch-btn) { flex: 1 1 calc(50% - 6px); }
+    .bar .sch-btn { order: 3; flex: 1 1 calc(50% - 6px); margin-right: 0; min-height: 56px; font-size: 20px; justify-content: center; }
     .big-title { font-size: 36px; }
     .page-title { font-size: 30px; }
     .lead { font-size: 18px; }
@@ -3073,6 +3079,8 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 #scr-mine .bar [data-printcal], #scr-mine .bar .bell-btn, #scr-mine .bar .signout-btn { position: relative; width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; }
 #scr-mine .bar [data-printcal]::before { content: "🖨️"; font-size: 20px; }
 #scr-mine .bar .bell-btn::before { content: "🔔"; font-size: 20px; }
+#scr-mine .bar .sch-btn { order: 0; width: 46px; height: 46px; min-height: 0; padding: 0; border-radius: 50%; font-size: 0; display: grid; place-items: center; margin-right: 0; flex: none; }
+#scr-mine .bar .sch-btn::before { content: "🎒"; font-size: 20px; }
 #scr-mine .bar .signout-btn span[aria-hidden] { font-size: 20px; } #scr-mine .bar .signout-word { display: none; }
 #scr-mine .bar .bell-num { position: absolute; top: -4px; right: -4px; font-size: 11px; }
 #scr-mine .enc-line { display: none !important; }
