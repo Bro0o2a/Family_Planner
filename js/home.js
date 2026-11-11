@@ -170,7 +170,7 @@ let beatSeq = 0;
 function beatBarHtml(id, big) {
   const last = lastWeekScore(id); if (last == null) return "";
   const now = scoreOf(id).overall, d = now - last, won = d > 0, pts = weekScoreLine(id), color = colorsOf(userById(id) || {}).color || "#f07c1e";
-  const W = 220, H = 92, L = 18, R = 34, T = 18, B = 16, vals = pts.map(p => p.s).concat(last), gid = `bbg${++beatSeq}`;
+  const W = 230, H = 92, L = 18, R = 46, T = 18, B = 16, vals = pts.map(p => p.s).concat(last), gid = `bbg${++beatSeq}`;
   const lo = Math.max(0, Math.floor((Math.min(...vals) - 5) / 10) * 10), hi = Math.min(100, Math.ceil((Math.max(...vals) + 3) / 10) * 10) || 100;
   const x = i => L + i * (W - L - R) / 6, y = v => T + (hi - v) / Math.max(1, hi - lo) * (H - T - B), f = n => n.toFixed(1);
   const end = pts[pts.length - 1], line = pts.map((p, k) => `${k ? "L" : "M"}${f(x(p.i))} ${f(y(p.s))}`).join(" ");
@@ -182,13 +182,16 @@ function beatBarHtml(id, big) {
       ${[lo, hi].map(v => `<text x="${L - 5}" y="${f(y(v) + 3)}" class="bb-ytxt">${v}</text>`).join("")}<line x1="${L}" x2="${W - R}" y1="${f(y(lo))}" y2="${f(y(lo))}" class="bb-base"/>
       <line x1="${L}" x2="${W - R}" y1="${f(gy)}" y2="${f(gy)}" class="bb-goal"/>
       <rect x="${W - R + 3}" y="${f(gy - 8)}" width="${R - 3}" height="16" rx="8" class="bb-flag"/><text x="${W - R / 2 + 1.5}" y="${f(gy + 3.6)}" class="bb-flagtxt">🏁${last}</text>
+      ${(() => { const below = gy + 30 < H - 2, ty = below ? gy + 20 : gy - 22, cx = W - R / 2 + 1.5;
+        return won ? `<text x="${cx}" y="${f(ty)}" class="bb-need">🏆 +${d}</text><text x="${cx}" y="${f(ty + 9)}" class="bb-needs">beaten!</text>`
+          : `<text x="${cx}" y="${f(ty)}" class="bb-need">${last + 1 - now} more</text><text x="${cx}" y="${f(ty + 9)}" class="bb-needs">to beat ${last}</text>`; })()}
       <path d="${area}" fill="url(#${gid})"/><path d="${line}" class="bb-line"/>
       ${pts.map(p => p === end ? "" : `<circle cx="${f(x(p.i))}" cy="${f(y(p.s))}" r="2.4" class="bb-dot"/>`).join("")}
       <circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="8" class="bb-halo"/><circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="4.6" class="bb-end"/>
       <rect x="${f(x(end.i) - 12)}" y="${f(tagY)}" width="24" height="13" rx="6.5" class="bb-tag"/><text x="${f(x(end.i))}" y="${f(tagY + 9.6)}" class="bb-tagtxt">${end.s}</text>
       ${days.map((t, i) => `<text x="${f(x(i))}" y="${H - 3}" class="bb-day${i === end.i ? " on" : i > end.i ? " later" : ""}">${t}</text>`).join("")}
     </svg>
-    <span class="bb-msg">${won ? `🏆 You beat last week! +${d}` : `🎯 ${last + 1 - now} more to beat ${last}!`}</span></span>`;
+    </span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {

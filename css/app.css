@@ -3353,6 +3353,9 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .beat-bar .bb-day { font-size: 7.5px; font-weight: 700; fill: rgba(74,52,38,.55); text-anchor: middle; }
 .beat-bar .bb-day.on { fill: var(--bc); font-weight: 900; }
 .beat-bar .bb-day.later { fill: rgba(74,52,38,.28); }
+.beat-bar .bb-need { font-size: 10px; font-weight: 900; fill: #c2410c; text-anchor: middle; }
+.beat-bar .bb-needs { font-size: 7.5px; font-weight: 800; fill: #a3530b; text-anchor: middle; }
+.beat-bar.won .bb-need, .beat-bar.won .bb-needs { fill: #15803d; }
 .beat-bar .bb-msg { display: inline-block; margin-top: 3px; padding: 3px 10px; border-radius: 999px; background: #fdecd6; color: #a3530b; font-size: 12px; font-weight: 800; }
 .beat-bar.won .bb-goal { stroke: #22a052; } .beat-bar.won .bb-flag { fill: #dcf5e4; } .beat-bar.won .bb-flagtxt { fill: #15803d; }
 .beat-bar.won .bb-msg { background: #dcf5e4; color: #15803d; }
