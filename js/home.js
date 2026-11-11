@@ -67,13 +67,13 @@ function drawKidHome(u) {
   const next = today.find(x => !isDone(todayYmd(), x.id, u.id));
   const tile = (cls, attr, icon, label, big, sub) => `<button class="kt ${cls}" ${attr}><span class="kt-ico" aria-hidden="true">${icon}</span><span class="kt-label">${label}</span><b class="kt-big">${big}</b><small>${sub}</small></button>`;
   $("homeBig").innerHTML = `<div class="k-hero">${faceAvatar(u) ? `<img class="k-hero-pic" src="${avatarSrc(u.avatar)}" alt="">` : `<span class="k-hero-pic k-hero-emoji">${safe(u.emoji)}</span>`}
-      <div class="k-hero-text"><h2>${hi}</h2><p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
+      <div class="k-hero-text"><h2>${hi}</h2>${beatBarHtml(u.id, true)}${scoredUsers().some(x => x.id === u.id) ? `<p class="k-cheer">${safe(kidCheerShort(u.id))}</p>` : ""}<p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
       ${next ? `<button class="k-go" data-kidcal>▶ ${safe(next.name.length > 18 ? next.name.slice(0, 17) + "…" : next.name)}</button>` : `<button class="k-go" data-kidcal>📅 My day</button>`}</div>
       <svg class="k-plant" viewBox="0 0 120 140" aria-hidden="true"><path d="M60 100V45" stroke="#5e8f5a" stroke-width="5" fill="none"/><path d="M60 70C35 70 22 52 20 34c22 0 36 14 40 36z" fill="#7fae6e"/><path d="M60 60C85 60 98 42 100 22c-22 0-36 14-40 38z" fill="#8fbb7c"/><path d="M60 50C48 36 46 20 54 6c10 10 12 26 6 44z" fill="#9ec68a"/><path d="M28 96h64l-8 40H36z" fill="#ead7bd"/><rect x="24" y="90" width="72" height="14" rx="7" fill="#f3e4cf"/></svg></div>
     <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
       ${tile("kt-cal", "data-kidcal", ico3d("calendar"), "Calendar", `${doneToday} of ${today.length}`, "done today")}
       ${tile("kt-habits", `data-kidpanel="habits"`, ico3d("goal"), "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
-      ${tile("kt-score", `data-go="points"`, ico3d("achieve"), "Score this week", `${scoreOf(u.id).overall}`, `of ${scoreOf(u.id).max}`)}</div>
+      ${tile("kt-score kt-beat", `data-sdpop="${safe(u.id)}"`, scoreRingHtml(scoreOf(u.id).overall, colorsOf(u).color, lastWeekScore(u.id)), "Score this week", `${scoreOf(u.id).overall} ${ringTrendHtml(u.id)}`, `of ${scoreOf(u.id).max} · tap for the day`)}</div>
     ${wishCardHtml(u)}${kidPlannerHtml(u, today, hb)}`;
   $("homeMenu").hidden = true;
   const bar = [["data-go=\"points\"", "🏆", "Points"], ["data-kidpanel=\"habits\"", "⭐", "Habits"], ...(feat("diary") ? [["data-go=\"diary\"", "📔", "My day"]] : []),
@@ -143,10 +143,55 @@ function needsLineHtml() {
     ${shown ? `<div class="needs-panel">${shown.html}</div>` : ""}</div>`;
 }
 // 🎯 The score ring (0–100) in the kid's colour
-function scoreRingHtml(n, color) {
-  const C = 2 * Math.PI * 44;
-  return `<span class="kc-ring" role="img" aria-label="Score ${n} this week" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
+function scoreRingHtml(n, color, target) {
+  const C = 2 * Math.PI * 44, t = typeof target === "number" && target > 0 ? Math.min(100, target) : null;
+  return `<span class="kc-ring${t != null && n >= t ? " beat" : ""}" role="img" aria-label="Score ${n} this week${t != null ? `, last week ${t}` : ""}" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
     <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * Math.min(n, 100) / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${n}</b></span>`;
+}
+// 🎯 Beat yourself: last week's final score (kept in points.reach) and the best week ever (before this week)
+function lastWeekScore(id) { const r = data.points.reach[`${addDaysYmd(data.points.week, -7)}|${id}`]; return r && typeof r.s === "number" && r.s > 0 ? r.s : null; }
+function bestWeekScore(id) {
+  const all = Object.entries(data.points.reach).filter(([k, r]) => k.endsWith("|" + id) && k.slice(0, 10) < data.points.week && r && typeof r.s === "number").map(([, r]) => r.s);
+  return all.length ? Math.max(...all) : null;
+}
+// 🎯 v187 Beat yourself graph: this week's score day by day (Sat → today) climbing to a dashed 🏁 line at last week's score
+const beatMemo = new Map();
+function weekScoreLine(id) {
+  const today = todayYmd(), out = [];
+  for (let d = data.points.week, i = 0; i < 7 && d <= today; d = addDaysYmd(d, 1), i++) {
+    if (d === today) { out.push({ i, s: scoreOf(id).overall }); break; }
+    const key = `${id}|${d}|${today}|${Object.keys(data.points.marks).length}|${Object.keys(data.habitMarks).length}`;
+    if (!beatMemo.has(key)) { if (beatMemo.size > 200) beatMemo.clear(); beatMemo.set(key, scoreAt(id, d, fromYmd(addDaysYmd(d, 1)).getTime() - 1, d, true)); }
+    out.push({ i, s: beatMemo.get(key) });
+  }
+  return out;
+}
+let beatSeq = 0;
+function beatBarHtml(id, big) {
+  const last = lastWeekScore(id); if (last == null) return "";
+  const now = scoreOf(id).overall, d = now - last, won = d > 0, pts = weekScoreLine(id), color = colorsOf(userById(id) || {}).color || "#f07c1e";
+  const W = 230, H = 92, L = 18, R = 46, T = 18, B = 16, vals = pts.map(p => p.s).concat(last), gid = `bbg${++beatSeq}`;
+  const lo = Math.max(0, Math.floor((Math.min(...vals) - 5) / 10) * 10), hi = Math.min(100, Math.ceil((Math.max(...vals) + 3) / 10) * 10) || 100;
+  const x = i => L + i * (W - L - R) / 6, y = v => T + (hi - v) / Math.max(1, hi - lo) * (H - T - B), f = n => n.toFixed(1);
+  const end = pts[pts.length - 1], line = pts.map((p, k) => `${k ? "L" : "M"}${f(x(p.i))} ${f(y(p.s))}`).join(" ");
+  const area = `${line} L${f(x(end.i))} ${f(y(lo))} L${f(x(pts[0].i))} ${f(y(lo))} Z`, gy = y(last);
+  const tagY = Math.abs(y(end.s) - 13 - gy) < 10 || y(end.s) < T + 4 ? y(end.s) + 9 : y(end.s) - 21;
+  const days = ["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"];
+  return `<span class="beat-bar${won ? " won" : ""}${big ? " big" : ""}" style="--bc:${color}" role="img" aria-label="This week ${now}, last week ${last}">
+    <svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".32"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+      ${[lo, hi].map(v => `<text x="${L - 5}" y="${f(y(v) + 3)}" class="bb-ytxt">${v}</text>`).join("")}<line x1="${L}" x2="${W - R}" y1="${f(y(lo))}" y2="${f(y(lo))}" class="bb-base"/>
+      <line x1="${L}" x2="${W - R}" y1="${f(gy)}" y2="${f(gy)}" class="bb-goal"/>
+      <rect x="${W - R + 3}" y="${f(gy - 8)}" width="${R - 3}" height="16" rx="8" class="bb-flag"/><text x="${W - R / 2 + 1.5}" y="${f(gy + 3.6)}" class="bb-flagtxt">🏁${last}</text>
+      ${(() => { const below = gy + 30 < H - 2, ty = below ? gy + 20 : gy - 22, cx = W - R / 2 + 1.5;
+        return won ? `<text x="${cx}" y="${f(ty)}" class="bb-need">🏆 +${d}</text><text x="${cx}" y="${f(ty + 9)}" class="bb-needs">beaten!</text>`
+          : `<text x="${cx}" y="${f(ty)}" class="bb-need">${last + 1 - now} more</text><text x="${cx}" y="${f(ty + 9)}" class="bb-needs">to beat ${last}</text>`; })()}
+      <path d="${area}" fill="url(#${gid})"/><path d="${line}" class="bb-line"/>
+      ${pts.map(p => p === end ? "" : `<circle cx="${f(x(p.i))}" cy="${f(y(p.s))}" r="2.4" class="bb-dot"/>`).join("")}
+      <circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="8" class="bb-halo"/><circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="4.6" class="bb-end"/>
+      <rect x="${f(x(end.i) - 12)}" y="${f(tagY)}" width="24" height="13" rx="6.5" class="bb-tag"/><text x="${f(x(end.i))}" y="${f(tagY + 9.6)}" class="bb-tagtxt">${end.s}</text>
+      ${days.map((t, i) => `<text x="${f(x(i))}" y="${H - 3}" class="bb-day${i === end.i ? " on" : i > end.i ? " later" : ""}">${t}</text>`).join("")}
+    </svg>
+    </span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {
@@ -156,6 +201,29 @@ function kidTodayLine(kid) {
   const next = items.find(x => !isDone(date, x.id, kid) && x.end > now && x.start >= 0);
   return `Today ${done} of ${items.length} done${next ? ` · next ${next.name} ${clock(next.start)}` : ""}`;
 }
+// 💬 v187 A short kind line per kid (parent's kid cards + the kid's own home), from the real numbers, never mean:
+//   1st: how close the next one is · close behind (≤ 5): "Only 3 behind Taha" · far behind: never the rank, only what wins
+//   points back (missed must-dos, today's ▲, the next thing to tick). Different words each day.
+function kidCheerShort(id) {
+  const fair = fairScores(), order = fairOrder(fair), rank = order.findIndex(u => u.id === id), mine = fair[id] || 0;
+  const pick = list => list[(Number(todayYmd().slice(-2)) + id.length) % list.length];
+  if (starDecided()) return stars().includes(id) ? "🌟 Shining Star this week! Amazing work." : "🌱 A new week starts soon: a fresh chance for everyone!";
+  if (order.length < 2 || !mine) return "🌱 Every tick lifts your score. Let's go!";
+  if (rank === 0) {
+    const gap = mine - (fair[order[1].id] || 0);
+    if (!gap) return `🔥 Tied for first with ${order[1].name}! The next tick decides.`;
+    return gap <= 3 ? pick([`🔥 In the lead, but ${order[1].name} is only ${gap} behind. Keep going!`, `🔥 First place! ${order[1].name} is close (${gap}), don't stop now.`])
+      : pick([`🔥 In the lead by ${gap}! Keep it up till Friday ⭐`, `🔥 First place by ${gap}. Great week, keep the habit!`]);
+  }
+  const above = order[rank - 1], gap = fair[above.id] - mine;
+  if (!gap) return `💪 Tied with ${above.name}! One more tick puts you ahead.`;
+  if (gap <= 5) return pick([`💪 Only ${gap} behind ${above.name}. One good worksheet can do it!`, `💪 So close: ${gap} to catch ${above.name}. You can do it!`]);
+  const sc = scoreOf(id), lost = sc.base - sc.overall, d = todayTrend(id);
+  if (lost >= 3) return `⭐ Do all your must-dos and win back up to ${lost} points!`;
+  if (d > 0) return pick([`🌱 ▲ ${d} today. Keep climbing!`, `🌱 Up ${d} today. Every step counts!`]);
+  const next = todayItems(id).find(x => !isDone(todayYmd(), x.id, id));
+  return next ? pick([`▶ Next: ${next.name}. Every tick lifts your score!`, `🌱 Tick ${next.name} today and watch your score grow.`]) : "🌱 A good worksheet today can lift your score a lot!";
+}
 // 🌟 Star = last week's Shining Star (until the next announcement) · 🔥 Leading = the best score this week right now
 const kidCardTags = id => (stars().includes(id) ? ` <span class="kc-tag kc-star">🌟 Star</span>` : "") +
   (leaders().includes(id) ? ` <span class="kc-tag kc-lead">🔥 Leading</span>` : "");
@@ -163,9 +231,10 @@ const kidCardTags = id => (stars().includes(id) ? ` <span class="kc-tag kc-star"
 function kidCardHtml(k) {
   const c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
   return `<div class="card kid-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-    <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">${scoreRingHtml(sc.overall, c.color)}
+    <div class="kc-top"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="${safe(k.name)}'s score: see it through the day">${scoreRingHtml(sc.overall, c.color, lastWeekScore(k.id))}${ringTrendHtml(k.id)}</button>
+    <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">
       <span class="kc-text"><b>${faceHtml(k)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
-        <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button>
+        ${beatBarHtml(k.id)}<small>${safe(kidTodayLine(k.id))}</small><small class="kc-cheer">${safe(kidCheerShort(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button></div>
     <div class="kc-btns"><button data-school="${safe(k.id)}">School</button><button data-viewcal="${safe(k.id)}">Calendar</button><button data-kidreport="${safe(k.id)}">Report</button></div></div>`;
 }
 // v155: the parent's home ends with ONE clear list in 4 groups (no hidden menus): Plan the week · The kids · Family · Settings.
@@ -263,42 +332,69 @@ function kidTodayHtml(k) {
 // 👧 The kid page is a MENU of big buttons (each with a one-line status); a tap opens ONLY that part (kidSec).
 //    ⬅️ Back (or "All about …") → the menu again. Sections: today · habits · star · score · study · points (💪 strong / 🎯 weak per subject)
 //    · tasks · school · work · moods (📔 moods, ✅ duties, 💌 wishes) · report (the full 📊 report, as before).
-// 📈 The score through one day (kid page 🏆 Score, 👤 profile 📅 This week, 📊 report, 🏆 leaderboard button: everyone can look): day chips (this week, up to today; yesterday first shown),
-// a step line from 12 AM to midnight in the kid's colour, a dot for each change, and the list of what changed it.
-let scoreDay = null, sdOpen = null;   // (🏆 leaderboard: whose day graph is open)
-function dayGraphHtml(k, color) {
-  const today = todayYmd(), days = weekDates().filter(d => d <= today);
-  const yest = addDaysYmd(today, -1), day = days.includes(scoreDay) ? scoreDay : days.includes(yest) ? yest : today;
-  const pts = dayScorePoints(k.id, day), t0 = fromYmd(day).getTime(), DAY = 864e5;
-  const lo = Math.max(0, Math.floor((Math.min(...pts.map(p => p.score)) - 5) / 5) * 5), hi = Math.min(100, Math.ceil((Math.max(...pts.map(p => p.score)) + 5) / 5) * 5);
-  const W = 320, H = 170, L = 30, R = 10, T = 12, B = 24;
+// 📈 The score through one day (v187: small and clean). Kid page 🏆 Score, 👤 profile, 📊 report, 🏆 leaderboard button,
+// and a pop-up from every score (the ring on the parent's kid cards, the kid page ring, the kid's 🏆 Score tile).
+// Day chips (this week, up to today) · a thin step line with a soft fill · "What changed" folded under it.
+let scoreDay = null, sdOpen = null, sdPop = null;   // (🏆 leaderboard: whose graph is open · the pop-up: whose)
+function dayGraphHtml(k, color, pop) {
+  const today = todayYmd(), days = weekDates().filter(d => d <= today), yest = addDaysYmd(today, -1);
+  const day = days.includes(scoreDay) ? scoreDay : pop ? today : days.includes(yest) ? yest : today;
+  const pts = dayScorePoints(k.id, day), t0 = fromYmd(day).getTime(), DAY = 864e5, vals = pts.map(p => p.score);
+  const lo = Math.max(0, Math.floor((Math.min(...vals) - 3) / 5) * 5), hi = Math.min(100, Math.ceil((Math.max(...vals) + 3) / 5) * 5);
+  const W = 320, H = 96, L = 24, R = 6, T = 6, B = 16, gid = "sdg-" + k.id.replace(/\W/g, "");
   const x = at => L + (W - L - R) * Math.min(1, Math.max(0, (at - t0) / DAY)), y = v => T + (H - T - B) * (1 - (v - lo) / Math.max(1, hi - lo));
-  let path = `M${x(pts[0].at).toFixed(1)},${y(pts[0].score).toFixed(1)}`;
-  pts.slice(1).forEach(p => { path += ` H${x(p.at).toFixed(1)} V${y(p.score).toFixed(1)}`; });
-  const ticksY = [lo, Math.round((lo + hi) / 2), hi], hours = [0, 6, 12, 18, 24];
-  const hourTxt = h => h === 0 || h === 24 ? "12 AM" : h === 12 ? "12 PM" : h < 12 ? h + " AM" : (h - 12) + " PM";
+  let line = `M${x(pts[0].at).toFixed(1)},${y(pts[0].score).toFixed(1)}`;
+  pts.slice(1).forEach(p => { line += ` H${x(p.at).toFixed(1)} V${y(p.score).toFixed(1)}`; });
+  const lastX = x(pts[pts.length - 1].at), area = `${line} H${lastX.toFixed(1)} V${H - B} H${x(pts[0].at).toFixed(1)} Z`;
+  const hourTxt = h => h === 0 || h === 24 ? "12a" : h === 12 ? "12p" : h < 12 ? h + "a" : (h - 12) + "p";
   const svg = `<svg class="sd-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${safe(k.name)}'s score on ${safe(dayLong(day))}">
-    ${ticksY.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="sd-grid"/><text x="${L - 4}" y="${y(v) + 3}" text-anchor="end" class="sd-lab">${v}</text>`).join("")}
-    ${hours.map(h => `<text x="${x(t0 + h * 36e5)}" y="${H - 6}" text-anchor="${h === 0 ? "start" : h === 24 ? "end" : "middle"}" class="sd-lab">${hourTxt(h)}</text>`).join("")}
-    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
-    ${pts.map((p, i) => i && p.score !== pts[i - 1].score ? `<circle cx="${x(p.at)}" cy="${y(p.score)}" r="4" fill="${color}" stroke="#fff" stroke-width="1.5"/>` : "").join("")}</svg>`;
-  const time = p => p.kind === "start" ? "12:00 AM" : p.kind === "midnight" ? "12:00 AM" : p.kind === "habits" ? "Day's end" : new Date(p.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const rows = pts.map((p, i) => { const ch = i ? p.score - pts[i - 1].score : 0;
-    return `<li><span class="sd-t">${time(p)}</span><span class="sd-w">${safe(p.text)}</span><b>${p.score}${ch ? ` <i class="${ch > 0 ? "sd-up" : "sd-down"}">${ch > 0 ? "▲ +" + ch : "▼ " + ch}</i>` : ""}</b></li>`; }).join("");
-  const first = pts[0].score, last = pts[pts.length - 1].score;
-  return `<div class="card sd-card"><h2>📈 Score through the day</h2>
-    <div class="sd-days">${days.map(d => `<button class="pill${d === day ? " on" : ""}" data-sdday="${d}">${d === today ? "Today" : d === yest ? "Yesterday" : DAYS[weekdayOf(d)].slice(0, 3)}</button>`).join("")}</div>
-    <p class="hint">${safe(dayLong(day))}: from <b>${first}</b> to <b>${last}</b>${last > first ? " ▲" : last < first ? " ▼" : ""}</p>
-    ${svg}<ul class="sd-list">${rows}</ul>
-    <p class="hint">The score is for the whole week, so each change moves it a little. ⭐ Habit ticks don't keep their time, so they show at the day's end.</p></div>`;
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".22"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    ${[lo, hi].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="sd-grid"/><text x="${L - 4}" y="${y(v) + 3}" text-anchor="end" class="sd-lab">${v}</text>`).join("")}
+    ${[0, 6, 12, 18, 24].map(h => `<text x="${x(t0 + h * 36e5)}" y="${H - 3}" text-anchor="${h === 0 ? "start" : h === 24 ? "end" : "middle"}" class="sd-lab">${hourTxt(h)}</text>`).join("")}
+    <path d="${area}" fill="url(#${gid})"/><path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map((p, i) => i && p.score !== pts[i - 1].score ? `<circle cx="${x(p.at)}" cy="${y(p.score)}" r="2.6" fill="#fff" stroke="${color}" stroke-width="1.6"/>` : "").join("")}</svg>`;
+  const time = p => p.kind === "start" || p.kind === "midnight" ? "12:00 AM" : p.kind === "habits" ? "Day's end" : new Date(p.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const moves = pts.map((p, i) => ({ ...p, ch: i ? p.score - pts[i - 1].score : 0 })).filter(p => p.ch);
+  const first = vals[0], last = vals[vals.length - 1], d = last - first;
+  return `<div class="${pop ? "sd-pop" : "card"} sd-card" style="--c:${color}">
+    <div class="sd-head"><b>Score through the day</b>${trendChipHtml(d)}</div>
+    <div class="sd-days" role="tablist">${days.map(dd => `<button class="sd-day${dd === day ? " on" : ""}" data-sdday="${dd}">${dd === today ? "Today" : dd === yest ? "Yesterday" : DAYS[weekdayOf(dd)].slice(0, 3)}</button>`).join("")}</div>
+    <p class="sd-sum">${safe(dayLong(day))} · <b>${first}</b> → <b>${last}</b></p>${svg}
+    ${moves.length ? `<details class="sd-more"><summary>What changed (${moves.length})</summary><ul class="sd-list">${moves.map(p =>
+      `<li><span class="sd-t">${time(p)}</span><span class="sd-w">${safe(p.text)}</span>${trendChipHtml(p.ch)}</li>`).join("")}</ul>
+      <p class="sd-note">The score is for the whole week. Habit ticks have no time, so they show at the day's end.</p></details>` : `<p class="sd-note">No change on this day.</p>`}</div>`;
+}
+// ▲ 3 / ▼ 2 / – : a small change sign (green up, red down, grey none)
+const trendChipHtml = d => `<span class="sd-chip ${d > 0 ? "up" : d < 0 ? "down" : "flat"}">${d > 0 ? "▲ " + d : d < 0 ? "▼ " + -d : "–"}</span>`;
+// (on a ring / tile: only when it moved today)
+const ringTrendHtml = id => { const d = todayTrend(id); return d ? trendChipHtml(d) : ""; };
+// Today's change for a kid: the score now − at 12 AM today (the same as Today's graph)
+function todayTrend(id) {
+  try { return scoreOf(id).overall - scoreAt(id, todayYmd(), fromYmd(todayYmd()).getTime()); } catch (e) { return 0; }
+}
+// The pop-up: from any score ring / tile with data-sdpop="<kid id>"
+function openScorePop(id) {
+  if (!exists(id) || isParentId(id)) return;
+  sdPop = id; scoreDay = null; drawScorePop();
+  $("sdModal").hidden = false;
+}
+function drawScorePop() {
+  const k = userById(sdPop), sc = scoreOf(k.id);
+  $("sdBody").innerHTML = `<div class="sd-pophead">${scoreRingHtml(sc.overall, colorsOf(k).color, lastWeekScore(k.id))}<div><b>${safe(k.name)}</b><small>Score this week · ${sc.overall} of ${sc.max}</small>${beatBarHtml(k.id)}</div></div>
+    ${dayGraphHtml(k, colorsOf(k).color, true)}<div class="btnrow"><button class="pill" data-sdclose data-go="points">🏆 Leaderboard</button><button class="primary" data-sdclose>OK</button></div>`;
 }
 document.addEventListener("click", e => {
+  const pop = e.target.closest && e.target.closest("[data-sdpop]");
+  if (pop) { e.preventDefault(); e.stopImmediatePropagation(); return openScorePop(pop.dataset.sdpop); }
+  if (e.target.closest && e.target.closest("[data-sdclose]")) { $("sdModal").hidden = true; sdPop = null; if (!e.target.closest("[data-go]")) e.stopImmediatePropagation(); return; }
+  if (e.target.id === "sdModal") { $("sdModal").hidden = true; sdPop = null; return; }
   const b = e.target.closest && e.target.closest("[data-sdday], [data-sdopen]");
   if (!b) return;
   e.stopImmediatePropagation();
   if ("sdopen" in b.dataset) sdOpen = sdOpen === b.dataset.sdopen ? null : b.dataset.sdopen; else scoreDay = b.dataset.sdday;
+  if (b.closest("#sdModal")) return drawScorePop();
   const y = window.scrollY; render(); window.scrollTo(0, y);
-});
+}, true);
 let kidSec = null;
 const starAnnounceText = () => { const t = starTime(); return `every ${DAYS[t.day]} at ${clock(toMin(t.time), true)}`; };
 // ⭐ Today's habits: done / all (prayers and water: done only when all parts are done)
@@ -435,7 +531,7 @@ function drawKidPage() {
   if (kidSec) { $("kidBody").innerHTML = kidSectionHtml(k, kidSec); return plainHeads($("kidBody")); }
   $("kidBody").innerHTML = `
     <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <div class="kp-head">${scoreRingHtml(sc.overall, c.color)}<div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>
+      <div class="kp-head"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="Score through the day">${scoreRingHtml(sc.overall, c.color, lastWeekScore(k.id))}${ringTrendHtml(k.id)}</button><div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>${beatBarHtml(k.id)}
         <small>${safe(kidTodayLine(k.id))}</small></div></div></div>
     <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">${secs.map(s => `<button class="kp-tile" data-kidsec="${s.id}">
       <span class="e" aria-hidden="true">${s.emoji}</span><b>${s.label}</b><small>${safe(kidSecLine(k, s.id))}</small></button>`).join("")}</div>`;
