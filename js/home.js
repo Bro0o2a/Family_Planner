@@ -73,7 +73,7 @@ function drawKidHome(u) {
     <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
       ${tile("kt-cal", "data-kidcal", ico3d("calendar"), "Calendar", `${doneToday} of ${today.length}`, "done today")}
       ${tile("kt-habits", `data-kidpanel="habits"`, ico3d("goal"), "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
-      ${tile("kt-score", `data-sdpop="${safe(u.id)}"`, ico3d("achieve"), "Score this week", `${scoreOf(u.id).overall} ${ringTrendHtml(u.id)}`, `of ${scoreOf(u.id).max} · tap for the day`)}</div>
+      ${tile("kt-score kt-beat", `data-sdpop="${safe(u.id)}"`, scoreRingHtml(scoreOf(u.id).overall, colorsOf(u).color, lastWeekScore(u.id)), "Score this week", lastWeekScore(u.id) != null ? `<span class="kt-last">Last week ${lastWeekScore(u.id)}</span> ${ringTrendHtml(u.id)}` : `${scoreOf(u.id).overall} ${ringTrendHtml(u.id)}`, beatLineHtml(u.id, true) || `of ${scoreOf(u.id).max} · tap for the day`)}</div>
     ${wishCardHtml(u)}${kidPlannerHtml(u, today, hb)}`;
   $("homeMenu").hidden = true;
   const bar = [["data-go=\"points\"", "🏆", "Points"], ["data-kidpanel=\"habits\"", "⭐", "Habits"], ...(feat("diary") ? [["data-go=\"diary\"", "📔", "My day"]] : []),
@@ -143,10 +143,25 @@ function needsLineHtml() {
     ${shown ? `<div class="needs-panel">${shown.html}</div>` : ""}</div>`;
 }
 // 🎯 The score ring (0–100) in the kid's colour
-function scoreRingHtml(n, color) {
-  const C = 2 * Math.PI * 44;
-  return `<span class="kc-ring" role="img" aria-label="Score ${n} this week" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
-    <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * Math.min(n, 100) / 100).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${n}</b></span>`;
+function scoreRingHtml(n, color, target) {
+  const C = 2 * Math.PI * 44, t = typeof target === "number" && target > 0 ? Math.min(100, target) : null;
+  // 🎯 v187 Beat yourself: a notch at last week's score (the line to pass), white with a dark edge so it shows on any colour
+  const a = t != null ? t / 100 * 2 * Math.PI : 0, pt = r => `${(50 + r * Math.cos(a)).toFixed(1)} ${(50 + r * Math.sin(a)).toFixed(1)}`;
+  return `<span class="kc-ring${t != null && n >= t ? " beat" : ""}" role="img" aria-label="Score ${n} this week${t != null ? `, last week ${t}` : ""}" style="--c:${color}"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" class="bu-trk"/>
+    <circle cx="50" cy="50" r="44" class="kc-bar" style="stroke-dasharray:${(C * Math.min(n, 100) / 100).toFixed(1)} ${C.toFixed(1)}"/>${t != null
+      ? `<circle cx="${pt(44).split(" ")[0]}" cy="${pt(44).split(" ")[1]}" r="7" class="kc-goal"/>` : ""}</svg><b>${n}</b></span>`;
+}
+// 🎯 Beat yourself: last week's final score (kept in points.reach) and the best week ever (before this week)
+function lastWeekScore(id) { const r = data.points.reach[`${addDaysYmd(data.points.week, -7)}|${id}`]; return r && typeof r.s === "number" && r.s > 0 ? r.s : null; }
+function bestWeekScore(id) {
+  const all = Object.entries(data.points.reach).filter(([k, r]) => k.endsWith("|" + id) && k.slice(0, 10) < data.points.week && r && typeof r.s === "number").map(([, r]) => r.s);
+  return all.length ? Math.max(...all) : null;
+}
+// "🎯 3 more to beat last week (71)" · "🚀 4 above last week!"
+function beatLineHtml(id, short) {
+  const last = lastWeekScore(id); if (last == null) return "";
+  const now = scoreOf(id).overall, d = now - last;
+  return `<span class="beat-line ${d > 0 ? "up" : ""}">${d > 0 ? `🚀 ${d} above last week${short ? "" : " (" + last + ")"}!` : d === 0 ? `🎯 Same as last week. 1 more to beat it!` : `🎯 ${-d} more to beat last week${short ? "" : " (" + last + ")"}`}</span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {
@@ -186,7 +201,7 @@ const kidCardTags = id => (stars().includes(id) ? ` <span class="kc-tag kc-star"
 function kidCardHtml(k) {
   const c = colorsOf(k), sc = scoreOf(k.id), e = feat("diary") ? diaryOf(k.id, todayYmd()) : null;
   return `<div class="card kid-card" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-    <div class="kc-top"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="${safe(k.name)}'s score: see it through the day">${scoreRingHtml(sc.overall, c.color)}${ringTrendHtml(k.id)}</button>
+    <div class="kc-top"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="${safe(k.name)}'s score: see it through the day">${scoreRingHtml(sc.overall, c.color, lastWeekScore(k.id))}${ringTrendHtml(k.id)}</button>
     <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">
       <span class="kc-text"><b>${faceHtml(k)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
         <small>${safe(kidTodayLine(k.id))}</small><small class="kc-cheer">${safe(kidCheerShort(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button></div>
@@ -335,7 +350,7 @@ function openScorePop(id) {
 }
 function drawScorePop() {
   const k = userById(sdPop), sc = scoreOf(k.id);
-  $("sdBody").innerHTML = `<div class="sd-pophead">${scoreRingHtml(sc.overall, colorsOf(k).color)}<div><b>${safe(k.name)}</b><small>Score this week · ${sc.overall} of ${sc.max}</small></div></div>
+  $("sdBody").innerHTML = `<div class="sd-pophead">${scoreRingHtml(sc.overall, colorsOf(k).color, lastWeekScore(k.id))}<div><b>${safe(k.name)}</b><small>Score this week · ${sc.overall} of ${sc.max}</small>${beatLineHtml(k.id)}</div></div>
     ${dayGraphHtml(k, colorsOf(k).color, true)}<div class="btnrow"><button class="pill" data-sdclose data-go="points">🏆 Leaderboard</button><button class="primary" data-sdclose>OK</button></div>`;
 }
 document.addEventListener("click", e => {
@@ -486,7 +501,7 @@ function drawKidPage() {
   if (kidSec) { $("kidBody").innerHTML = kidSectionHtml(k, kidSec); return plainHeads($("kidBody")); }
   $("kidBody").innerHTML = `
     <div class="card kp-top" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">
-      <div class="kp-head"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="Score through the day">${scoreRingHtml(sc.overall, c.color)}${ringTrendHtml(k.id)}</button><div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>
+      <div class="kp-head"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="Score through the day">${scoreRingHtml(sc.overall, c.color, lastWeekScore(k.id))}${ringTrendHtml(k.id)}</button><div><h1>${safe(k.emoji)} ${safe(k.name)}${e && moodFace(e.mood) ? ` ${moodFace(e.mood)}` : ""}${kidCardTags(k.id)}</h1>
         <small>${safe(kidTodayLine(k.id))}</small></div></div></div>
     <div class="kp-tiles" style="--c:${c.color};--soft:${c.soft};--ink:${c.ink}">${secs.map(s => `<button class="kp-tile" data-kidsec="${s.id}">
       <span class="e" aria-hidden="true">${s.emoji}</span><b>${s.label}</b><small>${safe(kidSecLine(k, s.id))}</small></button>`).join("")}</div>`;

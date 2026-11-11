@@ -3329,3 +3329,14 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 /* 💬 v187 the kind line under each kid (parent's kid cards, kid's home) */
 .kc-text small.kc-cheer { font-weight: 600; opacity: .75; font-size: 12px; white-space: normal; }
 .k-cheer { font-size: 13px; font-weight: 700; margin: 2px 0 4px; opacity: .85; }
+
+/* 🎯 v187 Beat yourself: last week's notch on the score ring + the line under the score */
+.kc-ring .kc-goal { fill: #fff; stroke: #3a2a1a; stroke-width: 3; }
+.kc-ring.beat .kc-goal { fill: #ffd54a; }
+.kt-beat .kt-last { font-size: 15px; font-weight: 800; color: #6b4a2a; }
+.beat-line { display: block; font-size: 12px; font-weight: 800; color: #9a5b12; }
+.beat-line.up { color: #15803d; }
+.kt-beat .kt-ico { background: none; box-shadow: none; width: 64px; height: 64px; border-radius: 50%; }
+.kt-beat .kt-ico .kc-ring { width: 64px; height: 64px; }
+.kt-beat .kt-ico .kc-ring b { font-size: 20px; }
+.kt-beat small { white-space: normal; }
