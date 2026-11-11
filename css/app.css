@@ -3366,3 +3366,13 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .ws-partrow .pill { font-size: 15px; min-width: 40px; min-height: 36px; padding: 4px 10px; justify-content: center; }
 .ws-partrow .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
 .ws-partrow > span { flex-basis: 100%; }
+
+
+/* v189 Score pop-up: everything in the middle */
+.sd-pophead { justify-content: center; text-align: left; }
+.sd-pophead > div { flex: none; }
+.sd-popbeat .beat-bar { margin: 8px auto 4px; }
+.sd-pop .sd-days, #sdBody .sd-days { justify-content: center; flex-wrap: wrap; }
+#sdBody .sd-sum, #sdBody .sd-note { text-align: center; }
+#sdBody .sd-head { justify-content: center; position: relative; }
+#sdBody .sd-head > :last-child:not(:first-child) { position: absolute; right: 0; }
