@@ -246,6 +246,10 @@ function maybeAskMood() {
   if (!need) return;
   let next = 0; try { next = Number(localStorage.getItem(MOOD_ASK_KEY + me + "." + todayYmd())) || 0; } catch (e) {}
   if (next < 0 || Date.now() < next) return;   // (-1 = answered / closed for today)
+  // (v186: the kid's own picture, a boy or a girl, chosen in 👤 My profile; no picture yet → their emoji)
+  const u = userById(me);
+  $("moodAskPic").innerHTML = faceAvatar(u) ? `<img src="${avatarSrc(u.avatar)}" alt="">` : safe(u.emoji || "🙂");
+  $("moodAskTitle").textContent = `Hi ${u.name}! How was your day?`;
   $("moodAskText").textContent = "Tap how you feel today. It only takes a second. 😊";
   $("moodAsk").hidden = false;
   $("moodAskGo").focus();
