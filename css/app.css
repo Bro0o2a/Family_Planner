@@ -3290,21 +3290,38 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .kc2-free { margin: 12px 18px 0; padding: 12px 14px; border-radius: 18px; background: #fef3c7; color: #92400e; font-weight: 800; text-align: center; }
 .kc2-freebtns { display: flex; justify-content: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 
-/* 📈 v184: score through one day (kid page → 🏆 Score) */
-.sd-days { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
-.sd-days .pill { padding: 6px 12px; font-size: 13px; min-height: 0; }
-.sd-days .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
-.sd-svg { width: 100%; height: auto; display: block; margin: 4px 0 8px; }
-.sd-grid { stroke: rgba(0,0,0,.1); stroke-width: 1; }
-.sd-lab { font-size: 10px; fill: #777; }
+/* 📈 v187: score through one day: small and clean (kid page, profile, report, leaderboard, pop-up) */
+.sd-card { padding: 14px 14px 10px; }
+.sd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sd-head b { font-size: 15px; }
+.sd-days { display: flex; gap: 4px; margin: 8px 0 4px; overflow-x: auto; scrollbar-width: none; }
+.sd-day { flex: none; padding: 4px 10px; min-height: 0; font-size: 12px; font-weight: 700; border-radius: 999px; border: 1px solid rgba(0,0,0,.1); background: transparent; color: inherit; box-shadow: none; }
+.sd-day.on { background: var(--c, #333); border-color: var(--c, #333); color: #fff; }
+.sd-sum { margin: 2px 0 0; font-size: 12px; color: #777; }
+.sd-svg { width: 100%; height: auto; display: block; margin: 2px 0 4px; }
+.sd-grid { stroke: rgba(0,0,0,.08); stroke-width: 1; }
+.sd-lab { font-size: 9px; fill: #999; }
+.sd-chip { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1.5; white-space: nowrap; vertical-align: middle; font-style: normal; }
+.sd-chip.up { background: #dcfce7; color: #15803d; }
+.sd-chip.down { background: #fee2e2; color: #b91c1c; }
+.sd-chip.flat { background: rgba(0,0,0,.06); color: #888; }
+.sd-more summary { cursor: pointer; font-size: 13px; font-weight: 700; padding: 4px 0; color: #666; }
 .sd-list { list-style: none; margin: 0; padding: 0; }
-.sd-list li { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid rgba(0,0,0,.06); font-size: 14px; }
-.sd-t { color: #777; font-size: 12px; }
-.sd-list b { white-space: nowrap; }
-.sd-up { color: #15803d; font-style: normal; font-size: 12px; }
-.sd-down { color: #b91c1c; font-style: normal; font-size: 12px; }
+.sd-list li { display: grid; grid-template-columns: 62px 1fr auto; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid rgba(0,0,0,.06); font-size: 12.5px; }
+.sd-t { color: #888; font-size: 11px; }
+.sd-note { margin: 4px 0 0; font-size: 11px; color: #999; }
 .sd-open { margin: 6px 0 2px; }
 .pt-graph { margin: -4px 0 12px; }
+.kc-top { display: flex; align-items: center; gap: 10px; }
+.kc-top .kc-open { flex: 1; min-width: 0; }
+.kc-ringbtn { position: relative; flex: none; padding: 0; background: none; border: 0; box-shadow: none; min-height: 0; color: inherit; cursor: pointer; }
+.kc-ringbtn .sd-chip { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); font-size: 9.5px; padding: 0 5px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.kt-big .sd-chip { font-size: 12px; margin-left: 4px; }
+.sd-popcard { max-width: 420px; width: 100%; }
+.sd-popcard .sd-card { padding: 10px 0 0; margin: 0; }
+.sd-pophead { display: flex; align-items: center; gap: 12px; }
+.sd-pophead b { display: block; font-size: 18px; }
+.sd-pophead small { color: #888; }
 
 /* 📔 v186: the mood reminder shows the kid's own boy / girl picture */
 .mood-pic img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
