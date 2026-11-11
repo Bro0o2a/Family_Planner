@@ -337,8 +337,8 @@ function cleanCheck(c, fallbackMax) {
                                                                ...(aiTxt(q.topic, 80) ? { topic: aiTxt(q.topic, 80) } : {}),
                                                                ...(aiTxt(q.skill, 60) ? { skill: aiTxt(q.skill, 60) } : {}),
                                                                ...(q.difficulty != null ? { difficulty: aiInt(q.difficulty, 1, 10, 5) } : {}),
-                                                               // (👨‍👩‍👧 a parent's fix: "right" | "wrong" · 🙋 the kid asked a parent to check it)
-                                                               ...(["right", "wrong"].includes(q.fixed) ? { fixed: q.fixed } : {}), ...(q.ask === true ? { ask: true } : {}),
+                                                               // (👨‍👩‍👧 a parent's fix: "right" | "wrong" | "part" (🟡 some of the points) · 🙋 the kid asked a parent to check it)
+                                                               ...(["right", "wrong", "part"].includes(q.fixed) ? { fixed: q.fixed } : {}), ...(q.ask === true ? { ask: true } : {}),
                                                                ...(Array.isArray(q.askTo) ? { askTo: q.askTo.filter(x => okId(String(x || ""))).slice(0, 4) } : {}),
                                                                ...(okId(String(q.fixedBy || "")) ? { fixedBy: q.fixedBy } : {}) })),
                 at: isYmd(c.at) ? c.at : todayYmd() };

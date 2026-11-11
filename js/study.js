@@ -1605,15 +1605,26 @@ function resultNode(w) {
     parent && c.questions.length ? h("div", { class: "btnrow" }, h("button", { data: { wsact: "allans" }, "aria-expanded": String(wsAllAns) }, wsAllAns ? "Hide all answers" : "📋 See all answers")) : null,
     fixedNode(c),
     parent && wsAllAns && c.questions.length ? h("ul", { class: "list" }, c.questions.map(q => h("li", { class: q.ask && !q.fixed ? "ws-asked" : null },
-      h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : "Not right yet" }, q.correct ? "✓" : "✗"),
+      h("span", { class: "ai-mk " + (q.correct ? "ok" : "no"), "aria-label": q.correct ? "Right" : q.points > 0 ? "Part marks" : "Not right yet" }, q.correct ? "✓" : q.points > 0 ? "🟡" : "✗"),
       h("div", { class: "what" }, `Question ${q.number}`,
-        h("small", null, `${q.ask && !q.fixed ? `🙋 ${kidNameOf(w.kid)} asks ${askedMe(q) ? "you" : askNames(q)} to check this · ` : ""}${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}${q.fixed ? ` · ✓ changed by ${q.fixedBy === me ? "you" : fixerName(q)}` : ""}`)),
+        h("small", null, `${q.ask && !q.fixed ? `🙋 ${kidNameOf(w.kid)} asks ${askedMe(q) ? "you" : askNames(q)} to check this · ` : ""}${num(q.points)}${most[q.number] != null ? "/" + num(most[q.number]) : ""} pts${q.your_answer ? ` · wrote: ${q.your_answer}` : ""}${q.note ? " · " + q.note : ""}${q.fixed ? ` · ✓ changed by ${q.fixedBy === me ? "you" : fixerName(q)}` : ""}`),
+        partMarksNode(q, most[q.number])),
       h("button", { class: "pill", data: { wsqfix: `${q.number}|${q.correct ? "wrong" : "right"}` } }, q.correct ? "Mark wrong" : "Mark right")))) : null);
 }
 // 👨‍👩‍👧 What a parent changed (the kid sees it too): "✓ Dad checked Q4: right"
 function fixedNode(c) {
   const list = c.questions.filter(q => q.fixed);
-  return list.length ? h("p", { class: "ai-note ws-fixed" }, list.map(q => `✓ ${fixerName(q)} checked Q${q.number}: ${q.fixed === "right" ? "right" : "wrong"}`).join(" · ")) : null;
+  return list.length ? h("p", { class: "ai-note ws-fixed" }, list.map(q => `✓ ${fixerName(q)} checked Q${q.number}: ${q.fixed === "part" ? `${num(q.points)} ${q.points === 1 ? "point" : "points"} (part marks)` : q.fixed === "right" ? "right" : "wrong"}`).join(" · ")) : null;
+}
+// 🟡 v188: PART MARKS (Broo2a): a parent gives some of a question's points ("Part marks: 1 · 2 …"), for a question worth 2 or more
+// (the buttons are the points between 0 and full: 0 = Mark wrong, full = Mark right)
+function partMarksNode(q, full) {
+  const top = Math.ceil(Number(full) || 0) - 1;
+  if (top < 1) return null;
+  const vals = Array.from({ length: Math.min(top, 9) }, (_, k) => k + 1);
+  return h("div", { class: "ws-partrow" }, h("span", null, `Part marks (out of ${num(full)}):`),
+    vals.map(v => h("button", { class: "pill" + (q.fixed === "part" && q.points === v ? " on" : ""), data: { wsqfix: `${q.number}|part:${v}` },
+      "aria-label": `Give ${v} of ${num(full)} points` }, `${v}`)));
 }
 // ✓ / ✗ A parent marks ONE question right or wrong (the AI's check stays as it is everywhere else) → the score, %, mark and learning update
 function fixQuestion(wsId, number, to) {
@@ -1622,7 +1633,11 @@ function fixQuestion(wsId, number, to) {
   const wq = w.questions.find(x => x.number === number), full = wq ? wq.points : 0;
   const qs = w.check.questions.map(q => ({ ...q })), q = qs.find(x => x.number === number);
   if (!q) return;
-  const pts = to === "right" ? full : 0, score = Math.max(0, Math.min(w.check.max_score, w.check.score + pts - (q.points || 0)));
+  const part = /^part:/.test(to) ? Math.max(0, Math.min(full, Number(to.slice(5)) || 0)) : null;   // (🟡 part marks: "part:2" → 2 points)
+  if (part != null && (part <= 0 || part >= full)) to = part >= full ? "right" : "wrong";
+  const pts = to === "right" ? full : part != null && to.startsWith("part") ? part : 0;
+  if (to.startsWith("part")) to = "part";
+  const score = Math.max(0, Math.min(w.check.max_score, w.check.score + pts - (q.points || 0)));
   Object.assign(q, { correct: to === "right", points: pts, fixed: to, fixedBy: me });
   delete q.ask; delete q.askTo;
   const c = { ...w.check, questions: qs, score };
@@ -1631,7 +1646,7 @@ function fixQuestion(wsId, number, to) {
   saveWsMark(w.kid, wsId, w, c);
   schoolFresh = true;
   render();
-  toast(`✓ Q${number} is now ${to}. Score: ${num(score)} / ${num(c.max_score)}`, 3000);
+  toast(`✓ Q${number} is now ${to === "part" ? `${num(pts)} of ${num(full)} points` : to}. Score: ${num(score)} / ${num(c.max_score)}`, 3000);
 }
 // 🙋 A kid asks a parent to check one answer (the parent sees it in "Needs you")
 // (to = one parent's id, or "all": the kid picks who checks it)
