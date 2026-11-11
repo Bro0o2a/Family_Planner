@@ -3336,20 +3336,25 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .kt-beat .kt-ico .kc-ring b { font-size: 20px; }
 .kt-beat small { white-space: normal; }
 
-/* 🎯 v187 Beat yourself graph: the week's line climbing to last week's dashed 🏁 line */
-.beat-bar { display: block; max-width: 250px; margin: 6px 0 4px; padding: 6px 8px 5px; border-radius: 14px; background: #fff; border: 1.5px solid #f1e3cc; white-space: normal; }
+/* 🎯 v187 Beat yourself graph: no box, the kid's line + soft area climbing to last week's dashed 🏁 line */
+.beat-bar { display: block; max-width: 250px; margin: 4px 0 6px; white-space: normal; }
 .beat-bar svg { display: block; width: 100%; height: auto; overflow: visible; }
-.beat-bar .bb-goal { stroke: #e0882a; stroke-width: 1.6; stroke-dasharray: 4 3; }
-.beat-bar .bb-goaltxt { font-size: 10px; font-weight: 800; fill: #b45309; }
-.beat-bar .bb-grid { stroke: #f1e6d6; stroke-width: 1; }
-.beat-bar .bb-ytxt { font-size: 8px; fill: #b8a48c; text-anchor: end; font-weight: 700; }
-.beat-bar .bb-day { font-size: 8px; fill: #a08870; text-anchor: middle; font-weight: 700; }
-.beat-bar .bb-line { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.beat-bar .bb-dot { stroke-width: 2; }
-.beat-bar .bb-now { font-size: 11px; font-weight: 900; fill: #3a2a1a; text-anchor: middle; }
-.beat-bar .bb-msg { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 800; color: #b45309; }
-.beat-bar.won { background: #f1fbf4; border-color: #b7e6c6; }
-.beat-bar.won .bb-goal { stroke: #15803d; } .beat-bar.won .bb-goaltxt { fill: #15803d; }
-.beat-bar.won .bb-msg { color: #15803d; }
-.beat-bar.big { max-width: 280px; } .beat-bar.big .bb-msg { font-size: 13.5px; }
+.beat-bar .bb-base { stroke: rgba(74,52,38,.14); stroke-width: 1; }
+.beat-bar .bb-ytxt { font-size: 8px; fill: rgba(74,52,38,.45); text-anchor: end; font-weight: 700; }
+.beat-bar .bb-goal { stroke: #e8912e; stroke-width: 1.5; stroke-dasharray: 3 3; }
+.beat-bar .bb-flag { fill: #fde9cc; }
+.beat-bar .bb-flagtxt { font-size: 8.5px; font-weight: 900; fill: #a3530b; text-anchor: middle; }
+.beat-bar .bb-line { fill: none; stroke: var(--bc); stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.beat-bar .bb-dot { fill: var(--bc); }
+.beat-bar .bb-halo { fill: var(--bc); opacity: .2; }
+.beat-bar .bb-end { fill: var(--bc); stroke: #fff; stroke-width: 2; }
+.beat-bar .bb-tag { fill: var(--bc); }
+.beat-bar .bb-tagtxt { font-size: 9px; font-weight: 900; fill: #fff; text-anchor: middle; }
+.beat-bar .bb-day { font-size: 7.5px; font-weight: 700; fill: rgba(74,52,38,.55); text-anchor: middle; }
+.beat-bar .bb-day.on { fill: var(--bc); font-weight: 900; }
+.beat-bar .bb-day.later { fill: rgba(74,52,38,.28); }
+.beat-bar .bb-msg { display: inline-block; margin-top: 3px; padding: 3px 10px; border-radius: 999px; background: #fdecd6; color: #a3530b; font-size: 12px; font-weight: 800; }
+.beat-bar.won .bb-goal { stroke: #22a052; } .beat-bar.won .bb-flag { fill: #dcf5e4; } .beat-bar.won .bb-flagtxt { fill: #15803d; }
+.beat-bar.won .bb-msg { background: #dcf5e4; color: #15803d; }
+.beat-bar.big { max-width: 270px; } .beat-bar.big .bb-msg { font-size: 13px; }
 .sd-pophead > div { flex: 1; min-width: 0; }

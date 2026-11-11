@@ -166,25 +166,29 @@ function weekScoreLine(id) {
   }
   return out;
 }
+let beatSeq = 0;
 function beatBarHtml(id, big) {
   const last = lastWeekScore(id); if (last == null) return "";
   const now = scoreOf(id).overall, d = now - last, won = d > 0, pts = weekScoreLine(id), color = colorsOf(userById(id) || {}).color || "#f07c1e";
-  const W = 200, H = 80, L = 20, R = 30, T = 10, B = 14, vals = pts.map(p => p.s).concat(last);
+  const W = 220, H = 92, L = 18, R = 34, T = 18, B = 16, vals = pts.map(p => p.s).concat(last), gid = `bbg${++beatSeq}`;
   const lo = Math.max(0, Math.floor((Math.min(...vals) - 5) / 10) * 10), hi = Math.min(100, Math.ceil((Math.max(...vals) + 3) / 10) * 10) || 100;
-  const x = i => L + i * (W - L - R) / 6, y = v => T + (hi - v) / Math.max(1, hi - lo) * (H - T - B);
-  const line = pts.map((p, k) => `${k ? "L" : "M"}${x(p.i).toFixed(1)} ${y(p.s).toFixed(1)}`).join(" "), end = pts[pts.length - 1];
-  const days = ["S", "S", "M", "T", "W", "T", "F"];
-  return `<span class="beat-bar${won ? " won" : ""}${big ? " big" : ""}" role="img" aria-label="This week ${now}, last week ${last}">
-    <svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
-      ${[lo, Math.round((lo + hi) / 20) * 10, hi].map(v => `<line x1="${L}" x2="${W - R + 4}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="bb-grid"/><text x="${L - 4}" y="${(y(v) + 3).toFixed(1)}" class="bb-ytxt">${v}</text>`).join("")}
-      <line x1="${L}" x2="${W - R + 4}" y1="${y(last).toFixed(1)}" y2="${y(last).toFixed(1)}" class="bb-goal"/>
-      <text x="${W - R + 7}" y="${(y(last) + 4).toFixed(1)}" class="bb-goaltxt">🏁${last}</text>
-      ${days.map((t, i) => `<text x="${x(i).toFixed(1)}" y="${H - 2}" class="bb-day">${t}</text>`).join("")}
-      <path d="${line}" class="bb-line" style="stroke:${color}"/>
-      ${pts.map(p => `<circle cx="${x(p.i).toFixed(1)}" cy="${y(p.s).toFixed(1)}" r="${p === end ? 4.5 : 2.6}" style="fill:${p === end ? color : "#fff"};stroke:${color}" class="bb-dot"/>`).join("")}
-      <text x="${x(end.i).toFixed(1)}" y="${(Math.abs(y(end.s) - 7 - y(last)) < 9 || y(end.s) < T + 8 ? y(end.s) + 15 : y(end.s) - 7).toFixed(1)}" class="bb-now">${end.s}</text>
+  const x = i => L + i * (W - L - R) / 6, y = v => T + (hi - v) / Math.max(1, hi - lo) * (H - T - B), f = n => n.toFixed(1);
+  const end = pts[pts.length - 1], line = pts.map((p, k) => `${k ? "L" : "M"}${f(x(p.i))} ${f(y(p.s))}`).join(" ");
+  const area = `${line} L${f(x(end.i))} ${f(y(lo))} L${f(x(pts[0].i))} ${f(y(lo))} Z`, gy = y(last);
+  const tagY = Math.abs(y(end.s) - 13 - gy) < 10 || y(end.s) < T + 4 ? y(end.s) + 9 : y(end.s) - 21;
+  const days = ["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"];
+  return `<span class="beat-bar${won ? " won" : ""}${big ? " big" : ""}" style="--bc:${color}" role="img" aria-label="This week ${now}, last week ${last}">
+    <svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".32"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+      ${[lo, hi].map(v => `<text x="${L - 5}" y="${f(y(v) + 3)}" class="bb-ytxt">${v}</text>`).join("")}<line x1="${L}" x2="${W - R}" y1="${f(y(lo))}" y2="${f(y(lo))}" class="bb-base"/>
+      <line x1="${L}" x2="${W - R}" y1="${f(gy)}" y2="${f(gy)}" class="bb-goal"/>
+      <rect x="${W - R + 3}" y="${f(gy - 8)}" width="${R - 3}" height="16" rx="8" class="bb-flag"/><text x="${W - R / 2 + 1.5}" y="${f(gy + 3.6)}" class="bb-flagtxt">🏁${last}</text>
+      <path d="${area}" fill="url(#${gid})"/><path d="${line}" class="bb-line"/>
+      ${pts.map(p => p === end ? "" : `<circle cx="${f(x(p.i))}" cy="${f(y(p.s))}" r="2.4" class="bb-dot"/>`).join("")}
+      <circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="8" class="bb-halo"/><circle cx="${f(x(end.i))}" cy="${f(y(end.s))}" r="4.6" class="bb-end"/>
+      <rect x="${f(x(end.i) - 12)}" y="${f(tagY)}" width="24" height="13" rx="6.5" class="bb-tag"/><text x="${f(x(end.i))}" y="${f(tagY + 9.6)}" class="bb-tagtxt">${end.s}</text>
+      ${days.map((t, i) => `<text x="${f(x(i))}" y="${H - 3}" class="bb-day${i === end.i ? " on" : i > end.i ? " later" : ""}">${t}</text>`).join("")}
     </svg>
-    <span class="bb-msg">${won ? `🏆 You beat last week! +${d} 🎉` : `🎯 ${last + 1 - now} more to beat last week (${last})`}</span></span>`;
+    <span class="bb-msg">${won ? `🏆 You beat last week! +${d}` : `🎯 ${last + 1 - now} more to beat ${last}!`}</span></span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {
