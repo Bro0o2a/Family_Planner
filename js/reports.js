@@ -52,7 +52,7 @@ function reportCardsHtml(kid, forPdf) {
   const u = userById(kid), r = reportRange(), x = reportData(kid, r), lines = reportLines(x, r, u.name), b = x.s.brief, briefNow = b && b.date >= data.points.week;
   const big = (n, label) => `<div class="rp-num"><b>${n}</b><small>${label}</small></div>`;
   const sc = rpRange === "week" ? scoreOf(kid) : null;   // (⭐ the score is for this week only)
-  return `${sc ? `<div class="card rp-card"><h2>⭐ Score this week</h2>${scoreBlockHtml(sc)}</div>` : ""}
+  return `${sc ? `<div class="card rp-card"><h2>⭐ Score this week</h2>${scoreBlockHtml(sc)}</div>${forPdf ? "" : dayGraphHtml(u, colorsOf(u).color)}` : ""}
     <div class="card rp-card"><h2>📚 Study per subject</h2>${sc ? `<p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · 📝 Marks: ${sc.has.marks ? sc.marks + "%" : "–"}${
       sc.free.count ? ` <small>(${sc.free.count} ${sc.free.count === 1 ? "worksheet" : "worksheets"}, ${sc.free.points} points)</small>` : ""}</p>` : ""}${studyTableHtml(kid, null)}</div>
     <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(kid)}</div>

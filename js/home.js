@@ -263,9 +263,9 @@ function kidTodayHtml(k) {
 // 👧 The kid page is a MENU of big buttons (each with a one-line status); a tap opens ONLY that part (kidSec).
 //    ⬅️ Back (or "All about …") → the menu again. Sections: today · habits · star · score · study · points (💪 strong / 🎯 weak per subject)
 //    · tasks · school · work · moods (📔 moods, ✅ duties, 💌 wishes) · report (the full 📊 report, as before).
-// 📈 The score through one day (on the kid page's 🏆 Score): day chips (this week, up to today; yesterday first shown),
+// 📈 The score through one day (kid page 🏆 Score, 👤 profile 📅 This week, 📊 report, 🏆 leaderboard button: everyone can look): day chips (this week, up to today; yesterday first shown),
 // a step line from 12 AM to midnight in the kid's colour, a dot for each change, and the list of what changed it.
-let scoreDay = null;
+let scoreDay = null, sdOpen = null;   // (🏆 leaderboard: whose day graph is open)
 function dayGraphHtml(k, color) {
   const today = todayYmd(), days = weekDates().filter(d => d <= today);
   const yest = addDaysYmd(today, -1), day = days.includes(scoreDay) ? scoreDay : days.includes(yest) ? yest : today;
@@ -293,9 +293,11 @@ function dayGraphHtml(k, color) {
     <p class="hint">The score is for the whole week, so each change moves it a little. ⭐ Habit ticks don't keep their time, so they show at the day's end.</p></div>`;
 }
 document.addEventListener("click", e => {
-  const b = e.target.closest && e.target.closest("#scr-kid [data-sdday]");
+  const b = e.target.closest && e.target.closest("[data-sdday], [data-sdopen]");
   if (!b) return;
-  e.stopImmediatePropagation(); scoreDay = b.dataset.sdday; render();
+  e.stopImmediatePropagation();
+  if ("sdopen" in b.dataset) sdOpen = sdOpen === b.dataset.sdopen ? null : b.dataset.sdopen; else scoreDay = b.dataset.sdday;
+  const y = window.scrollY; render(); window.scrollTo(0, y);
 });
 let kidSec = null;
 const starAnnounceText = () => { const t = starTime(); return `every ${DAYS[t.day]} at ${clock(toMin(t.time), true)}`; };

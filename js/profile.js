@@ -98,7 +98,7 @@ function drawMe() {
       ${st.pct != null ? `<li><span>✅ Tasks done</span><b>${st.pct}% <small>(${st.done} of ${st.planned})</small></b></li>` : ""}
       <li><span>⭐ Habit ticks</span><b>${st.ticks}</b></li>
       ${(f => f.count ? `<li><span>⭐ Free study</span><b>${f.count} ${f.count === 1 ? "worksheet" : "worksheets"}, ${f.points} points</b></li>` : "")(freeStudy(u.id))}</ul>
-      ${feat("diary") && canSeeMood(u.id) ? `<div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>` : ""}</div>` : ""}
+      ${feat("diary") && canSeeMood(u.id) ? `<div class="me-moods">${st.moods.map(x => `<span><b>${x.face || "·"}</b><small>${x.day}</small></span>`).join("")}</div>` : ""}</div>${dayGraphHtml(u, colorsOf(u).color)}` : ""}
     ${famSettings}
     <div class="btnrow me-btns">${canEdit && !meEdit ? `<button class="pill primary" data-meedit>⚙️ ${mine ? "My settings" : `Settings for ${safe(u.name)}`}</button>` : ""}</div>`;   // (🚪 Sign out: top right of every screen)
 }
@@ -805,13 +805,14 @@ function drawPoints() {
         <div class="pt-bar${star.includes(u.id) ? " shine" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i>
           ${star.includes(u.id) && pct ? `<span class="pt-spark" style="left:max(2px, calc(${pct}% - 20px))" aria-hidden="true">✨</span>` : ""}</div>
         ${subBarsHtml(fi[u.id])}
+        <button class="pill small sd-open" data-sdopen="${safe(u.id)}">📈 ${sdOpen === u.id ? "Hide the day graph" : "Score through the day"}</button>
         <div class="pt-kinds">${kindsText(kinds)} <small>· ${totals[u.id]} points</small></div>
         <div class="pt-sub">${max ? `${acts[u.id] / POINTS_EACH} of ${max / POINTS_EACH} activities done` : "No planned activities yet"}</div>
         ${noteHtml(u.id, rank, fi, sorted)}
         ${ptEdit && ptEdit.id === u.id && ptEdit.kind === "note" ? ptNoteFormHtml(u.id) : ""}
         ${star.includes(u.id) ? "" : heldBackHtml(u.id, fi, sorted)}
         ${buHist === u.id ? levelHistoryHtml(u.id) : ""}
-      </div></div>`;
+      </div></div>${sdOpen === u.id ? `<div class="pt-graph">${dayGraphHtml(u, c.color)}</div>` : ""}`;
   }).join("") + funLineHtml(fair);
   $("ptsHall").innerHTML = hallHtml();   // 🏆 every week's ⭐
   $("ptsRiddles").innerHTML = isParentDevice() ? "" : riddleBoardHtml();   // 🧩 the family riddle board (kids only)

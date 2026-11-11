@@ -3303,3 +3303,5 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .sd-list b { white-space: nowrap; }
 .sd-up { color: #15803d; font-style: normal; font-size: 12px; }
 .sd-down { color: #b91c1c; font-style: normal; font-size: 12px; }
+.sd-open { margin: 6px 0 2px; }
+.pt-graph { margin: -4px 0 12px; }
