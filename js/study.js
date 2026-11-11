@@ -1796,8 +1796,44 @@ function wsSameAsKey(w, wq, said) {
     return ks.length > 0 && ks.length === Object.keys(got).length && ks.every(k => got[k] === key[k]);
   }
   if (isOrderQ(wq)) { const k = orderKey(wq); return !!k && wsLetters(said) === k.join(""); }
-  if (isChoiceQ(wq)) { const i = optFind(wq.options, wq.answer); return i >= 0 && optFind(wq.options, said) === i; }
-  return false;
+  if (isChoiceQ(wq)) { const i = optFind(wq.options, wq.answer);
+    if (i < 0) return wsSameText(said, wq.answer);   // (the key isn't one of the choices: the same text is right)
+    // (v185: 1. the same words as a choice decide · 2. else the letter the kid wrote, also said in a longer way: "A (30 cm)", "A ✓",
+    //  "(A)", "Q3 A", "أ" · 3. else the old near match. E.g. "A cat" with the choices "A dog" / "A cat" is the words "A cat", not the letter A)
+    const byText = wsTextIdx(wq.options, said);
+    if (byText >= 0) return byText === i;
+    const L = wsKidLetter(wq.options, said);
+    if (L) return L === (OPT_LETTERS[i] || "");
+    return optFind(wq.options, said) === i;
+  }
+  // (any other question: the kid's answer is the key itself, e.g. "A" = "A", "30cm" = "30 cm")
+  return wsSameText(said, wq.answer);
+}
+// (the same answer, only spaces, capitals or a full stop at the end different: "30cm" = "30 cm", "Paris." = "paris";
+//  signs stay: "-5" ≠ "5", "3/4" ≠ "34", "1.5" ≠ "15")
+const wsPlain = x => String(x || "").toLowerCase().replace(/[“”„«»]/g, '"').replace(/[‘’]/g, "'").replace(/[\s.!?,;:]+$/, "").replace(/\s+/g, "");
+const wsSameText = (a, b) => !!wsPlain(a) && wsPlain(a) === wsPlain(b);
+// 🔤 The letter the kid wrote for a choice question, said in a longer way → "A" … or "" (not sure). OK: "A", "a)", "(A)", "A ✓",
+// "A (circled)", "Q3: A", "3 - A", "أ", or the letter + its own choice's words ("A) 30 cm", "A (30 cm)"). Not OK: "a dog" (words, not a letter).
+const WS_AR_ABC = { "أ": "A", "ا": "A", "ب": "B", "ج": "C", "د": "D" };
+function wsKidLetter(opts, said) {
+  let t = String(said || "").trim();
+  const n = t.match(/^q?\s*\d+\s*[).:\-–—=]?\s*(\(?(?:[A-Ja-j]|[أابجد])\)?\.?)$/iu);   // ("Q3 A", "3-A": only a number + one letter)
+  if (n) t = n[1];
+  const m = t.match(/^\(?([A-Ja-j]|[أابجد])(?![\p{L}\p{N}])\)?\s*[).:\-–—=]?\s*(.*)$/su);
+  if (!m) return "";
+  const L = WS_AR_ABC[m[1]] || m[1].toUpperCase();
+  if (!(OPT_LETTERS.indexOf(L) < opts.length)) return "";   // (not a letter on the paper: "F" for False, "T" for True …)
+  const rest = m[2].replace(/\b(circled|ticked|chosen|written|picked|in the box)\b/gi, "");
+  if (!/[\p{L}\p{N}]/u.test(rest)) return L;
+  return optFind(opts, rest) === OPT_LETTERS.indexOf(L) ? L : "";   // (the words after the letter are that letter's choice)
+}
+// (which choice has the SAME words as the kid's answer, with or without "A)" in front: no guessing) → its index or -1
+function wsTextIdx(opts, said) {
+  const a = optNorm(said), ex = opts.map(optExact).indexOf(optExact(said));
+  if (ex >= 0) return ex;
+  const same = opts.map(optNorm).reduce((l, x, k) => a && x === a ? [...l, k] : l, []);
+  return same.length === 1 ? same[0] : -1;
 }
 function wsSureRight(w, c) {
   let score = c.score;
