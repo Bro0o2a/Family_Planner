@@ -263,6 +263,42 @@ function kidTodayHtml(k) {
 // 👧 The kid page is a MENU of big buttons (each with a one-line status); a tap opens ONLY that part (kidSec).
 //    ⬅️ Back (or "All about …") → the menu again. Sections: today · habits · star · score · study · points (💪 strong / 🎯 weak per subject)
 //    · tasks · school · work · moods (📔 moods, ✅ duties, 💌 wishes) · report (the full 📊 report, as before).
+// 📈 The score through one day (kid page 🏆 Score, 👤 profile 📅 This week, 📊 report, 🏆 leaderboard button: everyone can look): day chips (this week, up to today; yesterday first shown),
+// a step line from 12 AM to midnight in the kid's colour, a dot for each change, and the list of what changed it.
+let scoreDay = null, sdOpen = null;   // (🏆 leaderboard: whose day graph is open)
+function dayGraphHtml(k, color) {
+  const today = todayYmd(), days = weekDates().filter(d => d <= today);
+  const yest = addDaysYmd(today, -1), day = days.includes(scoreDay) ? scoreDay : days.includes(yest) ? yest : today;
+  const pts = dayScorePoints(k.id, day), t0 = fromYmd(day).getTime(), DAY = 864e5;
+  const lo = Math.max(0, Math.floor((Math.min(...pts.map(p => p.score)) - 5) / 5) * 5), hi = Math.min(100, Math.ceil((Math.max(...pts.map(p => p.score)) + 5) / 5) * 5);
+  const W = 320, H = 170, L = 30, R = 10, T = 12, B = 24;
+  const x = at => L + (W - L - R) * Math.min(1, Math.max(0, (at - t0) / DAY)), y = v => T + (H - T - B) * (1 - (v - lo) / Math.max(1, hi - lo));
+  let path = `M${x(pts[0].at).toFixed(1)},${y(pts[0].score).toFixed(1)}`;
+  pts.slice(1).forEach(p => { path += ` H${x(p.at).toFixed(1)} V${y(p.score).toFixed(1)}`; });
+  const ticksY = [lo, Math.round((lo + hi) / 2), hi], hours = [0, 6, 12, 18, 24];
+  const hourTxt = h => h === 0 || h === 24 ? "12 AM" : h === 12 ? "12 PM" : h < 12 ? h + " AM" : (h - 12) + " PM";
+  const svg = `<svg class="sd-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${safe(k.name)}'s score on ${safe(dayLong(day))}">
+    ${ticksY.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" class="sd-grid"/><text x="${L - 4}" y="${y(v) + 3}" text-anchor="end" class="sd-lab">${v}</text>`).join("")}
+    ${hours.map(h => `<text x="${x(t0 + h * 36e5)}" y="${H - 6}" text-anchor="${h === 0 ? "start" : h === 24 ? "end" : "middle"}" class="sd-lab">${hourTxt(h)}</text>`).join("")}
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+    ${pts.map((p, i) => i && p.score !== pts[i - 1].score ? `<circle cx="${x(p.at)}" cy="${y(p.score)}" r="4" fill="${color}" stroke="#fff" stroke-width="1.5"/>` : "").join("")}</svg>`;
+  const time = p => p.kind === "start" ? "12:00 AM" : p.kind === "midnight" ? "12:00 AM" : p.kind === "habits" ? "Day's end" : new Date(p.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const rows = pts.map((p, i) => { const ch = i ? p.score - pts[i - 1].score : 0;
+    return `<li><span class="sd-t">${time(p)}</span><span class="sd-w">${safe(p.text)}</span><b>${p.score}${ch ? ` <i class="${ch > 0 ? "sd-up" : "sd-down"}">${ch > 0 ? "▲ +" + ch : "▼ " + ch}</i>` : ""}</b></li>`; }).join("");
+  const first = pts[0].score, last = pts[pts.length - 1].score;
+  return `<div class="card sd-card"><h2>📈 Score through the day</h2>
+    <div class="sd-days">${days.map(d => `<button class="pill${d === day ? " on" : ""}" data-sdday="${d}">${d === today ? "Today" : d === yest ? "Yesterday" : DAYS[weekdayOf(d)].slice(0, 3)}</button>`).join("")}</div>
+    <p class="hint">${safe(dayLong(day))}: from <b>${first}</b> to <b>${last}</b>${last > first ? " ▲" : last < first ? " ▼" : ""}</p>
+    ${svg}<ul class="sd-list">${rows}</ul>
+    <p class="hint">The score is for the whole week, so each change moves it a little. ⭐ Habit ticks don't keep their time, so they show at the day's end.</p></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-sdday], [data-sdopen]");
+  if (!b) return;
+  e.stopImmediatePropagation();
+  if ("sdopen" in b.dataset) sdOpen = sdOpen === b.dataset.sdopen ? null : b.dataset.sdopen; else scoreDay = b.dataset.sdday;
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+});
 let kidSec = null;
 const starAnnounceText = () => { const t = starTime(); return `every ${DAYS[t.day]} at ${clock(toMin(t.time), true)}`; };
 // ⭐ Today's habits: done / all (prayers and water: done only when all parts are done)
@@ -312,7 +348,7 @@ function kidSectionHtml(k, sec) {
         <p class="hint">The star is chosen ${safe(starAnnounceText())}: the best score wins.</p>
         ${stars().includes(k.id) ? `<p>${want && want.text ? `🎁 Gift: <b>${safe(want.text)}</b>${want.ok ? " ✅" : ""}` : "🎁 No gift picked yet."}</p>` : ""}
         <div class="btnrow"><button class="pill" data-go="points">🏆 Points and leaderboard</button></div></div>`,
-    score: () => `<div class="card"><h2>🏆 Score this week</h2>${scoreBlockHtml(sc)}${sc.free && sc.free.count ? `<p class="kid-free">${freeLine(sc.free)}</p>` : ""}</div>`,
+    score: () => `<div class="card"><h2>🏆 Score this week</h2>${scoreBlockHtml(sc)}${sc.free && sc.free.count ? `<p class="kid-free">${freeLine(sc.free)}</p>` : ""}</div>${dayGraphHtml(k, c.color)}`,
     study: () => `<div class="card rp-card"><h2>📚 Study per subject</h2><p class="rp-free">📚 Sessions: ${sc.sp ? sc.sp.study + "%" : "–"} · 📝 Marks: ${sc.has.marks ? sc.marks + "%" : "–"}${
         sc.free.count ? ` <small>(${sc.free.count} ${sc.free.count === 1 ? "worksheet" : "worksheets"}, ${sc.free.points} points)</small>` : ""}</p>${studyTableHtml(k.id, null)}</div>
       <div class="card rp-card"><h2>🎒 Topics</h2>${topicsSummaryHtml(k.id)}</div>`,
