@@ -240,6 +240,7 @@ function moodAskNeeds() {
 }
 function maybeAskMood() {
   if (!$("moodAsk").hidden || !$("prayAsk").hidden || screen === "start" || screen === "diary" || (cloud.enabled && !cloud.ready)) return;
+  if (rdPop || !$("riddleModal").hidden) return;   // (v186: never on top of the 🧩 riddle pop-up: it asks right after it closes)
   if (!$("syncModal").hidden || !$("loginScreen").hidden || document.querySelector(".tour")) return;
   const need = moodAskNeeds();
   if (!need) return;
@@ -249,6 +250,9 @@ function maybeAskMood() {
   $("moodAsk").hidden = false;
   $("moodAskGo").focus();
 }
+// (v186: also when the app is already open at reminder time, checked every minute, and when the phone comes back to the app)
+setInterval(() => { if (!document.hidden) maybeAskMood(); }, 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) maybeAskMood(); });
 function moodAskSet(v) { try { localStorage.setItem(MOOD_ASK_KEY + me + "." + todayYmd(), String(v)); } catch (e) {} }
 $("moodAskGo").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); openDiary(me); });
 $("moodAskLater").addEventListener("click", () => { $("moodAsk").hidden = true; moodAskSet(Date.now() + 3600e3); toast("OK! I'll ask again in an hour. 🙂", 3000); });
