@@ -3361,3 +3361,8 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .beat-bar.won .bb-msg { background: #dcf5e4; color: #15803d; }
 .beat-bar.big { max-width: 270px; } .beat-bar.big .bb-msg { font-size: 13px; }
 .sd-pophead > div { flex: 1; min-width: 0; }
+/* 🟡 v188: part marks under a question in "See all answers" (parents) */
+.ws-partrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; }
+.ws-partrow .pill { font-size: 15px; min-width: 40px; min-height: 36px; padding: 4px 10px; justify-content: center; }
+.ws-partrow .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
+.ws-partrow > span { flex-basis: 100%; }

@@ -131,6 +131,16 @@ try {
 
   // A checked worksheet in the School binder
   await run("add a checked worksheet", ws => { aiDocs.worksheets.testws = cleanWorksheet(ws); }, FAKE_WS);
+  // 🟡 Part marks: a parent gives 2 of Q1's 3 points → kept after cleaning, score goes up by 2
+  const part = await run("part marks", () => {
+    const before = aiDocs.worksheets.testws.check.score;
+    fixQuestion("testws", 1, "part:2");
+    const c = aiDocs.worksheets.testws.check, q = cleanCheck(JSON.parse(JSON.stringify(c)), 5).questions[0];
+    const ok = q.fixed === "part" && q.points === 2 && !q.correct && c.score === before - 3 + 2;
+    fixQuestion("testws", 1, "right");
+    return ok && aiDocs.worksheets.testws.check.score === before ? "ok" : JSON.stringify({ before, c });
+  });
+  if (part !== "ok") errors.push("[part marks] " + part);
 
   // 🤖 No parent OK yet: the AI helper asks first and sends nothing
   const asked = await run("AI asks for OK first", async () => {
