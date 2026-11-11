@@ -3305,3 +3305,6 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .sd-down { color: #b91c1c; font-style: normal; font-size: 12px; }
 .sd-open { margin: 6px 0 2px; }
 .pt-graph { margin: -4px 0 12px; }
+
+/* 📔 v186: the mood reminder shows the kid's own boy / girl picture */
+.mood-pic img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; box-shadow: 0 6px 18px rgba(0,0,0,.12); }

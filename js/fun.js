@@ -220,6 +220,7 @@ function closeRiddlePop() {
   rdPop = null;
   riddleAsk = false;
   $("riddleModal").hidden = true;
+  setTimeout(maybeAskMood, 600);   // 📔 v186: the evening mood reminder waited for the riddle: ask now
 }
 // After an answer: the next one in this open's queue (🤝 helps first), or close
 function nextRiddlePop() {
