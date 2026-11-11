@@ -67,7 +67,7 @@ function drawKidHome(u) {
   const next = today.find(x => !isDone(todayYmd(), x.id, u.id));
   const tile = (cls, attr, icon, label, big, sub) => `<button class="kt ${cls}" ${attr}><span class="kt-ico" aria-hidden="true">${icon}</span><span class="kt-label">${label}</span><b class="kt-big">${big}</b><small>${sub}</small></button>`;
   $("homeBig").innerHTML = `<div class="k-hero">${faceAvatar(u) ? `<img class="k-hero-pic" src="${avatarSrc(u.avatar)}" alt="">` : `<span class="k-hero-pic k-hero-emoji">${safe(u.emoji)}</span>`}
-      <div class="k-hero-text"><h2>${hi}</h2><p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
+      <div class="k-hero-text"><h2>${hi}</h2>${scoredUsers().some(x => x.id === u.id) ? `<p class="k-cheer">${safe(kidCheerShort(u.id))}</p>` : ""}<p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
       ${next ? `<button class="k-go" data-kidcal>▶ ${safe(next.name.length > 18 ? next.name.slice(0, 17) + "…" : next.name)}</button>` : `<button class="k-go" data-kidcal>📅 My day</button>`}</div>
       <svg class="k-plant" viewBox="0 0 120 140" aria-hidden="true"><path d="M60 100V45" stroke="#5e8f5a" stroke-width="5" fill="none"/><path d="M60 70C35 70 22 52 20 34c22 0 36 14 40 36z" fill="#7fae6e"/><path d="M60 60C85 60 98 42 100 22c-22 0-36 14-40 38z" fill="#8fbb7c"/><path d="M60 50C48 36 46 20 54 6c10 10 12 26 6 44z" fill="#9ec68a"/><path d="M28 96h64l-8 40H36z" fill="#ead7bd"/><rect x="24" y="90" width="72" height="14" rx="7" fill="#f3e4cf"/></svg></div>
     <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
@@ -156,6 +156,29 @@ function kidTodayLine(kid) {
   const next = items.find(x => !isDone(date, x.id, kid) && x.end > now && x.start >= 0);
   return `Today ${done} of ${items.length} done${next ? ` · next ${next.name} ${clock(next.start)}` : ""}`;
 }
+// 💬 v187 A short kind line per kid (parent's kid cards + the kid's own home), from the real numbers, never mean:
+//   1st: how close the next one is · close behind (≤ 5): "Only 3 behind Taha" · far behind: never the rank, only what wins
+//   points back (missed must-dos, today's ▲, the next thing to tick). Different words each day.
+function kidCheerShort(id) {
+  const fair = fairScores(), order = fairOrder(fair), rank = order.findIndex(u => u.id === id), mine = fair[id] || 0;
+  const pick = list => list[(Number(todayYmd().slice(-2)) + id.length) % list.length];
+  if (starDecided()) return stars().includes(id) ? "🌟 Shining Star this week! Amazing work." : "🌱 A new week starts soon: a fresh chance for everyone!";
+  if (order.length < 2 || !mine) return "🌱 Every tick lifts your score. Let's go!";
+  if (rank === 0) {
+    const gap = mine - (fair[order[1].id] || 0);
+    if (!gap) return `🔥 Tied for first with ${order[1].name}! The next tick decides.`;
+    return gap <= 3 ? pick([`🔥 In the lead, but ${order[1].name} is only ${gap} behind. Keep going!`, `🔥 First place! ${order[1].name} is close (${gap}), don't stop now.`])
+      : pick([`🔥 In the lead by ${gap}! Keep it up till Friday ⭐`, `🔥 First place by ${gap}. Great week, keep the habit!`]);
+  }
+  const above = order[rank - 1], gap = fair[above.id] - mine;
+  if (!gap) return `💪 Tied with ${above.name}! One more tick puts you ahead.`;
+  if (gap <= 5) return pick([`💪 Only ${gap} behind ${above.name}. One good worksheet can do it!`, `💪 So close: ${gap} to catch ${above.name}. You can do it!`]);
+  const sc = scoreOf(id), lost = sc.base - sc.overall, d = todayTrend(id);
+  if (lost >= 3) return `⭐ Do all your must-dos and win back up to ${lost} points!`;
+  if (d > 0) return pick([`🌱 ▲ ${d} today. Keep climbing!`, `🌱 Up ${d} today. Every step counts!`]);
+  const next = todayItems(id).find(x => !isDone(todayYmd(), x.id, id));
+  return next ? pick([`▶ Next: ${next.name}. Every tick lifts your score!`, `🌱 Tick ${next.name} today and watch your score grow.`]) : "🌱 A good worksheet today can lift your score a lot!";
+}
 // 🌟 Star = last week's Shining Star (until the next announcement) · 🔥 Leading = the best score this week right now
 const kidCardTags = id => (stars().includes(id) ? ` <span class="kc-tag kc-star">🌟 Star</span>` : "") +
   (leaders().includes(id) ? ` <span class="kc-tag kc-lead">🔥 Leading</span>` : "");
@@ -166,7 +189,7 @@ function kidCardHtml(k) {
     <div class="kc-top"><button class="kc-ringbtn" data-sdpop="${safe(k.id)}" aria-label="${safe(k.name)}'s score: see it through the day">${scoreRingHtml(sc.overall, c.color)}${ringTrendHtml(k.id)}</button>
     <button class="kc-open" data-kidpage="${safe(k.id)}" aria-label="${safe(k.name)}: all about ${safe(k.name)}">
       <span class="kc-text"><b>${faceHtml(k)} ${safe(k.name)}${e && moodFace(e.mood) ? ` <span class="kc-mood" title="Today's mood">${moodFace(e.mood)}</span>` : ""}${kidCardTags(k.id)}</b>
-        <small>${safe(kidTodayLine(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button></div>
+        <small>${safe(kidTodayLine(k.id))}</small><small class="kc-cheer">${safe(kidCheerShort(k.id))}</small></span><span class="kc-go" aria-hidden="true">›</span></button></div>
     <div class="kc-btns"><button data-school="${safe(k.id)}">School</button><button data-viewcal="${safe(k.id)}">Calendar</button><button data-kidreport="${safe(k.id)}">Report</button></div></div>`;
 }
 // v155: the parent's home ends with ONE clear list in 4 groups (no hidden menus): Plan the week · The kids · Family · Settings.
