@@ -154,14 +154,37 @@ function bestWeekScore(id) {
   const all = Object.entries(data.points.reach).filter(([k, r]) => k.endsWith("|" + id) && k.slice(0, 10) < data.points.week && r && typeof r.s === "number").map(([, r]) => r.s);
   return all.length ? Math.max(...all) : null;
 }
-// 🎯 v187 Beat yourself bar, easy for kids: "Last week 88 · Now 74", a bar filling up to the 🏁 flag, "14 more to beat it!"
+// 🎯 v187 Beat yourself graph: this week's score day by day (Sat → today) climbing to a dashed 🏁 line at last week's score
+const beatMemo = new Map();
+function weekScoreLine(id) {
+  const today = todayYmd(), out = [];
+  for (let d = data.points.week, i = 0; i < 7 && d <= today; d = addDaysYmd(d, 1), i++) {
+    if (d === today) { out.push({ i, s: scoreOf(id).overall }); break; }
+    const key = `${id}|${d}|${today}|${Object.keys(data.points.marks).length}|${Object.keys(data.habitMarks).length}`;
+    if (!beatMemo.has(key)) { if (beatMemo.size > 200) beatMemo.clear(); beatMemo.set(key, scoreAt(id, d, fromYmd(addDaysYmd(d, 1)).getTime() - 1, d, true)); }
+    out.push({ i, s: beatMemo.get(key) });
+  }
+  return out;
+}
 function beatBarHtml(id, big) {
   const last = lastWeekScore(id); if (last == null) return "";
-  const now = scoreOf(id).overall, d = now - last, won = d > 0, pct = Math.max(4, Math.min(100, Math.round(now / Math.max(1, last + 1) * 100)));
-  return `<span class="beat-bar${won ? " won" : ""}${big ? " big" : ""}" role="img" aria-label="Last week ${last}, now ${now}">
-    <span class="bb-top"><span>Last week <b>${last}</b></span><span>Now <b>${now}</b></span></span>
-    <span class="bb-track"><i style="width:${won ? 100 : pct}%"></i><em aria-hidden="true">${won ? "🏆" : "🏁"}</em></span>
-    <span class="bb-msg">${won ? `You beat last week! +${d} 🎉` : `🎯 ${last + 1 - now} more to beat last week!`}</span></span>`;
+  const now = scoreOf(id).overall, d = now - last, won = d > 0, pts = weekScoreLine(id), color = colorsOf(userById(id) || {}).color || "#f07c1e";
+  const W = 200, H = 80, L = 20, R = 30, T = 10, B = 14, vals = pts.map(p => p.s).concat(last);
+  const lo = Math.max(0, Math.floor((Math.min(...vals) - 5) / 10) * 10), hi = Math.min(100, Math.ceil((Math.max(...vals) + 3) / 10) * 10) || 100;
+  const x = i => L + i * (W - L - R) / 6, y = v => T + (hi - v) / Math.max(1, hi - lo) * (H - T - B);
+  const line = pts.map((p, k) => `${k ? "L" : "M"}${x(p.i).toFixed(1)} ${y(p.s).toFixed(1)}`).join(" "), end = pts[pts.length - 1];
+  const days = ["S", "S", "M", "T", "W", "T", "F"];
+  return `<span class="beat-bar${won ? " won" : ""}${big ? " big" : ""}" role="img" aria-label="This week ${now}, last week ${last}">
+    <svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
+      ${[lo, Math.round((lo + hi) / 20) * 10, hi].map(v => `<line x1="${L}" x2="${W - R + 4}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="bb-grid"/><text x="${L - 4}" y="${(y(v) + 3).toFixed(1)}" class="bb-ytxt">${v}</text>`).join("")}
+      <line x1="${L}" x2="${W - R + 4}" y1="${y(last).toFixed(1)}" y2="${y(last).toFixed(1)}" class="bb-goal"/>
+      <text x="${W - R + 7}" y="${(y(last) + 4).toFixed(1)}" class="bb-goaltxt">🏁${last}</text>
+      ${days.map((t, i) => `<text x="${x(i).toFixed(1)}" y="${H - 2}" class="bb-day">${t}</text>`).join("")}
+      <path d="${line}" class="bb-line" style="stroke:${color}"/>
+      ${pts.map(p => `<circle cx="${x(p.i).toFixed(1)}" cy="${y(p.s).toFixed(1)}" r="${p === end ? 4.5 : 2.6}" style="fill:${p === end ? color : "#fff"};stroke:${color}" class="bb-dot"/>`).join("")}
+      <text x="${x(end.i).toFixed(1)}" y="${(Math.abs(y(end.s) - 7 - y(last)) < 9 || y(end.s) < T + 8 ? y(end.s) + 15 : y(end.s) - 7).toFixed(1)}" class="bb-now">${end.s}</text>
+    </svg>
+    <span class="bb-msg">${won ? `🏆 You beat last week! +${d} 🎉` : `🎯 ${last + 1 - now} more to beat last week (${last})`}</span></span>`;
 }
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {

@@ -3336,18 +3336,20 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .kt-beat .kt-ico .kc-ring b { font-size: 20px; }
 .kt-beat small { white-space: normal; }
 
-/* 🎯 v187 Beat yourself bar: last week vs now, a bar filling up to the flag */
-.beat-bar { display: block; max-width: 260px; margin: 6px 0 4px; padding: 7px 10px 6px; border-radius: 14px; background: #fff7e6; border: 1.5px solid #f3d9a4; color: #6b4a1a; white-space: normal; }
-.beat-bar .bb-top { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
-.beat-bar .bb-top b { display: inline; font-size: 15px; font-weight: 900; }
-.beat-bar .bb-track { position: relative; display: block; height: 10px; margin: 5px 22px 5px 0; border-radius: 6px; background: #f0e2c8; }
-.beat-bar .bb-track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, #f5a524, #f07c1e); }
-.beat-bar .bb-track em { position: absolute; right: -22px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 16px; line-height: 1; }
-.beat-bar .bb-msg { display: block; font-size: 12.5px; font-weight: 800; color: #b45309; }
-.beat-bar.won { background: #ecfdf3; border-color: #a7e3bd; color: #14532d; }
-.beat-bar.won .bb-track i { background: linear-gradient(90deg, #34c46a, #15803d); }
+/* 🎯 v187 Beat yourself graph: the week's line climbing to last week's dashed 🏁 line */
+.beat-bar { display: block; max-width: 250px; margin: 6px 0 4px; padding: 6px 8px 5px; border-radius: 14px; background: #fff; border: 1.5px solid #f1e3cc; white-space: normal; }
+.beat-bar svg { display: block; width: 100%; height: auto; overflow: visible; }
+.beat-bar .bb-goal { stroke: #e0882a; stroke-width: 1.6; stroke-dasharray: 4 3; }
+.beat-bar .bb-goaltxt { font-size: 10px; font-weight: 800; fill: #b45309; }
+.beat-bar .bb-grid { stroke: #f1e6d6; stroke-width: 1; }
+.beat-bar .bb-ytxt { font-size: 8px; fill: #b8a48c; text-anchor: end; font-weight: 700; }
+.beat-bar .bb-day { font-size: 8px; fill: #a08870; text-anchor: middle; font-weight: 700; }
+.beat-bar .bb-line { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.beat-bar .bb-dot { stroke-width: 2; }
+.beat-bar .bb-now { font-size: 11px; font-weight: 900; fill: #3a2a1a; text-anchor: middle; }
+.beat-bar .bb-msg { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 800; color: #b45309; }
+.beat-bar.won { background: #f1fbf4; border-color: #b7e6c6; }
+.beat-bar.won .bb-goal { stroke: #15803d; } .beat-bar.won .bb-goaltxt { fill: #15803d; }
 .beat-bar.won .bb-msg { color: #15803d; }
-.beat-bar.big { max-width: 300px; }
-.beat-bar.big .bb-top { font-size: 13px; } .beat-bar.big .bb-top b { font-size: 18px; } .beat-bar.big .bb-msg { font-size: 14px; }
-.beat-bar .bb-top > span { white-space: nowrap; }
+.beat-bar.big { max-width: 280px; } .beat-bar.big .bb-msg { font-size: 13.5px; }
 .sd-pophead > div { flex: 1; min-width: 0; }
