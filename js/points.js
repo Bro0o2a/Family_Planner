@@ -565,6 +565,51 @@ function scoreOf(id) {
   return { ...subs, study, level: lv.score, activity: activityScore(id), habit: habitScore(id), has, base, overall, max, must: missed,
            sp: sessions.length ? sp : null, free, levels: lv.subs, extra: { count: 0, bonus: 0 }, marksCount: mk.count, extraCount: mk.extraCount, extraPts: mk.extraPts, tk };
 }
+// 📈 SCORE THROUGH ONE DAY (v184): the week's score again at each moment something changed it on that day.
+// Rebuilt from what the app already keeps: ✅ calendar ticks have their time (marks[key].at), 📝 worksheets their check time
+// (check.at). ⭐ Habit ticks have no time: they join at the day's end ("time not kept"). The last point is just after
+// midnight, when the day's unticked items and missed must-dos start to count (that's why the score can drop in the morning).
+function scoreAt(id, day, upTo, today = day, habits = false) {
+  const keep = { data, ws: aiDocs.worksheets, todayFn: todayYmd }, iso = new Date(upTo).toISOString();
+  const s = data.school[id], checkedAt = ws => { const w = aiDocs.worksheets[ws]; return w && w.check ? String(w.check.at || "") : ""; };
+  const marks = Object.fromEntries(Object.entries(data.points.marks).filter(([, m]) => !m || !m.at || String(m.at) <= iso));
+  const habitMarks = Object.fromEntries(Object.entries(data.habitMarks).filter(([k]) => k.slice(0, 10) < day || (k.slice(0, 10) === day && (habits || today > day))));
+  const school = !s ? data.school : { ...data.school, [id]: { ...s, learn: Object.fromEntries(Object.entries(s.learn || {}).map(([fid, L]) =>
+    [fid, { ...L, history: (L.history || []).filter(h => h.date <= day && (!h.ws || !checkedAt(h.ws) || checkedAt(h.ws) <= iso)) }])) } };
+  try {
+    data = { ...data, points: { ...data.points, marks }, habitMarks, school };
+    todayYmd = () => today;
+    return scoreOf(id).overall;
+  } finally { data = keep.data; aiDocs.worksheets = keep.ws; todayYmd = keep.todayFn; }
+}
+// → [{ at (ms), score, text, kind: "start" | "tick" | "ws" | "habits" | "midnight" | "now" }] for one kid on one day of this week
+function dayScorePoints(id, day) {
+  const start = fromYmd(day).getTime(), end = fromYmd(addDaysYmd(day, 1)).getTime(), isToday = day === todayYmd(), stop = isToday ? Date.now() : end - 1;
+  const inDay = at => { const t = new Date(at).getTime(); return t >= start && t <= stop ? t : null; };
+  const acts = allActs(), ev = [];
+  Object.entries(data.points.marks).forEach(([k, m]) => {
+    const [d, act, who] = k.split("|"); if (who !== id || !m || !m.at) return;
+    const t = inDay(m.at); if (t == null) return;
+    const a = acts.find(x => x.id === baseActId(act));
+    ev.push({ at: t, kind: "tick", text: `✅ ${a ? a.name : "Activity"} ticked${d !== day ? ` (for ${DAYS[weekdayOf(d)].slice(0, 3)})` : ""}` });
+  });
+  Object.values(aiDocs.worksheets).forEach(w => {
+    if (w.kid !== id || !w.check || !w.check.at) return;
+    const t = inDay(w.check.at); if (t == null) return;
+    const pct = w.check.max_score ? Math.round(w.check.score / w.check.max_score * 100) : null;
+    ev.push({ at: t, kind: "ws", text: `📝 ${w.subject || "Worksheet"} checked${pct != null ? `: ${pct}%` : ""}` });
+  });
+  ev.sort((a, b) => a.at - b.at);
+  const out = [{ at: start, kind: "start", text: "🌅 Start of the day", score: scoreAt(id, day, start) }];
+  ev.forEach(e => out.push({ ...e, score: scoreAt(id, day, e.at) }));
+  if (isToday) out.push({ at: stop, kind: "now", text: "🕒 Now", score: scoreAt(id, day, stop) });
+  else {
+    const hab = Object.keys(data.habitMarks).filter(k => k.startsWith(day + "|") && k.endsWith("|" + id)).length;
+    out.push({ at: end - 60000, kind: "habits", text: hab ? `⭐ ${hab} habit ${hab === 1 ? "tick" : "ticks"} (the app doesn't keep their time)` : "🌙 End of the day", score: scoreAt(id, day, end - 1, day, true) });
+    if (addDaysYmd(day, 1) < weekEnd()) out.push({ at: end, kind: "midnight", text: "🕛 Midnight: the whole day now counts (missed items too)", score: scoreAt(id, day, end - 1, addDaysYmd(day, 1)) });
+  }
+  return out;
+}
 // "37 / 90"
 const scoreText = s => `${s.overall} / ${s.max}${s.extra && s.extra.bonus ? ` (⚡ +${s.extra.bonus})` : ""}`;
 // The small bars: 📝 Marks (with each subject under it) · ✅ Ticks (a part with nothing this week: "–")
