@@ -380,7 +380,7 @@ function openScorePop(id) {
 }
 function drawScorePop() {
   const k = userById(sdPop), sc = scoreOf(k.id);
-  $("sdBody").innerHTML = `<div class="sd-pophead">${scoreRingHtml(sc.overall, colorsOf(k).color, lastWeekScore(k.id))}<div><b>${safe(k.name)}</b><small>Score this week · ${sc.overall} of ${sc.max}</small>${beatBarHtml(k.id)}</div></div>
+  $("sdBody").innerHTML = `<div class="sd-pophead">${scoreRingHtml(sc.overall, colorsOf(k).color, lastWeekScore(k.id))}<div><b>${safe(k.name)}</b><small>Score this week · ${sc.overall} of ${sc.max}</small></div></div><div class="sd-popbeat">${beatBarHtml(k.id, true)}</div>
     ${dayGraphHtml(k, colorsOf(k).color, true)}<div class="btnrow"><button class="pill" data-sdclose data-go="points">🏆 Leaderboard</button><button class="primary" data-sdclose>OK</button></div>`;
 }
 document.addEventListener("click", e => {
