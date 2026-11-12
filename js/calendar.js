@@ -646,7 +646,7 @@ function openCard(b) {
     <div class="k-card-top kc2-top">${canEditAct ? `<button class="k-edit kc2-pen" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change this activity">✏️</button>` : ""}
       <div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div>
       <div class="nm">${subj ? `${safe(subj.emoji)} ` : ""}${safe(what)}</div>
-      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}</div></div>
+      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}${(() => { const ac = actId && (b.fixed ? data.fixed : data.flexible).find(a => a.id === baseActId(actId)); return ac && ac.must ? `<span class="kc2-tag">⭐ Must-do</span>` : ""; })()}</div></div>
     <div class="kc2-when">
       <div class="kc2-day">📅 ${safe(dayLong(b.day))}</div>
       <div class="kc2-time">${safe(clock(b.start, true))} <span>→</span> ${safe(clock(b.end, true))}</div>
@@ -676,6 +676,8 @@ function quickEditHtml(b, actId, canEditAct, canMove) {
     ${time ? `<div class="qe-row"><span class="qe-lab">⏰ Time ${safe(onDay)}</span><div class="qe-time">${time}<button type="button" class="pill small primary" data-qetimesave="1">💾 Save</button></div></div>` : ""}
     <div class="qe-row"><span class="qe-lab">🏷️ Type</span><div class="qe-chips">${ACT_TYPES.map(([k, e, w]) =>
       `<button type="button" class="pill small${k === type ? " on" : ""}" data-qetype="${k}">${e} ${w}</button>`).join("")}</div></div>
+    ${act.users.some(u => !isParentId(u)) ? `<div class="qe-row"><span class="qe-lab">⭐ Must-do</span><div class="qe-chips">
+      <button type="button" class="pill small${act.must ? "" : " on"}" data-qemust="0">Off</button><button type="button" class="pill small${act.must ? " on" : ""}" data-qemust="1">On: missing it lowers the score</button></div></div>` : ""}
     ${b.fixed ? "" : `<div class="qe-row"><span class="qe-lab">🔢 Sessions a week</span><div class="qe-num">
       <button type="button" class="pill small" data-qetimes="-1" ${act.times <= 1 ? "disabled" : ""} aria-label="One less">−</button><b>${act.times}</b>
       <button type="button" class="pill small" data-qetimes="1" ${act.times >= maxTimes ? "disabled" : ""} aria-label="One more">+</button></div></div>`}
@@ -687,7 +689,7 @@ function quickEditHtml(b, actId, canEditAct, canMove) {
       <button type="button" class="pill small" data-qeno="1">Cancel</button></div></div></div>`;
 }
 document.addEventListener("click", e => {
-  const b = e.target.closest && e.target.closest("[data-qetimesave], [data-qetype], [data-qetimes], [data-qedel], [data-qeno], [data-qeone], [data-qeall]");
+  const b = e.target.closest && e.target.closest("[data-qetimesave], [data-qetype], [data-qetimes], [data-qemust], [data-qedel], [data-qeno], [data-qeone], [data-qeall]");
   if (!b || !isParentDevice()) return;
   const bar = b.closest(".qe-bar"), d = b.dataset; if (!bar) return;
   if (d.qedel || d.qeno) { bar.querySelector(".qe-ask").hidden = !!d.qeno; return; }
@@ -714,6 +716,13 @@ document.addEventListener("click", e => {
     act.type = d.qetype; if (act.type !== "study") { delete act.studyMode; }
     closeCard(); saveChanges();
     const [, e2, w2] = actTypeInfo(act.type); return toast(`${e2} ${act.name} is now ${w2}.`, 2500);
+  }
+  // ⭐ Must-do on / off (from today: earlier days never count; a missed session lowers the week's score like a missed ⭐ habit)
+  if (d.qemust) {
+    const on = d.qemust === "1"; if (on === !!act.must) return;
+    if (on) act.must = todayYmd(); else delete act.must;
+    closeCard(); writeData(); render();
+    return toast(on ? `⭐ ${act.name} is a Must-do from today. Missing it lowers the score.` : `${act.name} is not a Must-do any more.`, 3500);
   }
   // 🔢 sessions a week (the week is planned again)
   if (d.qetimes) {

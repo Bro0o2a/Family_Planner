@@ -645,7 +645,7 @@ function cleanData(d) {
       return { id: String(f.id || newId()), name: String(f.name),
                days: f.days.map(Number).filter(x => x >= 0 && x <= LAST_DAY), start: f.start, end: f.end,
                overlapWith: Array.isArray(f.overlapWith) ? f.overlapWith.map(String) : [], // older data had no list: start empty
-               users, ...helpOf(f, users, false), ...padsOf(f) };   // (🤝 helper · ⭐ type · 📚 study details)
+               users, ...helpOf(f, users, false), ...padsOf(f), ...(isMustDate(f.must) ? { must: f.must } : {}) };   // (🤝 helper · ⭐ type · 📚 study details · ⭐ v191 Must-do)
     });
 
   // Routines (older saved data has none)
@@ -743,6 +743,7 @@ function cleanData(d) {
                users, ...helpOf(f, users, true), ...padsOf(f), ...betweenOf(f),   // (🤝 helper · ⭐ type · 📚 study details)
                ...(f.twice === false ? { twice: false } : {}),   // (⏱️ "make one day's session longer" switched off)
                ...(f.twiceDay === true ? { twiceDay: true } : {}),   // (2️⃣ v181: may have a 2nd session on the same day)
+               ...(isMustDate(f.must) ? { must: f.must } : {}),   // (⭐ v191: Must-do since that date, see mustMissed)
                oldCanOverlap: f.canOverlap === true };
     });
 
@@ -1088,6 +1089,7 @@ const ACT_TYPES = [["study", "📚", "Study"], ["activity", "⚽", "Activity"], 
 const ACT_TYPE_KEYS = ACT_TYPES.map(t => t[0]);
 // An activity saved before types existed gets one, once (then it's kept): a name with "school" → "other" (on the calendar, no score),
 // everything else → "activity". An unknown type → "activity". (Hoisted: cleanData uses it while loading.)
+function isMustDate(v) { return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v); }   // (⭐ v191 an activity's Must-do: the date it started)
 function defaultActType(a) {
   if (a && ACT_TYPE_KEYS.includes(a.type)) return a.type;
   if (a && a.type != null) return "activity";

@@ -167,6 +167,16 @@ try {
   });
   if (tot !== "ok") errors.push("[same total] " + tot);
 
+  // ⭐ v191 a Must-do activity: a missed past session lowers the ratio; switched off = no effect
+  const mustAct = await run("must-do activity", () => {
+    const kid = scoredUsers()[0].id, past = (planDays() || []).find(d => d.date < todayYmd() && d.items.some(it => it.users.includes(kid) && !it.fixed));
+    if (!past) return "ok";   // (the example week starts today: nothing past to test)
+    const it = past.items.find(x => x.users.includes(kid) && !x.fixed), a = data.flexible.find(x => x.id === baseActId(it.actId));
+    const before = mustMissed(kid).due; a.must = data.points.week; const on = mustMissed(kid); delete a.must;
+    return on.due > before && cleanData(JSON.parse(JSON.stringify({ ...data, flexible: [{ ...a, must: "2026-01-01" }] }))).flexible[0].must === "2026-01-01" ? "ok" : JSON.stringify(on);
+  });
+  if (mustAct !== "ok") errors.push("[must-do activity] " + mustAct);
+
   // 🤖 No parent OK yet: the AI helper asks first and sends nothing
   const asked = await run("AI asks for OK first", async () => {
     data.aiOk = null;
