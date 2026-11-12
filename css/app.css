@@ -3330,7 +3330,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .kc-text small.kc-cheer { font-weight: 600; opacity: .75; font-size: 12px; white-space: normal; }
 .k-cheer { font-size: 13px; font-weight: 700; margin: 2px 0 4px; opacity: .85; }
 
-/* 🎯 v189 Beat yourself: a small circle on the score ring at last week's score */
+/* 🎯 v191 Beat yourself: a small circle on the score ring at last week's score */
 .kc-ring .kc-goal { fill: #fff; stroke: #3a2a1a; stroke-width: 3; }
 .kc-ring.beat .kc-goal { fill: #ffd54a; }
 .kt-beat .kt-ico { background: none; box-shadow: none; width: 64px; height: 64px; border-radius: 50%; }
