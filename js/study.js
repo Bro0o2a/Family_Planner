@@ -1202,7 +1202,10 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoHint").textContent = `${subject} for ${kidNameOf(kid)}. The answers stay hidden until you tap 🔑.`;
   $("wsoTopics").replaceChildren(...wso.topics.map((t, i) => h("label", { class: "checkline" },
     h("input", { type: "checkbox", value: i, checked: true }), h("span", null, t))));
-  $("wsoCount").replaceChildren(h("p", { class: "hint" }, `${WS_COUNT} questions, at ${kidNameOf(kid)}'s level.`));   // (🔢 v179: always 15)
+  // 🔢 v191: the kid picks 10 or 15 questions (15 when nothing was picked before)
+  const pickN = [10, 15].includes(count) ? count : WS_COUNT;
+  $("wsoCount").replaceChildren(...[10, 15].map(n => h("label", null, h("input", { type: "radio", name: "wsoN", value: n, checked: n === pickN }), h("span", null, `${n} questions`))),
+    h("p", { class: "hint", style: "flex-basis:100%;margin:0" }, `At ${kidNameOf(kid)}'s level.`));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
   $("wsoTr").innerHTML = wsPickHtml(kid, subject) + wsWordsHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
@@ -1214,14 +1217,14 @@ function wsFromWork(v) {
   const [wid, i] = v.split("|"), w = schoolOf(schoolKid).work[wid];
   if (!w) return;
   const topics = i !== undefined ? [w.topics[Number(i)]].filter(Boolean) : w.topics.length ? w.topics : [w.title];
-  openWsOpts(schoolKid, w.subject, topics, 10, wid, w.title);
+  openWsOpts(schoolKid, w.subject, topics, WS_COUNT, wid, w.title);
 }
 async function makeWorksheet() {
   const o = wso;
   if (!o) return;
   const topics = [...$("wsoTopics").querySelectorAll("input:checked")].map(x => o.topics[Number(x.value)]).filter(Boolean);
   if (!topics.length) return $("wsoErr").textContent = "Please tick at least one topic.";
-  const count = WS_COUNT;
+  const picked = $("wsoCount").querySelector("input[name=wsoN]:checked"), count = picked && [10, 15].includes(Number(picked.value)) ? Number(picked.value) : WS_COUNT;
   $("wsoErr").textContent = "";
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
