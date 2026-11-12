@@ -531,6 +531,19 @@ function mustMissed(id) {
       if (part < 1) missed.push({ name: `${h.emoji} ${h.name}`, date: d });
     }
   });
+  // ⭐ v191 Must-do ACTIVITIES (a parent switched Must-do on in ⚡ Quick edit): each of the kid's planned sessions from that day until
+  // yesterday counts as one must-do, done when ✅ ticked
+  const acts = allActs().filter(a => a.must);
+  if (acts.length) (planDays() || []).forEach(day => {
+    if (day.date >= today || day.date >= weekEnd()) return;
+    day.items.forEach(it => {
+      if (it.gone || !it.users.includes(id)) return;
+      const a = acts.find(x => x.id === baseActId(it.actId));
+      if (!a || day.date < a.must || (it.fixed && (fixedOnOf(day.date, it.actId) || {}).off)) return;   // (🚫 a fixed one that didn't happen: not due)
+      const ok = isDone(day.date, it.actId, id);
+      due++; if (ok) done++; else missed.push({ name: `${a.name}`, date: day.date });
+    });
+  });
   return { ratio: due ? done / due : 1, due, done, missed: missed.sort((a, b) => a.date.localeCompare(b.date)) };
 }
 // ⭐ Kids' habits ticked this week (all of the kid's habits, must-dos too): each habit-day counts its part done

@@ -646,7 +646,7 @@ function openCard(b) {
     <div class="k-card-top kc2-top">${canEditAct ? `<button class="k-edit kc2-pen" data-kedit="${b.fixed ? "fixed" : "flex"}|${safe(baseActId(actId))}" aria-label="Change this activity">✏️</button>` : ""}
       <div class="big">${b.fixed ? safe(b.emoji) : actIcon3d(b.name, b.type, "k-bigic")}</div>
       <div class="nm">${subj ? `${safe(subj.emoji)} ` : ""}${safe(what)}</div>
-      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}</div></div>
+      <div class="kc2-tags"><span class="kc2-tag">${safe(tEmoji)} ${safe(tWord)}</span>${isSecondId(actId || "") ? `<span class="kc2-tag">2nd today</span>` : ""}${(() => { const ac = actId && (b.fixed ? data.fixed : data.flexible).find(a => a.id === baseActId(actId)); return ac && ac.must ? `<span class="kc2-tag">⭐ Must-do</span>` : ""; })()}</div></div>
     <div class="kc2-when">
       <div class="kc2-day">📅 ${safe(dayLong(b.day))}</div>
       <div class="kc2-time">${safe(clock(b.start, true))} <span>→</span> ${safe(clock(b.end, true))}</div>
@@ -654,11 +654,94 @@ function openCard(b) {
       ${canMove ? `<button class="k-edit kc2-pen" data-kedit="move|${safe(b.day)}|${safe(actId)}" aria-label="Change the day or time">✏️</button>` : ""}</div>
     ${b.type === "free" ? `<div class="kc2-free">🎈 Free time: pick what to do!<div class="kc2-freebtns">${b.users.map(u => `<button class="pill small" data-freeopen="${safe(u)}">💡 Ideas${b.users.length > 1 ? ` for ${safe(userById(u).name)}` : ""}</button>`).join("")}</div></div>` : ""}
     <div class="kc2-tiles">${tiles.map(([ic, l, v, wide]) => `<div class="kc2-tile${wide ? " wide" : ""}"><small>${ic} ${l}</small><b>${v}</b></div>`).join("")}</div>
+    ${quickEditHtml(b, actId, canEditAct, canMove)}
     ${fixedTodayHtml(b)}
     <button class="k-ok" id="kOk">OK 👍</button>`;
+  $("kCard").classList.toggle("qe-on", !!$("kCard").querySelector(".qe-bar"));
   $("kModal").hidden = false;
   $("kOk").focus();
 }
+// ⚡ v191 (Broo2a) Quick edit on the big card (parents, today and later), all in one box:
+//   ⏰ the time on this day (straight in, no extra tap) · 🏷️ the type · 🔢 sessions a week (flexible ones) · 🗑️ Delete · ✏️ More changes
+function quickEditHtml(b, actId, canEditAct, canMove) {
+  if (!canEditAct || b.gone || b.day < todayYmd()) return "";
+  const base = baseActId(actId), kind = b.fixed ? "fixed" : "flex", key = `${b.day}|${actId}|${kind}`;
+  const act = (b.fixed ? data.fixed : data.flexible).find(a => a.id === base); if (!act) return "";
+  const fixKey = `${b.day}|${[...new Set(b.acts.map(a => a.actId))].join(",")}`, hm = m => clock24(m), type = actTypeOf(act);
+  const onDay = b.day === todayYmd() ? "today" : "on " + dayName(b.day);
+  const time = b.fixed ? `<label>From <input type="time" class="qe-from" value="${hm(b.start)}"></label><label>To <input type="time" class="qe-to" value="${hm(b.end)}"></label>`
+    : canMove ? `<label>Starts at <input type="time" class="qe-from" value="${hm(b.start)}"></label><small>(${act.duration} min)</small>` : "";
+  const maxTimes = act.twiceDay ? DAYS.length * 2 : DAYS.length;
+  return `<div class="qe-bar" data-qekey="${safe(key)}" data-qefix="${safe(fixKey)}"><b>⚡ Quick edit</b>
+    ${time ? `<div class="qe-row"><span class="qe-lab">⏰ Time ${safe(onDay)}</span><div class="qe-time">${time}<button type="button" class="pill small primary" data-qetimesave="1">💾 Save</button></div></div>` : ""}
+    <div class="qe-row"><span class="qe-lab">🏷️ Type</span><div class="qe-chips">${ACT_TYPES.map(([k, e, w]) =>
+      `<button type="button" class="pill small${k === type ? " on" : ""}" data-qetype="${k}">${e} ${w}</button>`).join("")}</div></div>
+    ${act.users.some(u => !isParentId(u)) ? `<div class="qe-row"><span class="qe-lab">⭐ Must-do</span><div class="qe-chips">
+      <button type="button" class="pill small${act.must ? "" : " on"}" data-qemust="0">Off</button><button type="button" class="pill small${act.must ? " on" : ""}" data-qemust="1">On: missing it lowers the score</button></div></div>` : ""}
+    ${b.fixed ? "" : `<div class="qe-row"><span class="qe-lab">🔢 Sessions a week</span><div class="qe-num">
+      <button type="button" class="pill small" data-qetimes="-1" ${act.times <= 1 ? "disabled" : ""} aria-label="One less">−</button><b>${act.times}</b>
+      <button type="button" class="pill small" data-qetimes="1" ${act.times >= maxTimes ? "disabled" : ""} aria-label="One more">+</button></div></div>`}
+    <div class="btnrow"><button type="button" class="pill small qe-del" data-qedel="1">🗑️ Delete</button>
+      <button type="button" class="pill small" data-kedit="${kind}|${safe(base)}">✏️ More changes</button></div>
+    <div class="qe-ask" hidden><b>Delete “${safe(b.name)}”?</b><div class="btnrow">
+      <button type="button" class="pill small" data-qeone="1">📅 Only ${safe(onDay)}</button>
+      <button type="button" class="pill small danger-text" data-qeall="1">🗑️ Every day</button>
+      <button type="button" class="pill small" data-qeno="1">Cancel</button></div></div></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-qetimesave], [data-qetype], [data-qetimes], [data-qemust], [data-qedel], [data-qeno], [data-qeone], [data-qeall]");
+  if (!b || !isParentDevice()) return;
+  const bar = b.closest(".qe-bar"), d = b.dataset; if (!bar) return;
+  if (d.qedel || d.qeno) { bar.querySelector(".qe-ask").hidden = !!d.qeno; return; }
+  const [ds, actId, kind] = bar.dataset.qekey.split("|"), base = baseActId(actId), fixKey = bar.dataset.qefix;
+  const act = (kind === "fixed" ? data.fixed : data.flexible).find(a => a.id === base); if (!act) return;
+  const onDay = ds === todayYmd() ? "today" : dayName(ds);
+  // ⏰ the time on this day only
+  if (d.qetimesave) {
+    const from = (bar.querySelector(".qe-from") || {}).value || "", to = (bar.querySelector(".qe-to") || {}).value || "";
+    if (kind === "fixed") {
+      if (!/^\d{2}:\d{2}$/.test(from) || !/^\d{2}:\d{2}$/.test(to) || from >= to) return toast("Pick a start time before the end time.", 2500);
+      closeCard(); return setFixedToday(fixKey, { start: from, end: to }, false, []);
+    }
+    if (!/^\d{2}:\d{2}$/.test(from)) return toast("Pick a start time.", 2500);
+    const start = toMin(from), check = moveCheck(actId, ds, ds, start);
+    if (!check.ok) return toast(`✗ ${check.why}`, 3500);
+    closeCard(); moveActivity(actId, ds, ds, start); editUndo = []; saveChanges(); hideSaved();
+    return toast(`✓ ${act.name}: ${onDay} at ${clock(start, true)}`, 3000, "#16a34a");
+  }
+  // 🏷️ the type (📚 Study needs its subjects: that one goes to ✏️ More changes)
+  if (d.qetype) {
+    if (d.qetype === actTypeOf(act)) return;
+    if (d.qetype === "study") { const m = bar.querySelector("[data-kedit]"); toast("📚 Pick the subjects for Study here.", 3000); return m && m.click(); }
+    act.type = d.qetype; if (act.type !== "study") { delete act.studyMode; }
+    closeCard(); saveChanges();
+    const [, e2, w2] = actTypeInfo(act.type); return toast(`${e2} ${act.name} is now ${w2}.`, 2500);
+  }
+  // ⭐ Must-do on / off (from today: earlier days never count; a missed session lowers the week's score like a missed ⭐ habit)
+  if (d.qemust) {
+    const on = d.qemust === "1"; if (on === !!act.must) return;
+    if (on) act.must = todayYmd(); else delete act.must;
+    closeCard(); writeData(); render();
+    return toast(on ? `⭐ ${act.name} is a Must-do from today. Missing it lowers the score.` : `${act.name} is not a Must-do any more.`, 3500);
+  }
+  // 🔢 sessions a week (the week is planned again)
+  if (d.qetimes) {
+    const max = act.twiceDay ? DAYS.length * 2 : DAYS.length, n = Math.max(1, Math.min(max, act.times + Number(d.qetimes)));
+    if (n === act.times) return;
+    act.times = n; closeCard();
+    if (saveChanges()) toast(`🔢 ${act.name}: ${n} ${n === 1 ? "session" : "sessions"} a week. The week is planned again.`, 3000);
+    return;
+  }
+  // (🗑️ v190 Delete thread folded in here: every day = the activity itself, as on ✏️ Add activities; gone days keep it as history)
+  if (d.qeall) { deleteActivity(base, kind === "fixed", true); closeCard(); if (saveChanges()) toast(`🗑️ “${act.name}” deleted.`, 2500); return; }
+  // 📅 only that day: a fixed one = 🚫 didn't happen; a flexible one = off that day's plan, never planned there again
+  if (kind === "fixed") { closeCard(); return setFixedToday(fixKey, { off: true }, false, []); }
+  const day = hasPlan() && data.plan.dates[ds];
+  if (day) day.items = day.items.filter(it => it.fixed || it.actId !== actId);
+  data.skips = { ...(data.skips || {}), [`${ds}|${actId}`]: { by: me, at: new Date().toISOString(), why: "skip" } };
+  writeData(); closeCard(); render();
+  toast(`🗑️ Taken off ${onDay}.`, 2500);
+});
 // 🏫 v180 (Broo2a): a fixed activity (School, a club …) that changed on ONE day: "🚫 Didn't happen" or "🕐 Other times that day".
 // Parents, today and later. That day's plan is made again around it: what clashes moves, and free time gets the activities
 // that were missing this week (then 🔍 Missed sessions and 🎈 ideas use the new free time too).

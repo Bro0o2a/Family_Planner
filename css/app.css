@@ -3330,39 +3330,69 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .kc-text small.kc-cheer { font-weight: 600; opacity: .75; font-size: 12px; white-space: normal; }
 .k-cheer { font-size: 13px; font-weight: 700; margin: 2px 0 4px; opacity: .85; }
 
-/* 🎯 v187 Beat yourself: last week's notch on the score ring + the line under the score */
+/* 🎯 v191 Beat yourself: a small circle on the score ring at last week's score */
+.kc-ring .kc-goal { fill: #fff; stroke: #3a2a1a; stroke-width: 3; }
+.kc-ring.beat .kc-goal { fill: #ffd54a; }
 .kt-beat .kt-ico { background: none; box-shadow: none; width: 64px; height: 64px; border-radius: 50%; }
 .kt-beat .kt-ico .kc-ring { width: 64px; height: 64px; }
 .kt-beat .kt-ico .kc-ring b { font-size: 20px; }
 .kt-beat small { white-space: normal; }
 
-/* 🎯 v187 Beat yourself graph: no box, the kid's line + soft area climbing to last week's dashed 🏁 line */
-.beat-bar { display: block; max-width: 250px; margin: 4px 0 6px; white-space: normal; }
-.beat-bar svg { display: block; width: 100%; height: auto; overflow: visible; }
-.beat-bar .bb-base { stroke: rgba(74,52,38,.14); stroke-width: 1; }
-.beat-bar .bb-ytxt { font-size: 8px; fill: rgba(74,52,38,.45); text-anchor: end; font-weight: 700; }
-.beat-bar .bb-goal { stroke: #e8912e; stroke-width: 1.5; stroke-dasharray: 3 3; }
-.beat-bar .bb-flag { fill: #fde9cc; }
-.beat-bar .bb-flagtxt { font-size: 8.5px; font-weight: 900; fill: #a3530b; text-anchor: middle; }
-.beat-bar .bb-line { fill: none; stroke: var(--bc); stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
-.beat-bar .bb-dot { fill: var(--bc); }
-.beat-bar .bb-halo { fill: var(--bc); opacity: .2; }
-.beat-bar .bb-end { fill: var(--bc); stroke: #fff; stroke-width: 2; }
-.beat-bar .bb-tag { fill: var(--bc); }
-.beat-bar .bb-tagtxt { font-size: 9px; font-weight: 900; fill: #fff; text-anchor: middle; }
-.beat-bar .bb-day { font-size: 7.5px; font-weight: 700; fill: rgba(74,52,38,.55); text-anchor: middle; }
-.beat-bar .bb-day.on { fill: var(--bc); font-weight: 900; }
-.beat-bar .bb-day.later { fill: rgba(74,52,38,.28); }
-.beat-bar .bb-need { font-size: 10px; font-weight: 900; fill: #c2410c; text-anchor: middle; }
-.beat-bar .bb-needs { font-size: 7.5px; font-weight: 800; fill: #a3530b; text-anchor: middle; }
-.beat-bar.won .bb-need, .beat-bar.won .bb-needs { fill: #15803d; }
-.beat-bar .bb-msg { display: inline-block; margin-top: 3px; padding: 3px 10px; border-radius: 999px; background: #fdecd6; color: #a3530b; font-size: 12px; font-weight: 800; }
-.beat-bar.won .bb-goal { stroke: #22a052; } .beat-bar.won .bb-flag { fill: #dcf5e4; } .beat-bar.won .bb-flagtxt { fill: #15803d; }
-.beat-bar.won .bb-msg { background: #dcf5e4; color: #15803d; }
-.beat-bar.big { max-width: 270px; } .beat-bar.big .bb-msg { font-size: 13px; }
+/* score pop-up head */
 .sd-pophead > div { flex: 1; min-width: 0; }
 /* 🟡 v188: part marks under a question in "See all answers" (parents) */
 .ws-partrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; }
 .ws-partrow .pill { font-size: 15px; min-width: 40px; min-height: 36px; padding: 4px 10px; justify-content: center; }
 .ws-partrow .pill.on { background: var(--ink, #222); color: #fff; border-color: var(--ink, #222); }
 .ws-partrow > span { flex-basis: 100%; }
+
+/* 🔑 v191 Key words box on the worksheet (a hint) + the parents' tick box */
+.ws-keybox { border: 2px dashed #1f2133; border-radius: 10px; padding: 8px 12px; margin: 0 0 12px; }
+.ws-keybox > b { display: block; font-size: .9em; margin-bottom: 4px; }
+.ws-keybox .ws-keywords { font-weight: 700; white-space: pre-wrap; line-height: 1.6; }
+.ws-keyedit { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.ws-keyedit input { width: 22px; height: 22px; flex: none; accent-color: var(--accent); }
+
+/* 📄 v191 the QUESTION pages of the PDF as short as they can be (no answer room there: the kids write on the answer sheet) */
+.pdf-stage.pdf-big .ws-compact { line-height: 1.25; }
+.pdf-stage.pdf-big .ws-compact .ws-q { padding: 3px 0; }
+.pdf-stage.pdf-big .ws-compact .ws-opts { margin-top: 1px; gap: 0 14px; }
+.pdf-stage.pdf-big .ws-compact .ws-to-order { margin-top: 1px; font-size: 12px; }
+.pdf-stage.pdf-big .ws-compact.ws-exam .ws-bar { margin: 6px 0 0; }
+.pdf-stage.pdf-big .ws-compact .ws-ins { padding: 4px 8px; font-size: 13px; }
+.pdf-stage.pdf-big .ws-compact .ws-keybox { padding: 4px 10px; margin-bottom: 6px; }
+.pdf-stage.pdf-big .ws-compact .ws-keybox > b { margin-bottom: 0; font-size: 13px; }
+.pdf-stage.pdf-big .ws-compact .ws-keybox .ws-keywords { line-height: 1.35; }
+.pdf-stage.pdf-big .ws-compact .ws-to-sheet { margin-top: 6px; padding: 4px 10px; }
+
+/* 📈 v191 Score pop-up: everything in the middle + why it went up / down */
+.sd-pophead { justify-content: center; text-align: left; }
+.sd-pophead > div { flex: none; }
+#sdBody .sd-days { justify-content: center; flex-wrap: wrap; }
+#sdBody .sd-sum, #sdBody .sd-note { text-align: center; }
+#sdBody .sd-head { justify-content: center; position: relative; }
+#sdBody .sd-head > :last-child:not(:first-child) { position: absolute; right: 0; }
+#sdBody .sd-svg { display: block; margin: 0 auto; }
+.sd-why { margin: 8px 0 0; padding: 8px 10px; border-radius: 12px; }
+.sd-why > b { display: block; font-size: 14px; margin-bottom: 2px; }
+.sd-why.up { background: #e7f7ec; } .sd-why.up > b { color: #15803d; }
+.sd-why.down { background: #fdecec; } .sd-why.down > b { color: #b91c1c; }
+.sd-why .sd-list { margin: 0; }
+
+/* ⚡ v191 Quick edit on the big activity card (parents) */
+.qe-bar { margin: 10px 18px 6px; padding: 10px 12px; border-radius: 16px; background: #fff7ec; border: 1px solid #f3dcbc; text-align: center; }
+.qe-bar > b { display: block; font-size: 14px; margin-bottom: 6px; }
+.k-card .qe-bar .btnrow, .qe-bar .btnrow { justify-content: center; flex-wrap: wrap; gap: 6px; background: none; box-shadow: none; padding: 0; margin: 0; position: static; bottom: auto; }
+.qe-ask { margin-top: 8px; padding: 8px 10px; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; }
+.qe-ask b { display: block; margin-bottom: 6px; color: var(--danger, #b91c1c); }
+/* (with Quick edit, the 🏫 one-day box keeps only its note, "As usual" and the times; its own two buttons are in Quick edit) */
+.qe-on .fx-today [data-fxoff], .qe-on .fx-today [data-fxtimes] { display: none; }
+.qe-on .kc2-when .kc2-pen, .qe-on .kc2-top .kc2-pen { display: none; }
+.qe-on .fx-today > b, .qe-on .fx-today .fx-days { display: none; }
+.qe-row { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 10px; }
+.qe-lab { font-size: 13px; font-weight: 700; opacity: .75; }
+.qe-time, .qe-chips, .qe-num { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
+.qe-time label { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+.qe-time input { font: inherit; padding: 4px 6px; border-radius: 10px; border: 1px solid #e5d3bb; }
+.qe-chips .pill.on { background: var(--ink, #4a3426); color: #fff; }
+.qe-num b { min-width: 28px; font-size: 20px; text-align: center; }

@@ -12,6 +12,10 @@ function drawSettings() {
   $("starClock").value = starTime().time;
   $("extraLimit").value = String(data.extraLimit || 3);
   $("moodRemind").value = data.moodRemind === undefined ? "18:00" : data.moodRemind;
+  const pa = previewAtOf();
+  $("previewDay").innerHTML = DAYS.map((d, i) => `<option value="${i}" ${pa && i === pa.day ? "selected" : ""}>${d}</option>`).join("") + `<option value="" ${pa ? "" : "selected"}>Off</option>`;
+  $("previewClock").value = pa ? pa.time : "09:00";
+  $("previewClock").disabled = !pa;
   drawBedtimes();
   fillPrayer();
   drawUsers();
@@ -105,6 +109,14 @@ $("maxTogether").addEventListener("change", () => {
   changed();                                    // (if the number was wrong, this puts the old one back)
 });
 
+// 📖 v191 Next week preview worksheets: day + time (data.previewAt "6|09:00"; "" = off)
+["previewDay", "previewClock"].forEach(id => $(id).addEventListener("change", () => {
+  const day = $("previewDay").value, time = $("previewClock").value || "09:00";
+  if (day !== "" && !/^\d{2}:\d{2}$/.test(time)) return drawSettings();
+  data.previewAt = day === "" ? "" : `${day}|${time}`;
+  changed();
+  drawSettings();
+}));
 // 🌟 The Shining Star's announce day + time: the points week then runs from the next day (see pointsWeekOf).
 // The week is moved straight away (no star for the part-week): ticks are by date, so nothing is lost.
 ["starDay", "starClock"].forEach(id => $(id).addEventListener("change", () => {

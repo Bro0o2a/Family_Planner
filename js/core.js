@@ -465,7 +465,7 @@ function emptyData() {
     starV: 2,        // ⭐ 2 = the old Friday 6 PM was moved to Friday 3:30 PM once (v171)
     fixedOn: {},    // 🏫 v180: a fixed activity changed on ONE date: "date|actId" → { off: true } (didn't happen) or { start, end } ("09:00")
     bedOn: {},      // 🌙 v180: a kid's bedtime changed for one night only: "date|kidId" → "21:00" (see bedMin)
-    extraLimit: 3, moodRemind: "18:00",   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
+    extraLimit: 3, moodRemind: "18:00", previewAt: "6|09:00",   // (📖 v191 next week's preview worksheets: weekday (0 = Monday) | time, Dubai; "" = off)   // (📔 v180: the mood + wish reminder pop-up for kids from this time, Dubai; "" = off)
    // 🤖 extra worksheets (not in a planned study session) a kid may make each day: 3–5 (⚙️ Settings, parents)   // ⭐ the Shining Star is announced on this weekday (0 = Monday) at this time (Dubai); the new week starts the next day
     maxTogether: 2, // most activities one person can be in at the same time (only ones you allowed together)
     plan: null,     // the week Dad planned with "Plan my week" (null = not planned yet)
@@ -645,7 +645,7 @@ function cleanData(d) {
       return { id: String(f.id || newId()), name: String(f.name),
                days: f.days.map(Number).filter(x => x >= 0 && x <= LAST_DAY), start: f.start, end: f.end,
                overlapWith: Array.isArray(f.overlapWith) ? f.overlapWith.map(String) : [], // older data had no list: start empty
-               users, ...helpOf(f, users, false), ...padsOf(f) };   // (🤝 helper · ⭐ type · 📚 study details)
+               users, ...helpOf(f, users, false), ...padsOf(f), ...(isMustDate(f.must) ? { must: f.must } : {}) };   // (🤝 helper · ⭐ type · 📚 study details · ⭐ v191 Must-do)
     });
 
   // Routines (older saved data has none)
@@ -743,6 +743,7 @@ function cleanData(d) {
                users, ...helpOf(f, users, true), ...padsOf(f), ...betweenOf(f),   // (🤝 helper · ⭐ type · 📚 study details)
                ...(f.twice === false ? { twice: false } : {}),   // (⏱️ "make one day's session longer" switched off)
                ...(f.twiceDay === true ? { twiceDay: true } : {}),   // (2️⃣ v181: may have a 2nd session on the same day)
+               ...(isMustDate(f.must) ? { must: f.must } : {}),   // (⭐ v191: Must-do since that date, see mustMissed)
                oldCanOverlap: f.canOverlap === true };
     });
 
@@ -848,6 +849,7 @@ function cleanData(d) {
   if (d.bedOn && typeof d.bedOn === "object" && !Array.isArray(d.bedOn))   // 🌙 v180 (only the newest 60)
     clean.bedOn = Object.fromEntries(Object.entries(d.bedOn).filter(([k, v]) => /^\d{4}-\d{2}-\d{2}\|.+/.test(k) && BED_TIME.test(String(v)))
       .sort((a, b) => b[0].localeCompare(a[0])).slice(0, 60));
+  if (d.previewAt === "" || /^[0-6]\|([01]\d|2[0-3]):[0-5]\d$/.test(String(d.previewAt))) clean.previewAt = d.previewAt;   // 📖 v191
   if (d.moodRemind === "" || /^(1[5-9]|2[0-1]):00$/.test(String(d.moodRemind))) clean.moodRemind = d.moodRemind;   // 📔 v180   // 🤖 (otherwise the default 3)
   // ⭐ When the Shining Star is announced (a parent picks it in ⚙️ Settings): weekday 0–6 (Monday = 0) + "HH:MM"
   if (d.starAt && Number.isInteger(d.starAt.day) && d.starAt.day >= 0 && d.starAt.day <= 6 && /^\d{2}:\d{2}$/.test(d.starAt.time || ""))
@@ -1088,6 +1090,7 @@ const ACT_TYPES = [["study", "📚", "Study"], ["activity", "⚽", "Activity"], 
 const ACT_TYPE_KEYS = ACT_TYPES.map(t => t[0]);
 // An activity saved before types existed gets one, once (then it's kept): a name with "school" → "other" (on the calendar, no score),
 // everything else → "activity". An unknown type → "activity". (Hoisted: cleanData uses it while loading.)
+function isMustDate(v) { return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v); }   // (⭐ v191 an activity's Must-do: the date it started)
 function defaultActType(a) {
   if (a && ACT_TYPE_KEYS.includes(a.type)) return a.type;
   if (a && a.type != null) return "activity";
@@ -1109,7 +1112,7 @@ function emptySchool() {
   return { info: { name: "", grade: "", teachers: "", timetable: {} }, grades: {}, tasks: {}, reviews: {}, seesaw: {},
            subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)), files: {}, notes: {}, work: {},
            profile: { asked: false, subjects: {}, other: "", skip: [] }, events: {}, week: null, requests: {}, syllabus: null, brief: null, topics: {},
-           learn: {}, reviewDue: [],   // (🧠 the learning profile per subject: see LEARNING PROFILE)
+           learn: {}, reviewDue: [], previewDue: [], revDone: [], gapDone: "",   // (🧠 the learning profile per subject: see LEARNING PROFILE · 📖 v191 previews, 📝 test revisions, 📋 missing topics)
            curr: {}, map: {}, bench: {},   // (📚 the school topics, 🌍 the official curriculum, 📏 the benchmark: see STUDY TOPICS)
            wsScores: {} };   // (📝 a small copy of every worksheet's check, so the score stays: see ALL MY WORKSHEETS)
 }
@@ -1266,8 +1269,16 @@ function cleanSchool(s) {
       .map(x => ({ n: Math.max(0, Math.round(Number(x.n)) || 0), label: txt(x.label, 60), start: x.start, fri: x.fri,
                    subjects: (Array.isArray(x.subjects) ? x.subjects : []).filter(y => y && txt(y.subject, 30)).slice(0, 12)
                      .map(y => ({ subject: txt(y.subject, 30), topics: (Array.isArray(y.topics) ? y.topics : []).map(t => txt(t, 60)).filter(Boolean).slice(0, 8) })) }));
+    // 📖 v191 next week's preview worksheets, made on the parents' day + time ("on" = that date): [{ n, label, start, on, subjects }]
+    c.previewDue = (Array.isArray(k.previewDue) ? k.previewDue : []).filter(x => x && isDate(x.start) && isDate(x.on)).slice(-3)
+      .map(x => ({ n: Math.max(0, Math.round(Number(x.n)) || 0), label: txt(x.label, 60), start: x.start, on: x.on,
+                   subjects: (Array.isArray(x.subjects) ? x.subjects : []).filter(y => y && txt(y.subject, 30)).slice(0, 12)
+                     .map(y => ({ subject: txt(y.subject, 30), topics: (Array.isArray(y.topics) ? y.topics : []).map(t => txt(t, 60)).filter(Boolean).slice(0, 8) })) }));
+    c.revDone = (Array.isArray(k.revDone) ? k.revDone : []).map(x => String(x).slice(0, 40)).filter(Boolean).slice(-30);   // (📝 tests already revised for)
+    c.gapDone = isDate(k.gapDone) ? k.gapDone : "";   // (📋 the last week whose missing topics were told)
     c.notes = list(k.notes, n => txt(n.text, 1000) && isDate(n.date)
-      ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}) } : null);
+      ? { subject: txt(n.subject, 30), text: txt(n.text, 1000), date: n.date, ...(okKey(String(n.by || "")) ? { by: n.by } : {}),
+          ...(n.gap === true ? { gap: true } : {}), ...(n.seen === true ? { seen: true } : {}) } : null);   // (📋 v191 a "missing topics" note: seen = off the parents' home)
     // 📚 School topics (see STUDY TOPICS): topic id → { sub: subject id, title, note, added: date, files: [file ids], by? }.
     //    Older data has none: made once from the 📥 school work cards and 📰 this week's topics (fixed ids: every phone makes the same).
     c.curr = k.curr && typeof k.curr === "object" && !Array.isArray(k.curr)

@@ -920,7 +920,7 @@ function drawHome() {
   $("homeHabits").innerHTML = "";
   $("homeCal").innerHTML = "";
   if (!isParentDevice()) maybeMakeRiddles();   // (🧩 riddles: kids only, never made on a parent's device)
-  else maybeMakeWeekReviews();   // (📰 v179: the week reviews, on Friday after school)
+  else { maybeMakeWeekReviews(); maybeMakePreviews(); maybeMakeRevisions(); maybeTellGaps(); }   // (📰 v179 week reviews; 📖📝📋 v191 previews, test revisions, missing topics)
   maybeShowTour();
   maybeShowSetup();   // ✨ a parent, the first time: "Make the app yours"
 }

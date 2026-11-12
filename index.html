@@ -20,7 +20,7 @@
      This section only controls colors, sizes and spacing.
      ============================================================ -->
 <!-- THE LOOK (all the CSS) is in css/app.css -->
-<link rel="stylesheet" href="css/app.css?v=188">
+<link rel="stylesheet" href="css/app.css?v=191">
 </head>
 <body>
 <!-- ============================================================
@@ -306,6 +306,13 @@
           <label for="moodRemind">📔 Remind the kids to answer their mood from</label>
           <select id="moodRemind"><option value="15:00">3 PM</option><option value="16:00">4 PM</option><option value="17:00">5 PM</option><option value="18:00">6 PM</option>
             <option value="19:00">7 PM</option><option value="20:00">8 PM</option><option value="21:00">9 PM</option><option value="">Off</option></select>
+        </div>
+        <div class="setting" style="margin-top:14px"><b>📖 Next week preview worksheets</b>
+          <p class="hint" style="margin:4px 0 6px">After you add a newsletter, the app makes a preview of next week's topics at this time.</p>
+          <div class="row">
+            <div><label class="small" for="previewDay">Day</label><select id="previewDay"></select></div>
+            <div><label class="small" for="previewClock">Time (Dubai)</label><input type="time" id="previewClock" value="09:00"></div>
+          </div>
         </div>
         <!-- 🌙 v180 Bedtimes (one per kid): filled by drawBedtimes (settings.js) -->
         <div class="setting bed-set" style="margin-top:14px"><b>🌙 Bedtimes</b>
@@ -891,23 +898,23 @@
 <!-- 🕌 adhan: works out the prayer times on the device (sw.js keeps a copy, so it also works offline) -->
 <script src="https://cdn.jsdelivr.net/npm/adhan@4.4.3/lib/bundles/adhan.umd.min.js"></script>
 <!-- THE BRAIN: the app's JavaScript, split by feature in the js/ folder (they load in this order; see CLAUDE.md) -->
-<script src="js/core.js?v=188"></script>
-<script src="js/screens.js?v=188"></script>
-<script src="js/points.js?v=188"></script>
-<script src="js/fun.js?v=188"></script>
-<script src="js/reports.js?v=188"></script>
-<script src="js/profile.js?v=188"></script>
-<script src="js/home.js?v=188"></script>
-<script src="js/activities.js?v=188"></script>
-<script src="js/calendar.js?v=188"></script>
-<script src="js/school.js?v=188"></script>
-<script src="js/ai.js?v=188"></script>
-<script src="js/pictures.js?v=188"></script>
-<script src="js/study.js?v=188"></script>
-<script src="js/settings.js?v=188"></script>
-<script src="js/taps.js?v=188"></script>
-<script src="js/cloud.js?v=188"></script>
-<script src="js/news.js?v=188"></script>
-<script src="js/start.js?v=188"></script>
+<script src="js/core.js?v=191"></script>
+<script src="js/screens.js?v=191"></script>
+<script src="js/points.js?v=191"></script>
+<script src="js/fun.js?v=191"></script>
+<script src="js/reports.js?v=191"></script>
+<script src="js/profile.js?v=191"></script>
+<script src="js/home.js?v=191"></script>
+<script src="js/activities.js?v=191"></script>
+<script src="js/calendar.js?v=191"></script>
+<script src="js/school.js?v=191"></script>
+<script src="js/ai.js?v=191"></script>
+<script src="js/pictures.js?v=191"></script>
+<script src="js/study.js?v=191"></script>
+<script src="js/settings.js?v=191"></script>
+<script src="js/taps.js?v=191"></script>
+<script src="js/cloud.js?v=191"></script>
+<script src="js/news.js?v=191"></script>
+<script src="js/start.js?v=191"></script>
 </body>
 </html>

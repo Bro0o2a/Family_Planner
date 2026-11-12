@@ -142,6 +142,56 @@ try {
   });
   if (part !== "ok") errors.push("[part marks] " + part);
 
+  // 🔑 v191 Key words box: kept by cleanWorksheet, printed on the paper, a parent's tick box takes it off
+  const kbox = await run("key words box", () => {
+    const w = cleanWorksheet({ title: "t", key_words: ["evaporation = gas", "condensation", "condensation", ""], questions: [{ number: 1, kind: "short_answer", prompt: "Why?", answer: "x", points: 1 }] });
+    if (JSON.stringify(w.key_words) !== '["evaporation","condensation"]') return "clean: " + JSON.stringify(w.key_words);
+    const on = document.createElement("div"); on.appendChild(wsSheetNode(w, false));
+    if (!on.querySelector(".ws-keybox") || !on.querySelector(".ws-keybox").textContent.includes("condensation")) return "no box on the paper";
+    aiDocs.worksheets.kwtest = { ...w, kid: "ex-kid1", subject: "Science", answers: [] };
+    const ed = document.createElement("div"); ed.appendChild(wsKeyEditNode(aiDocs.worksheets.kwtest, "kwtest")); document.body.appendChild(ed);
+    const tick = ed.querySelector("[data-kwtick]"); tick.checked = false; tick.dispatchEvent(new Event("change", { bubbles: true }));
+    const off = aiDocs.worksheets.kwtest, kept = cleanWorksheet(off).kwOff === true;
+    const paper = document.createElement("div"); paper.appendChild(wsSheetNode(off, false));
+    ed.remove(); delete aiDocs.worksheets.kwtest;
+    return off.kwOff === true && kept && !paper.querySelector(".ws-keybox") ? "ok" : JSON.stringify(off);
+  });
+  if (kbox !== "ok") errors.push("[key words box] " + kbox);
+
+  // 🔢 v191 the checked total = the paper's total; the score = the questions' points (each at most its marks)
+  const tot = await run("same total", () => {
+    const w = { questions: [{ number: 1, points: 2 }, { number: 2, points: 3 }, { number: 3, points: 1 }] };
+    const c = { score: 9, max_score: 10, questions: [{ number: 1, correct: true, points: 1 }, { number: 2, correct: false, points: 5 }, { number: 3, correct: false, points: 0 }] };
+    wsSameTotal(w, c);
+    return c.max_score === 6 && c.score === 5 && c.questions[0].points === 2 && c.questions[1].points === 3 ? "ok" : JSON.stringify(c);
+  });
+  if (tot !== "ok") errors.push("[same total] " + tot);
+
+  // ⭐ v191 a Must-do activity: a missed past session lowers the ratio; switched off = no effect
+  const mustAct = await run("must-do activity", () => {
+    const kid = scoredUsers()[0].id, past = (planDays() || []).find(d => d.date < todayYmd() && d.items.some(it => it.users.includes(kid) && !it.fixed));
+    if (!past) return "ok";   // (the example week starts today: nothing past to test)
+    const it = past.items.find(x => x.users.includes(kid) && !x.fixed), a = data.flexible.find(x => x.id === baseActId(it.actId));
+    const before = mustMissed(kid).due; a.must = data.points.week; const on = mustMissed(kid); delete a.must;
+    return on.due > before && cleanData(JSON.parse(JSON.stringify({ ...data, flexible: [{ ...a, must: "2026-01-01" }] }))).flexible[0].must === "2026-01-01" ? "ok" : JSON.stringify(on);
+  });
+  if (mustAct !== "ok") errors.push("[must-do activity] " + mustAct);
+
+  // 📖📋 v191 newsletter: the preview day is the Sunday before the week; the missing topics of a week are found
+  const nlIdeas = await run("newsletter preview + missing topics", () => {
+    const old = data.previewAt; data.previewAt = "6|09:00";
+    const pv = previewDateFor("2026-11-16"); data.previewAt = ""; const off = previewDateFor("2026-11-16"); data.previewAt = old;
+    if (pv !== "2026-11-15" || off !== "") return "preview day " + pv + " / off " + off;
+    const kid = kidsList()[0].id, s = schoolFor(kid), sid = ensureFolder(s, "Science");
+    addSchoolTopics(s, sid, ["Magnets"], "2026-11-09");
+    const gaps = weekGaps(kid, { subjects: [{ subject: "Science", topics: ["Magnets"] }] });
+    if (!gaps.length || !gaps[0].not.includes("Magnets")) return "gaps " + JSON.stringify(gaps);
+    s.notes.t1 = { subject: "Science", text: "📋 Week 1: not practised yet: Magnets.", date: "2026-11-13", by: me, gap: true };
+    const html = gapCardsHtml(); delete s.notes.t1;
+    return /Magnets/.test(html) && /data-gapws/.test(html) ? "ok" : html;
+  });
+  if (nlIdeas !== "ok") errors.push("[newsletter ideas] " + nlIdeas);
+
   // 🤖 No parent OK yet: the AI helper asks first and sends nothing
   const asked = await run("AI asks for OK first", async () => {
     data.aiOk = null;

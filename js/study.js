@@ -180,6 +180,27 @@ function sessionSections(kid, s, f, minutes) {
     const a = g.mastered[0], b = g.mastered[1] || a, main = Math.max(5, Math.round(minutes * 0.75));
     return [{ topic: a.title, minutes: main, focus: [], kind: "practising" }, { topic: b.title, minutes: Math.max(5, minutes - main), focus: [], kind: "challenge" }];
   }
+  // 🏫 v191 (Broo2a) study follows school: this week's newsletter topics come first (not 🟢 yet), then last week's 🔴 ones;
+  //   a test on this subject in the next 3 days: its topics first. They take about half the session (a test: most of it).
+  const today = todayYmd(), wk = s.week && s.week.start <= today && today <= s.week.end ? s.week.start : mondayOf(new Date());
+  const test = testsAhead(kid, 3).find(t => t.f.id === f.id), tTopics = test ? testTopics(s, f, test.date) : [];
+  const schoolNow = rows.filter(t => (test ? tTopics.some(x => sameTopicTitle(x, t.title)) : t.added === wk && t.st !== "mastered") || (!test && t.added === addDaysYmd(wk, -7) && t.st === "needs"));
+  if (schoolNow.length) {
+    const share = test ? 0.7 : 0.5, gm = Math.round(minutes * share), n = Math.max(1, Math.min(3, schoolNow.length, Math.floor(gm / 5)));
+    const first = schoolNow.sort((a, b) => (b.added || "").localeCompare(a.added || "") || avg(a) - avg(b)).slice(0, n)
+      .map(t => ({ topic: t.title, minutes: Math.max(5, Math.round(gm / n)), focus: t.st === "needs" ? topicWeak(t.info) : [], kind: test ? "review" : t.st === "needs" ? "needs_work" : "practising" }));
+    Object.keys(g).forEach(k => { g[k] = g[k].filter(t => !first.some(x => x.topic === t.title)); });
+    minutes = Math.max(5, minutes - gm);
+    if (!g.needs.length && !g.new.length && !g.practising.length && !g.mastered.length) return first;
+    return [...first, ...restSections(kid, f, g, minutes)].slice(0, 6);
+  }
+  return restSections(kid, f, g, minutes);
+}
+function restSections(kid, f, g, minutes) {
+  if (!g.needs.length && !g.new.length && !g.practising.length) {
+    const a = g.mastered[0]; if (!a) return [];
+    return [{ topic: a.title, minutes, focus: [], kind: "practising" }];
+  }
   const review = wsOf(kid, f.name).filter(w => w.session).length % 3 === 2;   // (every 3rd session of this subject)
   const plan = [["needs", 0.5, 2], ["new", 0.25, 2], ["practising", 0.2, 2], ...(review ? [["mastered", 0.07, 1]] : [])].filter(([k]) => g[k].length);
   const total = plan.reduce((n, p) => n + p[1], 0), out = [];
@@ -916,7 +937,13 @@ async function addNewsletter() {
     s.reviewDue = [...(s.reviewDue || []).filter(x => x.start !== start), { n, label: res.week_label, start, fri, subjects: subjects.map(x => ({ subject: x.subject, topics: x.topics })) }].slice(-3);
     writeData();
   }
-  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length ? `. The week reviews come on Friday ${dayMon(addDaysYmd(start, 4))} after school.` : ""}`, 5000);
+  // 📖 v191 (Broo2a): next week's PREVIEW worksheets, on the parents' day + time before the week starts (⚙️ Settings, default Sunday 9 AM)
+  const pv = previewDateFor(start);
+  if (subjects.length && pv) {
+    s.previewDue = [...(s.previewDue || []).filter(x => x.start !== start), { n, label: res.week_label, start, on: pv, subjects: subjects.map(x => ({ subject: x.subject, topics: x.topics })) }].slice(-3);
+    writeData();
+  }
+  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length && pv ? `. 📖 The previews come ${dayMon(pv)}` : ""}${subjects.length ? `. The week reviews come on Friday ${dayMon(addDaysYmd(start, 4))} after school.` : ""}`, 6000);
 }
 // 📰 Friday after school (a parent's device opens the app from Friday 3 PM on): each waiting week review, one per subject.
 //    🔴 needs-work topics of that week get more of the worksheet. (Older than 2 weeks: dropped, not made.)
@@ -947,6 +974,123 @@ async function maybeMakeWeekReviews() {
     if (made && screen === "school") render();
   } finally { reviewsMaking = false; }
 }
+// 📖 v191 PREVIEW: { day 0–6 (0 = Monday), time } from data.previewAt ("6|09:00" = Sunday 9 AM; "" = off)
+const previewAtOf = () => { const v = data.previewAt === undefined ? "6|09:00" : data.previewAt; if (!v) return null; const [d, t] = v.split("|"); return { day: Number(d), time: t }; };
+// (the date of the preview day just before the week that starts on "start" (a Monday); on or before the day before it)
+function previewDateFor(start) {
+  const p = previewAtOf(); if (!p) return "";
+  for (let d = addDaysYmd(start, -1), i = 0; i < 7; d = addDaysYmd(d, -1), i++) if (weekdayOf(d) === p.day) return d;
+  return "";
+}
+let previewsMaking = false;
+// (a parent's device, from the preview day + time on: one preview worksheet per subject of next week)
+async function maybeMakePreviews() {
+  if (previewsMaking || !isParentDevice() || !aiReady() || (cloud.enabled && !cloud.ready) || hasDraft()) return;
+  const p = previewAtOf(), d = dubaiNow().date, now = dubaiMinutes(); if (!p) return;
+  const due = x => d > x.on || (d === x.on && now >= toMin(p.time));
+  const jobs = [];
+  kidsList().forEach(k => (schoolOf(k.id).previewDue || []).filter(due).forEach(x => jobs.push({ kid: k.id, x })));
+  if (!jobs.length) return;
+  previewsMaking = true;
+  jobs.forEach(j => { const s = schoolFor(j.kid); s.previewDue = (s.previewDue || []).filter(y => y.start !== j.x.start); });   // (taken first: never made twice)
+  writeData();
+  try {
+    let made = 0, tried = 0;
+    for (const j of jobs) {
+      if (d > addDaysYmd(j.x.start, 4)) continue;   // (the week is nearly over: too late for a preview)
+      for (const y of j.x.subjects) {
+        tried++;
+        if (await newWorksheet(j.kid, y.subject, y.topics, WS_COUNT, "preview", "preview", { title: `📖 Week ${j.x.n} preview`, part: `📖 Week ${j.x.n} preview` }, false)) made++;
+      }
+    }
+    if (tried) toast(made === tried ? `📖 ${made} next-week ${made === 1 ? "preview is" : "previews are"} ready in 📝 Worksheets!` : `📖 ${made} of ${tried} previews were made.`, 4500);
+    if (made && screen === "school") render();
+  } finally { previewsMaking = false; }
+}
+// 📝 v191 TEST COMING UP: a 📌 school date that is a test / quiz / exam / assessment, for one subject (its name is in the title or note)
+const TEST_WORDS = /\b(test|quiz|exam|assessment|end of unit|unit check|spelling check|mock)\b|اختبار|امتحان/i;
+function testsAhead(kid, days = 3) {
+  const s = schoolOf(kid), d = dubaiNow().date, subs = subjectList(s, true);
+  return Object.entries(s.events || {}).filter(([, e]) => e.date > d && e.date <= addDaysYmd(d, days) && TEST_WORDS.test(`${e.title} ${e.note || ""}`))
+    .map(([id, e]) => ({ id, ...e, f: subs.find(f => new RegExp(`\\b${f.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(`${e.title} ${e.note || ""}`)) }))
+    .filter(x => x.f);
+}
+// (the topics a test is about: that subject's school topics of the last 3 weeks, newest first; at most 8)
+const testTopics = (s, f, date) => topicsOf(s, f.id).filter(t => t.added && t.added >= addDaysYmd(date, -21)).map(t => t.title).slice(0, 8);
+let revMaking = false;
+// (a parent's device: 2 days before the test, one revision worksheet on its topics; each test once)
+async function maybeMakeRevisions() {
+  if (revMaking || !isParentDevice() || !aiReady() || (cloud.enabled && !cloud.ready) || hasDraft()) return;
+  const jobs = [];
+  kidsList().forEach(k => testsAhead(k.id, 2).forEach(t => { if (!(schoolOf(k.id).revDone || []).includes(t.id)) jobs.push({ kid: k.id, t }); }));
+  if (!jobs.length) return;
+  revMaking = true;
+  jobs.forEach(j => { const s = schoolFor(j.kid); s.revDone = [...(s.revDone || []), j.t.id].slice(-30); });
+  writeData();
+  try {
+    let made = 0;
+    for (const j of jobs) {
+      const s = schoolOf(j.kid), topics = testTopics(s, j.t.f, j.t.date);
+      if (!topics.length) continue;
+      if (await newWorksheet(j.kid, j.t.f.name, topics, WS_COUNT, "revision", "revision", { title: `📝 ${j.t.title} revision`, part: `📝 ${j.t.title} (${dayMon(j.t.date)})` }, false)) made++;
+    }
+    if (made) toast(`📝 ${made} test revision ${made === 1 ? "worksheet is" : "worksheets are"} ready in 📝 Worksheets!`, 4500);
+    if (made && screen === "school") render();
+  } finally { revMaking = false; }
+}
+// 📋 v191 MISSING TOPICS: once the school week is over (Friday from 3 PM, Dubai), a note for the parents per kid: the newsletter's
+// topics of that week the kid hasn't practised yet, and the ones still 🔴 weak. Kept in the kid's 🎒 School notes, and on the
+// parents' home until they tap OK.
+function weekGaps(kid, w) {
+  const s = schoolOf(kid), out = [];
+  (w.subjects || []).forEach(x => {
+    const f = folderOf(s, x.subject); if (!f) return;
+    const rows = topicRows(kid, s, f), not = [], weak = [];
+    x.topics.forEach(t => { const r = rows.find(y => sameTopicTitle(y.title, t)); if (!r || r.st === "new") not.push(t); else if (r.st === "needs") weak.push(t); });
+    if (not.length || weak.length) out.push({ subject: f.name, not, weak });
+  });
+  return out;
+}
+function maybeTellGaps() {
+  if (!isParentDevice() || hasDraft()) return;
+  const d = dubaiNow().date;
+  let n = 0;
+  kidsList().forEach(k => {
+    const s0 = schoolOf(k.id), w = s0.week;
+    if (!w || !w.start || s0.gapDone === w.start) return;
+    const fri = addDaysYmd(w.start, 4);
+    if (d < fri || (d === fri && dubaiMinutes() < REVIEW_FROM)) return;
+    const gaps = weekGaps(k.id, w), s = schoolFor(k.id);
+    s.gapDone = w.start; n++;
+    // (one note per subject, so it shows in that subject's 🗒️ Notes in the 🎒 School file)
+    gaps.forEach(g => {
+      const text = `📋 ${w.label || "Week " + (w.n || "")}: ${[g.not.length ? "not practised yet: " + g.not.join(", ") : "", g.weak.length ? "still weak: " + g.weak.join(", ") : ""].filter(Boolean).join(". ")}.`;
+      s.notes[newId()] = { subject: g.subject, text: text.slice(0, 1000), date: d, by: me, gap: true };
+    });
+  });
+  if (n) writeData();
+}
+// (the parents' home: the unseen 📋 notes)
+const gapNotes = () => !isParentId(me) || isKidDevice() ? [] : kidsList().flatMap(k => Object.entries(schoolOf(k.id).notes || {}).filter(([, n]) => n.gap && !n.seen).map(([id, n]) => ({ kid: k.id, id, n })));
+function gapCardsHtml() {
+  const kids = [...new Set(gapNotes().map(x => x.kid))];
+  return kids.map(kid => { const list = gapNotes().filter(x => x.kid === kid);
+    return `<div class="card gap-card" style="--c:${colorsOf(userById(kid)).color}"><p><b>📋 What ${safe(kidNameOf(kid))} still needs from this school week</b></p>
+    ${list.map(x => `<p><b>${safe(x.n.subject)}</b>: ${safe(x.n.text.replace(/^📋 [^:]*: /, ""))}</p>`).join("")}
+    <div class="btnrow"><button class="primary" data-gapws="${safe(kid)}">📝 Make worksheets on these</button><button data-gapok="${safe(kid)}">OK</button></div>
+    <p class="hint">Saved in ${safe(kidNameOf(kid))}'s 🎒 School file (each subject's 🗒️ Notes).</p></div>`; }).join("");
+}
+const gapSeen = kid => { const s = schoolFor(kid); Object.values(s.notes).forEach(n => { if (n.gap) n.seen = true; }); };
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-gapok], [data-gapws]"); if (!b || !isParentDevice()) return;
+  if (b.dataset.gapok) { gapSeen(b.dataset.gapok); writeData(); return render(); }
+  // (📝 one weak-points worksheet per subject that has missing topics: the topics themselves)
+  const kid = b.dataset.gapws, w = schoolOf(kid).week; if (!w) return;
+  const gaps = weekGaps(kid, w);
+  gapSeen(kid); writeData(); render();
+  (async () => { let made = 0; for (const g of gaps) if (await newWorksheet(kid, g.subject, [...g.not, ...g.weak].slice(0, 8), WS_COUNT, "weak_points", "gapws|" + kid, { title: `📋 ${g.subject}: catch up`, part: "📋 Catch up" }, false)) made++;
+    if (made) toast(`📝 ${made} catch-up ${made === 1 ? "worksheet is" : "worksheets are"} ready in ${kidNameOf(kid)}'s 📝 Worksheets!`, 4500); })();
+});
 $("nlModal").addEventListener("click", e => {
   if (e.target === $("nlModal")) return closeNewsletter();
   const b = e.target.closest("button");
@@ -1202,7 +1346,10 @@ function openWsOpts(kid, subject, topics, count, work, part) {
   $("wsoHint").textContent = `${subject} for ${kidNameOf(kid)}. The answers stay hidden until you tap 🔑.`;
   $("wsoTopics").replaceChildren(...wso.topics.map((t, i) => h("label", { class: "checkline" },
     h("input", { type: "checkbox", value: i, checked: true }), h("span", null, t))));
-  $("wsoCount").replaceChildren(h("p", { class: "hint" }, `${WS_COUNT} questions, at ${kidNameOf(kid)}'s level.`));   // (🔢 v179: always 15)
+  // 🔢 v191: the kid picks 10 or 15 questions (15 when nothing was picked before)
+  const pickN = [10, 15].includes(count) ? count : WS_COUNT;
+  $("wsoCount").replaceChildren(...[10, 15].map(n => h("label", null, h("input", { type: "radio", name: "wsoN", value: n, checked: n === pickN }), h("span", null, `${n} questions`))),
+    h("p", { class: "hint", style: "flex-basis:100%;margin:0" }, `At ${kidNameOf(kid)}'s level.`));
   $("wsoErr").textContent = aiReady() ? "" : "🔌 " + AI_OFF + ".";
   $("wsoTr").innerHTML = wsPickHtml(kid, subject) + wsWordsHtml(kid, subject) + translateToggleHtml(kid, subject);   // 🌐 (remembered for this kid)
   $("aiWsModal").hidden = false;
@@ -1214,21 +1361,21 @@ function wsFromWork(v) {
   const [wid, i] = v.split("|"), w = schoolOf(schoolKid).work[wid];
   if (!w) return;
   const topics = i !== undefined ? [w.topics[Number(i)]].filter(Boolean) : w.topics.length ? w.topics : [w.title];
-  openWsOpts(schoolKid, w.subject, topics, 10, wid, w.title);
+  openWsOpts(schoolKid, w.subject, topics, WS_COUNT, wid, w.title);
 }
 async function makeWorksheet() {
   const o = wso;
   if (!o) return;
   const topics = [...$("wsoTopics").querySelectorAll("input:checked")].map(x => o.topics[Number(x.value)]).filter(Boolean);
   if (!topics.length) return $("wsoErr").textContent = "Please tick at least one topic.";
-  const count = WS_COUNT;
+  const picked = $("wsoCount").querySelector("input[name=wsoN]:checked"), count = picked && [10, 15].includes(Number(picked.value)) ? Number(picked.value) : WS_COUNT;
   $("wsoErr").textContent = "";
   const mode = pickMode(o.kid, o.subject);   // 🔁 practice, or 🚀 challenge when it's going very well
   const r = await callAi("worksheet", { ...kidInfo(o.kid), subject: o.subject, topics, count,
                                         notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + ` Exactly ${count} questions.` + wsKidNote(o.kid, o.subject, mode) + wsSummaryNote(o.kid, o.subject, topics), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
-  const ws = wsExamOrder(cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
+  const ws = wsExamOrder(cleanWorksheet({ ...r, key_words: wsKeyWordsFor(r, o.kid, o.subject), kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
                               ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
                               answers: [], ...(wsBandOf(o.kid, o.subject, mode) !== "normal" ? { pick: wsBandOf(o.kid, o.subject, mode) } : {}),
                               ...(learnRead(o.kid, o.subject) ? { lvl: levelNow(learnRead(o.kid, o.subject)) } : {}), ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
@@ -1392,6 +1539,7 @@ function wsSheetNode(w, showAns, compact = false) {
     h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): for a choose question, write the letter (A, B, C or D) in the box. Marks are shown in [brackets]."
       : "Answer all the questions. Marks are shown in [brackets]."),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
+    wsKeyBoxNode(w, rtl),
     h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
       return [   // (📚 each part's title above its first question · or the exam's section bar)
       ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)),
@@ -1402,9 +1550,9 @@ function wsSheetNode(w, showAns, compact = false) {
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
         q.picture && typeof wsPicNode === "function" ? wsPicNode(q.picture) : null,   // (🖼️)
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
-          compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
+          (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
-        compact && isOrderQ(q) ? h("div", { class: "ws-to-order" }, "On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …).") : null,
+        isOrderQ(q) ? h("div", { class: "ws-to-order" }, compact ? "On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …)." : "Write the letters in the right order (1st, 2nd, 3rd …).") : null,
         match || compact ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
       h("span", { class: "ws-pts" }, marksText(q.points)))]; })),
@@ -1487,6 +1635,28 @@ function schoolWorksheetHtml(s, isDad) {
   const w = aiDocs.worksheets[schoolDoc];
   return w && w.kid === schoolKid ? aiMount(() => wsViewNode(w, schoolDoc, s, isDad)) : notHere();
 }
+// 🔑 v191 Key words box on the paper (a hint): the lesson's words to use in the answers
+function wsKeyBoxNode(w, rtl) {
+  const k = w.key_words || [];
+  if (!k.length || w.kwOff) return null;
+  return h("div", { class: "ws-keybox" }, h("b", null, rtl ? "🔑 كلمات مفتاحية: استخدمها في إجاباتك" : "🔑 Key words: use them in your answers"),
+    h("div", { class: "ws-keywords" }, k.join("  ·  ")));
+}
+// (parents only, above the paper: one tick box, the key words box on this worksheet or not)
+function wsKeyEditNode(w, id) {
+  if (!(w.key_words || []).length) return null;
+  return h("label", { class: "card ws-keyedit ai-narrow" }, h("input", { type: "checkbox", checked: !w.kwOff, data: { kwtick: id } }),
+    h("span", null, h("b", null, "🔑 Key words box"), " on this worksheet: the kids use these words in their answers"));
+}
+document.addEventListener("change", e => {
+  const b = e.target.closest && e.target.closest("[data-kwtick]");
+  if (!b || !isDadNow()) return;
+  const id = b.dataset.kwtick, w = aiDocs.worksheets[id];
+  if (!w) return;
+  const doc = { ...w }; if (b.checked) delete doc.kwOff; else doc.kwOff = true;
+  aiSave("worksheets", id, doc);
+  render();
+});
 function wsViewNode(w, id, s, isDad) {
   const done = !!w.check, canAct = isDad || !done, files = w.answers.filter(f => s.files[f]), open = answersOpen(w), show = wsAnswers && open;
   return h("div", null,
@@ -1500,6 +1670,7 @@ function wsViewNode(w, id, s, isDad) {
       h("button", { data: { aireport: "worksheet|" + id } }, "🚩 Report"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
     wsLevelNode(w),
+    isDad ? wsKeyEditNode(w, id) : null,
     wsSheetNode(w, show),
     // ✅ Upload the answers → 🤖 Check
     h("div", { class: "card bd-card ai-narrow" },
@@ -1822,7 +1993,21 @@ function wsSameAsKey(w, wq, said) {
     return optFind(wq.options, said) === i;
   }
   // (any other question: the kid's answer is the key itself, e.g. "A" = "A", "30cm" = "30 cm")
-  return wsSameText(said, wq.answer);
+  // (v191: also the final answer after the working: "475 - 150 = 325" = "325 (475 − 150)")
+  const ends = x => [x, String(x || "").replace(/\s*\([^)]*\)\s*$/, ""), String(x || "").split("=").pop()];
+  return ends(said).some(a => a.trim() && ends(wq.answer).some(k => wsSameText(a, k) || wsSameWithUnit(a, k)));
+}
+// (v191: the key is just a number and the kid wrote that number + its unit: "3 V" = "3", "25 cm" = "25", "40°C" = "40".
+//  Only real units count, so "3x" ≠ "3" and "34" ≠ "3")
+const WS_UNITS = new Set(("v volt volts a amp amps ampere amperes w watt watts ω ohm ohms j joule joules n newton newtons hz kw kwh " +
+  "mm cm m km in ft mi g kg mg t l ml cl s sec secs second seconds min mins minute minutes h hr hrs hour hours day days week weeks " +
+  "° °c °f c f k % percent cm² cm2 m² m2 km² km2 mm² mm2 cm³ cm3 m³ m3 mm³ mm3 m/s km/h kmh kph mph aed dhs dh dirham dirhams $ fils " +
+  "unit units sq.cm squarecm squarem cubiccm").split(" "));
+function wsSameWithUnit(said, key) {
+  const k = wsPlain(key), a = wsPlain(said);
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(k) || !a.startsWith(k)) return false;
+  const u = a.slice(k.length).replace(/\.$/, "");
+  return WS_UNITS.has(u);
 }
 // (the same answer, only spaces, capitals or a full stop at the end different: "30cm" = "30 cm", "Paris." = "paris";
 //  signs stay: "-5" ≠ "5", "3/4" ≠ "34", "1.5" ≠ "15")
@@ -1857,9 +2042,23 @@ function wsSureRight(w, c) {
     if (q.correct || !wsSameAsKey(w, wq, q.your_answer)) return;
     const full = wq.points || 0;
     score = Math.min(c.max_score, score + Math.max(0, full - (q.points || 0)));
-    Object.assign(q, { correct: true, points: Math.max(q.points || 0, full) });
+    Object.assign(q, { correct: true, points: Math.max(q.points || 0, full), note: "Right ✓" });
   });
   c.score = score;
+  return c;
+}
+// 🔢 v191 the check's total is ALWAYS the worksheet's own total (the "Total: __ / N" on the paper), and the score is the sum of
+// the questions' points, each between 0 and that question's marks (a right one = full marks). Before, the AI's own sums could differ.
+function wsSameTotal(w, c) {
+  const max = wsTotal(w);
+  if (!(max > 0) || !c.questions.length) return c;
+  c.questions.forEach(q => {
+    const wq = w.questions.find(x => x.number === q.number);
+    if (!wq) return;
+    q.points = q.correct ? wq.points : Math.max(0, Math.min(wq.points, Number(q.points) || 0));
+  });
+  c.max_score = max;
+  c.score = Math.min(max, c.questions.filter(q => w.questions.some(x => x.number === q.number)).reduce((n, q) => n + q.points, 0));
   return c;
 }
 async function checkWorksheetNow(wsId) {
@@ -1897,7 +2096,7 @@ async function checkWorksheetNow(wsId) {
                                        ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
   if (!r) { schoolFresh = true; return render(); }   // (⚠️ the reason shows under the button)
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
-  if (c) wsSureRight(w, c);   // (✅ an answer exactly like the key is right)
+  if (c) { wsSureRight(w, c); wsSameTotal(w, c); }   // (✅ an answer exactly like the key is right · 🔢 the total = the paper's total)
   if (!c) { aiFail = { key: "check|" + wsId, text: "🤖 The check came back empty. Please try again.", at: Date.now() }; schoolFresh = true; render(); return toast("🤖 The check came back empty. Please try again.", 4000); }
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;
