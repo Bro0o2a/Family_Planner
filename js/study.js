@@ -1491,40 +1491,24 @@ function schoolWorksheetHtml(s, isDad) {
 // 🔑 v191 Key words box on the paper (a hint): the lesson's words to use in the answers
 function wsKeyBoxNode(w, rtl) {
   const k = w.key_words || [];
-  if (!k.length) return null;
+  if (!k.length || w.kwOff) return null;
   return h("div", { class: "ws-keybox" }, h("b", null, rtl ? "🔑 كلمات مفتاحية: استخدمها في إجاباتك" : "🔑 Key words: use them in your answers"),
-    h("div", { class: "ws-keywords" }, k.map(x => h("span", null, x))));
+    h("div", { class: "ws-keywords" }, k.join("  ·  ")));
 }
-// (parents only, above the paper: take a word out ✕ or add one; an added word is also kept for the subject's next worksheets)
+// (parents only, above the paper: one tick box, the key words box on this worksheet or not)
 function wsKeyEditNode(w, id) {
-  const k = w.key_words || [];
-  return h("details", { class: "card ws-keyedit ai-narrow" }, h("summary", null, h("b", null, "🔑 Key words box"), ` (${k.length}) · add or take out words`),
-    h("p", { class: "hint" }, "These words print in a box on the worksheet as a hint. Tap ✕ to take one out."),
-    h("div", { class: "ws-keywords" }, k.map((x, i) => h("button", { type: "button", class: "pill", data: { kwdel: id + "|" + i }, "aria-label": "Take out " + x }, x + " ✕"))),
-    h("div", { class: "ws-keyadd" }, h("input", { type: "text", maxlength: "40", placeholder: "Add a word, e.g. evaporation", data: { kwbox: id } }),
-      h("button", { type: "button", class: "btn", data: { kwadd: id } }, "+ Add")));
+  if (!(w.key_words || []).length) return null;
+  return h("label", { class: "card ws-keyedit ai-narrow" }, h("input", { type: "checkbox", checked: !w.kwOff, data: { kwtick: id } }),
+    h("span", null, h("b", null, "🔑 Key words box"), " on this worksheet: the kids use these words in their answers"));
 }
-document.addEventListener("click", e => {
-  const b = e.target.closest && e.target.closest("[data-kwdel],[data-kwadd]");
+document.addEventListener("change", e => {
+  const b = e.target.closest && e.target.closest("[data-kwtick]");
   if (!b || !isDadNow()) return;
-  const [id, i] = (b.dataset.kwdel || b.dataset.kwadd).split("|"), w = aiDocs.worksheets[id];
+  const id = b.dataset.kwtick, w = aiDocs.worksheets[id];
   if (!w) return;
-  let k = (w.key_words || []).slice();
-  if (b.dataset.kwdel) k.splice(Number(i), 1);
-  else {
-    const box = document.querySelector(`[data-kwbox="${CSS.escape(id)}"]`), word = box ? box.value.trim().slice(0, 40) : "";
-    if (!word) return box && box.focus();
-    if (!k.some(x => x.toLowerCase() === word.toLowerCase())) k.push(word);
-    // (also for the subject's next worksheets: added to the parents' key words list)
-    const L = learnFor(w.kid, w.subject);
-    if (L && !wsParentWords(w.kid, w.subject).some(x => x.toLowerCase() === word.toLowerCase())) { L.words = [(L.words || "").trim(), word].filter(Boolean).join("\n").slice(0, 1500); writeData(); }
-  }
-  k = k.slice(0, 12);
-  const doc = { ...w }; if (k.length) doc.key_words = k; else delete doc.key_words;
+  const doc = { ...w }; if (b.checked) delete doc.kwOff; else doc.kwOff = true;
   aiSave("worksheets", id, doc);
-  const open = !!b.closest("details");
   render();
-  if (open) { const d = document.querySelector(".ws-keyedit"); if (d) d.open = true; }
 });
 function wsViewNode(w, id, s, isDad) {
   const done = !!w.check, canAct = isDad || !done, files = w.answers.filter(f => s.files[f]), open = answersOpen(w), show = wsAnswers && open;

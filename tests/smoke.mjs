@@ -142,18 +142,19 @@ try {
   });
   if (part !== "ok") errors.push("[part marks] " + part);
 
-  // 🔑 v191 Key words box: kept by cleanWorksheet, printed on the paper, a parent takes one out and adds one
+  // 🔑 v191 Key words box: kept by cleanWorksheet, printed on the paper, a parent's tick box takes it off
   const kbox = await run("key words box", () => {
     const w = cleanWorksheet({ title: "t", key_words: ["evaporation = gas", "condensation", "condensation", ""], questions: [{ number: 1, kind: "short_answer", prompt: "Why?", answer: "x", points: 1 }] });
     if (JSON.stringify(w.key_words) !== '["evaporation","condensation"]') return "clean: " + JSON.stringify(w.key_words);
-    const host = document.createElement("div"); host.appendChild(wsSheetNode(w, false));
-    if (!host.querySelector(".ws-keybox") || host.querySelectorAll(".ws-keybox span").length !== 2) return "no box on the paper";
+    const on = document.createElement("div"); on.appendChild(wsSheetNode(w, false));
+    if (!on.querySelector(".ws-keybox") || !on.querySelector(".ws-keybox").textContent.includes("condensation")) return "no box on the paper";
     aiDocs.worksheets.kwtest = { ...w, kid: "ex-kid1", subject: "Science", answers: [] };
     const ed = document.createElement("div"); ed.appendChild(wsKeyEditNode(aiDocs.worksheets.kwtest, "kwtest")); document.body.appendChild(ed);
-    ed.querySelector('[data-kwdel="kwtest|0"]').click();
-    ed.querySelector("[data-kwbox]").value = "boiling"; ed.querySelector("[data-kwadd]").click();
-    const k = aiDocs.worksheets.kwtest.key_words; ed.remove(); delete aiDocs.worksheets.kwtest;
-    return JSON.stringify(k) === '["condensation","boiling"]' && wsParentWords("ex-kid1", "Science").includes("boiling") ? "ok" : JSON.stringify(k);
+    const tick = ed.querySelector("[data-kwtick]"); tick.checked = false; tick.dispatchEvent(new Event("change", { bubbles: true }));
+    const off = aiDocs.worksheets.kwtest, kept = cleanWorksheet(off).kwOff === true;
+    const paper = document.createElement("div"); paper.appendChild(wsSheetNode(off, false));
+    ed.remove(); delete aiDocs.worksheets.kwtest;
+    return off.kwOff === true && kept && !paper.querySelector(".ws-keybox") ? "ok" : JSON.stringify(off);
   });
   if (kbox !== "ok") errors.push("[key words box] " + kbox);
 

@@ -319,7 +319,7 @@ function cleanWorksheet(d) {
            ...(["instant", "igcse"].includes(d.src) ? { src: d.src } : {}),
            ...(aiTxt(d.detected_topic, 80) ? { detected_topic: aiTxt(d.detected_topic, 80) } : {}), ...(aiTxt(d.detected_subject, 30) ? { detected_subject: aiTxt(d.detected_subject, 30) } : {}),
            ...(aiTxt(d.swap, 30) ? { swap: aiTxt(d.swap, 30) } : {}), ...(d.done === true ? { done: true } : {}),
-           ...(wsKeyWordsClean(d.key_words).length ? { key_words: wsKeyWordsClean(d.key_words) } : {}),   // (🔑 v191: the lesson's key words, a hint box on the paper)
+           ...(wsKeyWordsClean(d.key_words).length ? { key_words: wsKeyWordsClean(d.key_words) } : {}), ...(d.kwOff === true ? { kwOff: true } : {}),   // (🔑 v191: the lesson's key words, a hint box on the paper)
            ...(d.lang === "ar" ? { lang: "ar" } : {}) };   // (🇦🇪 written in Arabic: shown right-to-left)
 }
 // The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote?,
