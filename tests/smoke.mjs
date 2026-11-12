@@ -158,6 +158,15 @@ try {
   });
   if (kbox !== "ok") errors.push("[key words box] " + kbox);
 
+  // 🔢 v191 the checked total = the paper's total; the score = the questions' points (each at most its marks)
+  const tot = await run("same total", () => {
+    const w = { questions: [{ number: 1, points: 2 }, { number: 2, points: 3 }, { number: 3, points: 1 }] };
+    const c = { score: 9, max_score: 10, questions: [{ number: 1, correct: true, points: 1 }, { number: 2, correct: false, points: 5 }, { number: 3, correct: false, points: 0 }] };
+    wsSameTotal(w, c);
+    return c.max_score === 6 && c.score === 5 && c.questions[0].points === 2 && c.questions[1].points === 3 ? "ok" : JSON.stringify(c);
+  });
+  if (tot !== "ok") errors.push("[same total] " + tot);
+
   // 🤖 No parent OK yet: the AI helper asks first and sends nothing
   const asked = await run("AI asks for OK first", async () => {
     data.aiOk = null;

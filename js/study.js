@@ -1903,6 +1903,20 @@ function wsSureRight(w, c) {
   c.score = score;
   return c;
 }
+// 🔢 v191 the check's total is ALWAYS the worksheet's own total (the "Total: __ / N" on the paper), and the score is the sum of
+// the questions' points, each between 0 and that question's marks (a right one = full marks). Before, the AI's own sums could differ.
+function wsSameTotal(w, c) {
+  const max = wsTotal(w);
+  if (!(max > 0) || !c.questions.length) return c;
+  c.questions.forEach(q => {
+    const wq = w.questions.find(x => x.number === q.number);
+    if (!wq) return;
+    q.points = q.correct ? wq.points : Math.max(0, Math.min(wq.points, Number(q.points) || 0));
+  });
+  c.max_score = max;
+  c.score = Math.min(max, c.questions.filter(q => w.questions.some(x => x.number === q.number)).reduce((n, q) => n + q.points, 0));
+  return c;
+}
 async function checkWorksheetNow(wsId) {
   const w = aiDocs.worksheets[wsId];
   if (!w) return;
@@ -1938,7 +1952,7 @@ async function checkWorksheetNow(wsId) {
                                        ...(q.picture ? { picture: q.picture.alt || q.picture.title || q.picture.type } : {}) })), files }, "check|" + wsId);
   if (!r) { schoolFresh = true; return render(); }   // (⚠️ the reason shows under the button)
   const c = cleanCheck({ ...r, at: todayYmd() }, wsTotal(w));
-  if (c) wsSureRight(w, c);   // (✅ an answer exactly like the key is right)
+  if (c) { wsSureRight(w, c); wsSameTotal(w, c); }   // (✅ an answer exactly like the key is right · 🔢 the total = the paper's total)
   if (!c) { aiFail = { key: "check|" + wsId, text: "🤖 The check came back empty. Please try again.", at: Date.now() }; schoolFresh = true; render(); return toast("🤖 The check came back empty. Please try again.", 4000); }
   c.aiScore = c.score;
   const now = aiDocs.worksheets[wsId] || w;
