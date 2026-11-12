@@ -1287,36 +1287,6 @@ document.addEventListener("click", e => {
   else calSubj = b.dataset.calsubj;
   render();
 });
-// The week in short, e.g. "📅 This week: 12 activities · 7 done ✓ · 5 left" / "⏱️ 8h 30m of activities · ⭐ 35 points"
-// Only the person's own activities count (not lessons Dad only helps with), just like points.
-function briefHtml(who, days) {
-  const items = days ? days.flatMap(day => day.items.filter(it => it.users.includes(who)).map(it => ({ ...it, date: day.date }))) : [];
-  const done = items.filter(it => isDone(it.date, it.actId, who)).length;
-  const minutes = items.reduce((sum, it) => sum + it.end - it.start, 0);
-  const points = pointsByUser()[who] || 0;
-  const line1 = items.length
-    ? `📅 This week: <b>${items.length}</b> ${items.length === 1 ? "activity" : "activities"} · <b>${done}</b> done ✓ · <b>${items.length - done}</b> left`
-    : `📅 No activities planned this week.`;
-  const line2 = `${minutes ? `⏱️ <b>${showDuration(minutes)}</b> of activities · ` : ""}<b>${points}</b> points (${kindsText(weekKinds(who))})${stars().includes(who) ? " · 🌟 Shining Star!" : ""}`;
-  // (👨‍👩‍👧 a parent: just the activities, no points)
-  if (isParentId(who)) return `<div>${items.length ? `📅 This week: <b>${items.length}</b> ${items.length === 1 ? "activity" : "activities"}` : "📅 No activities planned this week."}</div>${minutes ? `<div>⏱️ <b>${showDuration(minutes)}</b> of activities</div>` : ""}`;
-  return `<div>${line1}</div><div>${line2}</div>${pastHtml(who)}`;
-}
-// Past weeks' points: last week's points (from the ticks we keep) and how often they were the Shining Star
-function pastHtml(who) {
-  const lastMon = fromYmd(data.points.week);
-  lastMon.setDate(lastMon.getDate() - 7);
-  const from = ymd(lastMon), to = data.points.week;
-  const parts = [];
-  if (data.points.since < to) {   // we were already keeping ticks last week
-    const k = pointKinds(who, from, to, tickLog().filter(t => t.user === who && t.date >= from && t.date < to).length * POINTS_EACH);
-    const wasStar = data.points.history.some(h => h.week === from && h.winners.some(w => w.id === who));
-    parts.push(`Last week: <b>${k.tasks + k.habits + k.fun}</b> (${kindsText(k)})${wasStar ? " 🌟" : ""}`);
-  }
-  const times = data.points.history.filter(h => h.winners.some(w => w.id === who)).length;
-  if (times) parts.push(`🌟 Shining Star ${times === 1 ? "once" : times + " times"}`);
-  return parts.length ? `<div class="brief-past">${parts.join(" · ")}</div>` : "";
-}
 
 // (The old "Everyone's plan" and "View all plan" pages are now 📅 Calendar → Everyone. These are still read by older taps.)
 let allFilter = "all";     // (older) "all" or one person

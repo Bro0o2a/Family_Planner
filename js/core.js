@@ -1500,7 +1500,6 @@ const faceAvatar = u => u && AVATAR_IDS.includes(u.avatar) ? u.avatar : "";
 const facePhoto = u => u && isParentId(u.id) && typeof u.photo === "string" && u.photo.startsWith("data:image/jpeg;base64,") ? u.photo : "";
 const faceHtml = u => facePhoto(u) ? `<img class="face-img" src="${u.photo}" alt="${safe(u.name)}">`
   : faceAvatar(u) ? `<img class="face-img face-av" src="${avatarSrc(u.avatar)}" alt="${safe(u.name)}">` : safe((u && u.emoji) || "🙂");
-const facesHtml = ids => ids.map(id => faceHtml(userById(id))).join("");
 // 🏷️ v180 (Broo2a: the faces change, names don't): "Taha, Bana" · "All kids" · "Everyone" (short names when there are many)
 function namesTag(ids) {
   const list = (ids || []).filter(exists); if (!list.length) return "";
