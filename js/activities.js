@@ -505,11 +505,11 @@ function deleteRoutine(id) {
   changed();
 }
 
-function deleteActivity(id, isFixedOne) {
+function deleteActivity(id, isFixedOne, asked) {
   const list = isFixedOne ? data.fixed : data.flexible;
   const act = list.find(a => a.id === id);
   if (!act || !canEdit(act)) return;
-  if (!confirm(`Delete “${act.name}”?`)) return;
+  if (!asked && !confirm(`Delete “${act.name}”?`)) return;   // (⚡ the card's Quick edit asked already)
   // 📅 Its items on the days that are gone (and today) stay as history: they remember its name, people and type
   // (today's ones that haven't started and aren't ticked are taken out when the week is planned again, see makePlan)
   if (hasPlan()) Object.entries(data.plan.dates).forEach(([ds, day]) => ds <= todayYmd() && day.items.forEach(it => {

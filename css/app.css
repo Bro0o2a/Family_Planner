@@ -3378,3 +3378,14 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .sd-why.up { background: #e7f7ec; } .sd-why.up > b { color: #15803d; }
 .sd-why.down { background: #fdecec; } .sd-why.down > b { color: #b91c1c; }
 .sd-why .sd-list { margin: 0; }
+
+/* ⚡ v191 Quick edit on the big activity card (parents) */
+.qe-bar { margin: 10px 18px 6px; padding: 10px 12px; border-radius: 16px; background: #fff7ec; border: 1px solid #f3dcbc; text-align: center; }
+.qe-bar > b { display: block; font-size: 14px; margin-bottom: 6px; }
+.k-card .qe-bar .btnrow, .qe-bar .btnrow { justify-content: center; flex-wrap: wrap; gap: 6px; background: none; box-shadow: none; padding: 0; margin: 0; position: static; bottom: auto; }
+.qe-ask { margin-top: 8px; padding: 8px 10px; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca; }
+.qe-ask b { display: block; margin-bottom: 6px; color: var(--danger, #b91c1c); }
+/* (with Quick edit, the 🏫 one-day box keeps only its note, "As usual" and the times; its own two buttons are in Quick edit) */
+.qe-on .fx-today [data-fxoff], .qe-on .fx-today [data-fxtimes] { display: none; }
+.qe-on .kc2-when .kc2-pen, .qe-on .kc2-top .kc2-pen { display: none; }
+.qe-on .fx-today > b, .qe-on .fx-today .fx-days { display: none; }
