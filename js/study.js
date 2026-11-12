@@ -786,11 +786,6 @@ function curMatchOf(kid, sid, title) {
   if (!m || !m.list.length) return undefined;
   return m.list.find(t => curSame(title, t.title)) || null;
 }
-// The small tag on a topic (parents): "🌍 ✅ In the curriculum" · "🌍 ⚠️ Not in the curriculum" (nothing before the official list is loaded)
-function curTagHtml(kid, sid, title) {
-  const x = curMatchOf(kid, sid, title);
-  return x === undefined ? "" : x ? `<small class="cur-tag ok">🌍 ✅ In the curriculum${x.term ? ` · ${safe(x.term)}` : ""}</small>` : `<small class="cur-tag no">🌍 ⚠️ Not in the curriculum</small>`;
-}
 // 🌍 The brief: ✅ done and matched · ⏭️ the next lesson · ⚠️ the risks (behind / weak) · 🔜 coming later · ➕ extra (not in the curriculum)
 function curBriefHtml(kid, f) {
   const s = schoolOf(kid), m = s.map[f.id];

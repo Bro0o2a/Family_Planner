@@ -159,10 +159,6 @@ function scoreRingHtml(n, color, target) {
 }
 // 🎯 Beat yourself: last week's final score (kept in points.reach) and the best week ever (before this week)
 function lastWeekScore(id) { const r = data.points.reach[`${addDaysYmd(data.points.week, -7)}|${id}`]; return r && typeof r.s === "number" && r.s > 0 ? r.s : null; }
-function bestWeekScore(id) {
-  const all = Object.entries(data.points.reach).filter(([k, r]) => k.endsWith("|" + id) && k.slice(0, 10) < data.points.week && r && typeof r.s === "number").map(([, r]) => r.s);
-  return all.length ? Math.max(...all) : null;
-}
 // "Today 3 of 5 done · next Math 4:00" · "All finished ✅" · "Nothing today"
 function kidTodayLine(kid) {
   const date = todayYmd(), now = dubaiMinutes(), items = todayItems(kid), done = items.filter(x => isDone(date, x.id, kid)).length;
@@ -246,26 +242,6 @@ function familyRowHtml() {
 }
 let hubOpen = "";   // which big button is open (kept when the home redraws)
 document.addEventListener("toggle", e => { const d = e.target; if (d && d.dataset && d.dataset.hubg) { if (d.open) hubOpen = d.dataset.hubg; else if (hubOpen === d.dataset.hubg) hubOpen = ""; } }, true);
-// ✏️ Add / Plan: Add activities · ✨ Plan my week · 📌 One-day event · 🔄 Make a new plan
-function addPlanMenuHtml() {
-  return [{ go: "add", emoji: "✏️", label: "Add activities", sub: "Yours and everyone's" },
-    ...(isParentId(me) ? [{ plan: true, emoji: "✨", label: "Plan my week", sub: "Plans for everyone", cls: "primary" }] : []),
-    { attr: "data-onedaynew", emoji: "📌", label: "One-day event", sub: "Only on one date" },
-    ...(hasPlan() ? [{ attr: "data-newplan", emoji: "🔄", label: "Make a new plan", sub: "From today, ticks stay" }] : [])].map(tileHtml).join("");
-}
-// ☰ More (a parent): 📄 Family summary · 📊 How are my kids doing? · 🧹 Home duties · 📔 My day · 👤 My profile · 💾 Backup ·
-// 🔒 Your privacy · 👋 Show the tour · ✏️ Edit my home (and 🏆 Points, 👀 Your kids' work today: nothing that was on the home is lost)
-function parentMoreHtml() {
-  return `${fsButtonsHtml()}` + [
-    { attr: "data-report", emoji: "📊", label: "How are my kids doing?", sub: "All the kids" },
-    ...(feat("chores") ? [{ extra: "chores", emoji: "🧹", label: "Home duties", sub: "Jobs at home" }] : []),
-    ...(feat("diary") ? [{ attr: 'data-dyopen=""', emoji: "📔", label: "My day", sub: "How do you feel today?" }] : []),
-    { attr: 'data-go="kidswork"', emoji: "👀", label: "Your kids' work today", sub: "Live, as they do it" },
-    { attr: 'data-go="points"', emoji: "🏆", label: "Points", sub: "The kids' week" },
-    { ...PROFILE_TILE, sub: "My settings, my picture" },
-    ...(isParentId(me) ? [{ attr: "data-backup", emoji: "💾", label: "Backup", sub: "Save or load the family's data" }] : []),
-    PRIVACY_TILE, TOUR_TILE, { attr: "data-setupopen", emoji: "✏️", label: "Edit my home", sub: "Features on / off" }].map(tileHtml).join("");
-}
 document.addEventListener("click", e => {
   const b = e.target.closest && e.target.closest("[data-needs], [data-homeaddplan], [data-kidpage], [data-kidreport]");
   if (!b) return;
@@ -526,10 +502,6 @@ document.addEventListener("click", e => {
 // 🚪 Sign out at its bottom) · 🔒 Your privacy · 👋 Show the tour. (✏️ Add activities and 🖨️ Print are on 📅 Calendar.)
 function moreTilesHtml() {
   return [{ ...PROFILE_TILE, cls: "primary more-profile", sub: hasSpark(me) ? "My settings, my Spark, my school" : "My settings, my picture" }, PRIVACY_TILE, TOUR_TILE].map(tileHtml).join("");
-}
-// 📅 Calendar's small buttons: ✏️ Add activities (everyone) · 🖨️ Schedules to tick (the parent who plans)
-function calToolsHtml() {
-  return `<button class="pill" data-go="add">✏️ Add activities</button>${isParentId(me) ? `<button class="pill" data-printmenu>🖨️ Schedules to tick</button>` : ""}`;
 }
 // 📋 Today: my next activities (not done yet, up to 5) with big ✅ ticks; "See all" opens 📅 Calendar
 function todayItems(who) {

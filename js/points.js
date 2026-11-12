@@ -138,8 +138,6 @@ function pointPop(n, color) {
   setTimeout(() => el.remove(), 1500);
 }
 
-// ---------- 🎁 A parent's weekly prize (Sunday evening): +20 once a week, when they did 70% or more ----------
-const PRIZE_POINTS = 20, PRIZE_PCT = 70;
 // The day after this week's Sunday (so "this week" = from data.points.week up to, not including, this day)
 function weekEnd() { const dt = fromYmd(data.points.week); dt.setDate(dt.getDate() + 7); return ymd(dt); }
 
@@ -439,28 +437,6 @@ function studyTableHtml(kid, only) {
     <p class="st-hist-title">📅 The last 4 weeks (📚 Study /100)</p>
     <div class="st-wrap"><table class="st-table st-hist"><thead><tr><th>Subject</th>${weeks.map(w => { const a = fromYmd(w.wk); return `<th title="Week of ${safe(hallWeekRange(w.wk))}">${a.getDate()} ${MONTHS[a.getMonth()]}</th>`; }).join("")}</tr></thead>
     <tbody>${names.map(n => `<tr><th>${safe(n)}</th>${weeks.map(w => cell(w, n)).join("")}</tr>`).join("")}${!only && names.length > 1 ? `<tr><th>All subjects</th>${weeks.map(w => cell(w, null)).join("")}</tr>` : ""}</tbody></table></div>`;
-}
-// 📚 On the 🎒 subject page (and 🎒 My school / 📚 STUDY): today's sessions (and earlier ones without a result):
-// 📚 Start session · 📝 Open my worksheet · 🙋 I'm done · ➕ More questions (while it lasts) · ✅ its result · 🔁 swapped
-function sessionCardsHtml(kid, f) {
-  // (📅 the last 7 days, today included)
-  const today = todayYmd(), list = sessionsIn(kid, recentDates()).filter(x => x.mode === "sole" && x.date <= today && (!x.result || x.date === today)
-    && (!f || x.subjectId === f.id || sameSubject(x.subject, f.name) || (x.needsPick && x.options.some(o => o.id === f.id)))   // (📚 not picked yet: on each allowed subject)
-    && !(f && x.date === today && !x.ended && !sessionWsIds(x.key).length && !x.needsPick));   // (the subject page: today's 📚 Start session is the big button)
-  return list.map(x => {
-    // 📚 Several subjects, none picked yet: "Which subject today?" (a pick starts the session)
-    if (x.needsPick && !sessionWsIds(x.key).length && !x.ended) return `<div class="card sess-card"><h2>📚 ${safe(x.act.name)} · ${x.minutes} min</h2>
-      <p class="hint">${x.date === today ? "Today" : dayLong(x.date)} · ${clock(x.start, true)}–${clock(x.end, true)}</p>${subjectPickHtml(x, x.date === today)}</div>`;
-    const ids = sessionWsIds(x.key), wsId = ids[ids.length - 1], w = wsId && aiDocs.worksheets[wsId], tag = sessionTagText(x);
-    const swap = !x.result && ids.map(id => aiDocs.worksheets[id].swap).find(Boolean), live = x.date === today && !x.ended;
-    const more = w && live && (w.answers.length || w.check || w.done);
-    return `<div class="card sess-card"><h2>📚 ${f ? "Study session" : safe(x.subject)} · ${x.minutes} min${tag ? ` <span class="sess-res">${safe(tag)}</span>` : ""}</h2>
-      <p class="hint">${x.date === today ? "Today" : dayLong(x.date)} ·${clock(x.start, true)}–${clock(x.end, true)}${swap ? ` · 🔁 swapped to ${safe(swap)}` : ""}</p>
-      <div class="btnrow">${!w ? `<button class="primary" data-sessstart="${safe(x.key)}" data-aiwait="session|${safe(x.key)}">📚 Start session</button>`
-        : `<button class="${more ? "" : "primary"}" data-aiopen="worksheet|${safe(wsId)}">📝 Open my worksheet</button>${
-          more ? `<button class="primary" data-sessmore="${safe(x.key)}" data-aiwait="more|${safe(x.key)}">➕ More questions</button>`
-          : live && !w.check ? `<button data-sessdone="${safe(wsId)}">🙋 I'm done</button>` : ""}`}</div></div>`;
-  }).join("");
 }
 // ⚽ ACTIVITY sub-score (0–100). FOR NOW: % of this week's planned activity items (so far) that are ticked. (These rules will change later.)
 function activityScore(id) { return tallyPct(typeTally(id, "activity")); }

@@ -730,8 +730,6 @@ function briefNode(kid, b) {
       items("💪", "Strong", x.strong_points), items("🎯", "To work on", x.weak_points), items("➡️", "Next steps", x.next_steps))),
     b.home_tips.length ? h("section", { class: "bf-sub bf-home" }, h("h3", null, "Home tips"), h("ul", null, b.home_tips.map(t => h("li", null, t)))) : null);
 }
-// 🎚️ The worksheet level on a subject tile: "Easy" · "Normal" · "Hard" (set by a parent inside the subject)
-const wsLevelTag = (kid, subject) => { const k = wsPickOf(kid, subject); return `<span class="sc-wslv sc-wslv-${k}">Worksheet level: ${{ easy: "Easy", normal: "Normal", hard: "Hard" }[k]}</span>`; };
 // 🧸 v159: a 3D icon for each subject (icons/3d)
 const subjectIcon3d = n => [[/math/i, "practice"], [/science|physics|chem|bio/i, "research"], [/english|phonics/i, "class"], [/arabic|french|urdu/i, "lesson"],
   [/islam|quran|religio/i, "read"], [/ssa|social|humanit|history|geo/i, "milestone"], [/art|design/i, "palette"], [/music/i, "music"], [/comput|ict|coding/i, "focus"]].find(([re]) => re.test(n || ""))?.[1] || "homework";
@@ -983,23 +981,6 @@ const WS_PURPOSE = { preview: ["📖", "Next week preview"], revision: ["📝", 
 // A worksheet row: its status (✅ the score and the short note), then 📂 🖨️ 📸 ✅ 🔑
 // "👨‍👩‍👧 from Bro2a": a worksheet / explanation a parent made for the kid (it's in the kid's lists too)
 const madeByParent = d => d.by && d.by !== d.kid && exists(d.by) && isParentId(d.by) ? `👨‍👩‍👧 from ${userById(d.by).name}` : "";
-function wsRowNode(s, w) {
-  const files = w.answers.filter(x => s.files[x]), done = !!w.check, canAct = isDadNow() || !done, [emoji, label] = WS_PURPOSE[w.purpose] || ["📝", ""];
-  const status = done ? `${num(w.check.score)}/${num(w.check.max_score)} · ${wsPct(w)}%` : files.length ? "⏳ Waiting for check" : "Not done";
-  const note = done ? w.check.dadNote || w.check.overall_note : "";
-  return h("li", { class: "sc-wsrow" },
-    h("button", { class: "bd-file", data: { aiopen: "worksheet|" + w.id } }, h("span", { class: "e" }, emoji),
-      h("span", { class: "what" }, w.title, h("small", null, [label, partOf(w, s), shortDate(w.date), madeByParent(w)].filter(Boolean).join(" · ")))),
-    h("div", { class: "sc-wsstatus" }, h("span", { class: "ai-status " + (done ? "lv-" + pctLevel(wsPct(w)) : files.length ? "up" : "") }, status)),
-    note ? h("p", { class: "sc-wsnote" }, note.length > 140 ? note.slice(0, 137) + "…" : note) : null,
-    h("div", { class: "ai-btns sc-wsbtns" },
-      h("button", { data: { aiopen: "worksheet|" + w.id } }, "📂 Open"),
-      h("button", { data: { wsrow: "pdf|" + w.id } }, "📄 PDF"),   // (📄 worksheets are PDF only: never with the answers)
-      canAct ? h("button", { data: { wsrow: "upload|" + w.id } }, "📸 Upload my answers") : null,
-      canAct && files.length ? h("button", { class: "primary", data: { wsrow: "check|" + w.id, aiwait: "check|" + w.id } }, done ? "🤖 Check again" : "✅ Check now") : null,
-      h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Show answers" : "🔒 Show answers")),
-    aiFailFor("check|" + w.id) ? h("p", { class: "ai-failnote" }, aiFailFor("check|" + w.id)) : null);
-}
 function wsRowAction(v) {
   const [act, id] = v.split("|"), w = aiDocs.worksheets[id];
   if (!w) return;
