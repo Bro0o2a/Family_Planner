@@ -188,13 +188,17 @@ function compareHtml(kid, s, f, parent) {
       <td>${p.taught ? `✅${p.when ? ` <small>${dayMon(p.when)}</small>` : ""}` : p.unitTaught ? `🟠 <small>unit started</small>` : `❌ <small>not yet</small>`}</td>
       <td>${p.n ? `${p.n} <small>${p.n === 1 ? "sheet" : "sheets"}</small>` : `<small>none</small>`}</td><td>${res(p)}</td>
       <td><input type="checkbox" data-stcmptick="${safe(encodeURIComponent(p.title))}" ${on ? "checked" : ""} aria-label="Pick ${safe(p.title)}"></td></tr>`; };
-  const unit = (u, i) => { const t = u.parts.filter(p => p.taught).length;
+  const pc = (n, of) => of ? Math.round(n / of * 100) : 0;
+  const scoreOf = list => { const r = list.filter(p => p.results.length); return r.length ? meanPct(r.map(p => meanPct(p.results.slice(-3).map(x => x.pct)))) : null; };
+  const unit = (u, i) => { const t = u.parts.filter(p => p.taught).length, pr = u.parts.filter(p => p.n).length, sc = scoreOf(u.parts);
     return `<details class="st-cmp-unit" ${u.now || u.parts.some(p => stCmpPick.includes(p.title)) ? "open" : ""}><summary><b>Unit ${i + 1}: ${safe(u.title)}</b>
-      <small>${[u.term, `taught ${t} of ${u.parts.length}`, u.now ? "📍 the class is here now" : ""].filter(Boolean).map(safe).join(" · ")}</small></summary>
+      <small>${[u.term, `✅ taught ${t} of ${u.parts.length} (${pc(t, u.parts.length)}%)`, `✏️ practised ${pc(pr, u.parts.length)}%`, sc != null ? `🎯 score ${sc}%` : "", u.now ? "📍 the class is here now" : ""].filter(Boolean).map(safe).join(" · ")}</small></summary>
       <div class="st-cmp-wrap"><table class="st-cmp-t"><thead><tr><th>Official topic</th><th>School</th><th>Practised</th><th>Result</th><th>Pick</th></tr></thead>
       <tbody>${u.parts.map(row).join("")}</tbody></table></div></details>`; };
   return `<div class="card bd-card st-cmp"><h2>📊 ${safe(f.name)}: official curriculum vs school</h2>
-    <p class="st-bench"><b>📖 ${all.length} official topics</b> · <b>✅ ${taught} taught at school</b> · <b>✏️ ${practised} practised</b> · <b>❌ ${notYet} not yet</b></p>
+    <p class="st-bench"><b>📖 ${all.length} official topics</b> · <b>✅ ${taught} taught at school (${pc(taught, all.length)}%)</b> · <b>✏️ ${practised} practised (${pc(practised, all.length)}%)</b> · <b>❌ ${notYet} not yet (${pc(notYet, all.length)}%)</b>${scoreOf(all) != null ? ` · <b>🎯 average score ${scoreOf(all)}%</b>` : ""}</p>
+    <div class="cur-bar st-cmp-bar" role="img" aria-label="${pc(taught, all.length)}% taught at school"><i style="width:${pc(taught, all.length)}%"></i></div>
+    <p class="hint">${pc(taught, all.length)}% of this year's ${safe(f.name)} has been taught at school so far.</p>
     ${noParts && parent ? `<p class="hint">This list only has the big units. <button class="linkbtn" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🔄 Get the small topics of each unit</button></p>` : ""}
     <div class="st-cmp-units">${units.map(unit).join("")}</div>
     ${extra.length ? `<details class="st-cmp-unit other"><summary><b>School topics not in the official list</b> <small>${extra.length}</small></summary>
