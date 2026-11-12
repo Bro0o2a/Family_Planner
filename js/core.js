@@ -1296,7 +1296,8 @@ function cleanSchool(s) {
     //    (older data: the 🤖 /topics lists kept by subject name)
     c.map = {};
     if (k.map && typeof k.map === "object" && !Array.isArray(k.map)) Object.entries(k.map).forEach(([sid, x]) => {
-      if (okKey(sid) && x && Array.isArray(x.list)) c.map[sid] = { at: txt(x.at, 40), list: x.list.filter(t => t && txt(t.title, 80)).slice(0, 30).map(t => ({ title: txt(t.title, 80), term: txt(t.term, 20), now: t.now === true })) };
+      if (okKey(sid) && x && Array.isArray(x.list)) c.map[sid] = { at: txt(x.at, 40), list: x.list.filter(t => t && txt(t.title, 80)).slice(0, 30).map(t => ({ title: txt(t.title, 80), term: txt(t.term, 20), now: t.now === true,
+        ...(Array.isArray(t.parts) && t.parts.length ? { parts: t.parts.map(x => txt(x, 80)).filter(Boolean).slice(0, 8) } : {}) })) };   // (📊 v192 parts = the unit's small topics)
     });
     else Object.entries(c.topics).forEach(([name, x]) => { const sid = subjectIdIn(c, name); if (sid && !c.map[sid]) c.map[sid] = { at: x.at, list: x.list }; });
     // 📏 The benchmark per subject (parents): subject id → { at, covered, not_yet, ahead, note }
