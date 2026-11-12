@@ -419,7 +419,7 @@ function weekHtml(days, opts) {
   const bars = travelBars(opts.only || null, dates).map(x => ({ ...x, html: travelBarHtml(x, opts) }));
   // opts.whole = always all the days, without the Day / Week switch (View all plan → "🗓️ Full week")
   return (opts.whole ? "" : navHtml(dates)) + weekRowsHtml(dayParts, d => { const ds = dates[d];
-    return `<div class="k-dayname wd-${weekdayOf(ds)}" ${ds === today ? `title="Today"` : ""}><span class="k-daynum">${fromYmd(ds).getDate()}</span>${ds === today ? "Today · " : ""}${dayHead(ds)}</div>${examTagsHtml(ds, opts.only || null)}${
+    return `<div class="k-dayname wd-${weekdayOf(ds)}" ${ds === today ? `title="Today"` : ""}><span class="k-daynum">${fromYmd(ds).getDate()}</span>${ds === today ? "Today · " : ""}${dayHead(ds)}</div>${examTagsHtml(ds, opts.only || null)}${countdownHtml(ds, opts.only || null)}${
       eventsOn(ds, opts.only || null).filter(e => !e.time).map(e => eventHtml(e, opts.only || null)).join("")}${
       pactsOn(ds, opts.only || null).filter(a => a.type !== "travel" && !a.from).map(a => pactDayHtml(a, ds, opts)).join("")}`; }, opts.whole || wholeWeek, bars, dates);
 }

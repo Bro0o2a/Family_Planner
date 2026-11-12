@@ -1136,6 +1136,75 @@ async function maybeMakeRevisions() {
     if (made && screen === "school") render();
   } finally { revMaking = false; }
 }
+// ---------- 📌 v193 COMING UP: school dates of today and tomorrow (with their note: "bring headphones"), and tests / assessments up
+// to 3 days ahead, on the kid's home and the parents' home · a 🔔 News reminder the day before · ⏳ countdown on the calendar ·
+// ✏️ a practice test for a test, quiz, exam or assessment (CAT4 too) ----------
+const isTestEvent = e => TEST_WORDS.test(`${e.title} ${e.note || ""}`) || /\bcat ?4\b|\bmock\b|\bcheck\b/i.test(e.title);
+function comingUp(kid) {
+  const d = todayYmd(), s = data.school[kid];
+  if (!s || !exists(kid)) return [];
+  return Object.entries(s.events || {}).map(([id, e]) => ({ id, kid, ...e, days: Math.round((fromYmd(e.date) - fromYmd(d)) / 864e5) }))
+    .filter(e => e.days >= 0 && (e.days <= 1 || (e.days <= 3 && isTestEvent(e))))
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || ""));
+}
+const whenWord = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : `In ${n} days`;
+function comingLineHtml(e, showKid) {
+  const ws = e.trial && aiDocs.worksheets[e.trial];
+  const btn = !isTestEvent(e) ? "" : ws ? `<button class="pill" data-evopen="${safe(e.kid)}|${safe(e.trial)}">📝 Open the practice test</button>`
+    : `<button class="pill" data-evtrial="${safe(e.kid)}|${safe(e.id)}" data-aiwait="trial|${safe(e.id)}">✏️ Make a practice test</button>`;
+  return `<li class="cu-line${e.days === 0 ? " now" : ""}"><b>${whenWord(e.days)}${e.time ? ` ${clock(toMin(e.time))}` : ""} · ${safe(e.title)}</b>${showKid ? ` <small>(${safe(kidNameOf(e.kid))})</small>` : ""}
+    ${e.note ? `<span class="cu-note">👉 ${safe(e.note)}</span>` : ""}${btn ? `<div class="btnrow">${btn}</div>` : ""}</li>`;
+}
+function comingCardHtml(list, showKid) {
+  return list.length ? `<div class="card cu-card"><h3>📌 Coming up from school</h3><ul>${list.map(e => comingLineHtml(e, showKid)).join("")}</ul></div>` : "";
+}
+// ⏳ On the calendar: the days before a test say how many days are left
+function countdownHtml(date, who) {
+  if (date < todayYmd()) return "";
+  return Object.entries(data.school).filter(([kid]) => exists(kid) && (!who || who === kid || isParentId(who)))
+    .flatMap(([kid, s]) => Object.values(s.events || {}).filter(e => isTestEvent(e) && e.date > date && e.date <= addDaysYmd(date, 3)).map(e => ({ kid, ...e })))
+    .map(e => { const n = Math.round((fromYmd(e.date) - fromYmd(date)) / 864e5), u = userById(e.kid);
+      return `<div class="k-countdown" title="${safe(`${e.title} (${u.name})`)}">⏳ ${who === e.kid ? "" : safe(u.emoji) + " "}${n === 1 ? `${safe(e.title)} tomorrow` : `${safe(e.title)} in ${n} days`}</div>`; }).join("");
+}
+// ✏️ The practice test: the subject in its title (its school topics of the last 3 weeks), CAT4 = the 4 reasoning parts, else the title itself
+async function makeTrial(kid, id) {
+  const s = schoolOf(kid), e = s.events && s.events[id];
+  if (!e) return;
+  const subs = subjectList(s, true), text = `${e.title} ${e.note || ""}`;
+  const f = subs.find(x => new RegExp(`\\b${x.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(text));
+  const cat4 = /\bcat ?4\b/i.test(text);
+  const subject = f ? f.name : cat4 ? "Reasoning" : e.title.slice(0, 30);
+  const topics = f ? (testTopics(s, f, e.date).length ? testTopics(s, f, e.date) : [e.title])
+    : cat4 ? ["Verbal reasoning", "Non-verbal reasoning", "Quantitative reasoning", "Spatial reasoning"] : [e.title];
+  const hint = `This is a practice test for "${e.title}"${e.note ? ` (${e.note})` : ""} on ${shortDate(e.date)}. Make it look and feel like the real test: the same kinds of questions, mixed difficulty, short clear instructions.`
+    + (cat4 ? " CAT4 = the Cognitive Abilities Test: verbal, non-verbal, quantitative and spatial reasoning, all multiple choice, no school knowledge needed." : "");
+  const wsId = await newWorksheet(kid, subject, topics, WS_COUNT, "revision", "trial|" + id, { title: `📝 ${e.title} practice test`, part: `📝 ${e.title} (${dayMon(e.date)})`, hint }, true);
+  if (!wsId) return;
+  schoolFor(kid).events[id].trial = wsId;
+  writeData();
+  render();
+  toast("📝 The practice test is ready! 🖨️ Print or 📄 PDF.", 3500);
+}
+document.addEventListener("click", ev => {
+  const o = ev.target.closest && ev.target.closest("[data-evopen]");
+  if (o) { const [kid, id] = o.dataset.evopen.split("|"); if (screen !== "school" || schoolKid !== kid) openSchool(kid); return openAiDoc("worksheet", id); }
+  const b = ev.target.closest && ev.target.closest("[data-evtrial]");
+  if (!b) return;
+  const [kid, id] = b.dataset.evtrial.split("|");
+  makeTrial(kid, id);
+});
+// 🔔 The day before (a parent's device, once per date): a News line for everyone: "📌 Tomorrow: CAT4 Assessment (Bana) · bring …"
+function maybeTellEvents() {
+  if (!isParentDevice() || hasDraft()) return;
+  const tomorrow = addDaysYmd(todayYmd(), 1), items = [];
+  kidsList().forEach(k => { const s = data.school[k.id];
+    Object.values((s && s.events) || {}).forEach(e => { if (e.date !== tomorrow || e.told) return;
+      e.told = true;
+      items.push(newsItem("school", `📌 Tomorrow: ${e.title} (${kidNameOf(k.id)})${e.note ? ` · ${e.note}` : ""}${isTestEvent(e) ? " · ✏️ a practice test is on the home page" : ""}`, "", k.id)); }); });
+  if (!items.length) return;
+  writeData();
+  addNews(items);
+}
 // 📋 v191 MISSING TOPICS: once the school week is over (Friday from 3 PM, Dubai), a note for the parents per kid: the newsletter's
 // topics of that week the kid hasn't practised yet, and the ones still 🔴 weak. Kept in the kid's 🎒 School notes, and on the
 // parents' home until they tap OK.

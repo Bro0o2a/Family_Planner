@@ -78,9 +78,18 @@ function familyOrder(list) {
 //  and a parent can change it for one night (data.bedOn). Nothing is planned for that kid after it. null = no bedtime set.
 const BED_TIME = /^(1[89]|2[0-3]):[0-5]\d$/;   // 6 PM … 11:45 PM
 const isWeekendNight = wd => wd === 4 || wd === 5;   // (0 = Monday: Friday and Saturday nights)
+// 🌙 v193: a "Bedtime routine" (or any routine named bed / sleep) counts as bedtime too: nothing for that person after it ends
+const isBedRoutine = r => /\b(bed|sleep)/i.test(String(r && r.name || ""));
+function routineBed(person, wd) {
+  const ends = (data && Array.isArray(data.routines) ? data.routines : [])
+    .filter(r => isBedRoutine(r) && Array.isArray(r.days) && r.days.includes(wd) && (r.users || []).includes(person) && r.start)
+    .map(r => toMin(r.start) + (Number(r.duration) || 0)).filter(m => m > 12 * 60 && m <= 24 * 60);   // (an evening routine only)
+  return ends.length ? Math.min(...ends) : null;
+}
 function bedUsual(person, wd) {
   const u = data && Array.isArray(data.users) && data.users.find(x => x.id === person);
-  return u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null;
+  const own = u && u.bed ? toMin(isWeekendNight(wd) ? u.bed.we : u.bed.wd) : null, rt = routineBed(person, wd);
+  return own == null ? rt : rt == null ? own : Math.min(own, rt);
 }
 // 2️⃣ v181: an activity's 2nd session on the same date has its own id "actId~2" in the plan (own ✅ tick, own study session and
 // worksheet); baseActId gives the activity's own id back (for its name, people, length …)
@@ -1242,7 +1251,8 @@ function cleanSchool(s) {
                          weak_points: strs(x.weak_points, 5, 150), next_steps: strs(x.next_steps, 5, 300) })),
           home_tips: strs(bf.home_tips, 6, 400) } : null;
     c.events = list(k.events, e => !txt(e.title, 80) || !isDate(e.date) ? null
-      : { date: e.date, time: isHm(e.time) ? e.time : "", title: txt(e.title, 80), note: txt(e.note, 300), ...(okKey(String(e.by || "")) ? { by: e.by } : {}) });
+      : { date: e.date, time: isHm(e.time) ? e.time : "", title: txt(e.title, 80), note: txt(e.note, 300), ...(okKey(String(e.by || "")) ? { by: e.by } : {}),
+          ...(okKey(String(e.trial || "")) ? { trial: e.trial } : {}), ...(e.told === true ? { told: true } : {}) });   // (📌 v193 practice test · 🔔 told the day before)
     c.requests = list(k.requests, q => !["work", "practice"].includes(q.kind) || !txt(q.subject, 30) || !isDate(q.date) ? null
       : { kind: q.kind, subject: txt(q.subject, 30), date: q.date, ...(okKey(String(q.by || "")) ? { by: q.by } : {}),
           ...(q.kind === "work" ? { files: (Array.isArray(q.files) ? q.files : []).filter(x => okKey(String(x || ""))).slice(0, 20) }
