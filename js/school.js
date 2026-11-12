@@ -807,7 +807,7 @@ function schoolSubjectHtml(s, isDad, u) {
   if (editing) html += subjectFormHtml(f);
   // ⚙️ School coach off: just the files and the older records (no 🤖 worksheets, %, strong / weak points)
   if (!feat("coach")) return html + subjectFilesHtml(s, f, `📁 ${u.name}'s uploaded files`) + subjectOlderHtml(s, f, c, isDad);
-  if (stSub !== f.id) { stSub = f.id; stSec = null; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; }
+  if (stSub !== f.id) { stSub = f.id; stSec = null; stPick = []; stFilter = "all"; stOpen = null; stWs = false; stFiles = false; stMapPick = []; stCmp = false; stCmpPick = []; }
   html += levelBannerHtml();
   // 🎒 v154: the subject is a short summary + BIG BUTTONS; a tap opens ONLY that part (stSec). "⬅️ All about Math" (or ⬅️ Back) → the buttons.
   const all = wsOf(schoolKid, f.name), todo = all.filter(w => !w.check).length, sum = kidSubjectSummary(schoolKid, f);

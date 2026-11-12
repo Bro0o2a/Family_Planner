@@ -3396,3 +3396,23 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .qe-time input { font: inherit; padding: 4px 6px; border-radius: 10px; border: 1px solid #e5d3bb; }
 .qe-chips .pill.on { background: var(--ink, #4a3426); color: #fff; }
 .qe-num b { min-width: 28px; font-size: 20px; text-align: center; }
+
+/* 📊 v192 Compare: the official curriculum unit by unit vs the school */
+.st-cmp-row { margin: 0 0 10px; }
+.st-cmp-units { display: grid; gap: 8px; margin: 10px 0; }
+.st-cmp-unit { border: 1px solid var(--line, #e5e1d8); border-radius: 14px; padding: 8px 10px; background: var(--card, #fff); }
+.st-cmp-unit > summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.st-cmp-unit > summary small { color: var(--muted, #6b6b6b); }
+.st-cmp-unit.other { opacity: .9; }
+.st-cmp-wrap { overflow-x: auto; margin-top: 8px; }
+.st-cmp-t { width: 100%; border-collapse: collapse; font-size: .92em; }
+.st-cmp-t th { text-align: left; font-size: .8em; color: var(--muted, #6b6b6b); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--line, #e5e1d8); }
+.st-cmp-t td { padding: 7px 6px; border-bottom: 1px solid var(--line, #eee); vertical-align: middle; }
+.st-cmp-t td:first-child { min-width: 9em; }
+.st-cmp-t td small { color: var(--muted, #6b6b6b); white-space: nowrap; }
+.st-cmp-t tr.on td { background: color-mix(in srgb, var(--accent, #f4b400) 14%, transparent); }
+.st-cmp-t input[type=checkbox] { width: 22px; height: 22px; }
+.st-cmp-sum { background: color-mix(in srgb, var(--danger, #e05a47) 10%, var(--card, #fff)); border: 1px solid color-mix(in srgb, var(--danger, #e05a47) 35%, transparent); border-radius: 14px; padding: 10px 12px; margin: 10px 0; }
+.st-cmp-sum.ok { background: color-mix(in srgb, var(--ok, #2fa36b) 10%, var(--card, #fff)); border-color: color-mix(in srgb, var(--ok, #2fa36b) 35%, transparent); }
+.st-cmp-sum p { margin: 0 0 6px; }
+.st-cmp-sum ul { margin: 0 0 8px 18px; padding: 0; }

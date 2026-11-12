@@ -17,7 +17,7 @@ const topicShort = title => { const m = String(title || "").match(/^(.{2,40}?)\s
 const lowerT = t => String(t || "").trim().toLowerCase();
 const meanPct = list => list.length ? Math.round(list.reduce((n, x) => n + x, 0) / list.length) : null;   // (the average of some %)
 const dayMon = d => { const x = fromYmd(String(d).slice(0, 10)); return `${x.getDate()} ${MONTHS[x.getMonth()]}`; };
-let stSub = null, stPick = [], stFilter = "all", stOpen = null, stWs = false, stFiles = false, stMapPick = [];   // (the subject page)
+let stSub = null, stPick = [], stFilter = "all", stOpen = null, stWs = false, stFiles = false, stMapPick = [], stCmp = false, stCmpPick = [];   // (the subject page · 📊 v192 Compare view + its ticked topics)
 // A subject's school topics, newest first: [{ id, sub, title, note, added, files }]
 function topicsOf(s, sid) {
   return Object.entries(s.curr || {}).filter(([, t]) => t.sub === sid).map(([id, t]) => ({ id, ...t }))
@@ -131,13 +131,104 @@ function topicsCardHtml(s, f, parent) {
           g.unit ? g.unit.term ? ` · ${safe(g.unit.term)}` : "" : " · not in the official curriculum"}</small></span></summary>
         <ul class="st-list">${g.list.map(rowHtml).join("")}</ul></details>`; }).join("");
   }
-  return `${leftBehindHtml(schoolKid, s, f, all)}<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
+  const cmpBtn = `<div class="btnrow st-cmp-row"><button class="pill ${stCmp ? "on" : ""}" data-stcmp aria-pressed="${stCmp}">📊 ${stCmp ? "Back to my topics" : "Compare with the official curriculum"}</button></div>`;
+  if (stCmp) return cmpBtn + compareHtml(schoolKid, s, f, parent);
+  return `${cmpBtn}${leftBehindHtml(schoolKid, s, f, all)}<div class="card bd-card st-card"><h2>📚 ${parent ? "Topics" : "My topics"}</h2>
     ${parent && all.length ? `<div class="chips st-filters">${ST_FILTERS.map(([k, label]) => `<button class="chip ${stFilter === k ? "on" : ""}" data-stfilter="${k}" aria-pressed="${stFilter === k}">${label}${k === "all" ? "" : ` (${count(k)})`}</button>`).join("")}</div>` : ""}
     ${parent && all.length && !(m && m.list.length) && !unitsHtml ? `<p class="hint st-nounits">📖 Tip: open 📖 This year's topics and get the official list: then these are grouped into big units.</p>` : ""}
     ${all.length ? `${unitsHtml ? `<div class="st-units">${unitsHtml}</div>` : `<ul class="st-list">${rows || `<li class="sc-empty">No topics here.</li>`}</ul>`}
       <p class="st-legend">⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
       <div class="btnrow"><button class="primary st-make ${stPick.length ? "" : "off"}" data-stmake data-aiwait="stmake" aria-disabled="${!stPick.length}">✏️ Make a worksheet${stPick.length ? ` (${stPick.length})` : ""}</button></div>`
       : `<p class="sc-empty">📂 No topics yet. Tap ⬆️ Upload topic and add a school file (a photo or PDF).</p>`}</div>`;
+}
+// ---------- 📊 v192 COMPARE: the official curriculum, unit by unit (its small topics = parts), against what the school
+// taught (the school topics from newsletters and files) and what the kid practised (worksheets) · tick → ✏️ Make a worksheet ----------
+// (an older official list without parts: each unit is one row; parents can get it again with the small topics)
+// A school topic = this small topic? Same title, or most of their words match, NOT counting the unit's own words
+// ("Adding fractions" ≠ "Equivalent fractions" in the unit "Fractions": only "fractions" is shared)
+function partSame(a, b, unit) {
+  if (sameTopicTitle(a, b)) return true;
+  const U = new Set(topicWords(unit || "").map(curStem)), w = t => [...new Set(topicWords(t).filter(x => x.length > 2).map(curStem))].filter(x => !U.has(x));
+  const A = w(a), B = new Set(w(b));
+  if (!A.length || !B.size) return false;
+  const both = A.filter(x => B.has(x)).length;
+  return both >= 1 && both / Math.max(A.length, B.size) >= 0.6;
+}
+function compareRows(kid, s, f) {
+  const m = s.map[f.id], rows = topicRows(kid, s, f), used = new Set();
+  const units = m.list.map(u => {
+    const parts = (u.parts && u.parts.length ? u.parts : [u.title]).map(p => {
+      const mine = rows.filter(r => partSame(r.title, p, u.parts && u.parts.length ? u.title : "")); mine.forEach(r => used.add(r.id));
+      const direct = topicInfo(kid, f, p), ws = new Map();
+      [...mine.map(r => r.info), direct].forEach(i => i.list.forEach(w => ws.set(w.id, w)));
+      const res = new Map(); [...mine.flatMap(r => r.info.results), ...direct.results].forEach(r => res.set(r.ws + "|" + r.date, r));
+      const results = [...res.values()].sort((a, b) => a.date.localeCompare(b.date));
+      const st = topicStatus({ list: [...ws.values()], results });
+      return { title: p, taught: mine.length > 0, when: mine.map(r => r.added).filter(Boolean).sort()[0] || "", n: ws.size, st, results };
+    });
+    return { title: u.title, term: u.term, now: u.now, parts };
+  });
+  // (a school topic named like the whole unit: the unit has started, its untaught small topics show 🟡)
+  units.forEach(u => { const hit = rows.filter(r => sameTopicTitle(r.title, u.title)); if (!hit.length) return; hit.forEach(r => used.add(r.id)); u.parts.forEach(p => { if (!p.taught) p.unitTaught = true; }); });
+  return { units, extra: rows.filter(r => !used.has(r.id)) };
+}
+function compareHtml(kid, s, f, parent) {
+  const m = s.map[f.id], who = safe(kidNameOf(kid));
+  if (!m || !m.list.length) return `<div class="card bd-card st-cmp"><h2>📊 Compare</h2>
+    <p class="hint">First we need the official ${safe(f.name)} curriculum for ${who}'s year. It comes once, then the app compares it with what the school taught.</p>
+    ${parent ? `<div class="btnrow"><button class="primary" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">📖 Get the official curriculum</button></div>`
+      : `<p class="hint">🙋 Ask Mum or Dad to get it (📖 This year's topics).</p>`}</div>`;
+  const { units, extra } = compareRows(kid, s, f), all = units.flatMap(u => u.parts);
+  stCmpPick = stCmpPick.filter(t => all.some(p => p.title === t));
+  const taught = all.filter(p => p.taught).length, practised = all.filter(p => p.n).length, notYet = all.filter(p => !p.taught && !p.unitTaught).length;
+  const noParts = m.list.every(u => !(u.parts && u.parts.length));
+  const res = p => p.results.length ? `${statusDot(p.st)} <small>${meanPct(p.results.slice(-3).map(x => x.pct))}%</small>` : p.n ? statusDot(p.st) : `<span class="hint">—</span>`;
+  const row = p => { const on = stCmpPick.includes(p.title);
+    return `<tr class="${on ? "on" : ""}"><td><b>${safe(p.title)}</b></td>
+      <td>${p.taught ? `✅${p.when ? ` <small>${dayMon(p.when)}</small>` : ""}` : p.unitTaught ? `🟠 <small>unit started</small>` : `❌ <small>not yet</small>`}</td>
+      <td>${p.n ? `${p.n} <small>${p.n === 1 ? "sheet" : "sheets"}</small>` : `<small>none</small>`}</td><td>${res(p)}</td>
+      <td><input type="checkbox" data-stcmptick="${safe(encodeURIComponent(p.title))}" ${on ? "checked" : ""} aria-label="Pick ${safe(p.title)}"></td></tr>`; };
+  const pc = (n, of) => of ? Math.round(n / of * 100) : 0;
+  const scoreOf = list => { const r = list.filter(p => p.results.length); return r.length ? meanPct(r.map(p => meanPct(p.results.slice(-3).map(x => x.pct)))) : null; };
+  const unit = (u, i) => { const t = u.parts.filter(p => p.taught).length, pr = u.parts.filter(p => p.n).length, sc = scoreOf(u.parts);
+    return `<details class="st-cmp-unit" ${u.now || u.parts.some(p => stCmpPick.includes(p.title)) ? "open" : ""}><summary><b>Unit ${i + 1}: ${safe(u.title)}</b>
+      <small>${[u.term, `✅ taught ${t} of ${u.parts.length} (${pc(t, u.parts.length)}%)`, `✏️ practised ${pc(pr, u.parts.length)}%`, sc != null ? `🎯 score ${sc}%` : "", u.now ? "📍 the class is here now" : ""].filter(Boolean).map(safe).join(" · ")}</small></summary>
+      <div class="st-cmp-wrap"><table class="st-cmp-t"><thead><tr><th>Official topic</th><th>School</th><th>Practised</th><th>Result</th><th>Pick</th></tr></thead>
+      <tbody>${u.parts.map(row).join("")}</tbody></table></div></details>`; };
+  // 📢 The summary: the class is past these units (before the "now" unit, else before the last unit the school taught from),
+  // but the school never taught these small topics → "practise them yourself" (+ one button that ticks the first 4)
+  const nowAt = units.findIndex(u => u.now), lastAt = units.reduce((n, u, i) => u.parts.some(p => p.taught) ? i : n, -1);
+  const cut = nowAt >= 0 ? nowAt : lastAt, missed = units.slice(0, Math.max(0, cut)).flatMap(u => u.parts).filter(p => !p.taught && !p.n);
+  const left = cut >= 0 ? units[cut].parts.filter(p => !p.taught && !p.n) : [];
+  const summary = missed.length ? `<div class="st-cmp-sum"><p>📢 <b>${parent ? `${who}'s school` : "Your school"} hasn't covered ${missed.length} ${missed.length === 1 ? "topic" : "topics"} from the official curriculum</b>
+      that the class has already gone past. ${parent ? `${who} needs` : "You need"} to practise ${missed.length === 1 ? "it" : "them"} at home:</p>
+      <ul>${missed.map(p => `<li>${safe(p.title)}</li>`).join("")}</ul>
+      <div class="btnrow"><button class="primary" data-stcmpmissed="${safe(missed.slice(0, 4).map(p => encodeURIComponent(p.title)).join("|"))}">✏️ Tick ${missed.length > 4 ? "the first 4" : missed.length === 1 ? "it" : "them"} for a worksheet</button></div></div>`
+    : all.length && cut >= 0 ? `<div class="st-cmp-sum ok"><p>👍 <b>So far the school has covered the official topics</b> of the units the class has finished.${left.length ? ` Still to come in ${safe(units[cut].title)}: ${left.map(p => safe(p.title)).join(", ")}.` : ""}</p></div>` : "";
+  return `<div class="card bd-card st-cmp"><h2>📊 ${safe(f.name)}: official curriculum vs school</h2>${summary}
+    <p class="st-bench"><b>📖 ${all.length} official topics</b> · <b>✅ ${taught} taught at school (${pc(taught, all.length)}%)</b> · <b>✏️ ${practised} practised (${pc(practised, all.length)}%)</b> · <b>❌ ${notYet} not yet (${pc(notYet, all.length)}%)</b>${scoreOf(all) != null ? ` · <b>🎯 average score ${scoreOf(all)}%</b>` : ""}</p>
+    <div class="cur-bar st-cmp-bar" role="img" aria-label="${pc(taught, all.length)}% taught at school"><i style="width:${pc(taught, all.length)}%"></i></div>
+    <p class="hint">${pc(taught, all.length)}% of this year's ${safe(f.name)} has been taught at school so far.</p>
+    ${noParts && parent ? `<p class="hint">This list only has the big units. <button class="linkbtn" data-stmapload="${safe(f.id)}" data-aiwait="map|${safe(f.id)}">🔄 Get the small topics of each unit</button></p>` : ""}
+    <div class="st-cmp-units">${units.map(unit).join("")}</div>
+    ${extra.length ? `<details class="st-cmp-unit other"><summary><b>School topics not in the official list</b> <small>${extra.length}</small></summary>
+      <ul class="st-blist">${extra.map(r => `<li>${statusDot(r.st)} ${safe(r.title)}</li>`).join("")}</ul></details>` : ""}
+    <p class="st-legend">School: ✅ taught · 🟠 unit started · ❌ not yet. Result: ⚪ New · 🟡 Practising · 🔴 Needs work · 🟢 Mastered</p>
+    <div class="btnrow"><button class="primary ${stCmpPick.length ? "" : "off"}" data-stcmpmake="${safe(f.id)}" data-aiwait="stcmpmake" aria-disabled="${!stCmpPick.length}">✏️ Make a worksheet${stCmpPick.length ? ` (${stCmpPick.length})` : ""}</button></div>
+    <p class="hint">Tick up to 4 topics. Topics the school hasn't taught yet start easy, with a short explanation first.</p></div>`;
+}
+async function compareWorksheet(kid, sid) {
+  const s = schoolOf(kid), f = s.subjects[sid] && { id: sid, ...s.subjects[sid] };
+  if (!f) return;
+  if (!stCmpPick.length) return toast("📌 Tick at least one topic first.", 2500);
+  const items = compareRows(kid, s, f).units.flatMap(u => u.parts).filter(p => stCmpPick.includes(p.title));
+  if (!items.length) return;
+  const fresh = items.filter(p => !p.taught && !p.n).map(p => p.title);
+  const sections = items.length > 1 ? items.map(p => ({ topic: p.title, minutes: Math.max(5, Math.round(30 / items.length)), focus: [], kind: KIND_OF[p.st] })) : [];
+  const id = await newWorksheet(kid, f.name, items.map(p => p.title), 10, pickMode(kid, f.name), "stcmpmake",
+    { part: items[0].title, ...(sections.length ? { sections } : {}),
+      ...(fresh.length ? { hint: `Not taught at school yet: ${fresh.join(", ")}. For these, start very easy, explain the idea in one line before the first question, then step up slowly.` } : {}) }, true);
+  if (id) { stCmpPick = []; toast("✨ Your worksheet is ready! 🖨️ Print or 📄 PDF.", 3500); }
 }
 // 👨‍👩‍👧 A topic's history: each worksheet, its date, score and 🎯 weak points
 function topicHistoryHtml(t) {
@@ -635,7 +726,8 @@ async function loadMap(kid, sid) {
   if (!f || !isParentDevice()) return;
   const syl = s.syllabus;
   const r = await callAi("topics", { ...kidInfo(kid), subject: f.name, today: todayYmd(), ...(syl && syl.text ? { syllabus: syl.text } : {}) }, "map|" + sid);
-  const list = (r && Array.isArray(r.topics) ? r.topics : []).map(t => ({ title: aiTxt(t.title, 80), term: aiTxt(t.term, 20), now: t.now === true })).filter(t => t.title).slice(0, 30);
+  const list = (r && Array.isArray(r.topics) ? r.topics : []).map(t => ({ title: aiTxt(t.title, 80), term: aiTxt(t.term, 20), now: t.now === true,
+    ...(Array.isArray(t.parts) && t.parts.length ? { parts: t.parts.map(x => aiTxt(x, 80)).filter(Boolean).slice(0, 8) } : {}) })).filter(t => t.title).slice(0, 30);
   if (!list.length) return;
   schoolFor(kid).map[sid] = { at: new Date().toISOString(), list };
   writeData();
@@ -758,6 +850,10 @@ document.addEventListener("click", e => {
   if (ds.stleft) { stPick = ds.stleft.split(",").filter(Boolean).slice(0, 4); return makeFromTopics(); }   // (📌 left behind: practise them)
   if (ds.sessmore) return moreQuestions(ds.sessmore);
   if (ds.sessdone) return sessionDone(ds.sessdone);
+  if ("stcmp" in ds) { stCmp = !stCmp; return render(); }
+  if (ds.stcmpmake) return compareWorksheet(schoolKid, ds.stcmpmake);
+  if (ds.stcmpmissed) { stCmpPick = ds.stcmpmissed.split("|").filter(Boolean).map(decodeURIComponent); render();
+    const btn = document.querySelector("#scr-school [data-stcmpmake]"); if (btn) btn.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
   if (ds.stmapload) return loadMap(schoolKid, ds.stmapload);
   if (ds.stbench) return benchmark(schoolKid, ds.stbench);
   if (ds.stmappick) { const t = decodeURIComponent(ds.stmappick); stMapPick = stMapPick.includes(t) ? stMapPick.filter(x => x !== t) : [...stMapPick, t].slice(0, 8); return render(); }
@@ -766,6 +862,8 @@ document.addEventListener("click", e => {
   if (ds.stnotdone) { stMapPick = (ds.stnotdonet || "").split("|").filter(Boolean).map(decodeURIComponent); return mapPractice(schoolKid, ds.stnotdone); }
 });
 $("scr-school").addEventListener("change", e => {
+  const ct = e.target.dataset && e.target.dataset.stcmptick;
+  if (ct) { const t = decodeURIComponent(ct); stCmpPick = e.target.checked ? [...new Set([...stCmpPick, t])].slice(0, 4) : stCmpPick.filter(x => x !== t); return render(); }
   const id = e.target.dataset && e.target.dataset.sttick;
   if (!id) return;
   stPick = e.target.checked ? [...new Set([...stPick, id])] : stPick.filter(x => x !== id);
