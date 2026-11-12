@@ -1822,7 +1822,19 @@ function wsSameAsKey(w, wq, said) {
     return optFind(wq.options, said) === i;
   }
   // (any other question: the kid's answer is the key itself, e.g. "A" = "A", "30cm" = "30 cm")
-  return wsSameText(said, wq.answer);
+  return wsSameText(said, wq.answer) || wsSameWithUnit(said, wq.answer);
+}
+// (v191: the key is just a number and the kid wrote that number + its unit: "3 V" = "3", "25 cm" = "25", "40°C" = "40".
+//  Only real units count, so "3x" ≠ "3" and "34" ≠ "3")
+const WS_UNITS = new Set(("v volt volts a amp amps ampere amperes w watt watts ω ohm ohms j joule joules n newton newtons hz kw kwh " +
+  "mm cm m km in ft mi g kg mg t l ml cl s sec secs second seconds min mins minute minutes h hr hrs hour hours day days week weeks " +
+  "° °c °f c f k % percent cm² cm2 m² m2 km² km2 mm² mm2 cm³ cm3 m³ m3 mm³ mm3 m/s km/h kmh kph mph aed dhs dh dirham dirhams $ fils " +
+  "unit units sq.cm squarecm squarem cubiccm").split(" "));
+function wsSameWithUnit(said, key) {
+  const k = wsPlain(key), a = wsPlain(said);
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(k) || !a.startsWith(k)) return false;
+  const u = a.slice(k.length).replace(/\.$/, "");
+  return WS_UNITS.has(u);
 }
 // (the same answer, only spaces, capitals or a full stop at the end different: "30cm" = "30 cm", "Paris." = "paris";
 //  signs stay: "-5" ≠ "5", "3/4" ≠ "34", "1.5" ≠ "15")
@@ -1857,7 +1869,7 @@ function wsSureRight(w, c) {
     if (q.correct || !wsSameAsKey(w, wq, q.your_answer)) return;
     const full = wq.points || 0;
     score = Math.min(c.max_score, score + Math.max(0, full - (q.points || 0)));
-    Object.assign(q, { correct: true, points: Math.max(q.points || 0, full) });
+    Object.assign(q, { correct: true, points: Math.max(q.points || 0, full), note: "Right ✓" });
   });
   c.score = score;
   return c;
