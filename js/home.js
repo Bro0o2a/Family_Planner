@@ -323,9 +323,17 @@ function dayGraphHtml(k, color, pop) {
     <div class="sd-head"><b>Score through the day</b>${trendChipHtml(d)}</div>
     <div class="sd-days" role="tablist">${days.map(dd => `<button class="sd-day${dd === day ? " on" : ""}" data-sdday="${dd}">${dd === today ? "Today" : dd === yest ? "Yesterday" : DAYS[weekdayOf(dd)].slice(0, 3)}</button>`).join("")}</div>
     <p class="sd-sum">${safe(dayLong(day))} · <b>${first}</b> → <b>${last}</b></p>${svg}
-    ${moves.length ? `<details class="sd-more"><summary>What changed (${moves.length})</summary><ul class="sd-list">${moves.map(p =>
+    ${pop && moves.length ? sdWhyHtml(moves, time) : moves.length ? `<details class="sd-more"><summary>What changed (${moves.length})</summary><ul class="sd-list">${moves.map(p =>
       `<li><span class="sd-t">${time(p)}</span><span class="sd-w">${safe(p.text)}</span>${trendChipHtml(p.ch)}</li>`).join("")}</ul>
       <p class="sd-note">The score is for the whole week. Habit ticks have no time, so they show at the day's end.</p></details>` : `<p class="sd-note">No change on this day.</p>`}</div>`;
+}
+// 💬 v191 the pop-up (tap a score): WHY it went up and WHY it went down that day, open, in two lists
+function sdWhyHtml(moves, time) {
+  const list = (arr, cls, head) => arr.length ? `<div class="sd-why ${cls}"><b>${head}</b><ul class="sd-list">${arr.map(p =>
+    `<li><span class="sd-t">${time(p)}</span><span class="sd-w">${safe(p.text)}</span>${trendChipHtml(p.ch)}</li>`).join("")}</ul></div>` : "";
+  const up = moves.filter(p => p.ch > 0), down = moves.filter(p => p.ch < 0);
+  return list(up, "up", "▲ Why it went up") + list(down, "down", "▼ Why it went down") +
+    `<p class="sd-note">The score is for the whole week. Habit ticks have no time, so they show at the day's end.</p>`;
 }
 // ▲ 3 / ▼ 2 / – : a small change sign (green up, red down, grey none)
 const trendChipHtml = d => `<span class="sd-chip ${d > 0 ? "up" : d < 0 ? "down" : "flat"}">${d > 0 ? "▲ " + d : d < 0 ? "▼ " + -d : "–"}</span>`;

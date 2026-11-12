@@ -3364,3 +3364,17 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .pdf-stage.pdf-big .ws-compact .ws-keybox > b { margin-bottom: 0; font-size: 13px; }
 .pdf-stage.pdf-big .ws-compact .ws-keybox .ws-keywords { line-height: 1.35; }
 .pdf-stage.pdf-big .ws-compact .ws-to-sheet { margin-top: 6px; padding: 4px 10px; }
+
+/* 📈 v191 Score pop-up: everything in the middle + why it went up / down */
+.sd-pophead { justify-content: center; text-align: left; }
+.sd-pophead > div { flex: none; }
+#sdBody .sd-days { justify-content: center; flex-wrap: wrap; }
+#sdBody .sd-sum, #sdBody .sd-note { text-align: center; }
+#sdBody .sd-head { justify-content: center; position: relative; }
+#sdBody .sd-head > :last-child:not(:first-child) { position: absolute; right: 0; }
+#sdBody .sd-svg { display: block; margin: 0 auto; }
+.sd-why { margin: 8px 0 0; padding: 8px 10px; border-radius: 12px; }
+.sd-why > b { display: block; font-size: 14px; margin-bottom: 2px; }
+.sd-why.up { background: #e7f7ec; } .sd-why.up > b { color: #15803d; }
+.sd-why.down { background: #fdecec; } .sd-why.down > b { color: #b91c1c; }
+.sd-why .sd-list { margin: 0; }
