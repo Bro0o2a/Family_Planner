@@ -1596,7 +1596,7 @@ function eventsOn(date, who) {
 function eventHtml(e, who) {
   const u = userById(e.kid), when = e.time ? clock(toMin(e.time), true) : "All day";
   return `<button class="k-event" data-kevent="${safe(e.kid)}|${safe(e.id)}" title="${safe(`📌 ${e.title} · ${when} (${u.name})`)}">
-    📌 ${who === e.kid ? "" : safe(u.emoji) + " "}${e.time ? `<b>${clock(toMin(e.time))}</b> ` : ""}${safe(e.title)}</button>`;
+    📌 ${who === e.kid ? "" : safe(u.emoji) + " "}${e.time ? `<b>${clock(toMin(e.time))}</b> ` : ""}${safe(e.title)}${e.note ? `<small class="k-event-note">👉 ${safe(e.note)}</small>` : ""}</button>`;
 }
 // Tap one: its details (Bro2a can delete it from there)
 function showEvent(kid, id) {

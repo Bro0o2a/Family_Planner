@@ -70,7 +70,7 @@ function drawKidHome(u) {
       <div class="k-hero-text"><h2>${hi}</h2>${scoredUsers().some(x => x.id === u.id) ? `<p class="k-cheer">${safe(kidCheerShort(u.id))}</p>` : ""}<p>${!today.length ? "Nothing planned today. Enjoy!" : left ? `${left} ${left === 1 ? "thing" : "things"} left today. You can do it!` : "All done today. Amazing!"}</p>
       ${next ? `<button class="k-go" data-kidcal>▶ ${safe(next.name.length > 18 ? next.name.slice(0, 17) + "…" : next.name)}</button>` : `<button class="k-go" data-kidcal>📅 My day</button>`}</div>
       <svg class="k-plant" viewBox="0 0 120 140" aria-hidden="true"><path d="M60 100V45" stroke="#5e8f5a" stroke-width="5" fill="none"/><path d="M60 70C35 70 22 52 20 34c22 0 36 14 40 36z" fill="#7fae6e"/><path d="M60 60C85 60 98 42 100 22c-22 0-36 14-40 38z" fill="#8fbb7c"/><path d="M60 50C48 36 46 20 54 6c10 10 12 26 6 44z" fill="#9ec68a"/><path d="M28 96h64l-8 40H36z" fill="#ead7bd"/><rect x="24" y="90" width="72" height="14" rx="7" fill="#f3e4cf"/></svg></div>
-    <div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
+    ${comingCardHtml(comingUp(u.id), false)}<div class="kt-grid">${tile("kt-study", `data-school="${safe(u.id)}"`, ico3d("study"), "Study", "My school", `${study} study points`)}
       ${tile("kt-cal", "data-kidcal", ico3d("calendar"), "Calendar", `${doneToday} of ${today.length}`, "done today")}
       ${tile("kt-habits", `data-kidpanel="habits"`, ico3d("goal"), "Good habits", hb.all ? `${hb.done} of ${hb.all}` : "–", "today")}
       ${tile("kt-score kt-beat", `data-sdpop="${safe(u.id)}"`, scoreRingHtml(scoreOf(u.id).overall, colorsOf(u).color, lastWeekScore(u.id)), "Score this week", `${scoreOf(u.id).overall} ${ringTrendHtml(u.id)}`, `of ${scoreOf(u.id).max} · tap for the day`)}</div>
@@ -130,6 +130,10 @@ function needsItems() {
   // 📋 v191: missing topics of the school week that just ended
   const gaps = gapNotes();
   if (gaps.length) out.push({ key: "gaps", text: `📋 Missing topics for ${[...new Set(gaps.map(x => kidNameOf(x.kid)))].join(", ")}`, html: gapCardsHtml() });
+  // 📌 v193: school dates of today / tomorrow (+ tests in 3 days), with their notes and ✏️ practice tests
+  const cu = isParentId(me) ? kidsList().flatMap(k => comingUp(k.id)) : [];
+  if (cu.length) out.push({ key: "coming", text: `📌 Coming up: ${cu.slice(0, 2).map(e => `${whenWord(e.days).toLowerCase()} ${e.title} (${kidNameOf(e.kid)})`).join(", ")}${cu.length > 2 ? ` +${cu.length - 2}` : ""}`,
+    html: comingCardHtml(cu, true) });
   const nl = newsletterDue();
   if (nl.length) out.push({ key: "nl", text: `📰 Newsletter for ${nl.map(k => k.name).join(", ")}`, html: newsletterNudgeHtml() });
   return out;

@@ -1251,7 +1251,8 @@ function cleanSchool(s) {
                          weak_points: strs(x.weak_points, 5, 150), next_steps: strs(x.next_steps, 5, 300) })),
           home_tips: strs(bf.home_tips, 6, 400) } : null;
     c.events = list(k.events, e => !txt(e.title, 80) || !isDate(e.date) ? null
-      : { date: e.date, time: isHm(e.time) ? e.time : "", title: txt(e.title, 80), note: txt(e.note, 300), ...(okKey(String(e.by || "")) ? { by: e.by } : {}) });
+      : { date: e.date, time: isHm(e.time) ? e.time : "", title: txt(e.title, 80), note: txt(e.note, 300), ...(okKey(String(e.by || "")) ? { by: e.by } : {}),
+          ...(okKey(String(e.trial || "")) ? { trial: e.trial } : {}), ...(e.told === true ? { told: true } : {}) });   // (📌 v193 practice test · 🔔 told the day before)
     c.requests = list(k.requests, q => !["work", "practice"].includes(q.kind) || !txt(q.subject, 30) || !isDate(q.date) ? null
       : { kind: q.kind, subject: txt(q.subject, 30), date: q.date, ...(okKey(String(q.by || "")) ? { by: q.by } : {}),
           ...(q.kind === "work" ? { files: (Array.isArray(q.files) ? q.files : []).filter(x => okKey(String(x || ""))).slice(0, 20) }
