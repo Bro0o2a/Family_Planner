@@ -1403,9 +1403,9 @@ function wsSheetNode(w, showAns, compact = false) {
         q.question_ar && !rtl ? h("div", { class: "ws-ar", dir: "rtl", lang: "ar" }, q.question_ar) : null,
         q.picture && typeof wsPicNode === "function" ? wsPicNode(q.picture) : null,   // (🖼️)
         match || (q.options.length ? h("ul", { class: "ws-opts" }, q.options.map((o, i) => h("li", { class: "ws-opt" },
-          compact && (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
+          (isChoiceQ(q) || isOrderQ(q)) ? h("b", { class: "ws-letter" }, `${OPT_LETTERS[i] || i + 1})`)
             : h("span", { class: "ws-circle" + (q.kind === "ordering" || q.kind === "matching" ? " ws-box" : "") }), h("span", null, o)))) : null),
-        compact && isOrderQ(q) ? h("div", { class: "ws-to-order" }, "On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …).") : null,
+        isOrderQ(q) ? h("div", { class: "ws-to-order" }, compact ? "On the answer sheet: write the letters in the right order (1st, 2nd, 3rd …)." : "Write the letters in the right order (1st, 2nd, 3rd …).") : null,
         match || compact ? null : Array.from({ length: q.answer_lines }, () => h("div", { class: "ws-line" })),
         showAns && !match ? h("div", { class: "ws-ans" }, "✓ " + (q.answer || "—")) : null),
       h("span", { class: "ws-pts" }, marksText(q.points)))]; })),
