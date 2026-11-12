@@ -177,6 +177,21 @@ try {
   });
   if (mustAct !== "ok") errors.push("[must-do activity] " + mustAct);
 
+  // 📖📋 v191 newsletter: the preview day is the Sunday before the week; the missing topics of a week are found
+  const nlIdeas = await run("newsletter preview + missing topics", () => {
+    const old = data.previewAt; data.previewAt = "6|09:00";
+    const pv = previewDateFor("2026-11-16"); data.previewAt = ""; const off = previewDateFor("2026-11-16"); data.previewAt = old;
+    if (pv !== "2026-11-15" || off !== "") return "preview day " + pv + " / off " + off;
+    const kid = kidsList()[0].id, s = schoolFor(kid), sid = ensureFolder(s, "Science");
+    addSchoolTopics(s, sid, ["Magnets"], "2026-11-09");
+    const gaps = weekGaps(kid, { subjects: [{ subject: "Science", topics: ["Magnets"] }] });
+    if (!gaps.length || !gaps[0].not.includes("Magnets")) return "gaps " + JSON.stringify(gaps);
+    s.notes.t1 = { subject: "Science", text: "📋 Week 1: not practised yet: Magnets.", date: "2026-11-13", by: me, gap: true };
+    const html = gapCardsHtml(); delete s.notes.t1;
+    return /Magnets/.test(html) && /data-gapws/.test(html) ? "ok" : html;
+  });
+  if (nlIdeas !== "ok") errors.push("[newsletter ideas] " + nlIdeas);
+
   // 🤖 No parent OK yet: the AI helper asks first and sends nothing
   const asked = await run("AI asks for OK first", async () => {
     data.aiOk = null;

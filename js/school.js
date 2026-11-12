@@ -978,7 +978,7 @@ function fileStatus(f, s) {
 }
 
 // 📝 Worksheets: each with its status and 🖨️ ⬆ 🤖 🔑
-const WS_PURPOSE = { level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"], weak_points: ["🎯", "Weak points"],
+const WS_PURPOSE = { preview: ["📖", "Next week preview"], revision: ["📝", "Test revision"], level_check: ["🧭", "Level check"], practice: ["🔁", "Practice"], week_review: ["📅", "Week review"], challenge: ["🚀", "Challenge"], weak_points: ["🎯", "Weak points"],
                      placement: ["🧪", "Placement test"] };
 // A worksheet row: its status (✅ the score and the short note), then 📂 🖨️ 📸 ✅ 🔑
 // "👨‍👩‍👧 from Bro2a": a worksheet / explanation a parent made for the kid (it's in the kid's lists too)

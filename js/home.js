@@ -127,6 +127,9 @@ function needsItems() {
   const stuck = stuckList();
   if (stuck.length) out.push({ key: "stuck", text: stuck.length === 1 ? `😟 ${kidNameOf(stuck[0].kid)} is stuck on ${topicShort(stuck[0].t.title)}` : `😟 ${stuck.length} topics the kids are stuck on`,
     html: stuck.map(stuckCardHtml).join("") });
+  // 📋 v191: missing topics of the school week that just ended
+  const gaps = gapNotes();
+  if (gaps.length) out.push({ key: "gaps", text: `📋 Missing topics for ${[...new Set(gaps.map(x => kidNameOf(x.kid)))].join(", ")}`, html: gapCardsHtml() });
   const nl = newsletterDue();
   if (nl.length) out.push({ key: "nl", text: `📰 Newsletter for ${nl.map(k => k.name).join(", ")}`, html: newsletterNudgeHtml() });
   return out;

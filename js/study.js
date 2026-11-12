@@ -180,6 +180,27 @@ function sessionSections(kid, s, f, minutes) {
     const a = g.mastered[0], b = g.mastered[1] || a, main = Math.max(5, Math.round(minutes * 0.75));
     return [{ topic: a.title, minutes: main, focus: [], kind: "practising" }, { topic: b.title, minutes: Math.max(5, minutes - main), focus: [], kind: "challenge" }];
   }
+  // 🏫 v191 (Broo2a) study follows school: this week's newsletter topics come first (not 🟢 yet), then last week's 🔴 ones;
+  //   a test on this subject in the next 3 days: its topics first. They take about half the session (a test: most of it).
+  const today = todayYmd(), wk = s.week && s.week.start <= today && today <= s.week.end ? s.week.start : mondayOf(new Date());
+  const test = testsAhead(kid, 3).find(t => t.f.id === f.id), tTopics = test ? testTopics(s, f, test.date) : [];
+  const schoolNow = rows.filter(t => (test ? tTopics.some(x => sameTopicTitle(x, t.title)) : t.added === wk && t.st !== "mastered") || (!test && t.added === addDaysYmd(wk, -7) && t.st === "needs"));
+  if (schoolNow.length) {
+    const share = test ? 0.7 : 0.5, gm = Math.round(minutes * share), n = Math.max(1, Math.min(3, schoolNow.length, Math.floor(gm / 5)));
+    const first = schoolNow.sort((a, b) => (b.added || "").localeCompare(a.added || "") || avg(a) - avg(b)).slice(0, n)
+      .map(t => ({ topic: t.title, minutes: Math.max(5, Math.round(gm / n)), focus: t.st === "needs" ? topicWeak(t.info) : [], kind: test ? "review" : t.st === "needs" ? "needs_work" : "practising" }));
+    Object.keys(g).forEach(k => { g[k] = g[k].filter(t => !first.some(x => x.topic === t.title)); });
+    minutes = Math.max(5, minutes - gm);
+    if (!g.needs.length && !g.new.length && !g.practising.length && !g.mastered.length) return first;
+    return [...first, ...restSections(kid, f, g, minutes)].slice(0, 6);
+  }
+  return restSections(kid, f, g, minutes);
+}
+function restSections(kid, f, g, minutes) {
+  if (!g.needs.length && !g.new.length && !g.practising.length) {
+    const a = g.mastered[0]; if (!a) return [];
+    return [{ topic: a.title, minutes, focus: [], kind: "practising" }];
+  }
   const review = wsOf(kid, f.name).filter(w => w.session).length % 3 === 2;   // (every 3rd session of this subject)
   const plan = [["needs", 0.5, 2], ["new", 0.25, 2], ["practising", 0.2, 2], ...(review ? [["mastered", 0.07, 1]] : [])].filter(([k]) => g[k].length);
   const total = plan.reduce((n, p) => n + p[1], 0), out = [];
@@ -916,7 +937,13 @@ async function addNewsletter() {
     s.reviewDue = [...(s.reviewDue || []).filter(x => x.start !== start), { n, label: res.week_label, start, fri, subjects: subjects.map(x => ({ subject: x.subject, topics: x.topics })) }].slice(-3);
     writeData();
   }
-  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length ? `. The week reviews come on Friday ${dayMon(addDaysYmd(start, 4))} after school.` : ""}`, 5000);
+  // 📖 v191 (Broo2a): next week's PREVIEW worksheets, on the parents' day + time before the week starts (⚙️ Settings, default Sunday 9 AM)
+  const pv = previewDateFor(start);
+  if (subjects.length && pv) {
+    s.previewDue = [...(s.previewDue || []).filter(x => x.start !== start), { n, label: res.week_label, start, on: pv, subjects: subjects.map(x => ({ subject: x.subject, topics: x.topics })) }].slice(-3);
+    writeData();
+  }
+  toast(`📰 Added ${added} school ${added === 1 ? "date" : "dates"}${newTopics ? ` and ${newTopics} new ${newTopics === 1 ? "topic" : "topics"}` : ""}${subjects.length && pv ? `. 📖 The previews come ${dayMon(pv)}` : ""}${subjects.length ? `. The week reviews come on Friday ${dayMon(addDaysYmd(start, 4))} after school.` : ""}`, 6000);
 }
 // 📰 Friday after school (a parent's device opens the app from Friday 3 PM on): each waiting week review, one per subject.
 //    🔴 needs-work topics of that week get more of the worksheet. (Older than 2 weeks: dropped, not made.)
@@ -947,6 +974,123 @@ async function maybeMakeWeekReviews() {
     if (made && screen === "school") render();
   } finally { reviewsMaking = false; }
 }
+// 📖 v191 PREVIEW: { day 0–6 (0 = Monday), time } from data.previewAt ("6|09:00" = Sunday 9 AM; "" = off)
+const previewAtOf = () => { const v = data.previewAt === undefined ? "6|09:00" : data.previewAt; if (!v) return null; const [d, t] = v.split("|"); return { day: Number(d), time: t }; };
+// (the date of the preview day just before the week that starts on "start" (a Monday); on or before the day before it)
+function previewDateFor(start) {
+  const p = previewAtOf(); if (!p) return "";
+  for (let d = addDaysYmd(start, -1), i = 0; i < 7; d = addDaysYmd(d, -1), i++) if (weekdayOf(d) === p.day) return d;
+  return "";
+}
+let previewsMaking = false;
+// (a parent's device, from the preview day + time on: one preview worksheet per subject of next week)
+async function maybeMakePreviews() {
+  if (previewsMaking || !isParentDevice() || !aiReady() || (cloud.enabled && !cloud.ready) || hasDraft()) return;
+  const p = previewAtOf(), d = dubaiNow().date, now = dubaiMinutes(); if (!p) return;
+  const due = x => d > x.on || (d === x.on && now >= toMin(p.time));
+  const jobs = [];
+  kidsList().forEach(k => (schoolOf(k.id).previewDue || []).filter(due).forEach(x => jobs.push({ kid: k.id, x })));
+  if (!jobs.length) return;
+  previewsMaking = true;
+  jobs.forEach(j => { const s = schoolFor(j.kid); s.previewDue = (s.previewDue || []).filter(y => y.start !== j.x.start); });   // (taken first: never made twice)
+  writeData();
+  try {
+    let made = 0, tried = 0;
+    for (const j of jobs) {
+      if (d > addDaysYmd(j.x.start, 4)) continue;   // (the week is nearly over: too late for a preview)
+      for (const y of j.x.subjects) {
+        tried++;
+        if (await newWorksheet(j.kid, y.subject, y.topics, WS_COUNT, "preview", "preview", { title: `📖 Week ${j.x.n} preview`, part: `📖 Week ${j.x.n} preview` }, false)) made++;
+      }
+    }
+    if (tried) toast(made === tried ? `📖 ${made} next-week ${made === 1 ? "preview is" : "previews are"} ready in 📝 Worksheets!` : `📖 ${made} of ${tried} previews were made.`, 4500);
+    if (made && screen === "school") render();
+  } finally { previewsMaking = false; }
+}
+// 📝 v191 TEST COMING UP: a 📌 school date that is a test / quiz / exam / assessment, for one subject (its name is in the title or note)
+const TEST_WORDS = /\b(test|quiz|exam|assessment|end of unit|unit check|spelling check|mock)\b|اختبار|امتحان/i;
+function testsAhead(kid, days = 3) {
+  const s = schoolOf(kid), d = dubaiNow().date, subs = subjectList(s, true);
+  return Object.entries(s.events || {}).filter(([, e]) => e.date > d && e.date <= addDaysYmd(d, days) && TEST_WORDS.test(`${e.title} ${e.note || ""}`))
+    .map(([id, e]) => ({ id, ...e, f: subs.find(f => new RegExp(`\\b${f.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(`${e.title} ${e.note || ""}`)) }))
+    .filter(x => x.f);
+}
+// (the topics a test is about: that subject's school topics of the last 3 weeks, newest first; at most 8)
+const testTopics = (s, f, date) => topicsOf(s, f.id).filter(t => t.added && t.added >= addDaysYmd(date, -21)).map(t => t.title).slice(0, 8);
+let revMaking = false;
+// (a parent's device: 2 days before the test, one revision worksheet on its topics; each test once)
+async function maybeMakeRevisions() {
+  if (revMaking || !isParentDevice() || !aiReady() || (cloud.enabled && !cloud.ready) || hasDraft()) return;
+  const jobs = [];
+  kidsList().forEach(k => testsAhead(k.id, 2).forEach(t => { if (!(schoolOf(k.id).revDone || []).includes(t.id)) jobs.push({ kid: k.id, t }); }));
+  if (!jobs.length) return;
+  revMaking = true;
+  jobs.forEach(j => { const s = schoolFor(j.kid); s.revDone = [...(s.revDone || []), j.t.id].slice(-30); });
+  writeData();
+  try {
+    let made = 0;
+    for (const j of jobs) {
+      const s = schoolOf(j.kid), topics = testTopics(s, j.t.f, j.t.date);
+      if (!topics.length) continue;
+      if (await newWorksheet(j.kid, j.t.f.name, topics, WS_COUNT, "revision", "revision", { title: `📝 ${j.t.title} revision`, part: `📝 ${j.t.title} (${dayMon(j.t.date)})` }, false)) made++;
+    }
+    if (made) toast(`📝 ${made} test revision ${made === 1 ? "worksheet is" : "worksheets are"} ready in 📝 Worksheets!`, 4500);
+    if (made && screen === "school") render();
+  } finally { revMaking = false; }
+}
+// 📋 v191 MISSING TOPICS: once the school week is over (Friday from 3 PM, Dubai), a note for the parents per kid: the newsletter's
+// topics of that week the kid hasn't practised yet, and the ones still 🔴 weak. Kept in the kid's 🎒 School notes, and on the
+// parents' home until they tap OK.
+function weekGaps(kid, w) {
+  const s = schoolOf(kid), out = [];
+  (w.subjects || []).forEach(x => {
+    const f = folderOf(s, x.subject); if (!f) return;
+    const rows = topicRows(kid, s, f), not = [], weak = [];
+    x.topics.forEach(t => { const r = rows.find(y => sameTopicTitle(y.title, t)); if (!r || r.st === "new") not.push(t); else if (r.st === "needs") weak.push(t); });
+    if (not.length || weak.length) out.push({ subject: f.name, not, weak });
+  });
+  return out;
+}
+function maybeTellGaps() {
+  if (!isParentDevice() || hasDraft()) return;
+  const d = dubaiNow().date;
+  let n = 0;
+  kidsList().forEach(k => {
+    const s0 = schoolOf(k.id), w = s0.week;
+    if (!w || !w.start || s0.gapDone === w.start) return;
+    const fri = addDaysYmd(w.start, 4);
+    if (d < fri || (d === fri && dubaiMinutes() < REVIEW_FROM)) return;
+    const gaps = weekGaps(k.id, w), s = schoolFor(k.id);
+    s.gapDone = w.start; n++;
+    // (one note per subject, so it shows in that subject's 🗒️ Notes in the 🎒 School file)
+    gaps.forEach(g => {
+      const text = `📋 ${w.label || "Week " + (w.n || "")}: ${[g.not.length ? "not practised yet: " + g.not.join(", ") : "", g.weak.length ? "still weak: " + g.weak.join(", ") : ""].filter(Boolean).join(". ")}.`;
+      s.notes[newId()] = { subject: g.subject, text: text.slice(0, 1000), date: d, by: me, gap: true };
+    });
+  });
+  if (n) writeData();
+}
+// (the parents' home: the unseen 📋 notes)
+const gapNotes = () => !isParentId(me) || isKidDevice() ? [] : kidsList().flatMap(k => Object.entries(schoolOf(k.id).notes || {}).filter(([, n]) => n.gap && !n.seen).map(([id, n]) => ({ kid: k.id, id, n })));
+function gapCardsHtml() {
+  const kids = [...new Set(gapNotes().map(x => x.kid))];
+  return kids.map(kid => { const list = gapNotes().filter(x => x.kid === kid);
+    return `<div class="card gap-card" style="--c:${colorsOf(userById(kid)).color}"><p><b>📋 What ${safe(kidNameOf(kid))} still needs from this school week</b></p>
+    ${list.map(x => `<p><b>${safe(x.n.subject)}</b>: ${safe(x.n.text.replace(/^📋 [^:]*: /, ""))}</p>`).join("")}
+    <div class="btnrow"><button class="primary" data-gapws="${safe(kid)}">📝 Make worksheets on these</button><button data-gapok="${safe(kid)}">OK</button></div>
+    <p class="hint">Saved in ${safe(kidNameOf(kid))}'s 🎒 School file (each subject's 🗒️ Notes).</p></div>`; }).join("");
+}
+const gapSeen = kid => { const s = schoolFor(kid); Object.values(s.notes).forEach(n => { if (n.gap) n.seen = true; }); };
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-gapok], [data-gapws]"); if (!b || !isParentDevice()) return;
+  if (b.dataset.gapok) { gapSeen(b.dataset.gapok); writeData(); return render(); }
+  // (📝 one weak-points worksheet per subject that has missing topics: the topics themselves)
+  const kid = b.dataset.gapws, w = schoolOf(kid).week; if (!w) return;
+  const gaps = weekGaps(kid, w);
+  gapSeen(kid); writeData(); render();
+  (async () => { let made = 0; for (const g of gaps) if (await newWorksheet(kid, g.subject, [...g.not, ...g.weak].slice(0, 8), WS_COUNT, "weak_points", "gapws|" + kid, { title: `📋 ${g.subject}: catch up`, part: "📋 Catch up" }, false)) made++;
+    if (made) toast(`📝 ${made} catch-up ${made === 1 ? "worksheet is" : "worksheets are"} ready in ${kidNameOf(kid)}'s 📝 Worksheets!`, 4500); })();
+});
 $("nlModal").addEventListener("click", e => {
   if (e.target === $("nlModal")) return closeNewsletter();
   const b = e.target.closest("button");

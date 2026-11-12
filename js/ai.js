@@ -253,7 +253,7 @@ function aiMeta(d) {
 // A worksheet: { kid, subject, topics, count, title, intro, questions, youtube_searches, printable_searches,
 //                date, status: "To do" | "Answers uploaded" | "Checked ✓", by, at, work?, answers: [file ids], check?,
 //                part?: the topic title it's about (📊 "By part"), purpose?: the mode it was made with (see WS_MODES) }
-const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement", "weak_points"];
+const WS_MODES = ["level_check", "practice", "week_review", "challenge", "placement", "weak_points", "preview", "revision"];   // (📖 📝 v191)
 const modeOf = x => x === "level" ? "level_check" : WS_MODES.includes(x) ? x : null;   // ("level": a few sheets from an earlier test version)
 // 🔢 The items of a "put in order" question written inside its text: "Put these in order: seed; shoot; flower" →
 // { ask: "Put these in order:", list: [seed, shoot, flower] }. Split on ";", new lines, " / " or ", " (not "1,000"). Null when unsure.
@@ -576,7 +576,9 @@ const MODE_NOTES = {
   week_review: "review of this week's school topics",
   challenge: "a harder challenge sheet: the child is doing very well in this subject",
   placement: "placement test: find the child's real level in this subject (1 to 10)",
-  weak_points: "weak points worksheet: only the topics the child keeps getting wrong"
+  weak_points: "weak points worksheet: only the topics the child keeps getting wrong",
+  preview: "PREVIEW of NEXT week's school topics: the child has NOT learned them yet. A gentle first look: start very easy, explain each new idea in one short line inside the question, use the new key words, simple recall and recognise questions, nothing tricky",
+  revision: "TEST REVISION: the child has a school test on these topics in a few days. Cover every topic listed, the most important facts and skills, easy to test level"
 };
 // 🏫 The kid's school system and 📄 syllabus (when saved): sent with EVERY 🤖 worksheet
 function schoolSystemOf(kid) {
