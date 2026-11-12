@@ -879,6 +879,8 @@ function wsGroupedHtml(s, all) {
   return groups.filter(g => g[2].length).map(([k, title, list]) => `<div class="card wsg wsg-${k}"><div class="wsg-head"><h2>${title}</h2><span class="wsg-n">${list.length}</span></div>
     ${aiMount(() => h("ul", { class: "wsg-list" }, list.map(w => wsNiceNode(s, w, k))))}</div>`).join("");
 }
+// (v191: the row says the TOPICS it is about, not where they came from: a worksheet made from an uploaded "Newsletter" said only "Newsletter")
+const wsTopicsLine = (w, s) => { const t = (w.topics || []).filter(Boolean); return t.length ? t.slice(0, 2).join(", ") + (t.length > 2 ? ` +${t.length - 2}` : "") : partOf(w, s); };
 function wsNiceNode(s, w, k) {
   const [emoji, label] = WS_PURPOSE[w.purpose] || ["📝", ""], canAct = isDadNow() || !w.check, pct = w.check ? wsPct(w) : null;
   const badge = k === "done" ? h("span", { class: "wsg-score lv-" + pctLevel(pct) }, `${pct}%`, h("small", null, `${num(w.check.score)}/${num(w.check.max_score)}`))
@@ -888,7 +890,7 @@ function wsNiceNode(s, w, k) {
     : [h("button", { data: { wsrow: "answers|" + w.id } }, answersOpen(w) ? "🔑 Answers" : "🔒 Answers")];
   return h("li", { class: "wsg-row" },
     h("button", { class: "wsg-main", data: { aiopen: "worksheet|" + w.id } }, h("span", { class: "e" }, emoji),
-      h("span", { class: "what" }, h("b", null, w.title), h("small", null, [shortDate(w.date), label, partOf(w, s), madeByParent(w)].filter(Boolean).join(" · "))), badge),
+      h("span", { class: "what" }, h("b", null, w.title), h("small", null, [shortDate(w.date), label, wsTopicsLine(w, s), madeByParent(w)].filter(Boolean).join(" · "))), badge),
     h("div", { class: "wsg-btns" }, ...act));
 }
 document.addEventListener("click", e => {
