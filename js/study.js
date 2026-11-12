@@ -1822,7 +1822,9 @@ function wsSameAsKey(w, wq, said) {
     return optFind(wq.options, said) === i;
   }
   // (any other question: the kid's answer is the key itself, e.g. "A" = "A", "30cm" = "30 cm")
-  return wsSameText(said, wq.answer) || wsSameWithUnit(said, wq.answer);
+  // (v191: also the final answer after the working: "475 - 150 = 325" = "325 (475 − 150)")
+  const ends = x => [x, String(x || "").replace(/\s*\([^)]*\)\s*$/, ""), String(x || "").split("=").pop()];
+  return ends(said).some(a => a.trim() && ends(wq.answer).some(k => wsSameText(a, k) || wsSameWithUnit(a, k)));
 }
 // (v191: the key is just a number and the kid wrote that number + its unit: "3 V" = "3", "25 cm" = "25", "40°C" = "40".
 //  Only real units count, so "3x" ≠ "3" and "34" ≠ "3")
