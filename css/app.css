@@ -3412,3 +3412,7 @@ button.ip-item:hover { background: rgba(255, 255, 255, .7); }
 .st-cmp-t td small { color: var(--muted, #6b6b6b); white-space: nowrap; }
 .st-cmp-t tr.on td { background: color-mix(in srgb, var(--accent, #f4b400) 14%, transparent); }
 .st-cmp-t input[type=checkbox] { width: 22px; height: 22px; }
+.st-cmp-sum { background: color-mix(in srgb, var(--danger, #e05a47) 10%, var(--card, #fff)); border: 1px solid color-mix(in srgb, var(--danger, #e05a47) 35%, transparent); border-radius: 14px; padding: 10px 12px; margin: 10px 0; }
+.st-cmp-sum.ok { background: color-mix(in srgb, var(--ok, #2fa36b) 10%, var(--card, #fff)); border-color: color-mix(in srgb, var(--ok, #2fa36b) 35%, transparent); }
+.st-cmp-sum p { margin: 0 0 6px; }
+.st-cmp-sum ul { margin: 0 0 8px 18px; padding: 0; }

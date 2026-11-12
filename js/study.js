@@ -195,7 +195,17 @@ function compareHtml(kid, s, f, parent) {
       <small>${[u.term, `✅ taught ${t} of ${u.parts.length} (${pc(t, u.parts.length)}%)`, `✏️ practised ${pc(pr, u.parts.length)}%`, sc != null ? `🎯 score ${sc}%` : "", u.now ? "📍 the class is here now" : ""].filter(Boolean).map(safe).join(" · ")}</small></summary>
       <div class="st-cmp-wrap"><table class="st-cmp-t"><thead><tr><th>Official topic</th><th>School</th><th>Practised</th><th>Result</th><th>Pick</th></tr></thead>
       <tbody>${u.parts.map(row).join("")}</tbody></table></div></details>`; };
-  return `<div class="card bd-card st-cmp"><h2>📊 ${safe(f.name)}: official curriculum vs school</h2>
+  // 📢 The summary: the class is past these units (before the "now" unit, else before the last unit the school taught from),
+  // but the school never taught these small topics → "practise them yourself" (+ one button that ticks the first 4)
+  const nowAt = units.findIndex(u => u.now), lastAt = units.reduce((n, u, i) => u.parts.some(p => p.taught) ? i : n, -1);
+  const cut = nowAt >= 0 ? nowAt : lastAt, missed = units.slice(0, Math.max(0, cut)).flatMap(u => u.parts).filter(p => !p.taught && !p.n);
+  const left = cut >= 0 ? units[cut].parts.filter(p => !p.taught && !p.n) : [];
+  const summary = missed.length ? `<div class="st-cmp-sum"><p>📢 <b>${parent ? `${who}'s school` : "Your school"} hasn't covered ${missed.length} ${missed.length === 1 ? "topic" : "topics"} from the official curriculum</b>
+      that the class has already gone past. ${parent ? `${who} needs` : "You need"} to practise ${missed.length === 1 ? "it" : "them"} at home:</p>
+      <ul>${missed.map(p => `<li>${safe(p.title)}</li>`).join("")}</ul>
+      <div class="btnrow"><button class="primary" data-stcmpmissed="${safe(missed.slice(0, 4).map(p => encodeURIComponent(p.title)).join("|"))}">✏️ Tick ${missed.length > 4 ? "the first 4" : missed.length === 1 ? "it" : "them"} for a worksheet</button></div></div>`
+    : all.length && cut >= 0 ? `<div class="st-cmp-sum ok"><p>👍 <b>So far the school has covered the official topics</b> of the units the class has finished.${left.length ? ` Still to come in ${safe(units[cut].title)}: ${left.map(p => safe(p.title)).join(", ")}.` : ""}</p></div>` : "";
+  return `<div class="card bd-card st-cmp"><h2>📊 ${safe(f.name)}: official curriculum vs school</h2>${summary}
     <p class="st-bench"><b>📖 ${all.length} official topics</b> · <b>✅ ${taught} taught at school (${pc(taught, all.length)}%)</b> · <b>✏️ ${practised} practised (${pc(practised, all.length)}%)</b> · <b>❌ ${notYet} not yet (${pc(notYet, all.length)}%)</b>${scoreOf(all) != null ? ` · <b>🎯 average score ${scoreOf(all)}%</b>` : ""}</p>
     <div class="cur-bar st-cmp-bar" role="img" aria-label="${pc(taught, all.length)}% taught at school"><i style="width:${pc(taught, all.length)}%"></i></div>
     <p class="hint">${pc(taught, all.length)}% of this year's ${safe(f.name)} has been taught at school so far.</p>
@@ -842,6 +852,8 @@ document.addEventListener("click", e => {
   if (ds.sessdone) return sessionDone(ds.sessdone);
   if ("stcmp" in ds) { stCmp = !stCmp; return render(); }
   if (ds.stcmpmake) return compareWorksheet(schoolKid, ds.stcmpmake);
+  if (ds.stcmpmissed) { stCmpPick = ds.stcmpmissed.split("|").filter(Boolean).map(decodeURIComponent); render();
+    const btn = document.querySelector("#scr-school [data-stcmpmake]"); if (btn) btn.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
   if (ds.stmapload) return loadMap(schoolKid, ds.stmapload);
   if (ds.stbench) return benchmark(schoolKid, ds.stbench);
   if (ds.stmappick) { const t = decodeURIComponent(ds.stmappick); stMapPick = stMapPick.includes(t) ? stMapPick.filter(x => x !== t) : [...stMapPick, t].slice(0, 8); return render(); }
