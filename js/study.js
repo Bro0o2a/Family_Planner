@@ -1228,7 +1228,7 @@ async function makeWorksheet() {
                                         notes: (MODE_NOTES[mode] ? MODE_NOTES[mode] + "." : "") + ` Exactly ${count} questions.` + wsKidNote(o.kid, o.subject, mode) + wsSummaryNote(o.kid, o.subject, topics), mode, profile: profileText(o.kid, o.subject), ...schoolSystemOf(o.kid),
                                         ...learnBody(o.kid, o.subject), ...langBody(o.kid, o.subject) }, "worksheet");   // (🧠 level, skills, focus · 🇦🇪 / 🌐)
   if (!r) return;
-  const ws = wsExamOrder(cleanWorksheet({ ...r, kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
+  const ws = wsExamOrder(cleanWorksheet({ ...r, key_words: wsKeyWordsFor(r, o.kid, o.subject), kid: o.kid, subject: o.subject, topics, count, date: todayYmd(), by: me, at: new Date().toISOString(), purpose: mode,
                               ...(isArabicSubject(o.subject) ? { lang: "ar" } : {}),
                               answers: [], ...(wsBandOf(o.kid, o.subject, mode) !== "normal" ? { pick: wsBandOf(o.kid, o.subject, mode) } : {}),
                               ...(learnRead(o.kid, o.subject) ? { lvl: levelNow(learnRead(o.kid, o.subject)) } : {}), ...(o.work ? { work: o.work } : {}), ...(o.part ? { part: o.part } : {}) }));
@@ -1392,6 +1392,7 @@ function wsSheetNode(w, showAns, compact = false) {
     h("div", { class: "ws-ins" }, compact ? "Answer all the questions. Write your answers on the ANSWER SHEET (the last page): for a choose question, write the letter (A, B, C or D) in the box. Marks are shown in [brackets]."
       : "Answer all the questions. Marks are shown in [brackets]."),
     w.intro ? h("p", { class: "ws-intro" }, w.intro) : null,
+    wsKeyBoxNode(w, rtl),
     h("ol", { class: "ws-qs" }, w.questions.flatMap(q => { const match = matchNode(q, rtl, showAns);   // (🔗 matching: the 2-column table)
       return [   // (📚 each part's title above its first question · or the exam's section bar)
       ...(w.sections || []).filter(x => x.from === q.number && (x.title || x.topic)).map(x => h("li", { class: "ws-sec" }, x.title || x.topic)),
@@ -1487,6 +1488,44 @@ function schoolWorksheetHtml(s, isDad) {
   const w = aiDocs.worksheets[schoolDoc];
   return w && w.kid === schoolKid ? aiMount(() => wsViewNode(w, schoolDoc, s, isDad)) : notHere();
 }
+// 🔑 v191 Key words box on the paper (a hint): the lesson's words to use in the answers
+function wsKeyBoxNode(w, rtl) {
+  const k = w.key_words || [];
+  if (!k.length) return null;
+  return h("div", { class: "ws-keybox" }, h("b", null, rtl ? "🔑 كلمات مفتاحية: استخدمها في إجاباتك" : "🔑 Key words: use them in your answers"),
+    h("div", { class: "ws-keywords" }, k.map(x => h("span", null, x))));
+}
+// (parents only, above the paper: take a word out ✕ or add one; an added word is also kept for the subject's next worksheets)
+function wsKeyEditNode(w, id) {
+  const k = w.key_words || [];
+  return h("details", { class: "card ws-keyedit ai-narrow" }, h("summary", null, h("b", null, "🔑 Key words box"), ` (${k.length}) · add or take out words`),
+    h("p", { class: "hint" }, "These words print in a box on the worksheet as a hint. Tap ✕ to take one out."),
+    h("div", { class: "ws-keywords" }, k.map((x, i) => h("button", { type: "button", class: "pill", data: { kwdel: id + "|" + i }, "aria-label": "Take out " + x }, x + " ✕"))),
+    h("div", { class: "ws-keyadd" }, h("input", { type: "text", maxlength: "40", placeholder: "Add a word, e.g. evaporation", data: { kwbox: id } }),
+      h("button", { type: "button", class: "btn", data: { kwadd: id } }, "+ Add")));
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-kwdel],[data-kwadd]");
+  if (!b || !isDadNow()) return;
+  const [id, i] = (b.dataset.kwdel || b.dataset.kwadd).split("|"), w = aiDocs.worksheets[id];
+  if (!w) return;
+  let k = (w.key_words || []).slice();
+  if (b.dataset.kwdel) k.splice(Number(i), 1);
+  else {
+    const box = document.querySelector(`[data-kwbox="${CSS.escape(id)}"]`), word = box ? box.value.trim().slice(0, 40) : "";
+    if (!word) return box && box.focus();
+    if (!k.some(x => x.toLowerCase() === word.toLowerCase())) k.push(word);
+    // (also for the subject's next worksheets: added to the parents' key words list)
+    const L = learnFor(w.kid, w.subject);
+    if (L && !wsParentWords(w.kid, w.subject).some(x => x.toLowerCase() === word.toLowerCase())) { L.words = [(L.words || "").trim(), word].filter(Boolean).join("\n").slice(0, 1500); writeData(); }
+  }
+  k = k.slice(0, 12);
+  const doc = { ...w }; if (k.length) doc.key_words = k; else delete doc.key_words;
+  aiSave("worksheets", id, doc);
+  const open = !!b.closest("details");
+  render();
+  if (open) { const d = document.querySelector(".ws-keyedit"); if (d) d.open = true; }
+});
 function wsViewNode(w, id, s, isDad) {
   const done = !!w.check, canAct = isDad || !done, files = w.answers.filter(f => s.files[f]), open = answersOpen(w), show = wsAnswers && open;
   return h("div", null,
@@ -1500,6 +1539,7 @@ function wsViewNode(w, id, s, isDad) {
       h("button", { data: { aireport: "worksheet|" + id } }, "🚩 Report"),
       isDad ? h("button", { class: "danger-text", data: { wsact: "delete" } }, "🗑️ Delete") : null),
     wsLevelNode(w),
+    isDad ? wsKeyEditNode(w, id) : null,
     wsSheetNode(w, show),
     // ✅ Upload the answers → 🤖 Check
     h("div", { class: "card bd-card ai-narrow" },

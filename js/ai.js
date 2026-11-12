@@ -319,6 +319,7 @@ function cleanWorksheet(d) {
            ...(["instant", "igcse"].includes(d.src) ? { src: d.src } : {}),
            ...(aiTxt(d.detected_topic, 80) ? { detected_topic: aiTxt(d.detected_topic, 80) } : {}), ...(aiTxt(d.detected_subject, 30) ? { detected_subject: aiTxt(d.detected_subject, 30) } : {}),
            ...(aiTxt(d.swap, 30) ? { swap: aiTxt(d.swap, 30) } : {}), ...(d.done === true ? { done: true } : {}),
+           ...(wsKeyWordsClean(d.key_words).length ? { key_words: wsKeyWordsClean(d.key_words) } : {}),   // (🔑 v191: the lesson's key words, a hint box on the paper)
            ...(d.lang === "ar" ? { lang: "ar" } : {}) };   // (🇦🇪 written in Arabic: shown right-to-left)
 }
 // The check: { score, max_score, overall_note, questions: [{ number, correct, points, note }], at, aiScore?, dadNote?,
@@ -500,6 +501,12 @@ const wsWordsNote = (kid, subject) => { const w = wsWordsOf(kid, subject).trim()
   return w ? ` KEY WORDS the class uses in ${subject}, written by the parents (use these words and meanings in the questions and the answers): ${w.replace(/\s*\n\s*/g, "; ")}.` : ""; };
 const wsWordsCheck = (kid, subject) => { const w = wsWordsOf(kid, subject).trim();
   return w ? ` KEY WORDS the class uses, written by the parents: ${w.replace(/\s*\n\s*/g, "; ")}. When a child answers with one of these words, or with other words that mean the SAME thing (a key word's meaning, an example of it, or the word itself), it is RIGHT: judge the meaning, not the exact words of the key.` : ""; };
+// 🔑 v191 a worksheet's key words box: the lesson's words the kid should use in the answers (AI picks them, parents add/remove)
+const wsKeyWordsClean = a => [...new Set(aiArr(a, 16).map(x => aiTxt(x, 40).replace(/\s*=.*$/, "").trim()).filter(Boolean))].slice(0, 12);
+// (the parents' subject key words, words only: "evaporation = water turns into a gas" → "evaporation")
+const wsParentWords = (kid, subject) => wsWordsOf(kid, subject).split("\n").map(x => x.replace(/\s*[=:–-].*$/, "").trim()).filter(Boolean);
+// (a new worksheet's words: the AI's, or (an older AI server without them) the parents' words for the subject)
+const wsKeyWordsFor = (r, kid, subject) => wsKeyWordsClean(r.key_words).length ? r.key_words : wsParentWords(kid, subject);
 const wsWordsHtml = (kid, subject) => !isParentDevice() || !learnRead(kid, subject) ? "" : (() => { const w = wsWordsOf(kid, subject), n = w.split("\n").filter(x => x.trim()).length;
   return `<details class="ws-words"><summary><b>🔑 Key words</b> ${n ? `(${n})` : "· the words the class uses"}</summary>
   <p class="hint">One per line, like <i>evaporation = water turns into a gas</i>. New worksheets use them, and the check accepts them or any words that mean the same.</p>
@@ -947,7 +954,7 @@ async function newWorksheet(kid, subject, topics, count, mode, key, extra, open 
                                         ...langBody(kid, subject) }, key);   // (🇦🇪 Arabic / 🌐 translation)
   if (!r) return null;
   const found = aiTxt(r.detected_topic, 80), name = subject || aiTxt(r.detected_subject, 30) || "Other";   // (⚡ the topic in the file)
-  const ws = wsExamOrder(cleanWorksheet({ ...r, kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
+  const ws = wsExamOrder(cleanWorksheet({ ...r, key_words: wsKeyWordsFor(r, kid, name), kid, subject: name, topics: topics.length ? topics : [found || name], count, date: todayYmd(), by: me, ...(langBody(kid, subject).lang ? { lang: "ar" } : {}),
                               at: new Date().toISOString(), answers: [], purpose: mode, ...(wsBandOf(kid, subject, mode) !== "normal" ? { pick: wsBandOf(kid, subject, mode) } : {}),
                               ...(!["placement", "level_check"].includes(mode) && learnRead(kid, subject) ? { lvl: levelNow(learnRead(kid, subject)) } : {}), ...(instant && found ? { part: found } : {}), ...keep }));
   if (!ws) { toast("🤖 The worksheet came back empty. Please try again.", 4000); return null; }
